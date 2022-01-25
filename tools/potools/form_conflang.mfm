@@ -1,0 +1,178 @@
+object conflangfo: tconflangfo
+  visible = False
+  bounds_x = 444
+  bounds_y = 269
+  bounds_cx = 331
+  bounds_cy = 262
+  bounds_cxmin = 331
+  bounds_cymin = 222
+  bounds_cxmax = 331
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.bounds = (
+    0
+    0
+    331
+    262
+  )
+  options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  windowopacity = -Inf
+  oncreated = oncreat
+  moduleclassname = 'tmseform'
+  object ok: tbutton
+    frame.optionsskin = [fso_flat]
+    frame.localprops = [frl_optionsskin]
+    frame.localprops1 = []
+    bounds_x = 236
+    bounds_y = 6
+    bounds_cx = 78
+    bounds_cy = 26
+    anchors = [an_top, an_right]
+    state = [as_localcaption, as_localonexecute]
+    caption = 'OK'
+    onexecute = oncok
+  end
+  object gridlang: twidgetgrid
+    frame.localprops = []
+    frame.localprops1 = []
+    taborder = 1
+    bounds_x = 20
+    bounds_y = 39
+    bounds_cx = 290
+    bounds_cy = 115
+    optionsgrid = [og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
+    rowcount = 6
+    datacols.count = 3
+    datacols.items = <    
+      item[gridlangcaption]
+        colorselect = -1610612731
+        coloractive = -1610612731
+        colorfocused = -1610612731
+        width = 224
+        options = [co_readonly, co_disabled, co_savevalue, co_savestate, co_mousescrollrow]
+        widgetname = 'gridlangcaption'
+        dataclass = tgridmsestringdatalist
+        data = (
+          (
+            ''
+            ''
+            ''
+            ''
+            ''
+            ''
+          )
+        )
+      end    
+      item[gridlangbool]
+        color = -1610612731
+        width = 44
+        options = [co_drawfocus, co_savevalue, co_savestate, co_mousescrollrow]
+        widgetname = 'gridlangbool'
+        dataclass = tgridintegerdatalist
+        data = (
+          (
+            0
+            0
+            0
+            0
+            0
+            0
+          )
+        )
+      end    
+      item[gridlangcode]
+        width = 1
+        options = [co_invisible, co_savevalue, co_savestate, co_mousescrollrow]
+        widgetname = 'gridlangcode'
+        dataclass = tgridmsestringdatalist
+        data = (
+          (
+            ''
+            ''
+            ''
+            ''
+            ''
+            ''
+          )
+        )
+      end>
+    datarowheight = 17
+    oncellevent = oncellev
+    reffontheight = 15
+    object gridlangcaption: tstringedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 1
+      enabled = False
+      visible = False
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 224
+      bounds_cy = 17
+      optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_nogray, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly]
+      value = 'English'
+      reffontheight = 15
+    end
+    object gridlangbool: tbooleaneditradio
+      optionswidget1 = []
+      optionsskin = [osk_framebuttononly]
+      color = -1610612731
+      taborder = 2
+      bounds_x = 225
+      bounds_y = 0
+      bounds_cx = 44
+      bounds_cy = 17
+      visible = False
+      value = True
+    end
+    object gridlangcode: tstringedit
+      optionswidget1 = [ow1_fontglyphheight]
+      optionsskin = [osk_framebuttononly]
+      taborder = 3
+      visible = False
+      bounds_x = 270
+      bounds_y = 0
+      bounds_cx = 1
+      bounds_cy = 17
+      reffontheight = 15
+    end
+  end
+  object bpotools: tbutton
+    taborder = 2
+    bounds_x = 34
+    bounds_y = 6
+    bounds_cx = 132
+    bounds_cy = 26
+    anchors = [an_top, an_right]
+    state = [as_localcaption, as_localonexecute]
+    caption = 'Po tools'
+    onexecute = ontools
+  end
+  object tlabel1: tlabel
+    taborder = 3
+    bounds_x = 48
+    bounds_y = 168
+    bounds_cx = 41
+    bounds_cy = 15
+    caption = 'tlabel1'
+    reffontheight = 15
+  end
+  object tlabel2: tlabel
+    taborder = 4
+    bounds_x = 48
+    bounds_y = 200
+    bounds_cx = 41
+    bounds_cy = 15
+    caption = 'tlabel2'
+    reffontheight = 15
+  end
+  object tlabel3: tlabel
+    taborder = 5
+    bounds_x = 48
+    bounds_y = 232
+    bounds_cx = 41
+    bounds_cy = 15
+    caption = 'tlabel3'
+    reffontheight = 15
+  end
+end

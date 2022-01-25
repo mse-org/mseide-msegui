@@ -2875,9 +2875,18 @@ function wasrowexit(const info: celleventinfoty;
                                const noexitgrid: boolean = false): boolean;
 function cellkeypress(const info: celleventinfoty): keyty;
 
+var
+ noconfirmdelete : boolean = false;
+
 implementation
 uses
- mseguiintf,msestockobjects,mseact,mseactions,rtlconsts,msegraphedits,
+ mseguiintf,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ mseact,mseactions,rtlconsts,msegraphedits,
  mseassistiveserver,mseformatstr;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -2904,9 +2913,6 @@ const
   'Invalid col index',
   'Invalid widget'
  );
-
-//var
-// coloptionssplitinfo: setsplitinfoty;
 
 function iscellkeypress(const info: celleventinfoty;
              const akey: keyty = key_none; //key_none -> all keys
@@ -10775,10 +10781,20 @@ begin
    else begin
     state1:= [as_disabled];
    end;
-   tpopupmenu.additems(amenu,self,mouseinfo,[
-         stockobjects.captions[sc_copy_cells]+sepchar+
+
+{$ifdef mse_dynpo}
+  tpopupmenu.additems(amenu,self,mouseinfo,[
+         lang_stockcaption[ord(sc_copy_cells)]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_copycells])+')'],
                   [],[state1],[{$ifdef FPC}@{$endif}docopycells],not bo1);
+{$else}
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+         sc(sc_copy_cells)+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_copycells])+')'],
+                  [],[state1],[{$ifdef FPC}@{$endif}docopycells],not bo1);
+{$endif}
+
+
    bo1:= true;
   end;
   if fdatacols.canpaste or canevent(tmethod(fonpasteselection)) then begin
@@ -10788,25 +10804,54 @@ begin
    else begin
     state1:= [];
    end;
+
+{$ifdef mse_dynpo}
    tpopupmenu.additems(amenu,self,mouseinfo,[
-        stockobjects.captions[sc_paste_cells]+sepchar+
+        lang_stockcaption[ord(sc_paste_cells)]+sepchar+
       '('+encodeshortcutname(sysshortcuts[sho_pastecells])+')'],
                  [],[state1],[{$ifdef FPC}@{$endif}dopastecells],not bo1);
+
+{$else}
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+        sc(sc_paste_cells)+sepchar+
+      '('+encodeshortcutname(sysshortcuts[sho_pastecells])+')'],
+                 [],[state1],[{$ifdef FPC}@{$endif}dopastecells],not bo1);
+
+{$endif}
+
    bo1:= true;
   end;
 
   if og_rowinserting in foptionsgrid then begin
-   tpopupmenu.additems(amenu,self,mouseinfo,[
-              stockobjects.captions[sc_insert_rowhk]+sepchar+
+
+   {$ifdef mse_dynpo}
+  tpopupmenu.additems(amenu,self,mouseinfo,[
+              lang_stockcaption[ord(sc_insert_rowhk)]+sepchar+
          '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')'],[],
          menustates(caninsertrow),
         [{$ifdef FPC}@{$endif}doinsertrow],not bo1);
    bo1:= true;
    tpopupmenu.additems(amenu,self,mouseinfo,[
-              stockobjects.captions[sc_append_rowhk]+sepchar+
+              lang_stockcaption[ord(sc_append_rowhk)]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],
             menustates(canappendrow),[{$ifdef FPC}@{$endif}doappendrow],not bo1);
+{$else}
+  tpopupmenu.additems(amenu,self,mouseinfo,[
+              sc(sc_insert_rowhk)+sepchar+
+         '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')'],[],
+         menustates(caninsertrow),
+        [{$ifdef FPC}@{$endif}doinsertrow],not bo1);
    bo1:= true;
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+              sc(sc_append_rowhk)+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],
+            menustates(canappendrow),[{$ifdef FPC}@{$endif}doappendrow],not bo1);
+{$endif}
+
+
+   bo1:= true;
+
+
   end;
   if og_rowdeleting in foptionsgrid then begin
    if (ffocusedcell.row >= 0) and candeleterow then begin
@@ -10815,10 +10860,21 @@ begin
    else begin
     state1:= [as_disabled];
    end;
+
+{$ifdef mse_dynpo}
    tpopupmenu.additems(amenu,self,mouseinfo,[
-         stockobjects.captions[sc_delete_rowhk]+sepchar+
+         lang_stockcaption[ord(sc_delete_rowhk)]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],
                   [[mao_nocandefocus]],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
+
+{$else}
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+         sc(sc_delete_rowhk)+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],
+                  [[mao_nocandefocus]],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
+
+{$endif}
+
    bo1:= true;
   end;
  end;
@@ -16416,10 +16472,17 @@ end;
 
 function tcustomgrid.deleterowconfirmation(): boolean;
 begin
- with stockobjects do begin
-  result:= (og1_norowdeletequery in foptionsgrid1) or
-    askok(captions[sc_Delete_row_question],captions[sc_Confirmation]);
- end;
+if noconfirmdelete then result := true
+else
+begin
+{$ifdef mse_dynpo}
+ result:= (og1_norowdeletequery in foptionsgrid1) or
+    askok(lang_stockcaption[ord(sc_Delete_row_question)],lang_stockcaption[ord(sc_Confirmation)]);
+{$else}
+ result:= (og1_norowdeletequery in foptionsgrid1) or
+    askok(sc(sc_Delete_row_question),sc(sc_Confirmation));
+{$endif}
+end;
 end;
 
 procedure tcustomgrid.dodeleterow(const sender: tobject);
@@ -16433,12 +16496,25 @@ procedure tcustomgrid.dodeleteselectedrows(const sender: tobject);
 var
  ar1: integerarty;
  int1: integer;
+ str: string;
 begin
  ar1:= fdatacols.getselectedrows;
  if high(ar1) >= 0 then begin
-  if askok(stockobjects.textgenerators[tg_delete_n_selected_rows](
+
+  {$ifdef mse_dynpo}
+if high(ar1) = 0 then
+    str := lang_extended[ord(ex_del_row_selected)]
+  else str := StringReplace(lang_extended[ord(ex_del_rows_selected)], #37#115,
+    inttostrmse(length(ar1)), [rfReplaceAll]);
+
+  if askok(str,lang_stockcaption[ord(sc_Confirmation)])
+
+{$else}
+ if askok(stockobjects.textgenerators[tg_delete_n_selected_rows](
                                        [integer(length(ar1))]),
-                            stockobjects.captions[sc_Confirmation]) then begin
+                            stockobjects.captions[sc_Confirmation])
+{$endif}
+  then begin
    beginupdate;
    try
     for int1:= high(ar1) downto 0 do begin
@@ -16963,12 +17039,15 @@ end;
 procedure tcustomstringgrid.updatepopupmenu(var amenu: tpopupmenu;
                          var mouseinfo: mouseeventinfoty);
 begin
+
  if isdatacell(ffocusedcell) and (oe1_autopopupmenu in
                   tcustomstringcol(fdatacols.fitems[ffocusedcell.col]).
                                                      foptionsedit1) then begin
   feditor.updatepopupmenu(amenu,popupmenu,mouseinfo,false);
+
  end;
  inherited;
+
 end;
 
 function tcustomstringgrid.getassistivecaretindex(): int32;

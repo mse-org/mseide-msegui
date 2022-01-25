@@ -11,6 +11,11 @@ unit mseshortcutdialog;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msegrids,
  msestrings,msetypes,msewidgetgrid,msedatanodes,mselistbrowser,mseactions,
@@ -64,7 +69,7 @@ function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
 
 implementation
 uses
- mseshortcutdialog_mfm,msekeyboard,msedatalist,msearrayutils,msestockobjects;
+ mseshortcutdialog_mfm,msekeyboard,msedatalist,msearrayutils;
 
 const
  errorcolor = cl_ltred;
@@ -115,11 +120,24 @@ var
 begin
  fo1:= tmseshortcutdialogfo.create(nil);
  try
+  {$ifdef mse_dynpo}
+  no1:= tsysshortcutitem.create(lang_stockcaption[ord(sc_system)]);
+ {$else}
   no1:= tsysshortcutitem.create(stockobjects.captions[sc_system]);
+{$endif}
+  
+  
   for ss1:= low(ss1) to high(ss1) do begin
    no1.add(tsysshortcutitem.create(acontroller,ss1));
   end;
-  no2:= tassistiveshortcutitem.create(stockobjects.captions[sc_voiceoutput]);
+  
+   {$ifdef mse_dynpo}
+  no2:= tassistiveshortcutitem.create(lang_stockcaption[ord(sc_voiceoutput)]);
+  {$else}
+ no2:= tassistiveshortcutitem.create(stockobjects.captions[sc_voiceoutput]);
+ {$endif}
+  
+  
   for as1:= low(as1) to high(as1) do begin
    no2.add(tassistiveshortcutitem.create(acontroller,as1));
   end;

@@ -17,6 +17,7 @@ object colordialogfo: tcolordialogfo
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
   statfile = tstatfile1
   caption = 'Select Color'
+  windowopacity = -Inf
   onloaded = loadedexe
   onmouseevent = mouseeventexe
   onlayout = layoutexe
@@ -25,14 +26,14 @@ object colordialogfo: tcolordialogfo
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     taborder = 6
     bounds_x = 4
-    bounds_y = 237
+    bounds_y = 236
     bounds_cx = 97
-    bounds_cy = 18
+    bounds_cy = 19
     bounds_cxmin = 97
     anchors = [an_left, an_bottom]
     state = [as_localinvisible, as_localcaption, as_localonexecute]
     valuefaces.count = 1
-    valuefaces.items = <
+    valuefaces.items = <    
       item
         fade_pos.count = 3
         fade_pos.items = (
@@ -51,7 +52,7 @@ object colordialogfo: tcolordialogfo
       end>
     caption = 'Color &Picker'
     onexecute = colorpickexe
-    reffontheight = 14
+    reffontheight = 15
   end
   object colorarea: tpaintbox
     optionswidget = [ow_destroywidgets]
@@ -67,13 +68,13 @@ object colordialogfo: tcolordialogfo
       0
       0
       0
-      17
+      18
     )
     taborder = 5
     bounds_x = 51
     bounds_y = 3
     bounds_cx = 50
-    bounds_cy = 226
+    bounds_cy = 227
     anchors = [an_left, an_top, an_bottom]
   end
   object colorareabefore: tpaintbox
@@ -90,22 +91,21 @@ object colordialogfo: tcolordialogfo
       0
       0
       0
-      17
+      18
     )
     taborder = 4
     bounds_x = 3
     bounds_y = 3
     bounds_cx = 50
-    bounds_cy = 226
+    bounds_cy = 227
     anchors = [an_left, an_top, an_bottom]
   end
   object tlayouter1: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     taborder = 1
     bounds_x = 112
-    bounds_y = 219
+    bounds_y = 217
     bounds_cx = 221
-    bounds_cy = 37
+    bounds_cy = 38
     anchors = [an_left, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     linktop = tlayouter3
@@ -119,19 +119,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 5
       bounds_x = 185
-      bounds_y = 0
+      bounds_y = -1
       bounds_cx = 36
-      bounds_cy = 37
+      bounds_cy = 39
       onchange = rgbchange
       ondataentered = componentsdataentered
-      max = 255
-      reffontheight = 14
+      valuemax = 255
+      reffontheight = 15
     end
     object green: tintegeredit
       color = -2147483645
@@ -140,20 +140,20 @@ object colordialogfo: tcolordialogfo
       frame.localprops = []
       frame.localprops1 = []
       frame.outerframe = (
+        0
+        18
         1
-        17
-        2
         0
       )
       taborder = 4
-      bounds_x = 147
-      bounds_y = 0
-      bounds_cx = 39
-      bounds_cy = 37
+      bounds_x = 148
+      bounds_y = -1
+      bounds_cx = 37
+      bounds_cy = 39
       onchange = rgbchange
       ondataentered = componentsdataentered
-      max = 255
-      reffontheight = 14
+      valuemax = 255
+      reffontheight = 15
     end
     object red: tintegeredit
       color = -2147483645
@@ -163,19 +163,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 3
       bounds_x = 111
-      bounds_y = 0
+      bounds_y = -1
       bounds_cx = 36
-      bounds_cy = 37
+      bounds_cy = 39
       onchange = rgbchange
       ondataentered = componentsdataentered
-      max = 255
-      reffontheight = 14
+      valuemax = 255
+      reffontheight = 15
     end
     object bright: tintegeredit
       color = -2147483645
@@ -185,19 +185,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 2
       bounds_x = 72
-      bounds_y = 0
+      bounds_y = -1
       bounds_cx = 36
-      bounds_cy = 37
+      bounds_cy = 39
       onchange = hsbchange
       ondataentered = componentsdataentered
-      max = 100
-      reffontheight = 14
+      valuemax = 100
+      reffontheight = 15
     end
     object sat: tintegeredit
       color = -2147483645
@@ -207,19 +207,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       taborder = 1
       bounds_x = 36
-      bounds_y = 0
+      bounds_y = -1
       bounds_cx = 36
-      bounds_cy = 37
+      bounds_cy = 39
       onchange = hsbchange
       ondataentered = componentsdataentered
-      max = 100
-      reffontheight = 14
+      valuemax = 100
+      reffontheight = 15
     end
     object hue: tintegeredit
       color = -2147483645
@@ -229,26 +229,25 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       bounds_x = 0
-      bounds_y = 0
+      bounds_y = -1
       bounds_cx = 36
-      bounds_cy = 37
+      bounds_cy = 39
       onchange = hsbchange
       ondataentered = componentsdataentered
-      max = 360
-      reffontheight = 14
+      valuemax = 360
+      reffontheight = 15
     end
   end
   object tlayouter2: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     bounds_x = 11
-    bounds_y = 256
-    bounds_cx = 324
-    bounds_cy = 38
+    bounds_y = 255
+    bounds_cx = 322
+    bounds_cy = 39
     anchors = [an_left, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     font.name = 'stf_default'
@@ -263,13 +262,13 @@ object colordialogfo: tcolordialogfo
       taborder = 3
       bounds_x = 272
       bounds_y = 17
-      bounds_cx = 52
-      bounds_cy = 21
+      bounds_cx = 50
+      bounds_cy = 22
       bounds_cxmin = 50
       state = [as_localcaption, as_localcolor]
       caption = '&Cancel'
       modalresult = mr_cancel
-      reffontheight = 14
+      reffontheight = 15
     end
     object ok: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
@@ -277,22 +276,30 @@ object colordialogfo: tcolordialogfo
       bounds_x = 216
       bounds_y = 17
       bounds_cx = 50
-      bounds_cy = 21
+      bounds_cy = 22
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
-      reffontheight = 14
+      reffontheight = 15
     end
     object colored: tcoloredit
       frame.caption = 'Color'
       frame.captionpos = cp_top
       frame.localprops = []
       frame.localprops1 = []
+      frame.buttons.count = 2
+      frame.buttons.items = <      
+        item
+        end      
+        item
+          width = -1
+          imagenr = 17
+        end>
       frame.buttonellipse.width = -1
       frame.buttonellipse.imagenr = 17
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
@@ -300,12 +307,12 @@ object colordialogfo: tcolordialogfo
       bounds_x = 102
       bounds_y = 0
       bounds_cx = 108
-      bounds_cy = 37
+      bounds_cy = 39
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       onchange = colorchangeev
       ondataentered = coloreddataentered
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
-      reffontheight = 14
+      reffontheight = 15
     end
     object rgbed: tintegeredit
       frame.caption = 'RGB'
@@ -314,43 +321,40 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        17
+        18
         0
         0
       )
       bounds_x = 32
       bounds_y = 0
       bounds_cx = 68
-      bounds_cy = 37
+      bounds_cy = 39
       ondataentered = rgbeddataentered
       base = nb_hex
       bitcount = 24
-      reffontheight = 14
+      reffontheight = 15
     end
   end
   object tlayouter3: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     taborder = 2
     bounds_x = 112
     bounds_y = 0
     bounds_cx = 221
-    bounds_cy = 219
+    bounds_cy = 217
     optionslayout = [lao_aligny]
     align_mode = wam_start
     object sliderblue: tslider
       color = -2147483646
       frame.levelo = -1
-      frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
       frame.localprops1 = []
       taborder = 5
       bounds_x = 196
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 214
+      bounds_cy = 212
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
-      value = 0
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -372,17 +376,15 @@ object colordialogfo: tcolordialogfo
     object slidergreen: tslider
       color = -2147483646
       frame.levelo = -1
-      frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
       frame.localprops1 = []
       taborder = 4
       bounds_x = 160
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 214
+      bounds_cy = 212
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
-      value = 0
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -404,17 +406,15 @@ object colordialogfo: tcolordialogfo
     object sliderred: tslider
       color = -2147483646
       frame.levelo = -1
-      frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
       frame.localprops1 = []
       taborder = 3
       bounds_x = 124
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 214
+      bounds_cy = 212
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
-      value = 0
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -436,17 +436,15 @@ object colordialogfo: tcolordialogfo
     object sliderbright: tslider
       color = -2147483646
       frame.levelo = -1
-      frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
       frame.localprops1 = []
       taborder = 2
       bounds_x = 83
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 214
+      bounds_cy = 212
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
-      value = 0
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -468,17 +466,15 @@ object colordialogfo: tcolordialogfo
     object slidersat: tslider
       color = -2147483646
       frame.levelo = -1
-      frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
       frame.localprops1 = []
       taborder = 1
       bounds_x = 48
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 214
+      bounds_cy = 212
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
-      value = 0
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 2
       scrollbar.face.fade_pos.items = (
@@ -500,16 +496,14 @@ object colordialogfo: tcolordialogfo
     object sliderhue: tslider
       color = -2147483646
       frame.levelo = -1
-      frame.colorclient = -2147483647
       frame.localprops = [frl_levelo, frl_fileft, frl_fitop, frl_firight, frl_fibottom, frl_colorclient]
       frame.localprops1 = []
       bounds_x = 12
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 214
+      bounds_cy = 212
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
-      value = 0
       scrollbar.face.image.transparentcolor = -2147483648
       scrollbar.face.fade_pos.count = 7
       scrollbar.face.fade_pos.items = (

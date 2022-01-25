@@ -12,6 +12,18 @@ object stringenterfo: tstringenterfo
   container.frame.framei_bottom = 10
   container.frame.localprops = [frl_fibottom]
   container.frame.localprops1 = []
+  container.face.fade_pos.count = 2
+  container.face.fade_pos.items = (
+    0
+    1
+  )
+  container.face.fade_color.count = 2
+  container.face.fade_color.items = (
+    15461355
+    12237498
+  )
+  container.face.fade_direction = gd_down
+  container.face.localprops = [fal_fadirection]
   container.onlayout = layoutexe
   container.bounds = (
     0
@@ -19,27 +31,54 @@ object stringenterfo: tstringenterfo
     398
     70
   )
+  font.name = 'stf_default'
+  font.localprops = []
   options = [fo_screencentered, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat]
+  icon.options = [bmo_masked]
+  icon.origformat = 'png'
+  icon.image = {
+    00000000020000001000000010000000F0010000000000000000000000000000
+    000000000000000000000000000000000000000000EF001531FFFF014AFFFF01
+    6BFFFF01A5FFFF01B5FFFF01A5FFFF0100EF00096BFFF70131FFFF0152FFFF01
+    7BFFFF01B5FFFF01C6FFFF01A5FFFF0200EF000708EF080118FFAD0139FFFF01
+    5AFFFF018CFFFF01C6FFFF01D6FFFF01A5FFFF015AFFB50129FF290100EF0005
+    31EF310108EF080118FFAD0142FFFF016BFFFF01A5FFFF01E7FFFF01DEFFFF01
+    A5FFFF0152FFB50129FF290142FF420100EF000431EF310108EF080118FF5A01
+    42FFF7017BFFFF01C6FFFF03A5FFFF014AFF840129FF290139F7390100EF0004
+    31EF310108EF080118FF21014AFFCE0194FFFF01DEFFFF01C6FFFF029CFFE701
+    42FF4A0121FF210139F7390100EF000431EF310108EF080118FF180152FF6B01
+    DEFFFF01C6FFFF0394FFA50142FF420121FF210139F7390100EF000431EF3101
+    08E7080110F7100139F73901DEF7DE01C6FFFF02DEF7DE015AFF5A0121FF2101
+    10F7100131EF310100EF000431EF310100E7000208E7080173EF7301C6FFFF02
+    73EF730110E7100100E7000231EF310100EF000431EF310100E7000310E71001
+    29DE290210E7100100E7000331EF310100EF000431EF310100E7000200DE0005
+    00E7000331EF310100EF000431EF310100E7000A31EF310100EF000431EF3101
+    00E7000A31EF310100EF000573EF730100DE000100E7000500DE000273EF7301
+    00EF001300000000E0070000F00F0000F81F0000FC3F0000FC3F0000FC3F0000
+    FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000F81F0000
+    00000000
+  }
   windowopacity = -Inf
   onlayout = layoutexe
   moduleclassname = 'tmseform'
   object lab: tlabel
     optionswidget1 = [ow1_autoheight]
     optionswidget = [ow_mousewheel, ow_destroywidgets]
+    color = -2147483645
     taborder = 1
     bounds_x = 7
     bounds_y = 12
     bounds_cx = 384
-    bounds_cy = 16
+    bounds_cy = 15
     anchors = [an_left, an_top, an_right]
     caption = 'lab'
     textflags = [tf_ycentered, tf_wordbreak]
   end
   object tlayouter1: tlayouter
     bounds_x = 8
-    bounds_y = 36
+    bounds_y = 35
     bounds_cx = 383
-    bounds_cy = 22
+    bounds_cy = 21
     anchors = [an_left, an_top, an_right]
     optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     optionslayout = [lao_placex, lao_aligny]
@@ -52,43 +91,74 @@ object stringenterfo: tstringenterfo
     object cancel: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth, ow1_autosizeanright]
       optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+      frame.optionsskin = [fso_flat]
+      frame.localprops = [frl_optionsskin]
+      frame.localprops1 = []
+      face.fade_pos.count = 2
+      face.fade_pos.items = (
+        0
+        1
+      )
+      face.fade_color.count = 2
+      face.fade_color.items = (
+        16250871
+        -1610612731
+      )
+      face.fade_direction = gd_down
+      face.localprops = [fal_fadirection]
       taborder = 2
       bounds_x = 333
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 22
+      bounds_cy = 21
       bounds_cxmin = 50
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
-      reffontheight = 16
+      reffontheight = 15
     end
     object ok: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
+      frame.optionsskin = [fso_flat]
+      frame.localprops = [frl_optionsskin]
+      frame.localprops1 = []
+      face.fade_pos.count = 2
+      face.fade_pos.items = (
+        0
+        1
+      )
+      face.fade_color.count = 2
+      face.fade_color.items = (
+        16250871
+        -1610612731
+      )
+      face.fade_direction = gd_down
+      face.localprops = [fal_fadirection]
       taborder = 1
       bounds_x = 275
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 22
+      bounds_cy = 21
       bounds_cxmin = 50
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
-      reffontheight = 16
+      reffontheight = 15
     end
     object value: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-      frame.localprops = []
+      frame.levelo = 0
+      frame.localprops = [frl_levelo]
       frame.localprops1 = []
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 267
-      bounds_cy = 22
+      bounds_cy = 21
       anchors = [an_left, an_top, an_right]
       optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
-      reffontheight = 16
+      reffontheight = 15
     end
   end
 end

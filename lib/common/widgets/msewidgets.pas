@@ -21,7 +21,7 @@ interface
  {$endif}
 {$endif}
 uses
- classes,mclasses,msegui,mseguiglob,msetypes,msestrings,msegraphutils,
+ classes,mclasses,msegui,mseguiglob,msetypes,msestrings,msegraphutils, msefont,
  msegraphics,msesystypes,mseassistiveclient,mselist,
  mseevent,msescrollbar,msemenus,mserichstring,msedrawtext,mseglob,mseact,
  mseshapes,mseclasses,msebitmap,msetimer;
@@ -1477,9 +1477,19 @@ procedure getwindowicon(const abitmap: tmaskedbitmap; out aicon,amask: pixmapty;
 procedure buttonoptionstoshapestate(avalue: buttonoptionsty;
                                               var astate: shapestatesty);
 
+var
+messagefontheight : integer = 12;
+messagefontname : msestring = 'stf_default';
+
 implementation
 uses
- msebits,mseguiintf,msestockobjects,msekeyboard,sysutils,msemenuwidgets,
+ msebits,mseguiintf,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ msekeyboard,sysutils,msemenuwidgets,
  mseactions,msepointer,msestreaming,msesys,msearrayutils,mseassistiveserver;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -1688,18 +1698,30 @@ end;
 function confirmsavechangedfile(const filename: filenamety;
          out modalresult: modalresultty; multiple: boolean = false): boolean;
 begin
- with stockobjects do begin
+
   if multiple then begin
-   modalresult:= showmessage(captions[sc_file]+' '+filename+' '+
-                  captions[sc_is_modified_save],captions[sc_confirmation],
+ {$ifdef mse_dynpo}
+ modalresult:= showmessage(lang_stockcaption[ord(sc_file)] +' '+filename+' '+
+                  lang_stockcaption[ord(sc_is_modified_save)],lang_stockcaption[ord(sc_confirmation)],
                    [mr_yes,mr_all,mr_no,mr_noall,mr_cancel],mr_yes);
   end
   else begin
-   modalresult:= showmessage(captions[sc_file]+' '+filename+' '+
-                  captions[sc_is_modified_save],captions[sc_confirmation],
+   modalresult:= showmessage(lang_stockcaption[ord(sc_file)]+' '+filename+' '+
+                  lang_stockcaption[ord(sc_is_modified_save)],lang_stockcaption[ord(sc_confirmation)],
                    [mr_yes,mr_no,mr_cancel],mr_yes);
+
+{$else}
+  modalresult:= showmessage(sc(sc_file) +' '+filename+' '+
+                  sc(sc_is_modified_save),sc(sc_confirmation),
+                   [mr_yes,mr_all,mr_no,mr_noall,mr_cancel],mr_yes);
+  end
+  else begin
+   modalresult:= showmessage(sc(sc_file)+' '+filename+' '+
+                  sc(sc_is_modified_save),sc(sc_confirmation),
+                   [mr_yes,mr_no,mr_cancel],mr_yes);
+{$endif}
   end;
- end;
+
 {
  if multiple then begin
   modalresult:= showmessage('File '+filename+' is modified. Save?','Confirmation',
@@ -1930,19 +1952,26 @@ begin
                high(actions) >= 0,exttext,pshowmessageinfoty(adata));
    widget.name:= '_showmessage'; //debug purpose
    widget.parentwidget:= widget1; //do not create window handle of widget
+
    try
     acanvas:= widget1.getcanvas;
+    acanvas.font.color := cl_black;
     buttonheight:= acanvas.font.glyphheight + 6;
     buttonwidth:= 50;
     for int1:= 0 to ord(high(buttons)) do begin
-     int2:= acanvas.getstringwidth(
-                 stockobjects.modalresulttextnoshortcut[buttons[int1]]) + 10;
-     if int2 > buttonwidth then begin
+         int2:= acanvas.getstringwidth(
+{$ifdef mse_dynpo}
+                 lang_modalresultnoshortcut[Ord(buttons[int1])]) + 10;
+{$else}
+               stockobjects.modalresulttextnoshortcut[buttons[int1]]) + 10;
+{$endif}
+    if int2 > buttonwidth then begin
       buttonwidth:= int2;
      end;
     end;
     widget.caption:= caption;
     acanvas.font:= stockobjects.fonts[stf_message];
+    acanvas.font.color := cl_black;
     rect1:= textrect(acanvas,atext);
     if rect1.cx > maxtextwidth then begin
      rect1.cx:= maxtextwidth;
@@ -1960,10 +1989,15 @@ begin
      textoffset:= 0;
     end;
     with widget.info do begin
+     font:= stockobjects.fonts[stf_message];
+     font.height := messagefontheight;
+     font.name := ansistring(messagefontname);
+     font.color := cl_black;
      dest:= rect1;
      text.text:= atext;
     end;
     int1:= length(buttons);
+
     if int1 > 0 then begin
      int2:= int1 * buttonwidth;
      int2:= int2 + buttondist * (int1 - 1);
@@ -2010,19 +2044,21 @@ begin
       parentwidget:= widget;
       if buttons[int1] in noshortcut then begin
        caption:=
-                stockobjects.modalresulttextnoshortcut[buttons[int1]];
-{
-       captiontorichstring(
-                stockobjects.modalresulttextnoshortcut[buttons[int1]],
-                                                             finfo.ca.caption);
-}
-      end
+{$ifdef mse_dynpo}
+                 lang_modalresultnoshortcut[Ord(buttons[int1])];
+{$else}
+               stockobjects.modalresulttextnoshortcut[buttons[int1]];
+{$endif}
+
+     end
       else begin
-       caption:= stockobjects.modalresulttext[buttons[int1]];
-{
-       captiontorichstring(stockobjects.modalresulttext[buttons[int1]],
-                               finfo.ca.caption);
-}
+       caption:=
+{$ifdef mse_dynpo}
+                 lang_modalresult[Ord(buttons[int1])];
+{$else}
+               stockobjects.modalresulttext[buttons[int1]];
+{$endif}
+
       end;
       if int1 <= high(actions) then begin
        onexecute:= actions[int1];
@@ -2206,7 +2242,11 @@ procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                     const async: boolean = false);
 begin
  if caption = 'ERROR' then begin
-  caption:= sc(sc_errorupper);
+{$ifdef mse_dynpo}
+  caption:= uppercase(lang_stockcaption[ord(sc_error)]);
+{$else}
+ caption:= uppercase(sc(sc_error));
+{$endif}
  end;
  if async or not application.ismainthread then begin
   tshowerrormessageevent.create(atext,caption,minwidth,exttext);
@@ -2250,15 +2290,24 @@ function askconfirmation(const atext: msestring;
                     const minwidth: integer = 0): boolean;
                   //true if yes pressed
 begin
- result:= showmessage(atext,sc(sc_confirmation),[mr_yes,mr_no],defaultbutton,[],
-                          minwidth) = mr_yes;
+{$ifdef mse_dynpo}
+result:= showmessage(atext,lang_stockcaption[ord(sc_confirmation)],[mr_yes,mr_no],defaultbutton,[],
+                         minwidth) = mr_yes;
+{$else}
+result:= showmessage(atext,sc(sc_confirmation),[mr_yes,mr_no],defaultbutton,[],
+                         minwidth) = mr_yes;
+{$endif}
 end;
 
 function askconfirmationcancel(const atext: msestring;
                      const defaultbutton: modalresultty = mr_yes;
                      const minwidth: integer = 0): modalresultty;
 begin
+{$ifdef mse_dynpo}
+ result:= askyesnocancel(atext,lang_stockcaption[ord(sc_confirmation)],defaultbutton,minwidth);
+{$else}
  result:= askyesnocancel(atext,sc(sc_confirmation),defaultbutton,minwidth);
+{$endif}
 end;
 
 { tframefont}
@@ -5353,6 +5402,7 @@ begin
   tpopupmenu.additems(amenu,self,mouseinfo,fpopupmenu);
   amenu.menu.caption:= fpopupmenu.menu.caption; //for tassistivehandler
  end;
+
 end;
 
 procedure tactionwidget.dopopup(var amenu: tpopupmenu;
@@ -6104,6 +6154,7 @@ constructor tcustomhintwidget.create(const aowner: tcomponent;
                  var info: hintinfoty; const sender: tobject);
 var
  rect1,rect2: rectty;
+ hintfont: tfont;
 begin
  inherited create(aowner,atransientfor);
  foptionswidget:= defaultoptionshintwidget;
@@ -6117,9 +6168,16 @@ begin
  fframe.framei_right:= 1;
  fframe.framei_bottom:= 1;
  color:= cl_infobackground;
- rect2:= deflaterect(application.workarea(atransientfor),fframe.innerframe);
- rect1:= textrect(getcanvas,info.caption,rect2,[tf_wordbreak],
-                                            stockobjects.fonts[stf_hint]);
+
+  rect2:= deflaterect(application.workarea(atransientfor),fframe.innerframe);
+
+  hintfont := tfont.create;
+  hintfont.height := messagefontheight;
+  hintfont.name := ansistring(messagefontname);
+
+ rect1:= textrect(getcanvas,info.caption,rect2,[tf_wordbreak],hintfont);
+
+ hintfont.free;
  addsize1(rect1.size,fframe.innerframedim);
 // inc(rect1.cx,fframe.innerframedim.cx);
 // inc(rect1.cy,fframe.innerframedim.cy);
@@ -6138,10 +6196,21 @@ begin
 end;
 
 procedure thintwidget.dopaintforeground(const canvas: tcanvas);
+var
+ hintfont: tfont;
+
 begin
  inherited;
- drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],
-                                      stockobjects.fonts[stf_hint]);
+  hintfont := tfont.create;
+  hintfont.height := messagefontheight;
+  hintfont.name := ansistring(messagefontname);
+
+// drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],
+//                                      stockobjects.fonts[stf_hint]);
+
+  drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],hintfont);
+  hintfont.free;
+
 end;
 
 { tmessagewidget }

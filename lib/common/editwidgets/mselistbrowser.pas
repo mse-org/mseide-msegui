@@ -25,7 +25,12 @@ interface
 {$endif}
 uses
  mseglob,classes,mclasses,msegrids,msedatanodes,msedatalist,msedragglob,
- msegraphics,msegraphutils,msetypes,msestrings,msemenus,msestockobjects,
+ msegraphics,msegraphutils,msetypes,msestrings,msemenus,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
  msebitmap,mseclasses,mseguiglob,msedrawtext,msefileutils,msedataedits,
  mseeditglob,msewidgetgrid,msewidgets,mseedit,mseevent,msegui,msedropdownlist,
  msesys,msedrag,msestat,mseinplaceedit,msepointer,msegridsglob,

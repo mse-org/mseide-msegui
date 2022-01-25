@@ -254,7 +254,13 @@ var
 implementation
 uses
  objectinspector_mfm,sysutils,msearrayprops,actionsmodule,mseformatstr,
- msebitmap,msedrag,mseeditglob,msestockobjects,msedropdownlist,
+ msebitmap,msedrag,mseeditglob,
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ msedropdownlist,
  sourceupdate,sourceform,msekeyboard,main,msedatalist,msecolordialog;
 
 {$ifndef mse_allwarnings}

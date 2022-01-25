@@ -48,7 +48,12 @@ type
 
 implementation
 uses
- msestockobjects,mseimageselectorform,mseclasses,mseformatstr;
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ mseimageselectorform,mseclasses,mseformatstr;
 
 { tstockglypharraypropertyeditor }
 

@@ -1437,7 +1437,12 @@ procedure checkgdiunlocked;
 
 implementation
 uses
- SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,msestockobjects,
+ SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
  msearrayutils,mselist,msebits,msewidgets,msesystypes,
  msesysintf1,msesysintf,msesysutils,msefont;
 {$ifndef mse_allwarnings}
@@ -2099,7 +2104,11 @@ begin
  try
   initcolormap;
   msefont.init;
+{$ifdef mse_dynpo}
+  msestockobjects_dynpo.init;
+{$else}
   msestockobjects.init;
+{$endif}
   inited:= true;
   getwindowicon(nil,icon,mask);
   gui_setapplicationicon(icon,mask);
@@ -2111,8 +2120,12 @@ end;
 procedure deinit;
 begin
  if inited then begin
+{$ifdef mse_dynpo}
+  msestockobjects_dynpo.deinit;
+{$else}
   msestockobjects.deinit;
-  msefont.deinit;
+{$endif}
+ msefont.deinit;
  end;
  inited:= false;
 end;

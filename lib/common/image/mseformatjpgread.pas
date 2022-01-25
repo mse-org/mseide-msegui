@@ -14,19 +14,19 @@ interface
 const
  jpglabel = 'jpeg';
 procedure registerformat;
- 
+
 implementation
 uses
  classes,mclasses,msegraphics,msebitmap,msefpreadjpeg,msegraphicstream,
- msestockobjects,msestream;
- 
+ msestream;
+
 type
  tmsefpreaderjpeg = class(tfpreaderjpeg)
   protected
    function  InternalCheck(Str:Tstream): boolean; override;
  end;
- 
-function readgraphic(const source: tstream; 
+
+function readgraphic(const source: tstream;
                 const dest: tobject; var format: string;
                 const params: array of const): boolean;
 begin
@@ -63,7 +63,7 @@ end;
 procedure registerformat;
 begin
  registergraphicformat(jpglabel,{$ifdef FPC}@{$endif}readgraphic,nil,
-         stockobjects.captions[sc_JPEG_Image],['*.jpg','*.jpeg']);
+         'JPEG_Image',['*.jpg','*.jpeg']);
 end;
 
 initialization

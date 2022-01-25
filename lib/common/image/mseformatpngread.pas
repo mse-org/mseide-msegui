@@ -14,18 +14,17 @@ interface
 const
  pnglabel = 'png';
 procedure registerformat;
- 
+
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,msefpreadpng,msegraphicstream,
- msestockobjects;
- 
+ classes,mclasses,msegraphics,msebitmap,msefpreadpng,msegraphicstream;
+
 type
  tmsefpreaderpng = class(tfpreaderpng)
   protected
 //   function  InternalCheck(Str: TStream): boolean; override;
  end;
- 
+
 function readgraphic(const source: tstream;
                 const dest: tobject; var format: string;
                 const params: array of const): boolean;
@@ -63,7 +62,7 @@ end;
 procedure registerformat;
 begin
  registergraphicformat(pnglabel,{$ifdef FPC}@{$endif}readgraphic,nil,
-         stockobjects.captions[sc_PNG_Image],['*.png']);
+         'PNG_Image',['*.png']);
 end;
 
 initialization

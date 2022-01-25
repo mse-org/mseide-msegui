@@ -23,7 +23,13 @@ interface
 uses
  msegui,msewidgets,mseobjectpicker,classes,mclasses,msegraphutils,
  msepointer,msetypes,
- msestrings,msegraphics,mseevent,msestat,msestatfile,msestockobjects,mseclasses,
+ msestrings,msegraphics,mseevent,msestat,msestatfile,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ mseclasses,
  msesimplewidgets,mseguiglob,msemenus;
 type
 

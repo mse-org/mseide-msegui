@@ -360,6 +360,10 @@ var
 procedure handleerror(const e: exception; const text: string);
 implementation
 uses
+{$ifdef mse_dynpo}
+ po2arrays,
+ gettext,
+{$endif}
  regwidgets,regeditwidgets,regdialogs, regfiledialogx,regkernel,regprinter,msearrayutils,
  toolhandlermodule,
 {$ifndef mse_no_math}
@@ -439,6 +443,10 @@ end;
 
 procedure tmainfo.mainfooncreate(const sender: tobject);
 begin
+ {$ifdef mse_dynpo}
+  Gettext.GetLanguageIDs(MSELang, MSEFallbackLang);
+  createnewlang(MSEFallbackLang);
+ {$endif}
  designer.ongetmodulenamefile:= {$ifdef FPC}@{$endif}dofindmodulebyname;
  designer.ongetmoduletypefile:= {$ifdef FPC}@{$endif}dofindmodulebytype;
 

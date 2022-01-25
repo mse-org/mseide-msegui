@@ -29,7 +29,7 @@ procedure registerformat;
 implementation
 uses
  classes,mclasses,msebitmap,msebits,msegraphutils,mseguiintf,msegraphicstream,
-     msestockobjects,msegraphics;
+ msegraphics;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -41,7 +41,7 @@ uses
 
 type
  tbitmap1 = class(tbitmap);
- 
+
 const
  RT_BITMAP = PChar(2);
 
@@ -445,7 +445,7 @@ begin
  end
  else begin
   if dest is timagelist then begin
-   result:= readimagebmp(asource,timagelist(dest).bitmap);   
+   result:= readimagebmp(asource,timagelist(dest).bitmap);
    if result then begin
     timagelist(dest).bitmap.change;
    end;
@@ -494,10 +494,17 @@ end;
 
 procedure registerformat;
 begin
+{
  registergraphicformat(bmplabel,{$ifdef FPC}@{$endif}readgraphicbmp,nil,
-                        stockobjects.captions[sc_MS_Bitmap],['*.bmp']);
+                        lang_stockcaption[ord(sc_MS_Bitmap)],['*.bmp']);
  registergraphicformat(icolabel,{$ifdef FPC}@{$endif}readgraphicico,nil,
-                        stockobjects.captions[sc_MS_Icon],['*.ico']);
+                        lang_stockcaption[ord(sc_MS_Icon)],['*.ico']);
+ }
+
+registergraphicformat(bmplabel,{$ifdef FPC}@{$endif}readgraphicbmp,nil,
+                        'MS_Bitmap',['*.bmp']);
+ registergraphicformat(icolabel,{$ifdef FPC}@{$endif}readgraphicico,nil,
+                        'MS_Icon',['*.ico']);
 end;
 
 initialization

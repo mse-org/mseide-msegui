@@ -794,7 +794,12 @@ function createtabform(const aclass: tclass;
 
 implementation
 uses
- sysutils,mselist,msekeyboard,msebits,msestreaming,msestockobjects;
+ sysutils,mselist,msekeyboard,msebits,msestreaming,
+  {$ifdef mse_dynpo}
+ msestockobjects_dynpo;
+{$else}
+ msestockobjects;
+{$endif}
 const
  containercommonflags: optionswidgetty =
             [ow_arrowfocus,ow_arrowfocusin,ow_arrowfocusout,ow_destroywidgets,

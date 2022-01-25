@@ -866,7 +866,13 @@ function makexseriesdata(const value: real; const index: integer): xseriesdataty
 
 implementation
 uses
- sysutils,math,msebits,rtlconsts,msestockobjects,msearrayutils,mseformatstr;
+ sysutils,math,msebits,rtlconsts,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+  msearrayutils,mseformatstr;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}

@@ -38,7 +38,12 @@ function richstringdialog(var avalue: richstringty;
 
 implementation
 uses
- mserichstringeditor_mfm,mseeditglob,msekeyboard,msestockobjects,
+ mserichstringeditor_mfm,mseeditglob,msekeyboard,
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
                                                   msefontformatdialog;
 
 function richstringdialog(var avalue: richstringty;

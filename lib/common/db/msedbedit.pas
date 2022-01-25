@@ -2669,7 +2669,12 @@ function encoderowstate(const color: integer = -1; const font: integer = -1;
                             
 implementation
 uses
- msestockobjects,mseshapes,msereal,msebits,
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ mseshapes,msereal,msebits,
  mseassistiveserver,
  mseactions,mseact,rtlconsts,msedrawtext,sysutils,msedbdispwidgets;
 {$ifndef mse_allwarnings}
@@ -2739,16 +2744,26 @@ end;
 
 function confirmdeleterecord: boolean;
 begin
+{$ifdef mse_dynpo}
+ result:= askok(lang_stockcaption[ord(sc_Delete_record_question)],
+ lang_stockcaption[ord(sc_confirmation)]);
+{$else}
  with stockobjects do begin
-  result:= askok(captions[sc_Delete_record_question],captions[sc_confirmation])
+  result:= askok(captions[sc_Delete_record_question],captions[sc_confirmation]);
  end;
+{$endif} 
 end;
 
 function confirmcopyrecord: boolean;
 begin
+{$ifdef mse_dynpo}
+ result:= askok(lang_stockcaption[ord(sc_Delete_record_question)],
+ lang_stockcaption[ord(sc_confirmation)]);
+{$else}
  with stockobjects do begin
   result:= askok(captions[sc_Copy_record_question],captions[sc_confirmation])
- end;
+  end;
+{$endif}  
 end;
 
 { tnavigdatalink }
@@ -3164,8 +3179,12 @@ var
 begin
  for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
   with buttons[int1] do begin
-//   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
+////   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
+{$ifdef mse_dynpo}
+   hint:= lang_stockcaption[ord(dbnavighints[dbnavigbuttonty(int1)])];
+{$else}
    hint:= stockobjects.captions[dbnavighints[dbnavigbuttonty(int1)]];
+{$endif}   
    if (dno_shortcuthint in foptions) then begin
     if dbnavigbuttonty(int1) = dbnb_dialog then begin
      sc1:= shortcut;
@@ -3181,11 +3200,20 @@ begin
  end;
  with buttons[ord(dbnb_insert)] do begin
   if dno_append in self.options then begin
+{$ifdef mse_dynpo}
+   hint:= lang_stockcaption[ord(sc_append)];
+  end
+  else begin
+   hint:= lang_stockcaption[ord(sc_insert)];
+  end;
+{$else}
    hint:= stockobjects.captions[sc_append];
   end
   else begin
    hint:= stockobjects.captions[sc_insert];
   end;
+{$endif}   
+  
   if (dno_shortcuthint in foptions) and 
             (fshortcuts[dbnb_insert] <> 0) then begin
    hint:= hint + ' (' + 

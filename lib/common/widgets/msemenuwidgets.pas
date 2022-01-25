@@ -245,7 +245,13 @@ var
 
 implementation
 uses
- msedrawtext,mserichstring,msestockobjects,sysutils,msekeyboard,msebits,
+ msedrawtext,mserichstring,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ sysutils,msekeyboard,msebits,
  mseact,mseguiintf,msebitmap,msesysutils,mseassistiveserver;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

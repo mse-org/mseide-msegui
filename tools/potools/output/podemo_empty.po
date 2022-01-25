@@ -1,0 +1,559 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-03-04 23:54+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "&Cancel"
+msgstr "&Cancel"
+
+msgid "&Abort"
+msgstr "&Abort"
+
+msgid "&OK"
+msgstr "&OK"
+
+msgid "&Yes"
+msgstr "&Yes"
+
+msgid "&No"
+msgstr "&No"
+
+msgid "&All"
+msgstr "&All"
+
+msgid "Yes &all"
+msgstr "Yes &all"
+
+msgid "N&o all"
+msgstr "N&o all"
+
+msgid "&Ignore"
+msgstr "&Ignore"
+
+msgid "&Skip"
+msgstr "&Skip"
+
+msgid "Skip a&ll"
+msgstr "Skip a&ll"
+
+msgid "Co&ntinue"
+msgstr "Co&ntinue"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+msgid "Abort"
+msgstr "Abort"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Yes"
+msgstr "Yes"
+
+msgid "No"
+msgstr "No"
+
+msgid "All"
+msgstr "All"
+
+msgid "Yes all"
+msgstr "Yes all"
+
+msgid "No all"
+msgstr "No all"
+
+msgid "Ignore"
+msgstr "Ignore"
+
+msgid "Skip"
+msgstr "Skip"
+
+msgid "Skip all"
+msgstr "Skip all"
+
+msgid "Continue"
+msgstr "Continue"
+
+msgid "is invalid"
+msgstr "is invalid"
+
+msgid "Format error"
+msgstr "Format error"
+
+msgid "Value is required"
+msgstr "Value is required"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Min"
+msgstr "Min"
+
+msgid "Max"
+msgstr "Max"
+
+msgid "Range error"
+msgstr "Range error"
+
+msgid "&Undo"
+msgstr "&Undo"
+
+msgid "&Redo"
+msgstr "&Redo"
+
+msgid "&Copy"
+msgstr "&Copy"
+
+msgid "Cu&t"
+msgstr "Cu&t"
+
+msgid "&Paste"
+msgstr "&Paste"
+
+msgid "Select &all"
+msgstr "Select &all"
+
+msgid "&Insert Row"
+msgstr "&Insert Row"
+
+msgid "&Append Row"
+msgstr "&Append Row"
+
+msgid "&Delete Row"
+msgstr "&Delete Row"
+
+msgid "&Dir"
+msgstr "&Dir"
+
+msgid "&Home"
+msgstr "&Home"
+
+msgid "&Up"
+msgstr "&Up"
+
+msgid "&New"
+msgstr "&New"
+
+msgid "&Name"
+msgstr "&Name"
+
+msgid "&Show hidden files"
+msgstr "&Show hidden files"
+
+msgid "&Filter"
+msgstr "&Filter"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Open"
+msgstr "Open"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Create new directory"
+msgstr "Create new directory"
+
+msgid "Back"
+msgstr "Back"
+
+msgid "Forward"
+msgstr "Forward"
+
+msgid "Up"
+msgstr "Up"
+
+msgid "exists, do you want to overwrite?"
+msgstr "exists, do you want to overwrite?"
+
+msgid "is modified. Save?"
+msgstr "is modified. Save?"
+
+msgid "WARNING"
+msgstr "WARNING"
+
+msgid "Exception"
+msgstr "Exception"
+
+msgid "System"
+msgstr "System"
+
+msgid "does not exist"
+msgstr "does not exist"
+
+msgid "PASSWORD"
+msgstr "PASSWORD"
+
+msgid "Enter password"
+msgstr "Enter password"
+
+msgid "Invalid password!"
+msgstr "Invalid password!"
+
+msgid "Can not read directory"
+msgstr "Can not read directory"
+
+msgid "Graphic format not supported"
+msgstr "Graphic format not supported"
+
+msgid "Graphic format error"
+msgstr "Graphic format error"
+
+msgid "All Images"
+msgstr "All Images"
+
+msgid "Confirmation"
+msgstr "Confirmation"
+
+msgid "Delete record?"
+msgstr "Delete record?"
+
+msgid "Copy record?"
+msgstr "Copy record?"
+
+msgid "Close page"
+msgstr "Close page"
+
+msgid "First"
+msgstr "First"
+
+msgid "Prior"
+msgstr "Prior"
+
+msgid "Next"
+msgstr "Next"
+
+msgid "Last"
+msgstr "Last"
+
+msgid "Append"
+msgstr "Append"
+
+msgid "Delete"
+msgstr "Delete"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Post"
+msgstr "Post"
+
+msgid "Annul"
+msgstr "Annul"
+
+msgid "Refresh"
+msgstr "Refresh"
+
+msgid "Edit filter"
+msgstr "Edit filter"
+
+msgid "Edit filter minimum"
+msgstr "Edit filter minimum"
+
+msgid "Edit filter maximum"
+msgstr "Edit filter maximum"
+
+msgid "Reset filter"
+msgstr "Reset filter"
+
+msgid "Filter on"
+msgstr "Filter on"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Auto edit"
+msgstr "Auto edit"
+
+msgid "Copy record"
+msgstr "Copy record"
+
+msgid "Dialog"
+msgstr "Dialog"
+
+msgid "Insert"
+msgstr "Insert"
+
+msgid "Copy"
+msgstr "Copy"
+
+msgid "Paste"
+msgstr "Paste"
+
+msgid "Row insert"
+msgstr "Row insert"
+
+msgid "Row append"
+msgstr "Row append"
+
+msgid "Row delete"
+msgstr "Row delete"
+
+msgid "Undo"
+msgstr "Undo"
+
+msgid "Redo"
+msgstr "Redo"
+
+msgid "Cut"
+msgstr "Cut"
+
+msgid "Select all"
+msgstr "Select all"
+
+msgid "Filter off"
+msgstr "Filter off"
+
+msgid "Portrait"
+msgstr "Portrait"
+
+msgid "Landscape"
+msgstr "Landscape"
+
+msgid "Delete row?"
+msgstr "Delete row?"
+
+msgid "selected rows?"
+msgstr "selected rows?"
+
+msgid "Single item only"
+msgstr "Single item only"
+
+msgid "Copy Cells"
+msgstr "Copy Cells"
+
+msgid "Paste Cells"
+msgstr "Paste Cells"
+
+msgid "Close"
+msgstr "Close"
+
+msgid "Maximize"
+msgstr "Maximize"
+
+msgid "Normalize"
+msgstr "Normalize"
+
+msgid "Minimize"
+msgstr "Minimize"
+
+msgid "Fix size"
+msgstr "Fix size"
+
+msgid "Float"
+msgstr "Float"
+
+msgid "Stay on top"
+msgstr "Stay on top"
+
+msgid "Stay in background"
+msgstr "Stay in background"
+
+msgid "Lock children"
+msgstr "Lock children"
+
+msgid "No lock"
+msgstr "No lock"
+
+msgid "Input"
+msgstr "Input"
+
+msgid "Button"
+msgstr "Button"
+
+msgid "On"
+msgstr "On"
+
+msgid "Off"
+msgstr "Off"
+
+msgid "Left border"
+msgstr "Left border"
+
+msgid "Top border"
+msgstr "Top border"
+
+msgid "Right border"
+msgstr "Right border"
+
+msgid "Bottom border"
+msgstr "Bottom border"
+
+msgid "Begin of text"
+msgstr "Begin of text"
+
+msgid "End of text"
+msgstr "End of text"
+
+msgid "Inputmode"
+msgstr "Inputmode"
+
+msgid "Overwrite"
+msgstr "Overwrite"
+
+msgid "Deleted"
+msgstr "Deleted"
+
+msgid "Copied"
+msgstr "Copied"
+
+msgid "Inserted"
+msgstr "Inserted"
+
+msgid "Pasted"
+msgstr "Pasted"
+
+msgid "Withdrawn"
+msgstr "Withdrawn"
+
+msgid "Window activated"
+msgstr "Window activated"
+
+msgid "Menu"
+msgstr "Menu"
+
+msgid "Beginning of file"
+msgstr "Beginning of file"
+
+msgid "End of file"
+msgstr "End of file"
+
+msgid "Voice output"
+msgstr "Voice output"
+
+msgid "Speak again"
+msgstr "Speak again"
+
+msgid "First column"
+msgstr "First column"
+
+msgid "First row"
+msgstr "First row"
+
+msgid "Last column"
+msgstr "Last column"
+
+msgid "Last row"
+msgstr "Last row"
+
+msgid "Selection"
+msgstr "Selection"
+
+msgid "Speak path"
+msgstr "Speak path"
+
+msgid "Disabled button"
+msgstr "Disabled button"
+
+msgid "First field"
+msgstr "First field"
+
+msgid "Last field"
+msgstr "Last field"
+
+msgid "First element"
+msgstr "First element"
+
+msgid "Last element"
+msgstr "Last element"
+
+msgid "Slower"
+msgstr "Slower"
+
+msgid "Faster"
+msgstr "Faster"
+
+msgid "Window"
+msgstr "Window"
+
+msgid "Area"
+msgstr "Area"
+
+msgid "Area activated"
+msgstr "Area activated"
+
+msgid "Volume down"
+msgstr "Volume down"
+
+msgid "Volume up"
+msgstr "Volume up"
+
+msgid "Cancel speech"
+msgstr "Cancel speech"
+
+msgid "New"
+msgstr "New"
+
+msgid "Tools"
+msgstr "Tools"
+
+msgid "Languages"
+msgstr "Languages"
+
+msgid "Directory"
+msgstr "Directory"
+
+msgid "No icons"
+msgstr "No icons"
+
+msgid "No lateral"
+msgstr "No lateral"
+
+msgid "Compact"
+msgstr "Compact"
+
+msgid "Path"
+msgstr "Path"
+
+msgid "File"
+msgstr "File"
+
+msgid "Delete selected row?"
+msgstr "Delete selected row?"
+
+msgid "Delete %s selected rows?"
+msgstr "Delete %s selected rows?"
+
+msgid "This is a test of internationalization."
+msgstr "This is a test of internationalization."
+
+msgid "That is a other test."
+msgstr "That is a other test."
+
+msgid "This is the end."
+msgstr "This is the end."
+
+msgid "English [en]"
+msgstr "English [en]"
+
+msgid "Russian [ru]"
+msgstr "Russian [ru]"
+
+msgid "French [fr]"
+msgstr "French [fr]"
+
+msgid "German [de]"
+msgstr "German [de]"
+
+msgid "Spanish [es]"
+msgstr "Spanish [es]"
+
+msgid "Portuguese [pt]"
+msgstr "Portuguese [pt]"
+

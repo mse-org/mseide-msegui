@@ -381,7 +381,12 @@ function textendpoint(const start: pointty; const text: msestring): pointty;
 
 implementation
 uses
- msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,msestockobjects,
+ msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
  mseassistiveserver;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -530,35 +535,61 @@ begin
  end;
  if ies_cangroupundo in fstate then begin
   tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
-     [stockobjects.captions[sc_Undohk]+sepchar+
+{$ifdef mse_dynpo}
+   [lang_stockcaption[ord(sc_Undohk)]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_groupundo])+')',
-      stockobjects.captions[sc_Redohk]+sepchar+
+      lang_stockcaption[ord(sc_Redohk)]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_groupredo])+')',
-      stockobjects.captions[sc_Copyhk]+sepchar+
+      lang_stockcaption[ord(sc_Copyhk)]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
-      stockobjects.captions[sc_Cuthk]+sepchar+
+      lang_stockcaption[ord(sc_Cuthk)]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
-      stockobjects.captions[sc_Pastehk]+sepchar+
+      lang_stockcaption[ord(sc_Pastehk)]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_paste])+')',
-      stockobjects.captions[sc_Select_allhk]+sepchar+
-              '('+encodeshortcutname(sysshortcuts[sho_selectall])+')'
-              ],
+      lang_stockcaption[ord(sc_Select_allhk)]+sepchar+
+{$else}
+   [sc(sc_Undohk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_groupundo])+')',
+      sc(sc_Redohk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_groupredo])+')',
+      sc(sc_Copyhk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
+      sc(sc_Cuthk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
+      sc(sc_Pastehk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_paste])+')',
+      sc(sc_Select_allhk)+sepchar+
+{$endif}
+              '('+encodeshortcutname(sysshortcuts[sho_selectall])+')'],
      [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],
               [mao_nocandefocus],[mao_nocandefocus]],
                states,[@onundo,@onredo,@oncopy,@oncut,@onpaste,@onselectall]);
  end
  else begin
   tpopupmenu.additems(amenu,fintf.getwidget,mouseinfo,
-     [stockobjects.captions[sc_Undohk]+sepchar+'(Esc)',
-      stockobjects.captions[sc_Copyhk]+sepchar+
+{$ifdef mse_dynpo}
+     [lang_stockcaption[ord(sc_Undohk)]+sepchar+'(Esc)',
+      lang_stockcaption[ord(sc_Copyhk)]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
-      stockobjects.captions[sc_Cuthk]+sepchar+
+      lang_stockcaption[ord(sc_Cuthk)]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
-      stockobjects.captions[sc_Pastehk]+sepchar+
+      lang_stockcaption[ord(sc_Pastehk)]+sepchar+
               '('+encodeshortcutname(sysshortcuts[sho_paste])+')',
-      stockobjects.captions[sc_Select_allhk]+sepchar+
-              '('+encodeshortcutname(sysshortcuts[sho_selectall])+')'
-              ],
+      lang_stockcaption[ord(sc_Select_allhk)]+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_selectall])+')'],
+{$else}
+     [sc(sc_Undohk)+sepchar+'(Esc)',
+      sc(sc_Copyhk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_copy])+')',
+      sc(sc_Cuthk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_cut])+')',
+      sc(sc_Pastehk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_paste])+')',
+      sc(sc_Select_allhk)+sepchar+
+              '('+encodeshortcutname(sysshortcuts[sho_selectall])+')'],
+{$endif}
+
+
      [[mao_nocandefocus],[mao_nocandefocus],[mao_nocandefocus],
       [mao_nocandefocus],[mao_nocandefocus]],
                states,[@onundo,@oncopy,@oncut,@onpaste,@onselectall]);

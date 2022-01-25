@@ -87,7 +87,12 @@ function memodialog(var avalue: msestring; const readonly: boolean): modalresult
 
 implementation
 uses
- msememodialog_mfm,mseeditglob,msekeyboard,msestockobjects;
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ msememodialog_mfm,mseeditglob,msekeyboard;
 
 function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
 var

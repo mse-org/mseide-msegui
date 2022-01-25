@@ -96,7 +96,12 @@ function readfpgraphic(const source: tstream; const readerclass: fpreaderclassty
 
 implementation
 uses
- msestockobjects,msegraphutils,msearrayutils;
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ msegraphutils, msearrayutils;
 
 type
  tmaskedbitmap1 = class(tmaskedbitmap);
@@ -166,7 +171,11 @@ begin
  end;
  orderarray(order,ar1);
  setlength(result,1);
- result[0]:= stockobjects.captions[sc_All];
+{$ifdef mse_dynpo}
+ result[0]:= lang_stockcaption[ord(sc_All)];
+{$else}
+ result[0]:= sc(sc_All);
+{$endif}
  stackarray(ar1,result);
 end;
 
@@ -323,13 +332,23 @@ begin
  end;
  if not atry then begin
   if not found then begin
-   formaterror(
-      ansistring(stockobjects.captions[sc_graphic_format_not_supported]),
+ {$ifdef mse_dynpo}
+  formaterror(
+      ansistring(lang_stockcaption[ord(sc_graphic_format_not_supported)]),
                                                               aformatlabel);
   end
   else begin
-   formaterror(ansistring(stockobjects.captions[sc_graphic_format_error]),
+   formaterror(ansistring(lang_stockcaption[ord(sc_graphic_format_error)]),
                                                                 aformatlabel);
+{$else}
+  formaterror(
+      ansistring(sc(sc_graphic_format_not_supported)),
+                                                              aformatlabel);
+  end
+  else begin
+   formaterror(ansistring(sc(sc_graphic_format_error)),
+                                                                aformatlabel);
+{$endif}
   end;
  end;
 end;
@@ -352,7 +371,11 @@ begin
  end;
  if int2 < 0 then begin
   formaterror(
-        ansistring(stockobjects.captions[sc_graphic_format_not_supported]),
+{$ifdef mse_dynpo}
+        ansistring(lang_stockcaption[ord(sc_graphic_format_not_supported)]),
+{$else}
+        ansistring(sc(sc_graphic_format_not_supported)),
+{$endif}
                                                                aformatlabel);
  end;
  with formats[int2] do begin

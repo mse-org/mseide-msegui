@@ -1505,7 +1505,13 @@ function inttorealty(const avalue: integer): realty;
 
 implementation
 uses
- sysutils,msereal,msebits,msestreaming,msestockobjects,msefloattostr,
+ sysutils,msereal,msebits,msestreaming,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ msefloattostr,
  mseassistiveserver;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -1866,25 +1872,44 @@ end;
 procedure tcustomdataedit.formaterror(const quiet: boolean);
 begin
  if not quiet then begin
-  showmessage(''''+text+''' '+stockobjects.captions[sc_is_invalid]+'.',
-        stockobjects.captions[sc_Format_error]);
+
+{$ifdef mse_dynpo}
+  showmessage(''''+text+''' '+ lang_stockcaption[ord(sc_is_invalid)]+'.',
+        lang_stockcaption[ord(sc_Format_error)]);
+{$else}
+  showmessage(''''+text+''' '+ sc(sc_is_invalid)+'.',
+        sc(sc_Format_error));
+
+{$endif}
  end;
 end;
 
 procedure tcustomdataedit.notnullerror(const quiet: boolean);
 begin
  if not quiet then begin
-  showmessage(stockobjects.captions[sc_Value_is_required]+'.',
-               stockobjects.captions[sc_Error]);
+ {$ifdef mse_dynpo}
+ showmessage(lang_stockcaption[ord(sc_Value_is_required)]+'.',
+               lang_stockcaption[ord(sc_Error)]);
+{$else}
+  showmessage(sc(sc_Value_is_required)+'.',
+               sc(sc_Error));
+{$endif}
  end;
 end;
 
 procedure tcustomdataedit.rangeerror(const min, max; const quiet: boolean);
 begin
  if not quiet then begin
-  showmessage(stockobjects.captions[sc_min]+': '+datatotext(min)+' '+
-             stockobjects.captions[sc_Max]+': ' +
-            datatotext(max) + '.',stockobjects.captions[sc_Range_error]);
+
+ {$ifdef mse_dynpo}
+ showmessage(lang_stockcaption[ord(sc_min)]+': '+datatotext(min)+' '+
+             lang_stockcaption[ord(sc_Max)]+': ' +
+            datatotext(max) + '.',lang_stockcaption[ord(sc_Range_error)]);
+{$else}
+  showmessage(sc(sc_min)+': '+datatotext(min)+' '+
+             sc(sc_Max)+': ' +
+            datatotext(max) + '.',sc(sc_Range_error));
+{$endif}
  end;
 end;
 

@@ -647,8 +647,9 @@ var
    end;
    scopestack[scopestackpo]:= scopenr;
    po1:= @fsyntaxdefs[syntaxdefhandle].scopeinfos[scopenr];
+ 
    if po1^.fontinfonr <> 0 then begin
-    po1^.currfontinfonr:= po1^.fontinfonr;
+     po1^.currfontinfonr:= po1^.fontinfonr;
    end
    else begin
     if starttoken.fontinfonr <> 0 then begin
@@ -658,6 +659,7 @@ var
      po1^.currfontinfonr:= scopeinfopo^.currfontinfonr;
     end;
    end;
+   
    scopeinfopo:= po1;
    startscopenr:= scopenr;
   end;

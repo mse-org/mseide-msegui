@@ -449,7 +449,12 @@ var
 implementation
 uses
  sysutils,mserichstring,msestream,typinfo,mseformatstr,msestreaming,
- msestockobjects,mseassistiveserver,msearrayutils;
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ mseassistiveserver,msearrayutils;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -717,7 +722,11 @@ const
         sc_row_insert,sc_row_append,sc_row_delete,
         sc_copy_cells,sc_paste_cells,sc_undo,sc_redo);
 begin
- result:= stockobjects.captions[list[aitem]];
+{$ifdef mse_dynpo}
+ result:= lang_stockcaption[ord(list[aitem])];
+{$else}
+ result:= sc(list[aitem]);
+{$endif}
 end;
 
 function getassistiveshortcutdispname(
@@ -728,7 +737,11 @@ const
         sc_cancelspeech,
         sc_slower,sc_faster,sc_volumedown,sc_volumeup);
 begin
- result:= stockobjects.captions[list[aitem]];
+{$ifdef mse_dynpo}
+ result:= lang_stockcaption[ord(list[aitem])];
+{$else}
+ result:= sc(list[aitem]);
+{$endif}
 end;
 
 function isnormalkey(const akey: shortcutty): boolean;

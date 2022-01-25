@@ -1039,7 +1039,13 @@ uses
  msereallisteditor,msedoublereallisteditor,msecomptree,
  mseintegerlisteditor,mseact,msesys,
  msecolordialog,msememodialog,
- mseshapes,msestockobjects,msetexteditor,mserichstringeditor,
+ mseshapes,
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ msetexteditor,mserichstringeditor,
  msegraphicstream,msedate,
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
  mseformatpnmread,mseformattgaread,mseformatxpmread,mseformattiffread{$endif},
@@ -1076,7 +1082,11 @@ begin
  result:= (toval < fromval) or
           askok(mo.c[ord(wishdelete)]+' '+inttostrmse(fromval) +
          ' '+mo.c[ord(str_to)]+' '+ inttostrmse(toval) + '?',
+{$ifdef mse_dynpo}
+         lang_stockcaption[ord(sc_confirmation)]);
+{$else}
          stockobjects.captions[sc_confirmation]);
+{$endif} 
 end;
 
 function getcomponentpropname(const acomp: tcomponent): msestring;
@@ -2840,7 +2850,12 @@ function tclasspropertyeditor.checkfreeoptionalclass: boolean;
 begin
  result:= askok(mo.c[ord(wishdestroy)]+' ' + fname+' ('+
              msestring(ftypeinfo^.Name)+
-                     ')?',stockobjects.captions[sc_confirmation]);
+                     ')?',
+{$ifdef mse_dynpo}
+         lang_stockcaption[ord(sc_confirmation)]);
+{$else}
+         stockobjects.captions[sc_confirmation]);
+{$endif} 
 end;
 
 function tclasspropertyeditor.dispname: msestring;
@@ -3629,7 +3644,12 @@ begin
  int1:= tarrayprop(getpointervalue).count;
  if ( int1 > va) and not askok(mo.c[ord(wishdelete)]+' '+inttostrmse(va) +
          ' '+mo.c[ord(str_to)]+' '+ inttostrmse(int1-1) + '?',
-         stockobjects.captions[sc_confirmation]) then begin
+{$ifdef mse_dynpo}
+         lang_stockcaption[ord(sc_confirmation)])
+{$else}
+         stockobjects.captions[sc_confirmation])
+{$endif}          
+          then begin
   exit;
  end;
  if not ((ps_noadditems in fstate) and (va > int1)) then begin

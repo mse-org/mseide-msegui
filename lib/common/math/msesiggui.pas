@@ -23,7 +23,12 @@ uses
  classes,mclasses,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,
  msetypes,
  msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
- msesplitter,msegui,msestat,msestatfile,msestrings,msestockobjects,
+ msesplitter,msegui,msestat,msestatfile,msestrings,
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
  msemenus,mseact,msedataedits,msereal,mseedit;
 
 type

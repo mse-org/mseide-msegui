@@ -545,7 +545,13 @@ procedure freetransientmenu(var amenu: tcustommenu);
 
 implementation
 uses
- sysutils,msestockobjects,rtlconsts,msebits,msemenuwidgets,msedatalist,
+ sysutils,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ rtlconsts,msebits,msemenuwidgets,msedatalist,
  mseactions,msestreaming,msearrayutils,msesysutils;
 type
  tapplication1 = class(tguiapplication)

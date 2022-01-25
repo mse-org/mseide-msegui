@@ -1,0 +1,362 @@
+
+
+msgstr "&Cancel"
+
+msgstr "&Abort"
+
+msgstr "&OK"
+
+msgstr "&Yes"
+
+msgstr "&No"
+
+msgstr "&All"
+
+msgstr "Yes &all"
+
+msgstr "N&o all"
+
+msgstr "&Ignore"
+
+msgstr "&Skip"
+
+msgstr "Skip a&ll"
+
+msgstr "Co&ntinue"
+
+msgstr "Cancel"
+
+msgstr "Abort"
+
+msgstr "OK"
+
+msgstr "Yes"
+
+msgstr "No"
+
+msgstr "All"
+
+msgstr "Yes all"
+
+msgstr "No all"
+
+msgstr "Ignore"
+
+msgstr "Skip"
+
+msgstr "Skip all"
+
+msgstr "Continue"
+
+msgstr "is invalid"
+
+msgstr "Format error"
+
+msgstr "Value is required"
+
+msgstr "Error"
+
+msgstr "Min"
+
+msgstr "Max"
+
+msgstr "Range error"
+
+msgstr "&Undo"
+
+msgstr "&Redo"
+
+msgstr "&Copy"
+
+msgstr "Cu&t"
+
+msgstr "&Paste"
+
+msgstr "Select &all"
+
+msgstr "&Insert Row"
+
+msgstr "&Append Row"
+
+msgstr "&Delete Row"
+
+msgstr "&Dir"
+
+msgstr "&Home"
+
+msgstr "&Up"
+
+msgstr "&New"
+
+msgstr "&Name"
+
+msgstr "&Show hidden files"
+
+msgstr "&Filter"
+
+msgstr "Save"
+
+msgstr "Open"
+
+msgstr "Name"
+
+msgstr "Create new directory"
+
+msgstr "Back"
+
+msgstr "Forward"
+
+msgstr "Up"
+
+msgstr "exists, do you want to overwrite?"
+
+msgstr "is modified. Save?"
+
+msgstr "WARNING"
+
+msgstr "Exception"
+
+msgstr "System"
+
+msgstr "does not exist"
+
+msgstr "PASSWORD"
+
+msgstr "Enter password"
+
+msgstr "Invalid password!"
+
+msgstr "Can not read directory"
+
+msgstr "Graphic format not supported"
+
+msgstr "Graphic format error"
+
+msgstr "All Images"
+
+msgstr "Confirmation"
+
+msgstr "Delete record?"
+
+msgstr "Copy record?"
+
+msgstr "Close page"
+
+msgstr "First"
+
+msgstr "Prior"
+
+msgstr "Next"
+
+msgstr "Last"
+
+msgstr "Append"
+
+msgstr "Delete"
+
+msgstr "Edit"
+
+msgstr "Post"
+
+msgstr "Annul"
+
+msgstr "Refresh"
+
+msgstr "Edit filter"
+
+msgstr "Edit filter minimum"
+
+msgstr "Edit filter maximum"
+
+msgstr "Reset filter"
+
+msgstr "Filter on"
+
+msgstr "Search"
+
+msgstr "Auto edit"
+
+msgstr "Copy record"
+
+msgstr "Dialog"
+
+msgstr "Insert"
+
+msgstr "Copy"
+
+msgstr "Paste"
+
+msgstr "Row insert"
+
+msgstr "Row append"
+
+msgstr "Row delete"
+
+msgstr "Undo"
+
+msgstr "Redo"
+
+msgstr "Cut"
+
+msgstr "Select all"
+
+msgstr "Filter off"
+
+msgstr "Portrait"
+
+msgstr "Landscape"
+
+msgstr "Delete row?"
+
+msgstr "selected rows?"
+
+msgstr "Single item only"
+
+msgstr "Copy Cells"
+
+msgstr "Paste Cells"
+
+msgstr "Close"
+
+msgstr "Maximize"
+
+msgstr "Normalize"
+
+msgstr "Minimize"
+
+msgstr "Fix size"
+
+msgstr "Float"
+
+msgstr "Stay on top"
+
+msgstr "Stay in background"
+
+msgstr "Lock children"
+
+msgstr "No lock"
+
+msgstr "Input"
+
+msgstr "Button"
+
+msgstr "On"
+
+msgstr "Off"
+
+msgstr "Left border"
+
+msgstr "Top border"
+
+msgstr "Right border"
+
+msgstr "Bottom border"
+
+msgstr "Begin of text"
+
+msgstr "End of text"
+
+msgstr "Inputmode"
+
+msgstr "Overwrite"
+
+msgstr "Deleted"
+
+msgstr "Copied"
+
+msgstr "Inserted"
+
+msgstr "Pasted"
+
+msgstr "Withdrawn"
+
+msgstr "Window activated"
+
+msgstr "Menu"
+
+msgstr "Beginning of file"
+
+msgstr "End of file"
+
+msgstr "Voice output"
+
+msgstr "Speak again"
+
+msgstr "First column"
+
+msgstr "First row"
+
+msgstr "Last column"
+
+msgstr "Last row"
+
+msgstr "Selection"
+
+msgstr "Speak path"
+
+msgstr "Disabled button"
+
+msgstr "First field"
+
+msgstr "Last field"
+
+msgstr "First element"
+
+msgstr "Last element"
+
+msgstr "Slower"
+
+msgstr "Faster"
+
+msgstr "Window"
+
+msgstr "Area"
+
+msgstr "Area activated"
+
+msgstr "Volume down"
+
+msgstr "Volume up"
+
+msgstr "Cancel speech"
+
+msgstr "New"
+
+msgstr "Tools"
+
+msgstr "Languages"
+
+msgstr "Directory"
+
+msgstr "No icons"
+
+msgstr "No lateral"
+
+msgstr "Compact"
+
+msgstr "Path"
+
+msgstr "File"
+
+msgstr "Delete selected row?"
+
+msgstr "Delete %s selected rows?"
+
+msgstr "This is a test of internationalization."
+
+msgstr "That is a other test."
+
+msgstr "This is the end."
+
+msgstr "English [en]"
+
+msgstr "Russian [ru]"
+
+msgstr "French [fr]"
+
+msgstr "German [de]"
+
+msgstr "Spanish [es]"
+
+msgstr "Portuguese [pt]"
+

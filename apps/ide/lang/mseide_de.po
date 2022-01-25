@@ -1,0 +1,559 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-03-04 23:54+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "&Cancel"
+msgstr "&Abbrechen"
+
+msgid "&Abort"
+msgstr "&Abbrechen"
+
+msgid "&OK"
+msgstr "&OK"
+
+msgid "&Yes"
+msgstr "&Ja"
+
+msgid "&No"
+msgstr "&Nein"
+
+msgid "&All"
+msgstr "&Alle"
+
+msgid "Yes &all"
+msgstr "Ja &alle"
+
+msgid "N&o all"
+msgstr "N&o alle"
+
+msgid "&Ignore"
+msgstr "&Ignorieren"
+
+msgid "&Skip"
+msgstr "&Überspringen"
+
+msgid "Skip a&ll"
+msgstr "Alle &alle überspringen"
+
+msgid "Co&ntinue"
+msgstr "Weiter"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Abort"
+msgstr "Abbruch"
+
+msgid "OK"
+msgstr "OK"
+
+msgid "Yes"
+msgstr "Ja"
+
+msgid "No"
+msgstr "Nein"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "Yes all"
+msgstr "Ja alle"
+
+msgid "No all"
+msgstr "Nein alle"
+
+msgid "Ignore"
+msgstr "Ignorieren"
+
+msgid "Skip"
+msgstr "Überspringen"
+
+msgid "Skip all"
+msgstr "Alle überspringen"
+
+msgid "Continue"
+msgstr "Fortfahren"
+
+msgid "is invalid"
+msgstr "ist ungültig"
+
+msgid "Format error"
+msgstr "Formatfehler"
+
+msgid "Value is required"
+msgstr "Wert ist erforderlich"
+
+msgid "Error"
+msgstr "Fehler"
+
+msgid "Min"
+msgstr "Min"
+
+msgid "Max"
+msgstr "Max"
+
+msgid "Range error"
+msgstr "Bereichsfehler"
+
+msgid "&Undo"
+msgstr "&Rückgängig machen"
+
+msgid "&Redo"
+msgstr "&Wiederherstellen"
+
+msgid "&Copy"
+msgstr "&Kopieren"
+
+msgid "Cu&t"
+msgstr "Cu&t"
+
+msgid "&Paste"
+msgstr "&Einfügen"
+
+msgid "Select &all"
+msgstr "&alle auswählen"
+
+msgid "&Insert Row"
+msgstr "&Zeile einfügen"
+
+msgid "&Append Row"
+msgstr "Zeile &anhängen"
+
+msgid "&Delete Row"
+msgstr "Zeile &löschen"
+
+msgid "&Dir"
+msgstr "&Dir"
+
+msgid "&Home"
+msgstr "&Home"
+
+msgid "&Up"
+msgstr "&Nach oben"
+
+msgid "&New"
+msgstr "&Neu"
+
+msgid "&Name"
+msgstr "&Name"
+
+msgid "&Show hidden files"
+msgstr "&Versteckte Dateien anzeigen"
+
+msgid "&Filter"
+msgstr "&Filtern"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Open"
+msgstr "Öffnen"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Create new directory"
+msgstr "Neues Verzeichnis erstellen"
+
+msgid "Back"
+msgstr "Zurück"
+
+msgid "Forward"
+msgstr "Weiterleiten"
+
+msgid "Up"
+msgstr "Nach oben"
+
+msgid "exists, do you want to overwrite?"
+msgstr "existiert, willst du überschreiben?"
+
+msgid "is modified. Save?"
+msgstr "wird geändert. Speichern?"
+
+msgid "WARNING"
+msgstr "WARNUNG"
+
+msgid "Exception"
+msgstr "Ausnahme"
+
+msgid "System"
+msgstr "System"
+
+msgid "does not exist"
+msgstr "existiert nicht"
+
+msgid "PASSWORD"
+msgstr "PASSWORT"
+
+msgid "Enter password"
+msgstr "Passwort eingeben"
+
+msgid "Invalid password!"
+msgstr "Ungültiges Passwort!"
+
+msgid "Can not read directory"
+msgstr "Verzeichnis kann nicht gelesen werden"
+
+msgid "Graphic format not supported"
+msgstr "Grafikformat wird nicht unterstützt"
+
+msgid "Graphic format error"
+msgstr "Grafikformatfehler"
+
+msgid "All Images"
+msgstr "Alle Bilder"
+
+msgid "Confirmation"
+msgstr "Bestätigung"
+
+msgid "Delete record?"
+msgstr "Datensatz löschen?"
+
+msgid "Copy record?"
+msgstr "Datensatz kopieren?"
+
+msgid "Close page"
+msgstr "Seite schließen"
+
+msgid "First"
+msgstr "Zuerst"
+
+msgid "Prior"
+msgstr "Zuvor"
+
+msgid "Next"
+msgstr "Weiter"
+
+msgid "Last"
+msgstr "Zuletzt"
+
+msgid "Append"
+msgstr "Anhängen"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Post"
+msgstr "Post"
+
+msgid "Annul"
+msgstr "Annullieren"
+
+msgid "Refresh"
+msgstr "Aktualisieren"
+
+msgid "Edit filter"
+msgstr "Filter bearbeiten"
+
+msgid "Edit filter minimum"
+msgstr "Filterminimum bearbeiten"
+
+msgid "Edit filter maximum"
+msgstr "Filtermaximum bearbeiten"
+
+msgid "Reset filter"
+msgstr "Filter zurücksetzen"
+
+msgid "Filter on"
+msgstr "Filter ein"
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Auto edit"
+msgstr "Automatisch bearbeiten"
+
+msgid "Copy record"
+msgstr "Datensatz kopieren"
+
+msgid "Dialog"
+msgstr "Dialog"
+
+msgid "Insert"
+msgstr "Einfügen"
+
+msgid "Copy"
+msgstr "Kopieren"
+
+msgid "Paste"
+msgstr "Einfügen"
+
+msgid "Row insert"
+msgstr "Zeile einfügen"
+
+msgid "Row append"
+msgstr "Zeile anhängen"
+
+msgid "Row delete"
+msgstr "Zeile löschen"
+
+msgid "Undo"
+msgstr "Rückgängig machen"
+
+msgid "Redo"
+msgstr "Wiederholen"
+
+msgid "Cut"
+msgstr "Ausschneiden"
+
+msgid "Select all"
+msgstr "Alle auswählen"
+
+msgid "Filter off"
+msgstr "Filter aus"
+
+msgid "Portrait"
+msgstr "Porträt"
+
+msgid "Landscape"
+msgstr "Landschaft"
+
+msgid "Delete row?"
+msgstr "Zeile löschen?"
+
+msgid "selected rows?"
+msgstr "ausgewählte Zeilen?"
+
+msgid "Single item only"
+msgstr "Nur Einzelartikel"
+
+msgid "Copy Cells"
+msgstr "Zellen kopieren"
+
+msgid "Paste Cells"
+msgstr "Zellen einfügen"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Maximize"
+msgstr "Maximieren"
+
+msgid "Normalize"
+msgstr "Normalisieren"
+
+msgid "Minimize"
+msgstr "Minimieren"
+
+msgid "Fix size"
+msgstr "Größe korrigieren"
+
+msgid "Float"
+msgstr "Float"
+
+msgid "Stay on top"
+msgstr "Oben bleiben"
+
+msgid "Stay in background"
+msgstr "Im Hintergrund bleiben"
+
+msgid "Lock children"
+msgstr "Kinder sperren"
+
+msgid "No lock"
+msgstr "Keine Sperre"
+
+msgid "Input"
+msgstr "Eingabe"
+
+msgid "Button"
+msgstr "Schaltfläche"
+
+msgid "On"
+msgstr "Ein"
+
+msgid "Off"
+msgstr "Aus"
+
+msgid "Left border"
+msgstr "Linker Rand"
+
+msgid "Top border"
+msgstr "Oberer Rand"
+
+msgid "Right border"
+msgstr "Rechter Rand"
+
+msgid "Bottom border"
+msgstr "Unterer Rand"
+
+msgid "Begin of text"
+msgstr "Textanfang"
+
+msgid "End of text"
+msgstr "Textende"
+
+msgid "Inputmode"
+msgstr "Eingabemodus"
+
+msgid "Overwrite"
+msgstr "Überschreiben"
+
+msgid "Deleted"
+msgstr "Gelöscht"
+
+msgid "Copied"
+msgstr "Kopiert"
+
+msgid "Inserted"
+msgstr "Eingefügt"
+
+msgid "Pasted"
+msgstr "Eingefügt"
+
+msgid "Withdrawn"
+msgstr "Zurückgezogen"
+
+msgid "Window activated"
+msgstr "Fenster aktiviert"
+
+msgid "Menu"
+msgstr "Menü"
+
+msgid "Beginning of file"
+msgstr "Anfang der Datei"
+
+msgid "End of file"
+msgstr "Ende der Datei"
+
+msgid "Voice output"
+msgstr "Sprachausgabe"
+
+msgid "Speak again"
+msgstr "Noch einmal sprechen"
+
+msgid "First column"
+msgstr "Erste Spalte"
+
+msgid "First row"
+msgstr "Erste Zeile"
+
+msgid "Last column"
+msgstr "Letzte Spalte"
+
+msgid "Last row"
+msgstr "Letzte Zeile"
+
+msgid "Selection"
+msgstr "Auswahl"
+
+msgid "Speak path"
+msgstr "Pfad sprechen"
+
+msgid "Disabled button"
+msgstr "Schaltfläche deaktiviert"
+
+msgid "First field"
+msgstr "Erstes Feld"
+
+msgid "Last field"
+msgstr "Letztes Feld"
+
+msgid "First element"
+msgstr "Erstes Element"
+
+msgid "Last element"
+msgstr "Letztes Element"
+
+msgid "Slower"
+msgstr "Langsamer"
+
+msgid "Faster"
+msgstr "Schneller"
+
+msgid "Window"
+msgstr "Fenster"
+
+msgid "Area"
+msgstr "Bereich"
+
+msgid "Area activated"
+msgstr "Bereich aktiviert"
+
+msgid "Volume down"
+msgstr "Leiser"
+
+msgid "Volume up"
+msgstr "Lauter"
+
+msgid "Cancel speech"
+msgstr "Sprache abbrechen"
+
+msgid "New"
+msgstr "Neu"
+
+msgid "Tools"
+msgstr "Werkzeuge"
+
+msgid "Languages"
+msgstr "Sprachen"
+
+msgid "Directory"
+msgstr "Verzeichnis"
+
+msgid "No icons"
+msgstr "Keine Symbole"
+
+msgid "No lateral"
+msgstr "Kein seitliches"
+
+msgid "Compact"
+msgstr "Kompakt"
+
+msgid "Path"
+msgstr "Pfad"
+
+msgid "File"
+msgstr "Datei"
+
+msgid "Delete selected row?"
+msgstr "Ausgewählte Zeile löschen?"
+
+msgid "Delete %s selected rows?"
+msgstr "%s ausgewählte Zeilen löschen?"
+
+msgid "This is a test of internationalization."
+msgstr "Dies ist ein Internationalisierungstest."
+
+msgid "That is a other test."
+msgstr "Das ist ein anderer Test."
+
+msgid "This is the end."
+msgstr "Das ist das Ende."
+
+msgid "English [en]"
+msgstr "Englisch [en]"
+
+msgid "Russian [ru]"
+msgstr "Russisch [ru]"
+
+msgid "French [fr]"
+msgstr "Französisch [fr]"
+
+msgid "German [de]"
+msgstr "Deutsch [de]"
+
+msgid "Spanish [es]"
+msgstr "Spanisch [es]"
+
+msgid "Portuguese [pt]"
+msgstr "Portugiesisch [pt]"
+

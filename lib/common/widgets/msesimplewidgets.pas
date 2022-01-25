@@ -17,7 +17,13 @@ uses
  msegui,mseglob,mseguiglob,msetypes,msestrings,msegraphics,mseevent,
  mseact,msewidgets,
  mserichstring,mseshapes,classes,mclasses,mseclasses,msebitmap,msedrawtext,
- msedrag,msestockobjects,msegraphutils,msemenus,msetimer;
+ msedrag,
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ msegraphutils,msemenus,msetimer;
 
 const
  defaultbuttonwidth = 50;

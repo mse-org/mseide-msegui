@@ -1,0 +1,462 @@
+unit po2arrays;
+
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+interface
+
+uses
+  msetypes,
+  msesys,
+  mseguiintf,
+  SysUtils,
+  msefileutils,
+  msegraphics,
+  mseglob,
+  msestream,
+  msegui,
+  msegraphutils,
+  mseclasses,
+  mclasses,
+  msestrings,
+  msedatamodules,
+  mseguiglob;
+
+procedure createnewlang(alang: msestring);
+procedure dosearch(thearray: array of msestring; theindex: integer);
+procedure findpofiles();
+
+implementation
+
+uses
+  msestockobjects_dynpo,
+  mseconsts_dynpo;
+
+var
+  constvaluearray: array of msestring;
+  astro, astrt, acomp: utf8String;
+  hasfound: Boolean = False;
+  empty: Boolean = False;
+  lang_langnamestmp: array of msestring;
+
+
+///////////////
+
+procedure findpofiles();
+var
+  ListOfFiles: array of string;
+  SearchResult: TSearchRec;
+  Attribute: word;
+  i: integer = 0;
+  str1: string;
+begin
+  Attribute := faReadOnly or faArchive;
+
+  SetLength(ListOfFiles, 0);
+
+  str1 := ExtractFilePath(ParamStr(0)) + 'lang' + directoryseparator;
+
+  // List the files
+  FindFirst(str1 + '*.po', Attribute, SearchResult);
+  while (i = 0) do
+  begin
+    SetLength(ListOfFiles, Length(ListOfFiles) + 1);     // Increase the list
+    ListOfFiles[High(ListOfFiles)] := SearchResult.Name; // Add it at the end of the list
+    i := FindNext(SearchResult);
+  end;
+  FindClose(SearchResult);
+
+  setlength(lang_langnamestmp, 1);
+  lang_langnamestmp[0] := '[en]';
+
+  for i := Low(ListOfFiles) to High(ListOfFiles) do
+    if system.pos('empty', ListOfFiles[i]) = 0 then
+    begin
+      setlength(lang_langnamestmp, length(lang_langnamestmp) + 1);
+      str1 := ListOfFiles[i];
+      str1 := StringReplace(str1, 'podemo_', '', [rfReplaceAll]);
+      str1 := StringReplace(str1, '.po', '', [rfReplaceAll]);
+      lang_langnamestmp[length(lang_langnamestmp) - 1] := '[' + trim(str1) + ']';
+      //writeln(lang_langnamestmp[length(lang_langnamestmp) - 1]);
+    end;
+end;
+
+procedure dosearch(thearray: array of msestring; theindex: integer);
+var
+  str2: utf8String;
+  y: integer;
+begin
+  y        := 0;
+  hasfound := False;
+
+  while (y < length(constvaluearray)) and (hasfound = False) do
+  begin
+    str2  := (constvaluearray[y]);
+    acomp := system.Copy(str2, 1, system.pos(';', str2) - 1);
+    // writeln('---acomp:' + acomp);
+    str2  := (system.Copy(str2, system.pos(';', str2) + 1, length(str2) - system.pos(';', str2) + 1));
+    astro := (system.Copy(str2, 1, system.pos(';', str2) - 1));
+    astro := StringReplace(astro, '\"', '"', [rfReplaceAll]);
+    //  writeln('---astro:' + astro);
+    str2  := (system.Copy(str2, system.pos(';', str2) + 1, length(str2) - system.pos(';', str2) + 1));
+    astrt := system.Copy(str2, 1, length(str2));
+    astrt := StringReplace(astrt, '\"', '"', [rfReplaceAll]);
+
+    if thearray[theindex] = astro then
+      hasfound := True;
+    // writeln('---astrt:' + astrt);
+
+    Inc(y);
+  end;
+end;
+
+procedure createnewlang(alang: msestring);
+var
+  x, x2, x3: integer;
+  file1: ttextdatastream;
+  str1: msestring;
+  str2, str3, str4, strtemp: utf8String;
+  isstring: Boolean = False;
+  isid: Boolean = False;
+  iscontext: Boolean = False;
+  ispocontext: Boolean = False;
+  imodalresultty: modalresultty;
+  imainformty: mainformty;
+  iextendedty: extendedty;
+  istockcaptionty: stockcaptionty;
+  default_modalresulttext, default_modalresulttextnoshortcut, default_mainformtext, default_stockcaption, default_langnamestext, default_extendedtext: array of msestring;
+begin
+
+  str1 := ExtractFilePath(ParamStr(0)) + 'lang' + directoryseparator + 'mseide_' + alang + '.po';
+
+  if (not fileexists(str1)) or (lowercase(alang) = 'en') or (trim(alang) = '') then
+  begin
+    setlength(lang_modalresult, length(en_modalresulttext));
+    for imodalresultty := Low(modalresultty) to High(modalresultty) do
+      lang_modalresult[Ord(imodalresultty)] := en_modalresulttext[(imodalresultty)];
+
+    setlength(lang_modalresultnoshortcut, length(en_modalresulttextnoshortcut));
+    for imodalresultty := Low(modalresultty) to High(modalresultty) do
+      lang_modalresultnoshortcut[Ord(imodalresultty)] :=
+        en_modalresulttextnoshortcut[(imodalresultty)];
+
+    setlength(lang_stockcaption, length(en_stockcaption));
+    for istockcaptionty := Low(stockcaptionty) to High(stockcaptionty) do
+      lang_stockcaption[Ord(istockcaptionty)] :=
+        en_stockcaption[(istockcaptionty)];
+
+    setlength(lang_extended, length(en_extendedtext));
+    for iextendedty := Low(extendedty) to High(extendedty) do
+      lang_extended[Ord(iextendedty)] :=
+        en_extendedtext[(iextendedty)];
+
+    setlength(lang_mainform, length(en_mainformtext));
+    for imainformty := Low(mainformty) to High(mainformty) do
+      lang_mainform[Ord(imainformty)] :=
+        en_mainformtext[(imainformty)];
+
+    findpofiles();
+
+    if length(lang_langnamestmp) > length(en_langnamestext) then
+      setlength(lang_langnames, length(lang_langnamestmp))
+    else
+      setlength(lang_langnames, length(en_langnamestext));
+
+    //    writeln('length(en_langnamestext) ' + inttostr(length(en_langnamestext)));
+    //       writeln('lang_langnames[x] ' + inttostr(length(lang_langnames)));
+
+    for x := 0 to length(en_langnamestext) - 1 do
+      lang_langnames[x] := en_langnamestext[x];
+
+    if length(lang_langnames) > length(en_langnamestext) then
+    begin
+      for x := 0 to high(lang_langnames) do
+      begin
+        str2   := trim(copy(lang_langnames[x], system.pos('[', lang_langnames[x]), 10));
+        for x2 := 0 to high(lang_langnamestmp) do
+          if trim(lang_langnamestmp[x2]) = str2 then
+            lang_langnamestmp[x2] := '';
+      end;
+
+      x2    := length(en_langnamestext);
+      for x := 0 to high(lang_langnamestmp) do
+        if trim(lang_langnamestmp[x]) <> '' then
+        begin
+          lang_langnames[x2] := 'Language ' + trim(lang_langnamestmp[x]);
+          Inc(x2);
+        end;
+
+    end;
+  end
+  else if fileexists(str1) then
+  begin
+
+    file1 := ttextdatastream.Create(str1, fm_read);
+
+    file1.encoding := ce_utf8;
+
+    setlength(constvaluearray, 0);
+
+    file1.readln(str1);
+
+    str3 := '';
+    str2 := '';
+    str4 := '';
+
+    while not file1.EOF do
+    begin
+      str1    := '';
+      file1.readln(str1);
+      strtemp := '';
+
+      if (trim(str1) <> '') and (system.Copy(str1, 1, 1) <> '#') then
+        if (system.Copy(str1, 1, 7) = 'msgctxt') then
+        begin
+          ispocontext := True;
+
+          setlength(constvaluearray, length(constvaluearray) + 1);
+          str2      := str4 + utf8String(';') + str2 + utf8String(';') + str3;
+          str2      := StringReplace(str2, '\n', '', [rfReplaceAll]);
+          str2      := StringReplace(str2, '\', '', [rfReplaceAll]);
+          constvaluearray[length(constvaluearray) - 1] := str2;
+          str3      := '';
+          str4      := '';
+          str4      := (system.Copy(str1, 10, length(str1) - 10));
+          iscontext := True;
+          isid      := False;
+          isstring  := False;
+        end
+        else if (copy(str1, 1, 5) = 'msgid') then
+        begin
+          if ispocontext = False then
+          begin
+            setlength(constvaluearray, length(constvaluearray) + 1);
+            str2 := str4 + utf8String(';') + str2 + utf8String(';') + str3;
+            str2 := StringReplace(str2, '\n', '', [rfReplaceAll]);
+            str2 := StringReplace(str2, '\', '', [rfReplaceAll]);
+            constvaluearray[length(constvaluearray) - 1] := str2;
+            str3 := '';
+            str4 := '';
+          end;
+          str2 := system.Copy(str1, 8, length(str1) - 8);
+          iscontext := False;
+          isid      := True;
+          isstring  := False;
+        end
+        else if (system.Copy(str1, 1, 6) = 'msgstr') then
+        begin
+          str3      := (system.Copy(str1, 9, length(str1) - 9));
+          str3      := StringReplace(str3, '\n', '', [rfReplaceAll]);
+          iscontext := False;
+          isid      := False;
+          isstring  := True;
+        end
+        else if iscontext then
+        begin
+          strtemp := system.Copy(str1, 2, length(str1) - 2);
+          if (system.pos('\n', strtemp) > 0) then
+          begin
+            strtemp := StringReplace(strtemp, '\n', '', [rfReplaceAll]);
+            str4    := str4 + strtemp + mseString(sLineBreak);
+          end
+          else
+            str4    := str4 + strtemp;
+        end
+        else if isid then
+        begin
+          strtemp := system.Copy(str1, 2, length(str1) - 2);
+          if (system.pos('\n', strtemp) > 0) then
+          begin
+            strtemp := StringReplace(strtemp, '\n', '', [rfReplaceAll]);
+            str2    := str2 + strtemp + mseString(sLineBreak);
+          end
+          else
+            str2    := str2 + strtemp;
+        end
+        else if isstring then
+        begin
+          strtemp := system.Copy(str1, 2, length(str1) - 2);
+          if (system.pos('\n', strtemp) > 0) then
+          begin
+            strtemp := StringReplace(strtemp, '\n', '', [rfReplaceAll]);
+            str3    := (str3 + strtemp + mseString(sLineBreak));
+          end
+          else
+            str3    := str3 + strtemp;
+        end;
+    end;
+    setlength(constvaluearray, length(constvaluearray) + 1);
+    str2 := str4 + mseString(';') + str2 + utf8String(';') + str3;
+    str2 := StringReplace(str2, '\n', '', [rfReplaceAll]);
+    str2 := StringReplace(str2, '\', '', [rfReplaceAll]);
+    constvaluearray[length(constvaluearray) - 1] := str2;
+
+    file1.Free;
+
+    setlength(default_modalresulttext, length(en_modalresulttext));
+    for imodalresultty := Low(modalresultty) to High(modalresultty) do
+      default_modalresulttext[Ord(imodalresultty)] := en_modalresulttext[(imodalresultty)];
+
+    setlength(default_modalresulttextnoshortcut, length(en_modalresulttextnoshortcut));
+    for imodalresultty := Low(modalresultty) to High(modalresultty) do
+      default_modalresulttextnoshortcut[Ord(imodalresultty)] :=
+        en_modalresulttextnoshortcut[(imodalresultty)];
+
+    setlength(default_stockcaption, length(en_stockcaption));
+    for istockcaptionty := Low(stockcaptionty) to High(stockcaptionty) do
+      default_stockcaption[Ord(istockcaptionty)] :=
+        en_stockcaption[(istockcaptionty)];
+
+    setlength(default_extendedtext, length(en_extendedtext));
+    for iextendedty := Low(extendedty) to High(extendedty) do
+      default_extendedtext[Ord(iextendedty)] :=
+        en_extendedtext[(iextendedty)];
+
+    setlength(default_mainformtext, length(en_mainformtext));
+    for imainformty := Low(mainformty) to High(mainformty) do
+      default_mainformtext[Ord(imainformty)] :=
+        en_mainformtext[(imainformty)];
+
+    setlength(default_langnamestext, length(en_langnamestext));
+    for x := 0 to length(en_langnamestext) - 1 do
+      default_langnamestext[x] := en_langnamestext[x];
+
+    setlength(lang_modalresult, length(default_modalresulttext));
+
+    for x := 0 to length(default_modalresulttext) - 1 do
+    begin
+
+      dosearch(default_modalresulttext, x);
+      if hasfound then
+      else
+        astrt := default_modalresulttext[x];
+      if trim(astrt) = '' then
+        astrt := default_modalresulttext[x];
+
+      astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
+      astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
+
+      lang_modalresult[x] := astrt;
+
+    end;
+
+    setlength(lang_modalresultnoshortcut, length(default_modalresulttextnoshortcut));
+
+    for x := 0 to length(default_modalresulttextnoshortcut) - 1 do
+    begin
+      dosearch(default_modalresulttextnoshortcut, x);
+
+      if hasfound then
+      else
+        astrt := default_modalresulttextnoshortcut[x];
+      if trim(astrt) = '' then
+        astrt := default_modalresulttextnoshortcut[x];
+
+      astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
+      astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
+
+      lang_modalresultnoshortcut[x] := astrt;
+    end;
+
+
+    setlength(lang_stockcaption, length(default_stockcaption));
+
+    for x := 0 to length(default_stockcaption) - 1 do
+    begin
+      dosearch(default_stockcaption, x);
+
+      if hasfound then
+      else
+        astrt := default_stockcaption[x];
+      if trim(astrt) = '' then
+        astrt := default_stockcaption[x];
+
+      astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
+      astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
+
+      lang_stockcaption[x] := astrt;
+
+    end;
+
+    setlength(lang_extended, length(default_extendedtext));
+
+    for x := 0 to length(default_extendedtext) - 1 do
+    begin
+      dosearch(default_extendedtext, x);
+
+      if hasfound then
+      else
+        astrt := default_extendedtext[x];
+      if trim(astrt) = '' then
+        astrt := default_extendedtext[x];
+
+      astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
+      astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
+
+      lang_extended[x] := astrt;
+
+    end;
+
+    setlength(lang_mainform, length(default_mainformtext));
+
+    for x := 0 to length(default_mainformtext) - 1 do
+    begin
+      dosearch(default_mainformtext, x);
+
+      if hasfound then
+      else
+        astrt := default_mainformtext[x];
+      if trim(astrt) = '' then
+        astrt := default_mainformtext[x];
+
+      astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
+      astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
+
+      lang_mainform[x] := astrt;
+    end;
+
+
+    setlength(lang_langnames, length(default_langnamestext));
+
+    for x := 0 to length(default_langnamestext) - 1 do
+    begin
+      dosearch(default_langnamestext, x);
+
+      if hasfound then
+      else
+        astrt := default_langnamestext[x];
+      if trim(astrt) = '' then
+        astrt := default_langnamestext[x];
+
+      astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
+      astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
+
+      lang_langnames[x] := astrt;
+
+    end;
+
+    findpofiles();
+
+    if length(lang_langnamestmp) > length(lang_langnames) then
+    begin
+      x3     := length(lang_langnames);
+      setlength(lang_langnames, length(lang_langnamestmp));
+      for x  := 0 to high(lang_langnames) do
+      begin
+        str2 := trim(copy(lang_langnames[x], system.pos('[', lang_langnames[x]), 10));
+        for x2 := 0 to high(lang_langnamestmp) do
+          if trim(lang_langnamestmp[x2]) = str2 then
+            lang_langnamestmp[x2] := '';
+      end;
+
+      for x := 0 to high(lang_langnamestmp) do
+        if trim(lang_langnamestmp[x]) <> '' then
+        begin
+          lang_langnames[x3] := 'Language ' + trim(lang_langnamestmp[x]);
+          Inc(x3);
+        end;
+
+    end;
+  end;
+end;
+
+end.
+

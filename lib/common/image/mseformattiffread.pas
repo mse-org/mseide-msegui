@@ -13,19 +13,18 @@ interface
 const
  tifflabel = 'tif';
 procedure registerformat;
- 
+
 implementation
 uses
- classes,mclasses,msegraphics,msebitmap,msefpreadtiff,msegraphicstream,
- msestockobjects;
- 
+ classes,mclasses,msegraphics,msebitmap,msefpreadtiff,msegraphicstream;
+
 type
  tmsefpreadertiff = class(tfpreadertiff)
   protected
 //   function  InternalCheck(Str: TStream): boolean; override;
  end;
- 
-function readgraphic(const source: tstream; 
+
+function readgraphic(const source: tstream;
                 const dest: tobject; var format: string;
                 const params: array of const): boolean;
 begin
@@ -62,7 +61,7 @@ end;
 procedure registerformat;
 begin
  registergraphicformat(tifflabel,{$ifdef FPC}@{$endif}readgraphic,nil,
-         stockobjects.captions[sc_TIFF_Image],['*.tif','*.tiff']);
+         'TIFF_Image',['*.tif','*.tiff']);
 end;
 
 initialization

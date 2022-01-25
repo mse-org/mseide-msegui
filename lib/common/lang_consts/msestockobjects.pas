@@ -153,8 +153,11 @@ type
                     sc_firstfield,sc_lastfield,
                     sc_firstelement,sc_lastelement,sc_slower,sc_faster,
                     sc_window,sc_area,sc_areaactivated,
-                    sc_volumedown,sc_volumeup,sc_cancelspeech
-                    );
+                    sc_volumedown,sc_volumeup,sc_cancelspeech,
+                    sc_newfile, sc_tools, sc_lang,
+                    sc_directory, sc_noicons, sc_nolateral, sc_compact,
+                    sc_path
+                  );
  textgeneratorfuncty = function(const params: array of const): msestring;
  textgeneratorty = (tg_delete_n_selected_rows);
 

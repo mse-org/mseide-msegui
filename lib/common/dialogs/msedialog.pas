@@ -215,7 +215,12 @@ type
 
 implementation
 uses
- msestockobjects,msekeyboard,mseformatstr,msereal,sysutils;
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ msekeyboard,mseformatstr,msereal,sysutils;
 
 type
  tcustomdataedit1 = class(tcustomdataedit);

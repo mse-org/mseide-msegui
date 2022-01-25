@@ -39,7 +39,13 @@ uses
  mseprinter,msetypes,msedatalist,msedatamodules,mseclasses,formdesigner,
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,msemacros,
  mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,mseguiprocess,
- msearrayprops,msesumlist,mserttistat,msestockobjects,regglob,msearrayutils,
+ msearrayprops,msesumlist,mserttistat,
+ {$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ regglob,msearrayutils,
  msecryptohandler,msestringcontainer,mseformatstr;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

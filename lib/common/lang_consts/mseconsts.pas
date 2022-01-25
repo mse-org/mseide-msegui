@@ -274,8 +274,16 @@ const
   'Area activated',      //sc_areaactivated
   'Volume down',         //sc_volumedown
   'Volume up',           //sc_volumeup
-  'Cancel speech'        //sc_cancelspeech
-);
+  'Cancel speech',        //sc_cancelspeech
+  'New',                 //sc_newfile
+  'Tools',               //sc_tools
+  'Languages',           // sc_lang
+  'Directory',           // sc_directory
+  'No icons',            // sc_noicons
+  'No lateral',          // sc_themes
+  'Compact',             // sc_compact
+  'Path'               // sc_path
+ );
 
 function delete_n_selected_rows(const params: array of const): msestring;
 begin

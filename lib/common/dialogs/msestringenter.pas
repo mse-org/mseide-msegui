@@ -37,7 +37,12 @@ function checkpassword(const password: msestring; var modalresult: modalresultty
 
 implementation
 uses
- msestringenter_mfm,msestockobjects;
+ msestringenter_mfm,
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo;
+{$else}
+ msestockobjects;
+{$endif}
 
 function stringenter(var avalue: msestring; const text: msestring = '';
                                const acaption: msestring = ''): modalresultty;
@@ -74,14 +79,23 @@ begin
   fo:= tstringenterfo.create(nil);
   try
    with fo do begin
-    caption:= stockobjects.captions[sc_passwordupper];
-    lab.caption:= stockobjects.captions[sc_enterpassword]+':';
+{$ifdef mse_dynpo}
+    caption:= lang_stockcaption[ord(sc_passwordupper)];
+    lab.caption:= lang_stockcaption[ord(sc_enterpassword)]+':';
+{$else}
+    caption:= sc(sc_passwordupper);
+    lab.caption:= sc(sc_enterpassword)+':';
+{$endif}
     value.passwordchar:= '*';
     value.value:= '';
     modalresult:= fo.show(true,nil);
     result:= (modalresult = mr_ok) and (password = value.value);
     if not result and (modalresult = mr_ok) then begin
-     showerror(stockobjects.captions[sc_invalidpassword]);
+{$ifdef mse_dynpo}
+     showerror(lang_stockcaption[ord(sc_invalidpassword)]);
+{$else}
+     showerror(sc(sc_invalidpassword));
+{$endif}
     end;
    end;
   finally

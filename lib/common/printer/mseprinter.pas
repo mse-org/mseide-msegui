@@ -21,6 +21,13 @@ interface
 {$endif}
 
 uses
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+ mseconsts_dynpo,
+{$else}
+ msestockobjects,
+ mseconsts,
+{$endif}
  mseclasses,msegraphics,msegraphutils,msestrings,msestream,msedrawtext,
  mserichstring,classes,mclasses,msetypes,msestat,msestatfile,
  msedataedits,msedropdownlist,
@@ -515,7 +522,8 @@ function checkstdpagesize(const awidth,aheight: flo64): stdpagesizety;
 
 implementation
 uses
- mseprocutils,msepipestream,msesysintf,msestockobjects,mseconsts,msesys,
+ mseprocutils,msepipestream,msesysintf,
+ msesys,
  mseformatstr;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -1799,8 +1807,13 @@ end;
 constructor tpageorientationselector.create(aowner: tcomponent);
 begin
  inherited;
+{$ifdef mse_dynpo}
+ addrow([lang_stockcaption[ord(sc_portrait)]]);
+ addrow([lang_stockcaption[ord(sc_landscape)]]);
+{$else}
  addrow([stockcaptions(sc_portrait)]);
  addrow([stockcaptions(sc_landscape)]);
+{$endif}
 end;
 
 function tpageorientationselector.getvalue: pageorientationty;
@@ -1826,8 +1839,15 @@ procedure tpageorientationselector.getdropdowninfo(var aenums: integerarty;
                                                 const names: tdropdowndatacols);
 begin
  names.clear;
+ {$ifdef mse_dynpo}
+ names.addrow([lang_stockcaption[ord(sc_portrait)]]);
+ names.addrow([lang_stockcaption[ord(sc_landscape)]]);
+{$else}
  names.addrow([stockcaptions(sc_portrait)]);
  names.addrow([stockcaptions(sc_landscape)]);
+ {$endif}
+ 
+ 
 end;
 
 procedure tpageorientationselector.dochange;

@@ -1,0 +1,559 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-03-04 23:54+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "&Cancel"
+msgstr "&Отмена"
+
+msgid "&Abort"
+msgstr "&Прервать"
+
+msgid "&OK"
+msgstr "&ОК"
+
+msgid "&Yes"
+msgstr "&Да"
+
+msgid "&No"
+msgstr "&Нет"
+
+msgid "&All"
+msgstr "&Все"
+
+msgid "Yes &all"
+msgstr "Да и все"
+
+msgid "N&o all"
+msgstr "Н&все"
+
+msgid "&Ignore"
+msgstr "&Игнорировать"
+
+msgid "&Skip"
+msgstr "&Пропустить"
+
+msgid "Skip a&ll"
+msgstr "Пропустить все"
+
+msgid "Co&ntinue"
+msgstr "Продолжить"
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Abort"
+msgstr "Прервать"
+
+msgid "OK"
+msgstr "ОК"
+
+msgid "Yes"
+msgstr "Да"
+
+msgid "No"
+msgstr "Нет"
+
+msgid "All"
+msgstr "Все"
+
+msgid "Yes all"
+msgstr "Да все"
+
+msgid "No all"
+msgstr "Не все"
+
+msgid "Ignore"
+msgstr "Игнорировать"
+
+msgid "Skip"
+msgstr "Пропустить"
+
+msgid "Skip all"
+msgstr "Пропустить все"
+
+msgid "Continue"
+msgstr "Продолжить"
+
+msgid "is invalid"
+msgstr "недействителен"
+
+msgid "Format error"
+msgstr "Ошибка формата"
+
+msgid "Value is required"
+msgstr "Требуется значение"
+
+msgid "Error"
+msgstr "Ошибка"
+
+msgid "Min"
+msgstr "Мин"
+
+msgid "Max"
+msgstr "Макс"
+
+msgid "Range error"
+msgstr "Ошибка диапазона"
+
+msgid "&Undo"
+msgstr "&Отменить"
+
+msgid "&Redo"
+msgstr "&Повторить"
+
+msgid "&Copy"
+msgstr "&Копировать"
+
+msgid "Cu&t"
+msgstr "C&t"
+
+msgid "&Paste"
+msgstr "&Вставить"
+
+msgid "Select &all"
+msgstr "Выбрать &все"
+
+msgid "&Insert Row"
+msgstr "&Вставить строку"
+
+msgid "&Append Row"
+msgstr "&Добавить строку"
+
+msgid "&Delete Row"
+msgstr "&Удалить строку"
+
+msgid "&Dir"
+msgstr "&Каталог"
+
+msgid "&Home"
+msgstr "&Главная"
+
+msgid "&Up"
+msgstr "&Вверх"
+
+msgid "&New"
+msgstr "&Новый"
+
+msgid "&Name"
+msgstr "&Имя"
+
+msgid "&Show hidden files"
+msgstr "&Показать скрытые файлы"
+
+msgid "&Filter"
+msgstr "&Фильтр"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Open"
+msgstr "Открыть"
+
+msgid "Name"
+msgstr "Имя"
+
+msgid "Create new directory"
+msgstr "Создать новый каталог"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Forward"
+msgstr "Переслать"
+
+msgid "Up"
+msgstr "Вверх"
+
+msgid "exists, do you want to overwrite?"
+msgstr "существует, перезаписать?"
+
+msgid "is modified. Save?"
+msgstr "изменено. Сохранить?"
+
+msgid "WARNING"
+msgstr "ПРЕДУПРЕЖДЕНИЕ"
+
+msgid "Exception"
+msgstr "Исключение"
+
+msgid "System"
+msgstr "Система"
+
+msgid "does not exist"
+msgstr "не существует"
+
+msgid "PASSWORD"
+msgstr "ПАРОЛЬ"
+
+msgid "Enter password"
+msgstr "Введите пароль"
+
+msgid "Invalid password!"
+msgstr "Неверный пароль!"
+
+msgid "Can not read directory"
+msgstr "Не удается прочитать каталог"
+
+msgid "Graphic format not supported"
+msgstr "Графический формат не поддерживается"
+
+msgid "Graphic format error"
+msgstr "Ошибка графического формата"
+
+msgid "All Images"
+msgstr "Все изображения"
+
+msgid "Confirmation"
+msgstr "Подтверждение"
+
+msgid "Delete record?"
+msgstr "Удалить запись?"
+
+msgid "Copy record?"
+msgstr "Копировать запись?"
+
+msgid "Close page"
+msgstr "Закрыть страницу"
+
+msgid "First"
+msgstr "Первый"
+
+msgid "Prior"
+msgstr "Предыдущий"
+
+msgid "Next"
+msgstr "Далее"
+
+msgid "Last"
+msgstr "Последний"
+
+msgid "Append"
+msgstr "Добавить"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Edit"
+msgstr "Изменить"
+
+msgid "Post"
+msgstr "Опубликовать"
+
+msgid "Annul"
+msgstr "Аннулировать"
+
+msgid "Refresh"
+msgstr "Обновить"
+
+msgid "Edit filter"
+msgstr "Редактировать фильтр"
+
+msgid "Edit filter minimum"
+msgstr "Редактировать минимум фильтра"
+
+msgid "Edit filter maximum"
+msgstr "Изменить максимум фильтра"
+
+msgid "Reset filter"
+msgstr "Сбросить фильтр"
+
+msgid "Filter on"
+msgstr "Фильтровать"
+
+msgid "Search"
+msgstr "Поиск"
+
+msgid "Auto edit"
+msgstr "Автоматическое редактирование"
+
+msgid "Copy record"
+msgstr "Копировать запись"
+
+msgid "Dialog"
+msgstr "Диалог"
+
+msgid "Insert"
+msgstr "Вставить"
+
+msgid "Copy"
+msgstr "Копировать"
+
+msgid "Paste"
+msgstr "Вставить"
+
+msgid "Row insert"
+msgstr "Вставить строку"
+
+msgid "Row append"
+msgstr "Добавить строку"
+
+msgid "Row delete"
+msgstr "Удалить строку"
+
+msgid "Undo"
+msgstr "Отменить"
+
+msgid "Redo"
+msgstr "Повторить"
+
+msgid "Cut"
+msgstr "Вырезать"
+
+msgid "Select all"
+msgstr "Выбрать все"
+
+msgid "Filter off"
+msgstr "Отключить фильтр"
+
+msgid "Portrait"
+msgstr "Портрет"
+
+msgid "Landscape"
+msgstr "Пейзаж"
+
+msgid "Delete row?"
+msgstr "Удалить строку?"
+
+msgid "selected rows?"
+msgstr "выбранные строки?"
+
+msgid "Single item only"
+msgstr "Только один элемент"
+
+msgid "Copy Cells"
+msgstr "Копировать ячейки"
+
+msgid "Paste Cells"
+msgstr "Вставить ячейки"
+
+msgid "Close"
+msgstr "Закрыть"
+
+msgid "Maximize"
+msgstr "Развернуть"
+
+msgid "Normalize"
+msgstr "Нормализовать"
+
+msgid "Minimize"
+msgstr "Свернуть"
+
+msgid "Fix size"
+msgstr "Исправить размер"
+
+msgid "Float"
+msgstr "Плавающая"
+
+msgid "Stay on top"
+msgstr "Оставайтесь на высоте"
+
+msgid "Stay in background"
+msgstr "Оставаться в фоновом режиме"
+
+msgid "Lock children"
+msgstr "Блокировать детей"
+
+msgid "No lock"
+msgstr "Нет блокировки"
+
+msgid "Input"
+msgstr "Ввод"
+
+msgid "Button"
+msgstr "Кнопка"
+
+msgid "On"
+msgstr "Вкл."
+
+msgid "Off"
+msgstr "Выкл"
+
+msgid "Left border"
+msgstr "Левая граница"
+
+msgid "Top border"
+msgstr "Верхняя граница"
+
+msgid "Right border"
+msgstr "Правая граница"
+
+msgid "Bottom border"
+msgstr "Нижняя граница"
+
+msgid "Begin of text"
+msgstr "Начало текста"
+
+msgid "End of text"
+msgstr "Конец текста"
+
+msgid "Inputmode"
+msgstr "Режим ввода"
+
+msgid "Overwrite"
+msgstr "Перезаписать"
+
+msgid "Deleted"
+msgstr "Удалено"
+
+msgid "Copied"
+msgstr "Скопировано"
+
+msgid "Inserted"
+msgstr "Вставлено"
+
+msgid "Pasted"
+msgstr "Вставлено"
+
+msgid "Withdrawn"
+msgstr "Снято"
+
+msgid "Window activated"
+msgstr "Окно активировано"
+
+msgid "Menu"
+msgstr "Меню"
+
+msgid "Beginning of file"
+msgstr "Начало файла"
+
+msgid "End of file"
+msgstr "Конец файла"
+
+msgid "Voice output"
+msgstr "Голосовой вывод"
+
+msgid "Speak again"
+msgstr "Повторить"
+
+msgid "First column"
+msgstr "Первый столбец"
+
+msgid "First row"
+msgstr "Первая строка"
+
+msgid "Last column"
+msgstr "Последний столбец"
+
+msgid "Last row"
+msgstr "Последняя строка"
+
+msgid "Selection"
+msgstr "Выбор"
+
+msgid "Speak path"
+msgstr "Произнести путь"
+
+msgid "Disabled button"
+msgstr "Отключенная кнопка"
+
+msgid "First field"
+msgstr "Первое поле"
+
+msgid "Last field"
+msgstr "Последнее поле"
+
+msgid "First element"
+msgstr "Первый элемент"
+
+msgid "Last element"
+msgstr "Последний элемент"
+
+msgid "Slower"
+msgstr "Медленнее"
+
+msgid "Faster"
+msgstr "Быстрее"
+
+msgid "Window"
+msgstr "Окно"
+
+msgid "Area"
+msgstr "Область"
+
+msgid "Area activated"
+msgstr "Область активирована"
+
+msgid "Volume down"
+msgstr "Уменьшить громкость"
+
+msgid "Volume up"
+msgstr "Увеличить громкость"
+
+msgid "Cancel speech"
+msgstr "Отменить речь"
+
+msgid "New"
+msgstr "Новый"
+
+msgid "Tools"
+msgstr "Инструменты"
+
+msgid "Languages"
+msgstr "Языки"
+
+msgid "Directory"
+msgstr "Каталог"
+
+msgid "No icons"
+msgstr "Нет значков"
+
+msgid "No lateral"
+msgstr "Без боковых"
+
+msgid "Compact"
+msgstr "Компактный"
+
+msgid "Path"
+msgstr "Путь"
+
+msgid "File"
+msgstr "Файл"
+
+msgid "Delete selected row?"
+msgstr "Удалить выбранную строку?"
+
+msgid "Delete %s selected rows?"
+msgstr "Удалить %s выбранных строк?"
+
+msgid "This is a test of internationalization."
+msgstr "Это проверка интернационализации."
+
+msgid "That is a other test."
+msgstr "Это другой тест."
+
+msgid "This is the end."
+msgstr "Это конец."
+
+msgid "English [en]"
+msgstr "Английский [en]"
+
+msgid "Russian [ru]"
+msgstr "Русский [ru]"
+
+msgid "French [fr]"
+msgstr "Французский [fr]"
+
+msgid "German [de]"
+msgstr "немецкий [de]"
+
+msgid "Spanish [es]"
+msgstr "Испанский [es]"
+
+msgid "Portuguese [pt]"
+msgstr "Португальский [pt]"
+

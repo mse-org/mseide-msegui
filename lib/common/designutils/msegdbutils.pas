@@ -22,6 +22,13 @@ interface
  {$endif}
 {$endif}
 uses
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+ mseconsts_dynpo,
+{$else}
+ msestockobjects,
+ mseconsts,
+{$endif}
  msestream,mseclasses,classes,mclasses,msetypes,mseevent,msehash,msepipestream,
  msestrings,mseapplication,msegui,msedatalist,msesystypes,mseprocess;
 
@@ -697,8 +704,7 @@ implementation
 uses
  sysutils,mseformatstr,mseprocutils,msesysutils,msefileutils,msemacros,
  msebits,msesysintf,msesysintf1,mseguiintf,msearrayutils,msesys,msedate,
- actionsmodule
-        {$ifdef UNIX},mselibc{$else},windows,msedynload{$endif};
+ actionsmodule {$ifdef UNIX},mselibc{$else},windows,msedynload{$endif};
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -1405,8 +1411,9 @@ begin
       end;
       bo1:= getstopinfo(values,flastconsoleoutput,stopinfo);
       if not bo1 then begin
-       stopinfo.messagetext:= ansistring(actionsmo.c[ord(ac_stoperror)])+': ' +
+  stopinfo.messagetext:= ansistring(actionsmo.c[ord(ac_stoperror)])+': ' +
                                                       stopinfo.messagetext;
+
       end
       else begin
        if (stopinfo.reason = sr_breakpoint_hit) and

@@ -403,7 +403,12 @@ type
 implementation
 
 uses
- msestockobjects,sysutils,msekeyboard,msebits,msepointer,mseact;
+{$ifdef mse_dynpo}
+ msestockobjects_dynpo,
+{$else}
+ msestockobjects,
+{$endif}
+ sysutils,msekeyboard,msebits,msepointer,mseact;
 type
  twidget1 = class(twidget);
 {
@@ -489,8 +494,14 @@ begin
    deflaterect1(dim,frame.innerframe);
   end;
   minblen:= fbuttonminlength;
-  areas[sbbu_up].ca.imagelist:= stockobjects.glyphs;
-  areas[sbbu_down].ca.imagelist:= stockobjects.glyphs;
+  {$ifdef mse_dynpo}
+  areas[sbbu_up].ca.imagelist:= msestockobjects_dynpo.stockobjects.glyphs;
+  areas[sbbu_down].ca.imagelist:= msestockobjects_dynpo.stockobjects.glyphs;
+ {$else}
+  areas[sbbu_up].ca.imagelist:= msestockobjects.stockobjects.glyphs;
+  areas[sbbu_down].ca.imagelist:= msestockobjects.stockobjects.glyphs;
+ {$endif}
+
   areas[sbbu_down].imagenrdisabled:= -2; //grayed
   areas[sbbu_move].imagenrdisabled:= -2; //grayed
   areas[sbbu_up].imagenrdisabled:= -2; //grayed
