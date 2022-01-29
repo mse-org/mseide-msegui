@@ -196,8 +196,6 @@ begin
 
     setlength(constvaluearray, 0);
 
-    file1.readln(str1);
-
     str2 := '';
     str3 := '';
     str4 := '';

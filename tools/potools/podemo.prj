@@ -209,7 +209,7 @@ options=114
  index=0
  [projectoptionsfo.setting_tab]
  firsttab=0
- index=2
+ index=0
  [projectoptionsfo]
  stackedunder=
  x=270
@@ -794,10 +794,10 @@ findhistory=20
  sc_path
 findoptions=1
 editpos=4
- 0,0
  0,-1073741823
  0,-1073741823
- 0,3
+ 0,-1073741823
+ 66,332
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -806,7 +806,7 @@ sourcefiles=4
  ${PROJECTDIR}/podemo.pas
  ${PROJECTDIR}/form_conflang.pas
  ${PROJECTDIR}/form_potools.pas
- ${PROJECTDIR}/po2arrays.pas
+ /home/fred/mseide-msegui/tools/potools/po2arrays.pas
 relpaths=4
  podemo.pas
  form_conflang.pas
@@ -831,9 +831,9 @@ nomenumodules=2
  0
 [sourcefo.files_tab]
 firsttab=0
-index=0
+index=3
 [layout]
-windowlayout=566
+windowlayout=567
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -967,7 +967,7 @@ windowlayout=566
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=_mse_conflangfo_mse_
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -1070,10 +1070,10 @@ windowlayout=566
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=579
- width0=138
+ propcolwidthref=242
+ width0=58
  sortdescend0=0
- width1=435
+ width1=178
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1268,7 +1268,7 @@ windowlayout=566
  x=0
  y=0
  cx=1219
- cy=51
+ cy=50
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1280,11 +1280,11 @@ windowlayout=566
  nx=0
  ny=0
  ncx=1219
- ncy=59
+ ncy=58
  x=0
  y=0
  cx=1219
- cy=59
+ cy=58
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1294,9 +1294,10 @@ windowlayout=566
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/potools/podemo.pas
- history=5
+ value=/home/fred/mseide-msegui/tools/potools/po2arrays.pas
+ history=6
   /home/fred/mseide-msegui/tools/potools/po2arrays.pas
+  /home/fred/mseide-msegui/tools/potools/podemo.pas
   /home/fred/msegui_dynpo/demo/po2arrays.pas
   /home/fred/msegui_dynpo/demo/form_conflang.pas
   /home/fred/msegui_dynpo/demo/form_potools.pas
@@ -1318,12 +1319,12 @@ windowlayout=566
  x=0
  y=0
  cx=1219
- cy=455
+ cy=456
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=0
+ index=3
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1357,9 +1358,9 @@ windowlayout=566
  ncx=0
  ncy=0
  x=0
- y=54
+ y=53
  cx=1219
- cy=455
+ cy=456
  rcx=0
  rcy=0
  [_mse_conflangfo_mse_]

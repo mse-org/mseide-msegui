@@ -121,7 +121,8 @@ var
   imodalresultty: modalresultty;
   iextendedty: extendedty;
   istockcaptionty: stockcaptionty;
-  default_modalresulttext, default_modalresulttextnoshortcut, default_mainformtext, default_stockcaption, default_langnamestext, default_extendedtext: array of msestring;
+  default_modalresulttext, default_modalresulttextnoshortcut, default_stockcaption,
+  default_langnamestext, default_extendedtext: array of msestring;
 begin
 
   str1 := ExtractFilePath(ParamStr(0)) + 'lang' + directoryseparator + 'mseide_' + alang + '.po';
@@ -185,8 +186,6 @@ begin
     file1.encoding := ce_utf8;
 
     setlength(constvaluearray, 0);
-
-    file1.readln(str1);
 
     str3 := '';
     str2 := '';
@@ -301,8 +300,7 @@ begin
       default_extendedtext[Ord(iextendedty)] :=
         en_extendedtext[(iextendedty)];
 
-  
-    setlength(default_langnamestext, length(en_langnamestext));
+      setlength(default_langnamestext, length(en_langnamestext));
     for x := 0 to length(en_langnamestext) - 1 do
       default_langnamestext[x] := en_langnamestext[x];
 
