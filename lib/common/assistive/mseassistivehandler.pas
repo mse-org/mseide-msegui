@@ -28,11 +28,7 @@ uses
  classes,mclasses,mseclasses,mseassistiveserver,mseevent,mselist,
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,
  mseassistiveclient,msemenuwidgets,msegrids,msespeak,msetypes,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif} 
  msegraphutils,msegui,msehash,mdb,msestat,msestatfile;
 
 type

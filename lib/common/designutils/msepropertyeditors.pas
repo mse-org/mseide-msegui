@@ -1040,11 +1040,7 @@ uses
  mseintegerlisteditor,mseact,msesys,
  msecolordialog,msememodialog,
  mseshapes,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msetexteditor,mserichstringeditor,
  msegraphicstream,msedate,
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,

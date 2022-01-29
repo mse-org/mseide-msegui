@@ -546,11 +546,7 @@ procedure freetransientmenu(var amenu: tcustommenu);
 implementation
 uses
  sysutils,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  rtlconsts,msebits,msemenuwidgets,msedatalist,
  mseactions,msestreaming,msearrayutils,msesysutils;
 type

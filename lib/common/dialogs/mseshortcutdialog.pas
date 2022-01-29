@@ -11,11 +11,7 @@ unit mseshortcutdialog;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msegrids,
  msestrings,msetypes,msewidgetgrid,msedatanodes,mselistbrowser,mseactions,

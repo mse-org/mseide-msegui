@@ -679,11 +679,7 @@ uses
   mseactions,
   msestringenter,
   msekeyboard,
-{$ifdef mse_dynpo}
-  msestockobjects_dynpo,
-{$else}
   msestockobjects,
-{$endif}
   msesysintf,
   msearrayutils;
 

@@ -143,11 +143,7 @@ implementation
 uses
  main_mfm,msefileutils,msesystypes,msesys,sysutils,mselist,project,
  rtlconsts,mseprocutils,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msewidgets,mseparser,mseformdatatools,mseresourcetools,
  msearrayutils,msesettings,messagesform,mseeditglob,mseformatstr;
 type

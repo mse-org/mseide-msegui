@@ -27,8 +27,8 @@ procedure findpofiles();
 implementation
 
 uses
-  msestockobjects_dynpo,
-  mseconsts_dynpo;
+  msestockobjects,
+  mseconsts;
 
 var
   constvaluearray: array of msestring;
@@ -119,7 +119,6 @@ var
   iscontext: Boolean = False;
   ispocontext: Boolean = False;
   imodalresultty: modalresultty;
-  imainformty: mainformty;
   iextendedty: extendedty;
   istockcaptionty: stockcaptionty;
   default_modalresulttext, default_modalresulttextnoshortcut, default_mainformtext, default_stockcaption, default_langnamestext, default_extendedtext: array of msestring;
@@ -148,11 +147,6 @@ begin
       lang_extended[Ord(iextendedty)] :=
         en_extendedtext[(iextendedty)];
 
-    setlength(lang_mainform, length(en_mainformtext));
-    for imainformty := Low(mainformty) to High(mainformty) do
-      lang_mainform[Ord(imainformty)] :=
-        en_mainformtext[(imainformty)];
-
     findpofiles();
 
     if length(lang_langnamestmp) > length(en_langnamestext) then
@@ -160,10 +154,7 @@ begin
     else
       setlength(lang_langnames, length(en_langnamestext));
 
-    //    writeln('length(en_langnamestext) ' + inttostr(length(en_langnamestext)));
-    //       writeln('lang_langnames[x] ' + inttostr(length(lang_langnames)));
-
-    for x := 0 to length(en_langnamestext) - 1 do
+      for x := 0 to length(en_langnamestext) - 1 do
       lang_langnames[x] := en_langnamestext[x];
 
     if length(lang_langnames) > length(en_langnamestext) then
@@ -310,11 +301,7 @@ begin
       default_extendedtext[Ord(iextendedty)] :=
         en_extendedtext[(iextendedty)];
 
-    setlength(default_mainformtext, length(en_mainformtext));
-    for imainformty := Low(mainformty) to High(mainformty) do
-      default_mainformtext[Ord(imainformty)] :=
-        en_mainformtext[(imainformty)];
-
+  
     setlength(default_langnamestext, length(en_langnamestext));
     for x := 0 to length(en_langnamestext) - 1 do
       default_langnamestext[x] := en_langnamestext[x];
@@ -394,25 +381,6 @@ begin
       lang_extended[x] := astrt;
 
     end;
-
-    setlength(lang_mainform, length(default_mainformtext));
-
-    for x := 0 to length(default_mainformtext) - 1 do
-    begin
-      dosearch(default_mainformtext, x);
-
-      if hasfound then
-      else
-        astrt := default_mainformtext[x];
-      if trim(astrt) = '' then
-        astrt := default_mainformtext[x];
-
-      astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
-      astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
-
-      lang_mainform[x] := astrt;
-    end;
-
 
     setlength(lang_langnames, length(default_langnamestext));
 

@@ -3322,11 +3322,7 @@ implementation
 uses
  msesysintf,typinfo,msestreaming,msetimer,msebits,msewidgets,
  mseshapes,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msefileutils,msedatalist,Math,msesysutils,
  rtlconsts,{$ifndef FPC}classes_del,{$endif}mseformatstr,
  mseprocutils,msesys,msesysdnd,mseassistiveserver;

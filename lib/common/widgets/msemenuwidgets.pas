@@ -246,11 +246,7 @@ var
 implementation
 uses
  msedrawtext,mserichstring,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  sysutils,msekeyboard,msebits,
  mseact,mseguiintf,msebitmap,msesysutils,mseassistiveserver;
 {$ifndef mse_allwarnings}

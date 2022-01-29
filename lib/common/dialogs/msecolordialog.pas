@@ -198,11 +198,7 @@ procedure paintcolorrect(const canvas: tcanvas; const arect: rectty;
 implementation
 uses
  msecolordialog_mfm,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
- msestockobjects,
-{$endif}
+ msestockobjects,  
  mseformatstr,sysutils,msepointer,
  msekeyboard,mseguiintf,mseeditglob;
 type

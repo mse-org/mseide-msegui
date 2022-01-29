@@ -163,11 +163,7 @@ function calccaptionsize(const acanvas: tcanvas; const ainfo: captioninfoty;
 implementation
 uses
  classes,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msebits,sysutils,mseassistiveserver;
 type
  twidget1 = class(twidget);

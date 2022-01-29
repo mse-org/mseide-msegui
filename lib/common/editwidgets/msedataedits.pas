@@ -1506,11 +1506,7 @@ function inttorealty(const avalue: integer): realty;
 implementation
 uses
  sysutils,msereal,msebits,msestreaming,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msefloattostr,
  mseassistiveserver;
 {$ifndef mse_allwarnings}

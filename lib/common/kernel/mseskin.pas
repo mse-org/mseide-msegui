@@ -21,11 +21,7 @@ interface
 uses
  classes,mclasses,mseclasses,msegui,msescrollbar,mseedit,
  msegraphics,msegraphutils,msebitmap,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msetabs,msetoolbar,msedataedits,msemenus,msearrayprops,msegraphedits,
  msesimplewidgets,mseshapes,
  msegrids,msewidgets,msetypes,mseglob,msestrings,msedrawtext,mseguiglob;

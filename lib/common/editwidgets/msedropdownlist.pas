@@ -25,11 +25,7 @@ uses
  mseinplaceedit,msearrayprops,classes,mclasses,msegraphics,msedrawtext,
  msegraphutils,mseassistiveclient,
  msetimer,{mseforms,}msetypes,msestrings,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msescrollbar,
  msekeyboard,msegridsglob,mseeditglob,msestat,msebitmap;
 

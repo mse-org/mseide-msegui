@@ -40,11 +40,7 @@ uses
  mseapplication,mseglob,mseguiglob,mseskin,msedesigner,msemacros,
  mseguithreadcomp,mseprocmonitorcomp,msefadepropedit,mseguiprocess,
  msearrayprops,msesumlist,mserttistat,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  regglob,msearrayutils,
  msecryptohandler,msestringcontainer,mseformatstr;
 {$ifndef mse_allwarnings}

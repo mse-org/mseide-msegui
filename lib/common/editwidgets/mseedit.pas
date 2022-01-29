@@ -681,11 +681,7 @@ type
 implementation
 uses
  sysutils,msebits,msedataedits,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  mseact,
  mseassistiveserver;
 

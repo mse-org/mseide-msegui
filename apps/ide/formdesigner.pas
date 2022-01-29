@@ -435,11 +435,7 @@ function getdesignform(const acomp: tcomponent): tformdesignerfo;
 implementation
 uses
  formdesigner_mfm,mselist,msekeyboard,msebits,sysutils,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msedrawtext,selectsubmoduledialogform,mseshapes,settaborderform,
  msedatalist,objectinspector,projectoptionsform,main,msedatamodules,
  setcreateorderform,componentstore,msearrayutils,actionsmodule,msecomptree

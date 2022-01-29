@@ -170,11 +170,7 @@ type
 
 implementation
 uses
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msesumlist,mseact;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

@@ -77,11 +77,7 @@ function pinggmgraphic(const source: tstream;
 implementation
 uses
  msegraphics,msegraphicstream,msestream,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msectypes,msebits,mseclasses,mseformatstr,math;
 
 type

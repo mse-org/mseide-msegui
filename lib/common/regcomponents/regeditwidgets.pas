@@ -28,11 +28,7 @@ uses
  msedropdownlist,mseterminal,msedrawtext,msedatanodes,{msedialog,}
  msetypes,msestrings,
  regwidgets,msearrayprops,typinfo,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msefoldedit,msebitmap,mseglob,
  msestream,mserealsumedit,msedatalist,msegui,msegrids,msesumlist,mseclasses,
  sysutils,regglob,msearrayutils,mseeditglob;

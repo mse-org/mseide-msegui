@@ -1049,11 +1049,7 @@ var
 implementation
 uses
  sysutils,msearrayutils,msekeyboard,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msebits;
 
 type

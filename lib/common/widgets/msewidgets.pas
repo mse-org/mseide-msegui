@@ -1484,11 +1484,7 @@ messagefontname : msestring = 'stf_default';
 implementation
 uses
  msebits,mseguiintf,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msekeyboard,sysutils,msemenuwidgets,
  mseactions,msepointer,msestreaming,msesys,msearrayutils,mseassistiveserver;
 {$ifndef mse_allwarnings}

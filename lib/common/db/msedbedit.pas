@@ -2669,11 +2669,7 @@ function encoderowstate(const color: integer = -1; const font: integer = -1;
                             
 implementation
 uses
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  mseshapes,msereal,msebits,
  mseassistiveserver,
  mseactions,mseact,rtlconsts,msedrawtext,sysutils,msedbdispwidgets;

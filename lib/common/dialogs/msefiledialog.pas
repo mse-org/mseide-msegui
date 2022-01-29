@@ -591,11 +591,7 @@ implementation
 uses
  msefiledialog_mfm,msebits,mseactions,
  msestringenter,msefiledialogres,msekeyboard,
-{$ifdef mse_dynpo}
-msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msesysintf,msearrayutils;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

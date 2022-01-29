@@ -30,11 +30,7 @@ uses
  classes,mclasses,msegui,
  mseglob,mseguiglob,msescrollbar,msegraphutils,msegraphics,mseevent,
  msewidgets,mseeditglob,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msestat,msestatfile,mseassistiveclient,
  mseclasses,msesimplewidgets,msemenus,mseact,typinfo,msedragglob,
  msegrids,msewidgetgrid,msedatalist,msebitmap,msetypes,msestrings,msearrayprops,

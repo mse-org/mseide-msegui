@@ -15,6 +15,7 @@ begin
   Gettext.GetLanguageIDs(MSELang, MSEFallbackLang);
   application.createform(tconflangfo, conflangfo);
   application.createform(theaderfo, headerfo);
+  headerfo.close;
   application.run;
 end.
 

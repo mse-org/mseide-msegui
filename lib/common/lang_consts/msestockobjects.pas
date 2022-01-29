@@ -20,6 +20,12 @@ const
  boxsize = 11;      //for treelistitem expand box
  checkboxsize = 13; //for listitem checkbox
 
+{$ifdef mse_dynpo}
+var
+   lang_stockcaption, lang_modalresult, lang_modalresultnoshortcut,
+  lang_extended, lang_langnames: array of msestring;
+{$endif}
+
 type
 
  stockbitmapty = (stb_default,stb_none,
@@ -94,70 +100,70 @@ const
  firsttracesymbol = stg_circlesmall;
  lasttracesymbol = stg_triatopbig;
 
+{$ifdef mse_dynpo}
 type
- stockcaptionty = (sc_none,sc_is_invalid,sc_Format_error,sc_Value_is_required,
-                    sc_Error,sc_Min,sc_Max,sc_Range_error,
-                    sc_Undohk,sc_Redohk,sc_copyhk,sc_cuthk,sc_pastehk,
-                    sc_select_allhk,
-                    sc_insert_rowhk,sc_append_rowhk,sc_delete_rowhk,
-                    sc_Dirhk,sc_Homehk,sc_Uphk,sc_New_dirhk,sc_Namehk,
-                    sc_Show_hidden_fileshk,sc_Filterhk,
-                    sc_Save,sc_Open,
-                    sc_name,sc_create_new_directory,
-                    sc_back,sc_forward,sc_up,
-                    sc_file,sc_exists_overwrite,sc_is_modified_save,
-                    sc_warningupper,sc_errorupper,sc_exception,sc_system,
-                    sc_does_not_exist,
-                    sc_passwordupper,sc_enterpassword,sc_invalidpassword,
-                    sc_can_not_read_directory,
-                    sc_graphic_format_not_supported,sc_graphic_format_error,
-                    sc_MS_Bitmap,sc_MS_Icon,sc_JPEG_Image,sc_PNG_Image,
-                    sc_XPM_Image,sc_PNM_Image,sc_TARGA_image,sc_TIFF_image,
-                    sc_All,
-                    sc_Confirmation,sc_Delete_record_question,
-                    sc_Copy_record_question,
-                    sc_close_page,
-{
- dbnavigbuttonty = (dbnb_first,dbnb_prior,dbnb_next,dbnb_last,dbnb_insert,
-           dbnb_delete,dbnb_edit,
-           dbnb_post,dbnb_cancel,dbnb_refresh,
-           dbnb_filter,dbnb_filtermin,dbnb_filtermax,dbnb_filteronoff,dbnb_find,
-           dbnb_autoedit,dbnb_copyrecord,dbnb_dialog);
-}
-                    sc_first,sc_prior,sc_next,sc_last,
-                    sc_append,sc_delete,sc_edit,sc_post,sc_cancel,sc_refresh,
-                    sc_edit_filter,sc_edit_filter_min,sc_edit_filter_max,
-                    sc_reset_filter,
-                    sc_filter_on,sc_search,sc_auto_edit,sc_copy_record,
-                    sc_dialog,
-                    sc_insert,sc_copy,sc_paste,
-                    sc_row_insert,sc_row_append,sc_row_delete,
-                    sc_undo,sc_redo,sc_cut,sc_select_all,
+  extendedty = (
+    ex_del_row_selected,
+    ex_del_rows_selected
+    );
+{$endif}
+type
+  stockcaptionty = (sc_none, sc_is_invalid, sc_Format_error, sc_Value_is_required,
+    sc_Error, sc_Min, sc_Max, sc_Range_error,
+    sc_Undohk, sc_Redohk, sc_copyhk, sc_cuthk, sc_pastehk,
+    sc_select_allhk,
+    sc_insert_rowhk, sc_append_rowhk, sc_delete_rowhk,
+    sc_Dirhk, sc_Homehk, sc_Uphk, sc_New_dirhk, sc_Namehk,
+    sc_Show_hidden_fileshk, sc_Filterhk,
+    sc_Save, sc_Open,
+    sc_name, sc_create_new_directory,
+    sc_back, sc_forward, sc_up,
+    sc_exists_overwrite, sc_is_modified_save,
+    sc_warningupper, sc_exception, sc_system,
+    sc_does_not_exist,
+    sc_passwordupper, sc_enterpassword, sc_invalidpassword,
+    sc_can_not_read_directory,
+    sc_graphic_format_not_supported, sc_graphic_format_error,
+    sc_All,
+    sc_Confirmation, sc_Delete_record_question,
+    sc_Copy_record_question,
+    sc_close_page,
+    sc_first, sc_prior, sc_next, sc_last,
+    sc_append, sc_delete, sc_edit, sc_post,
+    sc_cancel,
+    sc_refresh,
+    sc_edit_filter, sc_edit_filter_min, sc_edit_filter_max,
+    sc_reset_filter,
+    sc_filter_on, sc_search, sc_auto_edit, sc_copy_record,
+    sc_dialog,
+    sc_insert, sc_copy, sc_paste,
+    sc_row_insert, sc_row_append, sc_row_delete,
+    sc_undo, sc_redo, sc_cut, sc_select_all,
+    sc_filter_off,
+    sc_portrait, sc_landscape,
+    sc_Delete_row_question, sc_selected_rows,
+    sc_Single_item_only, sc_Copy_Cells, sc_Paste_Cells,
+    sc_close, sc_maximize, sc_normalize, sc_minimize, sc_fix_size,
+    sc_float, sc_stay_on_top, sc_stay_in_background,
+    sc_lock_children, sc_no_lock,
+    sc_input, sc_button, sc_on, sc_off,
+    sc_leftborder, sc_topborder, sc_rightborder, sc_bottomborder,
+    sc_beginoftext, sc_endoftext, sc_inputmode, sc_overwrite,
+    sc_deleted, sc_copied, sc_inserted, sc_pasted, sc_withdrawn,
+    sc_windowactivated, sc_menu,
+    sc_bof, sc_eof,
+    sc_voiceoutput, sc_speakagain,
+    sc_firstcol, sc_firstrow, sc_lastcol, sc_lastrow,
+    sc_selection, sc_speakpath, sc_disabledbutton,
+    sc_firstfield, sc_lastfield,
+    sc_firstelement, sc_lastelement, sc_slower, sc_faster,
+    sc_window, sc_area, sc_areaactivated,
+    sc_volumedown, sc_volumeup, sc_cancelspeech,
+    sc_newfile, sc_tools, sc_lang,
+    sc_directory, sc_noicons, sc_nolateral, sc_compact,
+    sc_path, sc_file
+    );
 
-                    sc_filter_off,
-                    sc_portrait,sc_landscape,
-                    sc_Delete_row_question,sc_selected_rows,
-                    sc_Single_item_only,sc_Copy_Cells,sc_Paste_Cells,
-                    sc_close,sc_maximize,sc_normalize,sc_minimize,sc_fix_size,
-                    sc_float,sc_stay_on_top,sc_stay_in_background,
-                    sc_lock_children,sc_no_lock,
-                    sc_input,sc_button,sc_on,sc_off,
-                    sc_leftborder,sc_topborder,sc_rightborder,sc_bottomborder,
-                    sc_beginoftext,sc_endoftext,sc_inputmode,sc_overwrite,
-                    sc_deleted,sc_copied,sc_inserted,sc_pasted,sc_withdrawn,
-                    sc_windowactivated,sc_menu,
-                    sc_bof,sc_eof,
-                    sc_voiceoutput,sc_speakagain,
-                    sc_firstcol,sc_firstrow,sc_lastcol,sc_lastrow,
-                    sc_selection,sc_speakpath,sc_disabledbutton,
-                    sc_firstfield,sc_lastfield,
-                    sc_firstelement,sc_lastelement,sc_slower,sc_faster,
-                    sc_window,sc_area,sc_areaactivated,
-                    sc_volumedown,sc_volumeup,sc_cancelspeech,
-                    sc_newfile, sc_tools, sc_lang,
-                    sc_directory, sc_noicons, sc_nolateral, sc_compact,
-                    sc_path
-                  );
  textgeneratorfuncty = function(const params: array of const): msestring;
  textgeneratorty = (tg_delete_n_selected_rows);
 
@@ -165,20 +171,20 @@ type
   private
    fbitmaps: array[stockbitmapty] of tbitmap;
    ffonts: array[stockfontty] of twidgetfont;
-//   fmodalresulttext: array[modalresultty] of msestring;
-//   fmodalresulttextnoshortcut: array[modalresultty] of msestring;
-   fglyphs: timagelist;
+  fglyphs: timagelist;
    ffontaliasregistered: boolean;
    function getbitmaps(index: stockbitmapty): tbitmap;
    function getfonts(index: stockfontty): twidgetfont;
+   procedure setmseicon(const avalue: tmaskedbitmap);
+  function getmseicon: tmaskedbitmap;
+  function getglyphs: timagelist;
+  procedure fontchanged(const sender: tobject);
+  {$ifndef mse_dynpo}
    function getmodalresulttext(index: modalresultty): msestring;
    function getmodalresulttextnoshortcut(index: modalresultty): msestring;
-   function getglyphs: timagelist;
-   procedure fontchanged(const sender: tobject);
-   function getmseicon: tmaskedbitmap;
-   function getcaptions(index: stockcaptionty): msestring;
+    function getcaptions(index: stockcaptionty): msestring;
    function gettextgenerator(index: textgeneratorty): textgeneratorfuncty;
-   procedure setmseicon(const avalue: tmaskedbitmap);
+  {$endif}
   public
    constructor create;
    destructor destroy; override;
@@ -188,6 +194,9 @@ type
               aalignment: alignmentsty = [al_ycentered,al_xcentered]);
    property bitmaps[index: stockbitmapty]: tbitmap read getbitmaps;
    property fonts[index: stockfontty]: twidgetfont read getfonts;
+   property glyphs: timagelist read getglyphs;
+   property mseicon: tmaskedbitmap read getmseicon write setmseicon;
+  {$ifndef mse_dynpo}
    property modalresulttext[index: modalresultty]: msestring
                                                read getmodalresulttext;
    property modalresulttextnoshortcut[index: modalresultty]: msestring
@@ -195,9 +204,8 @@ type
    property captions[index: stockcaptionty]: msestring read getcaptions;
    property textgenerators[index: textgeneratorty]: textgeneratorfuncty
                                                        read gettextgenerator;
-   property glyphs: timagelist read getglyphs;
-   property mseicon: tmaskedbitmap read getmseicon write setmseicon;
- end;
+{$endif}  
+end;
 
 type
  tstockdata = class(tmsedatamodule)
@@ -206,7 +214,9 @@ type
  end;
 
 function stockobjects: tstockobjects;
+ {$ifndef mse_dynpo}
 function sc(const acaption: stockcaptionty): msestring;
+{$endif}
 
 procedure init;
 procedure deinit;
@@ -325,10 +335,12 @@ begin
  result:= stockobjs;
 end;
 
+ {$ifndef mse_dynpo}
 function sc(const acaption: stockcaptionty): msestring;
 begin
  result:= stockobjects.captions[acaption];
 end;
+ {$endif}
 
 procedure init;
 begin
@@ -506,6 +518,23 @@ begin
  stockdata.mseicon.bitmap.assign(avalue);
 end;
 
+procedure tstockobjects.paintglyph(const canvas: tcanvas;
+     const glyph: stockglyphty; const rect: rectty;
+     const grayed: boolean = false;  const color: colorty = cl_glyph;
+     aalignment: alignmentsty = [al_ycentered,al_xcentered]);
+var
+ colorbefore: colorty;
+begin
+ colorbefore:= canvas.color;
+ canvas.color:= color;
+ if grayed then begin
+  aalignment:= aalignment + [al_grayed];
+ end;
+ glyphs.paint(canvas,integer(glyph),rect,aalignment,color);
+ canvas.color:= colorbefore;
+end;
+
+{$ifndef mse_dynpo}
 function tstockobjects.getmodalresulttext(index: modalresultty): msestring;
 begin
  result:= mseconsts.modalresulttext(index);
@@ -527,21 +556,6 @@ function tstockobjects.gettextgenerator(index: textgeneratorty): textgeneratorfu
 begin
  result:= stocktextgenerators(index);
 end;
-
-procedure tstockobjects.paintglyph(const canvas: tcanvas;
-     const glyph: stockglyphty; const rect: rectty;
-     const grayed: boolean = false;  const color: colorty = cl_glyph;
-     aalignment: alignmentsty = [al_ycentered,al_xcentered]);
-var
- colorbefore: colorty;
-begin
- colorbefore:= canvas.color;
- canvas.color:= color;
- if grayed then begin
-  aalignment:= aalignment + [al_grayed];
- end;
- glyphs.paint(canvas,integer(glyph),rect,aalignment,color);
- canvas.color:= colorbefore;
-end;
+ {$endif}
 
 end.

@@ -1,18 +1,19 @@
 object headerfo: theaderfo
   visible = False
   bounds_x = 495
-  bounds_y = 202
-  bounds_cx = 446
-  bounds_cy = 415
+  bounds_y = 203
+  bounds_cx = 427
+  bounds_cy = 482
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.bounds = (
     0
     0
-    446
-    415
+    427
+    482
   )
   options = [fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = conflangfo.tstatfile1
   caption = 'Po <> Po converter'
   windowopacity = -Inf
   oncreate = oncreateform
@@ -35,17 +36,16 @@ object headerfo: theaderfo
       0
     )
     bounds_x = 8
-    bounds_y = 9
-    bounds_cx = 428
+    bounds_y = 41
+    bounds_cx = 409
     bounds_cy = 36
-    anchors = [an_left, an_top, an_right]
     value = '# SOME DESCRIPTIVE TITLE.'#10'# Copyright (C) YEAR THE PACKAGE''S COPYRIGHT HOLDER'#10'# This file is distributed under the same license as the PACKAGE package.'#10'# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.'#10'#'#10'#, fuzzy'#10'msgid ""'#10'msgstr ""'#10'"Project-Id-Version: \n"'#10'"Report-Msgid-Bugs-To: \n"'#10'"POT-Creation-Date: 2019-03-04 23:54+0300\n"'#10'"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"'#10'"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"'#10'"Language-Team: LANGUAGE <LL@li.org>\n"'#10'"Language: \n"'#10'"MIME-Version: 1.0\n"'#10'"Content-Type: text/plain; charset=UTF-8\n"'#10'"Content-Transfer-Encoding: 8bit\n"'
     reffontheight = 15
   end
   object tbutton2: tbutton
     taborder = 1
-    bounds_x = 33
-    bounds_y = 220
+    bounds_x = 25
+    bounds_y = 268
     bounds_cx = 377
     bounds_cy = 117
     state = [as_localdisabled, as_localcaption, as_localonexecute]
@@ -73,8 +73,8 @@ object headerfo: theaderfo
   object tbutton4: tbutton
     Tag = 1
     taborder = 4
-    bounds_x = 24
-    bounds_y = 104
+    bounds_x = 16
+    bounds_y = 152
     bounds_cx = 402
     bounds_cy = 52
     state = [as_localdisabled, as_localcaption, as_localonexecute]
@@ -99,11 +99,10 @@ object headerfo: theaderfo
       0
     )
     taborder = 5
-    bounds_x = 40
-    bounds_y = 52
+    bounds_x = 32
+    bounds_y = 100
     bounds_cx = 370
     bounds_cy = 39
-    statfile = tstatfile1
     controller.fontheight = 0
     controller.fontname = 'stf_default'
     controller.fontcolor = -1610612734
@@ -120,8 +119,8 @@ object headerfo: theaderfo
   object tlabel1: tlabel
     optionswidget1 = [ow1_fontglyphheight]
     taborder = 6
-    bounds_x = 80
-    bounds_y = 352
+    bounds_x = 72
+    bounds_y = 424
     bounds_cx = 298
     bounds_cy = 43
     caption = 'Sorry this form is not yet translated, feel free to do it as exercice! '
@@ -134,13 +133,49 @@ object headerfo: theaderfo
   object tbutton3: tbutton
     Tag = 2
     taborder = 7
-    bounds_x = 24
-    bounds_y = 168
+    bounds_x = 16
+    bounds_y = 216
     bounds_cx = 402
     bounds_cy = 36
     state = [as_localdisabled, as_localcaption, as_localonexecute]
     caption = 'Create new "podemo_empty.txt" file ready for Google Translate'
     onexecute = createnew
+  end
+  object tbutton5: tbutton
+    Tag = 3
+    taborder = 8
+    bounds_x = 16
+    bounds_y = 8
+    bounds_cx = 338
+    bounds_cy = 28
+    state = [as_localdisabled, as_localcaption, as_localonexecute]
+    caption = 'Extract all the captions from a form.mfm file '
+    onexecute = createnew
+  end
+  object tmemoedit1: tmemoedit
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.sbhorz.pagesize = 1
+    frame.sbvert.pagesize = 1
+    taborder = 9
+    visible = False
+    bounds_x = 0
+    bounds_y = 88
+    bounds_cx = 427
+    bounds_cy = 389
+    anchors = [an_left, an_top, an_right, an_bottom]
+    reffontheight = 15
+  end
+  object tbutton1: tbutton
+    taborder = 10
+    bounds_x = 367
+    bounds_y = 8
+    bounds_cx = 50
+    bounds_cy = 28
+    anchors = [an_top, an_right]
+    state = [as_invisible, as_localinvisible, as_localcaption, as_localonexecute]
+    caption = 'Close'
+    onexecute = onclose
   end
   object paneldone: tgroupbox
     frame.colorclient = 16765345
@@ -148,15 +183,16 @@ object headerfo: theaderfo
     frame.localprops1 = []
     taborder = 3
     visible = False
-    bounds_x = 4
+    bounds_x = 0
     bounds_y = 5
-    bounds_cx = 440
-    bounds_cy = 402
+    bounds_cx = 427
+    bounds_cy = 476
+    anchors = [an_left, an_top, an_right, an_bottom]
     object labdone: tlabel
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autoheight]
       color = -2147483645
       bounds_x = 44
-      bounds_y = 157
+      bounds_y = 197
       bounds_cx = 353
       bounds_cy = 48
       caption = 'Done.'
@@ -183,7 +219,7 @@ object headerfo: theaderfo
     top = 120
   end
   object impexpfiledialog: tfiledialogx
-    statfile = tstatfile1
+    statfile = conflangfo.tstatfile1
     controller.fontheight = 0
     controller.fontname = 'stf_default'
     controller.fontcolor = -1610612734
@@ -221,10 +257,5 @@ object headerfo: theaderfo
     controller.captionopen = 'Choose a Po file'
     left = 150
     top = 86
-  end
-  object tstatfile1: tstatfile
-    filename = 'status.sta'
-    left = 26
-    top = 87
   end
 end

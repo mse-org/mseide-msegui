@@ -18,11 +18,7 @@ uses
  mseact,msewidgets,
  mserichstring,mseshapes,classes,mclasses,mseclasses,msebitmap,msedrawtext,
  msedrag,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msegraphutils,msemenus,msetimer;
 
 const

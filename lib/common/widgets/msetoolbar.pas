@@ -411,11 +411,7 @@ type
 
 implementation
 uses
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  sysutils,msebits,mseactions;
 
 const

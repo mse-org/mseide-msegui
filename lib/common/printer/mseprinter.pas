@@ -21,13 +21,7 @@ interface
 {$endif}
 
 uses
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
- mseconsts_dynpo,
-{$else}
- msestockobjects,
- mseconsts,
-{$endif}
+ msestockobjects, mseconsts,
  mseclasses,msegraphics,msegraphutils,msestrings,msestream,msedrawtext,
  mserichstring,classes,mclasses,msetypes,msestat,msestatfile,
  msedataedits,msedropdownlist,

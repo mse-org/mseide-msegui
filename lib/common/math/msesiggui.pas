@@ -24,11 +24,7 @@ uses
  msetypes,
  msechart,mseclasses,msefft,msewidgets,msegraphics,msegraphutils,msedial,
  msesplitter,msegui,msestat,msestatfile,msestrings,
- {$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msemenus,mseact,msedataedits,msereal,mseedit;
 
 type

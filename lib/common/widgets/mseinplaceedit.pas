@@ -382,11 +382,7 @@ function textendpoint(const start: pointty; const text: msestring): pointty;
 implementation
 uses
  msekeyboard,sysutils,msesysutils,msebits,msewidgets,classes,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  mseassistiveserver;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

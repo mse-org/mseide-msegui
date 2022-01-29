@@ -96,11 +96,7 @@ function readfpgraphic(const source: tstream; const readerclass: fpreaderclassty
 
 implementation
 uses
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msegraphutils, msearrayutils;
 
 type

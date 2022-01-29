@@ -2881,11 +2881,7 @@ var
 implementation
 uses
  mseguiintf,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  mseact,mseactions,rtlconsts,msegraphedits,
  mseassistiveserver,mseformatstr;
 {$ifndef mse_allwarnings}

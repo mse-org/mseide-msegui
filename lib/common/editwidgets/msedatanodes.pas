@@ -23,11 +23,7 @@ interface
 uses
  classes,mclasses,msegraphutils,msedrawtext,msegraphics,msedatalist,mseglob,
  mseguiglob,msegui,
-{$ifdef mse_dynpo}
- msestockobjects_dynpo,
-{$else}
  msestockobjects,
-{$endif}
  msebitmap,mseclasses,mseevent,msegrids,msetypes,msestrings,mseinplaceedit,
  msestat,msegridsglob,mselist,msearrayutils,msearrayprops;
 
