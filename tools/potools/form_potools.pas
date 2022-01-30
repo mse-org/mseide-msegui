@@ -239,7 +239,8 @@ end;
 
 procedure theaderfo.createnewpo(const Sender: TObject; fn: msestring);
 var
-  x, y: integer;
+  x, y, int1: integer;
+  str1, str2: msestring;
   file1: ttextdatastream;
   imodalresultty: modalresultty;
   iextendedty: extendedty;
@@ -278,21 +279,28 @@ begin
     defaultresult[x + y] := en_langnamestext[x];
 
   // check if double "msgid"
- {
   str1 := '';
-  int1:= 0;
+  str2 := '';
+  int1 := 0;
   for x := 0 to length(defaultresult) - 1 do
   begin
-    if int1 > 1 then writeln('Similar msgid = ' + destr1 + ' = ' + inttostr(int1)) ;
-    int1:= 0;
-    str1 := defaultresult[x];
+    if int1 > 1 then
+      str2 := str2 +
+        'Similar msgid = ' + str1 + ' = ' + IntToStr(int1) + lineend;
+    int1   := 0;
+    str1   := defaultresult[x];
     if trim(str1) <> '' then
-    for y := 0 to length(defaultresult) - y do
-    begin
-      if defaultresult[y] = str1 then inc(int1);
-     end;
+      for y := 0 to length(defaultresult) - y do
+        if defaultresult[y] = str1 then
+          Inc(int1);
   end;
- }
+
+  if trim(str2) = '' then
+    ShowMessage('   Good: No double similar "msgid" found!   ',
+      'Result of double "msegid"')
+  else
+    ShowMessage('Those double similar "msgid" were found:' + lineend + str2,
+      'Result of check for double "msegid"');
 
   if forgoogle = False then
     file1 := ttextdatastream.Create(outputdir.Value +

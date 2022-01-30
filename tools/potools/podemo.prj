@@ -796,8 +796,8 @@ findoptions=1
 editpos=4
  0,-1073741823
  0,-1073741823
- 0,-1073741823
- 66,332
+ 0,242
+ 0,332
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -806,7 +806,7 @@ sourcefiles=4
  ${PROJECTDIR}/podemo.pas
  ${PROJECTDIR}/form_conflang.pas
  ${PROJECTDIR}/form_potools.pas
- /home/fred/mseide-msegui/tools/potools/po2arrays.pas
+ ${PROJECTDIR}/po2arrays.pas
 relpaths=4
  podemo.pas
  form_conflang.pas
@@ -831,7 +831,7 @@ nomenumodules=2
  0
 [sourcefo.files_tab]
 firsttab=0
-index=3
+index=2
 [layout]
 windowlayout=567
  [mainfo.basedock]
@@ -967,7 +967,7 @@ windowlayout=567
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=mainfo
+ stackedunder=_mse_conflangfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1294,7 +1294,7 @@ windowlayout=567
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/potools/po2arrays.pas
+ value=/home/fred/mseide-msegui/tools/potools/form_potools.pas
  history=6
   /home/fred/mseide-msegui/tools/potools/po2arrays.pas
   /home/fred/mseide-msegui/tools/potools/podemo.pas
@@ -1324,7 +1324,7 @@ windowlayout=567
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=3
+ index=2
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
