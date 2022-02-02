@@ -793,26 +793,31 @@ findhistory=20
  sc_cancelspeech
  sc_path
 findoptions=1
-editpos=4
+editpos=5
  0,-1073741823
  0,-1073741823
- 0,242
- 0,332
+ 0,-1073741823
+ 0,0
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-sourcefiles=4
+bookmarks4=0
+sourcefiles=5
  ${PROJECTDIR}/podemo.pas
  ${PROJECTDIR}/form_conflang.pas
  ${PROJECTDIR}/form_potools.pas
- ${PROJECTDIR}/po2arrays.pas
-relpaths=4
+ /home/fred/mseide-msegui/tools/potools/po2arrays.pas
+ ${PROJECTDIR}/form_conflang.pas
+relpaths=5
  podemo.pas
  form_conflang.pas
  form_potools.pas
  po2arrays.pas
-ismoduletexts=4
+ form_conflang.pas
+ismoduletexts=5
+ 0
  0
  0
  0
@@ -831,9 +836,9 @@ nomenumodules=2
  0
 [sourcefo.files_tab]
 firsttab=0
-index=2
+index=3
 [layout]
-windowlayout=567
+windowlayout=568
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -847,8 +852,8 @@ windowlayout=567
  ny=0
  ncx=0
  ncy=0
- x=34
- y=45
+ x=63
+ y=82
  cx=1231
  cy=621
  rcx=0
@@ -967,7 +972,7 @@ windowlayout=567
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=_mse_conflangfo_mse_
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -1294,9 +1299,10 @@ windowlayout=567
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/potools/form_potools.pas
- history=6
+ value=/home/fred/mseide-msegui/tools/potools/po2arrays.pas
+ history=7
   /home/fred/mseide-msegui/tools/potools/po2arrays.pas
+  /home/fred/mseide-msegui/tools/potools/form_potools.pas
   /home/fred/mseide-msegui/tools/potools/podemo.pas
   /home/fred/msegui_dynpo/demo/po2arrays.pas
   /home/fred/msegui_dynpo/demo/form_conflang.pas
@@ -1324,7 +1330,7 @@ windowlayout=567
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=2
+ index=3
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]

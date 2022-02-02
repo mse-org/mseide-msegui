@@ -56,7 +56,6 @@ type
    frichcaption: richstringty;
    fcaption: msestring;
    fhint: msestring;
-   fwidth: integer;
    fstate: tabstatesty;
    fcolor: colorty;
    fcoloractive: colorty;
@@ -121,7 +120,6 @@ type
                 //-2 -> same as imagenr
    property tag: integer read ftag write ftag default 0;
    property hint: msestring read fhint write fhint;
-   property width: integer read fwidth write fwidth;
  end;
  tabarty = array of ttab;
  tabaty = array[0..0] of ttab;
@@ -158,9 +156,8 @@ type
    fcolor: colorty;
    fcoloractive: colorty;
    fimagepos: imageposty;
-   flabel: Tlabel;
-   //   fcaptionframe: framety;
-   //   fimagedist: integer;
+//   fcaptionframe: framety;
+//   fimagedist: integer;
    fframe: ttabframe;
    fface: tface;
    ffaceactive: tface;
@@ -250,7 +247,6 @@ type
    function getframestateflags: framestateflagsty; virtual;
    function getedgeshift(): int32;
   public
-
    constructor create(const aowner: tcustomtabbar;
                            aclasstype: indexpersistentclassty); reintroduce;
    destructor destroy; override;
@@ -838,6 +834,7 @@ type
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
+
    procedure createtabframe();
    procedure createtabface();
    procedure createtabfont();
@@ -1043,14 +1040,9 @@ type
    property statpriority;
  end;
 
-var
- tabcloser: boolean = false;
-
 implementation
 uses
- sysutils,msearrayutils,msekeyboard,
- msestockobjects,
- msebits;
+ sysutils,msearrayutils,msekeyboard,msestockobjects,msebits;
 
 type
  twidget1 = class(twidget);
@@ -1845,8 +1837,6 @@ end;
 constructor ttabs.create(const aowner: tcustomtabbar;
                                   aclasstype: indexpersistentclassty);
 begin
- flabel := Tlabel.create(nil);
- flabel.visible := false;
  fcolor:= cl_default;
  fcoloractive:= cl_default;
  fimagepos:= defaultimagepos;
@@ -1872,8 +1862,6 @@ begin
  fframe.free;
  ffont.free;
  ffontactive.free;
- flabel.free;
-
  inherited;
 end;
 
@@ -2839,11 +2827,7 @@ begin
 end;
 
 procedure tcustomtabbar.clientmouseevent(var info: mouseeventinfoty);
-var
-i, w1, w2 : integer;
-found : boolean = false;
 begin
-
  if not (es_processed in info.eventstate) and
                            canevent(tmethod(fonclientmouseevent)) then begin
   fonclientmouseevent(self,info);
@@ -2858,34 +2842,10 @@ begin
  if not (csdesigning in componentstate) or
                             (ws1_designactive in fwidgetstate1) then begin
   with flayoutinfo do begin
-
-    if  (tabcloser = true) and  (info.eventkind = ek_buttonrelease) and (tabs.count > 1) then
-      begin
-
-       w1 := 0;
-       w2 := 0;
-       i := flayoutinfo.firsttab ;
-
-      // writeln('flayoutinfo.firsttab = ' + inttostr(i));
-
-       while (i < tabs.count) and (found = false)  do
-       begin
-
-         tabs.flabel.font.width := tabs[i].font.width;
-         tabs.flabel.font.height := tabs[i].font.height;
-         tabs.flabel.caption := tabs[i].caption;
-
-         w2 := w2 + tabs.flabel.width + 20;
-
-         w1 := w2 + 1;
-         inc(i);
-
-        end;
-     end else
-        checkbuttonhint(self,info,fhintedbutton,cells,
+   checkbuttonhint(self,info,fhintedbutton,cells,
                            {$ifdef FPC}@{$endif}getbuttonhint,
                            {$ifdef FPC}@{$endif}gethintpos);
-   end;
+  end;
  end;
 end;
 
