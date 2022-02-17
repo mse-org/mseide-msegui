@@ -787,18 +787,23 @@ findhistory=20
  '2'
  sc_cancelspeech
 findoptions=1
-editpos=2
+editpos=3
  0,-1073741823
  0,32
+ 0,8
 bookmarks0=0
 bookmarks1=0
-sourcefiles=2
+bookmarks2=0
+sourcefiles=3
  ${PROJECTDIR}/podemo.pas
- ${PROJECTDIR}/po2arrays.pas
-relpaths=2
+ /home/fred/mseide-msegui/tools/POtools/POdemo/po2arrays.pas
+ /home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
+relpaths=3
  podemo.pas
  po2arrays.pas
-ismoduletexts=2
+ captionpodemo.pas
+ismoduletexts=3
+ 0
  0
  0
 modules=0
@@ -807,9 +812,9 @@ visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
 firsttab=0
-index=1
+index=2
 [layout]
-windowlayout=532
+windowlayout=537
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1046,10 +1051,10 @@ windowlayout=532
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=471
- width0=113
+ propcolwidthref=486
+ width0=117
  sortdescend0=0
- width1=352
+ width1=363
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1270,17 +1275,22 @@ windowlayout=532
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/POdemo/form_potools.pas
- history=9
-  /home/fred/mseide-msegui/tools/POtools/POdemo/form_conflang.pas
-  /home/fred/mseide-msegui/tools/POdemo/po2arrays.pas
-  /home/fred/mseide-msegui/tools/potools/po2arrays.pas
-  /home/fred/mseide-msegui/tools/potools/form_potools.pas
-  /home/fred/mseide-msegui/tools/potools/podemo.pas
-  /home/fred/msegui_dynpo/demo/po2arrays.pas
-  /home/fred/msegui_dynpo/demo/form_conflang.pas
-  /home/fred/msegui_dynpo/demo/form_potools.pas
-  ${PROJECTDIR}/main.pas
+ value=/home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
+ history=14
+  /home/fred/msegui_dynpo-mod/modemo.pas
+  /home/fred/msegui_dynpo-mod/captionmodemo.pas
+  /home/fred/strumpract/src/status.pas
+  /home/fred/strumpract/src/findmessage.pas
+  /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts.pas
+  /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts_ru.pas
+  /home/fred/strumpract/src/captionstrumpract.pas
+  /home/fred/strumpract/src/config.mfm
+  /home/fred/strumpract (copy 1)/src/main.mfm
+  /home/fred/strumpract/src/equalizer.pas
+  /home/fred/strumpract/src/infos.pas
+  /home/fred/strumpract/src/potools.pas
+  /home/fred/strumpract/src/po2arrays.pas
+  /home/fred/strumpract/src/conflang.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1303,7 +1313,7 @@ windowlayout=532
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=1
+ index=2
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]

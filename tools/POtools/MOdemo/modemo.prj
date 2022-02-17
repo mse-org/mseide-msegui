@@ -19,8 +19,8 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/msegui_dynpo-mod
-projectfilename=/home/fred/msegui_dynpo-mod/modemo.prj
+projectdir=/home/fred/mseide-msegui/tools/POtools/MOdemo
+projectfilename=/home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.prj
 findinfiledialog=52
  [findinfileadialogfo.subdirs]
  value=1
@@ -81,7 +81,7 @@ finddialog=8
  stackedunder=
  x=716
  y=372
- cx=234
+ cx=266
  cy=269
 replacedialog=16
  [replacedialogfo.promptonreplace]
@@ -468,12 +468,15 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=1
+modulenames=2
  CONFLANGFO
-moduletypes=1
+ HEADERFO
+moduletypes=2
  TCONFLANGFO
-modulefiles=1
- /home/fred/msegui_dynpo-mod/form_conflang.mfm
+ THEADERFO
+modulefiles=2
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/form_conflang.mfm
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.mfm
 befcommandon=0
 makeoptionson=6
  63
@@ -772,39 +775,62 @@ envvarons=0
 [edit]
 hintwidth=314
 hintheight=214
-finddtext='podemo_'
-findhistory=0
+finddtext=utf8
+findhistory=1
+ utf8
 findoptions=1
-editpos=2
+editpos=5
  0,0
- 0,58
+ 0,-1073741823
+ 0,34
+ 0,121
+ 0,108
 bookmarks0=0
 bookmarks1=0
-sourcefiles=2
+bookmarks2=0
+bookmarks3=0
+bookmarks4=0
+sourcefiles=5
  ${PROJECTDIR}/modemo.pas
  ${PROJECTDIR}/form_conflang.pas
-relpaths=2
+ ${PROJECTDIR}/captionmodemo.pas
+ ${PROJECTDIR}/mo2arrays.pas
+ ${PROJECTDIR}/form_potools.pas
+relpaths=5
  modemo.pas
  form_conflang.pas
-ismoduletexts=2
+ captionmodemo.pas
+ mo2arrays.pas
+ form_potools.pas
+ismoduletexts=5
  0
  0
-modules=1
- /home/fred/msegui_dynpo-mod/form_conflang.mfm
-moduleoptions=1
  0
-visiblemodules=1
+ 0
+ 0
+modules=2
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/form_conflang.mfm
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.mfm
+moduleoptions=2
+ 0
+ 0
+visiblemodules=2
  -1
-nomenumodules=1
+ -1
+nomenumodules=2
+ 0
  0
 [sourcefo.files_tab]
-order=2
- 1
+order=5
  0
+ 2
+ 3
+ 4
+ 1
 firsttab=0
-index=0
+index=3
 [layout]
-windowlayout=558
+windowlayout=582
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1041,10 +1067,10 @@ windowlayout=558
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=471
- width0=111
+ propcolwidthref=486
+ width0=115
  sortdescend0=0
- width1=354
+ width1=365
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1208,7 +1234,7 @@ windowlayout=558
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=_mse_conflangfo_mse_
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1265,8 +1291,10 @@ windowlayout=558
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/msegui_dynpo-mod/form_conflang.pas
- history=13
+ value=/home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
+ history=15
+  /home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
+  /home/fred/msegui_dynpo-mod/modemo.pas
   /home/fred/msegui_dynpo-mod/captionmodemo.pas
   /home/fred/strumpract/src/status.pas
   /home/fred/strumpract/src/findmessage.pas
@@ -1301,11 +1329,14 @@ windowlayout=558
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=2
-  1
+ order=5
   0
+  2
+  3
+  4
+  1
  firsttab=0
- index=0
+ index=3
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1347,7 +1378,7 @@ windowlayout=558
  [_mse_conflangfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=mainfo
+ stackedunder=_mse_headerfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1358,6 +1389,25 @@ windowlayout=558
  y=269
  cx=341
  cy=262
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [_mse_headerfo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=mainfo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=495
+ y=203
+ cx=437
+ cy=482
  rcx=0
  rcy=0
  wsize=0

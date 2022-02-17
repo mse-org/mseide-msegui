@@ -5,10 +5,7 @@ unit captionpodemo;
 interface
 
 uses
-  msestockobjects,
-  mseglob,
   msestrings,
-  mseapplication,
   msetypes;
 
  // Your enums
@@ -34,12 +31,6 @@ var
   lang_conflangfo: array of msestring;
 
 implementation
-
-uses
-  SysUtils,
-  msesysintf,
-  msearrayutils,
-  mseformatstr;
 
 initialization
 

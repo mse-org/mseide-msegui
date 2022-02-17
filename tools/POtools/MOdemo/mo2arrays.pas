@@ -8,7 +8,6 @@ uses
   msesys,
   mseguiintf,
   SysUtils,
-  LazUTF8,
   msefileutils,
   msegraphics,
   mseglob,
@@ -73,8 +72,8 @@ begin
     begin
       setlength(lang_langnamestmp, length(lang_langnamestmp) + 1);
       str1 := ListOfFiles[i];
-      str1 := utf8StringReplace(str1, appname, '', [rfReplaceAll]);
-      str1 := utf8StringReplace(str1, langext, '', [rfReplaceAll]);
+      str1 := StringReplace(str1, appname, '', [rfReplaceAll]);
+      str1 := StringReplace(str1, langext, '', [rfReplaceAll]);
       lang_langnamestmp[length(lang_langnamestmp) - 1] := '[' + trim(str1) + ']';
       //writeln(lang_langnamestmp[length(lang_langnamestmp) - 1]);
     end;
@@ -84,15 +83,15 @@ procedure translate_stock (var lang_stocktext, default_stocktext: {array of mses
                            MOfile: TMOfile);
 var
   x: integer;
-  astrt: utf8String;
+  astrt: mseString;
 begin
     setlength (lang_stocktext, length (default_stocktext));
 
     for x:= 0 to length (default_stocktext) - 1 do
     begin
       astrt:= MOfile.translate (default_stocktext [x]);
-      astrt:= utf8StringReplace (astrt, ',',  '‚', [rfReplaceAll]);
-      astrt:= utf8StringReplace (astrt, #039, '‘', [rfReplaceAll]);
+      astrt:= StringReplace (astrt, ',',  '‚', [rfReplaceAll]);
+      astrt:= StringReplace (astrt, #039, '‘', [rfReplaceAll]);
       lang_stocktext [x]:= astrt;
     end;
 end;
@@ -120,7 +119,7 @@ procedure createnewlang(alang: msestring);
 var
   x, x2, x3: integer;
   str1: msestring;
-  str2: utf8String;
+  str2: mseString;
   default_modalresulttext, default_modalresulttextnoshortcut, default_mainformtext, default_stockcaption, default_langnamestext, default_extendedtext: array of msestring;
 
     MOfile: TMOfile;
