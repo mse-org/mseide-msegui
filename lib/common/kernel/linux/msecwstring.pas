@@ -267,7 +267,9 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
     // truncate string
     setlength(dest,length(dest)-outleft);
    {$ifdef mse_fpc_3}
+   {$ifndef freebsd}
     pansirec(pointer(dest)-sizeof(tansirec))^.codepage:= cp;
+   {$endif} 
    {$endif}
 {$ifdef mse_fpc_3}
  end;
