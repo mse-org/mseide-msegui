@@ -4,52 +4,25 @@ unit form_conflang;
 interface
 
 uses
-  msetypes,
-  mseglob,
-  mseguiglob,
-  mseguiintf,
-  mseapplication,
-  msestat,
-  msemenus,
-  msegui,
-  msegraphics,
-  msegraphutils,
-  mseevent,
-  mseclasses,
-  msewidgets,
-  mseforms,
-  msesimplewidgets,
-  msegraphedits,
-  mseificomp,
-  mseificompglob,
-  mseifiglob,
-  msescrollbar,
-  msestatfile,
-  mseact,
-  msedataedits,
-  msedragglob,
-  msedropdownlist,
-  mseedit,
-  msegrids,
-  msegridsglob,
-  msestream,
-  msewidgetgrid,
-  SysUtils,
-  msedispwidgets,
-  mserichstring;
+ msetypes,mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
+ msegraphics,msegraphutils,mseevent,mseclasses,msewidgets,mseforms,
+ msesimplewidgets,msegraphedits,mseificomp,mseificompglob,mseifiglob,
+ msescrollbar,msestatfile,mseact,msedataedits,msedragglob,msedropdownlist,
+ mseedit,msegrids,msegridsglob,msestream,msewidgetgrid,SysUtils,msedispwidgets,
+ mserichstring;
 
 type
   tconflangfo = class(tmseform)
     ok: TButton;
     gridlang: twidgetgrid;
-    gridlangtext: tstringedit;
+    gridlangcaption: tstringedit;
     gridlangbool: tbooleaneditradio;
     gridlangcode: tstringedit;
     bpotools: TButton;
     tlabel1: tlabel;
     tlabel2: tlabel;
     tlabel3: tlabel;
-    tstatfile1: tstatfile;
+   tstatfile1: tstatfile;
     procedure oncok(const Sender: TObject);
     procedure oncreat(const Sender: TObject);
     procedure oncellev(const Sender: TObject; var info: celleventinfoty);
@@ -57,27 +30,7 @@ type
     procedure setlangdemo(thelang: string);
   end;
 
-  // Your enums
-type
-  myformty = (
-    my_test1,                 //0 This is a test of internationalization
-    my_test2,                 //1 That is a other test
-    my_test3                  //2 This is the end.
-    );
-
-  // your custom array
-  myformaty = array[myformty] of msestring;
-
-  // Your consts
-const
-  en_myformtext: myformaty = (
-    'This is a test of internationalization.',
-    'That is a other test.',
-    'This is the end.'
-    );
-
 var
-  lang_myform: array of msestring;
   conflangloaded: shortint = 0;
   conflangfo: tconflangfo;
 
@@ -85,9 +38,12 @@ implementation
 
 uses
 {$ifdef mse_dynpo}
-  po2arrays,
+ mo2arrays,
+ msestockobjects,
+{$else}
+ msestockobjects,
 {$endif}
-  msestockobjects,
+  captionmodemo,
   form_potools,
   form_conflang_mfm;
 
@@ -103,26 +59,24 @@ begin
 
   for x := 0 to length(lang_langnames) - 1 do
   begin
-    conflangfo.gridlangtext[x] := lang_langnames[x];
+    conflangfo.gridlangcaption[x] := lang_langnames[x];
     str := trim(copy(lang_langnames[x], system.pos('[', lang_langnames[x]), 10));
     str := StringReplace(str, '[', '', [rfReplaceAll]);
     str := StringReplace(str, ']', '', [rfReplaceAll]);
     conflangfo.gridlangcode[x] := str;
   end;
 
-  conflangfo.ok.Caption := lang_modalresult[Ord(mr_ok)];  // captions from msegui widgets.
+  conflangfo.ok.Caption := lang_modalresult[Ord(mr_ok)];
 
-  conflangfo.bpotools.Caption := 'Po ' + lang_stockcaption[Ord(sc_tools)]; // captions from msegui widgets.
+  conflangfo.bpotools.Caption := 'Po ' + lang_stockcaption[Ord(sc_tools)];
 
-  conflangfo.Caption := lang_stockcaption[Ord(sc_lang)]; // captions from msegui widgets.
+  conflangfo.Caption := lang_stockcaption[Ord(sc_lang)];
 
-  conflangfo.tlabel1.Caption := lang_myform[Ord(my_test1)]; // captions from this application.
+  conflangfo.tlabel1.Caption := lang_mainform[Ord(ma_test1)];
 
-  conflangfo.tlabel2.Caption := lang_myform[Ord(my_test2)];  // captions from this application.
+  conflangfo.tlabel2.Caption := lang_mainform[Ord(ma_test2)];
 
-
-  conflangfo.tlabel3.Caption := lang_myform[Ord(my_test3)]; // captions from this application.
-
+  conflangfo.tlabel3.Caption := lang_mainform[Ord(ma_test3)];
 {$endif}
   application.ProcessMessages;
 end;
@@ -169,4 +123,3 @@ begin
 end;
 
 end.
-

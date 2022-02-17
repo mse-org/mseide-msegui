@@ -1,0 +1,1645 @@
+[componentpalette]
+order0=50
+ 0
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 9
+ 8
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 44
+ 18
+ 19
+ 17
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 45
+ 46
+ 47
+ 48
+ 49
+order1=0
+order2=16
+ 0
+ 1
+ 5
+ 2
+ 3
+ 4
+ 6
+ 7
+ 8
+ 9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+order3=0
+order4=0
+order5=0
+order6=0
+order7=0
+order8=0
+order9=0
+order10=0
+order11=0
+order12=0
+order13=0
+order14=0
+order15=0
+order16=0
+order17=0
+order18=0
+[projectoptions]
+projectdir=/home/fred/POtoMO
+projectfilename=/home/fred/POtoMO/PO2MO.prj
+finddialog=8
+ [finddialogfo.selectedonly]
+ value=0
+ [finddialogfo]
+ stackedunder=
+ x=944
+ y=114
+ cx=266
+ cy=269
+options=114
+ [projectoptionsfo.toolshortcuts]
+ dropdowncolwidths=3
+  70
+  70
+  70
+ [projectoptionsfo.twidgetgrid3]
+ propcolwidthref=764
+ sortdescend0=0
+ sortdescend1=0
+ sortdescend2=0
+ sortdescend3=0
+ width4=104
+ sortdescend4=0
+ width5=92
+ sortdescend5=0
+ width6=86
+ sortdescend6=0
+ width7=77
+ sortdescend7=0
+ width8=39
+ sortdescend8=0
+ width9=285
+ sortdescend9=0
+ [projectoptionsfo.twidgetgrid4]
+ propcolwidthref=572
+ width0=96
+ sortdescend0=0
+ sortdescend1=0
+ width2=100
+ sortdescend2=0
+ width3=275
+ sortdescend3=0
+ width4=287
+ sortdescend4=0
+ sorted=0
+ col=-1073741823
+ row=-1073741823
+ rowheight=17
+ [projectoptionsfo.newfile]
+ firsttab=0
+ index=0
+ [projectoptionsfo.fontaliasgrid]
+ propcolwidthref=315
+ width0=143
+ sortdescend0=0
+ width1=304
+ sortdescend1=0
+ width2=66
+ sortdescend2=0
+ width3=54
+ sortdescend3=0
+ width4=62
+ sortdescend4=0
+ width5=70
+ sortdescend5=0
+ width6=103
+ sortdescend6=0
+ [projectoptionsfo.macrosplitter]
+ x=0
+ y=201
+ xprop=1
+ yprop=0.37294332723949
+ [projectoptionsfo.macrogrid]
+ propcolwidthref=537
+ sortdescend0=0
+ sortdescend1=0
+ sortdescend2=0
+ sortdescend3=0
+ sortdescend4=0
+ sortdescend5=0
+ sortdescend6=0
+ sortdescend7=0
+ sortdescend8=0
+ sortdescend9=0
+ width10=146
+ sortdescend10=0
+ width11=521
+ sortdescend11=0
+ [projectoptionsfo.comment_1]
+ value=
+ [projectoptionsfo.comment_B]
+ value=
+ [projectoptionsfo.comment_M]
+ value=
+ [projectoptionsfo.makegroupbox]
+ firsttab=0
+ index=2
+ [projectoptionsfo.exceptionsgrid]
+ propcolwidthref=725
+ width0=77
+ sortdescend0=0
+ width1=719
+ sortdescend1=0
+ [projectoptionsfo.ttabwidget1]
+ firsttab=0
+ index=0
+ [projectoptionsfo.filefiltergrid]
+ propcolwidthref=660
+ width0=186
+ sortdescend0=0
+ width1=653
+ sortdescend1=0
+ [projectoptionsfo.ttabwidget2]
+ firsttab=0
+ index=0
+ [projectoptionsfo.setting_tab]
+ firsttab=0
+ index=2
+ [projectoptionsfo]
+ stackedunder=
+ x=346
+ y=157
+ cx=815
+ cy=606
+settings=8
+ [settings_form]
+ x=543
+ y=54
+ cx=446
+ cy=660
+ wsize=0
+ active=1
+ visible=1
+imagelisteditor=89
+ [imagelisteditorfo.statfile1]
+ currentversion=0
+ [imagelisteditorfo.filedialog]
+ filenames=1
+  /home/fred/Pictures/images/
+ filenamescust=0
+ filecolwidth=150
+ x=380
+ y=127
+ cx=608
+ cy=431
+ nopanel=0
+ compact=0
+ showoptions=0
+ hidehistory=0
+ hideicons=0
+ showhidden=0
+ colnamewidth=203
+ colsizewidth=81
+ colextwidth=45
+ coldatewidth=126
+ splitterplaces=243
+ splitterlateral=126
+ lastdir=/home/fred/Pictures/images/
+ filehistory=50
+  /home/fred/Pictures/images/mixright32.png
+  /home/fred/Pictures/images/mixleft32.png
+  /home/fred/Pictures/images/mix3right2.png
+  /home/fred/Pictures/images/mix3left2.png
+  /home/fred/Pictures/images/mix3right.png
+  /home/fred/Pictures/images/mix3left.png
+  /home/fred/Pictures/images/mixright.png
+  /home/fred/Pictures/images/mixleft.png
+  /home/fred/Pictures/images/beauty.png
+  /home/fred/Pictures/imagesideu/stop2_24.png
+  /home/fred/Pictures/imagesideu/stop_24.png
+  /home/fred/Pictures/imagesideu/stop_64.png
+  /home/fred/strumpract/src/images/file.png
+  /home/fred/strumpract/src/images/dir.png
+  /home/fred/Images/pause24.png
+  /home/fred/Images/stop24.png
+  /home/fred/Images/cue.png
+  /home/fred/Images/start.png
+  /home/fred/Documents/cue24.png
+  /home/fred/Images/pause5.png
+  /home/fred/Images/pause6.png
+  /home/fred/Documents/pause24.png
+  /home/fred/Documents/stop24.png
+  /home/fred/Documents/stop242.png
+  /home/fred/Images/stop6.png
+  /home/fred/Images/stop5.png
+  /home/fred/Images/stop42.png
+  /home/fred/Images/pause2.png
+  /home/fred/Images/pause.png
+  /home/fred/Images/stop4.png
+  /home/fred/Images/stop3.png
+  /home/fred/Images/stop2.png
+  /home/fred/Images/linenul.png
+  /home/fred/Images/linebas.png
+  /home/fred/Images/linedroitbas.png
+  /home/fred/Images/linegauchebas.png
+  /home/fred/Images/line1.png
+  /home/fred/Images/line0_6.png
+  /home/fred/Images/line1_7.png
+  /home/fred/Images/line0_8.png
+  /home/fred/Bureau/line1_7.png
+  /home/fred/Bureau/line0_6.png
+  /home/fred/Bureau/line1_4.png
+  /home/fred/Bureau/line3_8.png
+  /home/fred/Bureau/line1_1.png
+  /home/fred/Bureau/line1_8.png
+  /home/fred/Bureau/line0_8.png
+  /home/fred/Bureau/line1.png
+  /home/fred/Bureau/line5.png
+  /home/fred/Bureau/line0.png
+ filefilterindex=0
+ filefilter="All" "*.jpg" "*.jpeg" "*.bmp" "*.ico" "*.png" "*.pnm" "*.pgm" "*.pbm" "*.tga" "*.tif" "*.tiff" "*.xpm"
+ [imagelisteditorfo.transparentcolor]
+ value=-2147483647
+ [imagelisteditorfo.stretch]
+ value=0
+ [imagelisteditorfo]
+ x=590
+ y=219
+ cx=508
+ cy=355
+ wsize=0
+ active=1
+ visible=1
+mainfile=PO2MO
+targetfile=po2mo
+messageoutputfile=
+makecommand=${COMPILER}
+makedir=
+unitdirs=2
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
+ ${MSELIBDIR}*/
+unitpref=-Fu
+incpref=-Fi
+libpref=-Fl
+objpref=-Fo
+targpref=-o
+befcommand=0
+aftcommand=0
+makeoptions=5
+ -l -Mobjfpc -Sh -Fcutf8
+ -gl -O-
+ -B
+ -FUunits
+ -O2 -XX -CX -Xs
+makeoptpurpose=5
+ 
+ 
+ 
+ 
+ 
+compilerused=29
+ ${COMPILER} (Default)
+ Pascal 1
+ Pascal 2
+ Pascal 3
+ Pascal 4
+ Pascal 5
+ Pascal 6
+ Pascal 7
+ Pascal 8
+ C 1
+ C 2
+ C 3
+ C 4
+ C 5
+ C 6
+ C 7
+ C 8
+ Java 1
+ Java 2
+ Java 3
+ Java 4
+ Python 1
+ Python 2
+ Python 3
+ Python 4
+ Other 1
+ Other 2
+ Other 3
+ Other 4
+debuggerused=6
+ ${DEBUGGER} (Default)
+ Debugger 1
+ Debugger 2
+ Debugger 3
+ Debugger 4
+ None
+exeused=15
+ ${EXEEXT} (Default)
+ No Extension
+ .exe
+ .com
+ .bin
+ .prog
+ .pyc
+ .class
+ .java
+ .so
+ .dll
+ .lib
+ .o
+ .res
+ .inf
+codetemplatedirs=1
+ ${TEMPLATEDIR}
+toolmenus=0
+toolfiles=0
+toolparams=0
+fontnames=0
+scriptbeforecopy=
+scriptaftercopy=
+newprojectfiles=0
+newprojectfilesdest=0
+newfinames=3
+ Programme MSE
+ Unité MSE
+ Fichier texte MSE
+newfifilters=3
+ "*.pas" "*.pp"
+ "*.pas" "*.pp"
+ 
+newfiexts=3
+ pas
+ pas
+ 
+newfisources=3
+ ${TEMPLATEDIR}/fpc_mse/default/program.pas
+ ${TEMPLATEDIR}/fpc_mse/default/unit.pas
+ 
+newfonames=11
+ Mainform
+ Forme simple
+ Formulaire d‘amarrage
+ Module de données
+ Sous-formulaire
+ Scrollboxform
+ Tabform
+ Panneau de quai
+ Signaler
+ Forme de script
+ Forme héritée
+newfonamebases=11
+ form
+ form
+ form
+ module
+ form
+ form
+ form
+ form
+ report
+ script
+ form
+newfosources=11
+ ${TEMPLATEDIR}fpc_mse/default/mainform.pas
+ ${TEMPLATEDIR}fpc_mse/default/simpleform.pas
+ ${TEMPLATEDIR}fpc_mse/default/dockingform.pas
+ ${TEMPLATEDIR}fpc_mse/default/datamodule.pas
+ ${TEMPLATEDIR}fpc_mse/default/subform.pas
+ ${TEMPLATEDIR}fpc_mse/default/scrollboxform.pas
+ ${TEMPLATEDIR}fpc_mse/default/tabform.pas
+ ${TEMPLATEDIR}fpc_mse/default/dockpanelform.pas
+ ${TEMPLATEDIR}fpc_mse/default/report.pas
+ ${TEMPLATEDIR}fpc_mse/default/pascform.pas
+ ${TEMPLATEDIR}fpc_mse/default/inheritedform.pas
+newfoforms=11
+ ${TEMPLATEDIR}fpc_mse/default/mainform.mfm
+ ${TEMPLATEDIR}fpc_mse/default/simpleform.mfm
+ ${TEMPLATEDIR}fpc_mse/default/dockingform.mfm
+ ${TEMPLATEDIR}fpc_mse/default/datamodule.mfm
+ ${TEMPLATEDIR}fpc_mse/default/subform.mfm
+ ${TEMPLATEDIR}fpc_mse/default/scrollboxform.mfm
+ ${TEMPLATEDIR}fpc_mse/default/tabform.mfm
+ ${TEMPLATEDIR}fpc_mse/default/dockpanelform.mfm
+ ${TEMPLATEDIR}fpc_mse/default/report.mfm
+ ${TEMPLATEDIR}fpc_mse/default/pascform.mfm
+ ${TEMPLATEDIR}fpc_mse/default/inheritedform.mfm
+forcezorder=0
+stripmessageesc=0
+copymessages=0
+closemessages=0
+enablepurpose=0
+enablesource=1
+checkmethods=1
+colorerror=-1610612717
+colorwarning=-1610612712
+colornote=-1610612716
+colorhint=15134207
+usercolors=30
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+usercolorcomment=30
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+formatmacronames=0
+formatmacrovalues=0
+settingsfile=
+settingseditor=0
+settingsdebugger=0
+settingsstorage=0
+settingsprojecttree=0
+settingsautoload=0
+settingsautosave=0
+modulenames=0
+moduletypes=0
+modulefiles=0
+befcommandon=0
+makeoptionson=5
+ 4095
+ 4095
+ 4063
+ 4095
+ 32
+compilerusedon=29
+ 4095
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+debuggerusedon=6
+ 4095
+ 0
+ 0
+ 0
+ 0
+ 0
+exeusedon=15
+ 4095
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+comment_M=
+comment_B=
+comment_1=
+comment_2=
+comment_3=
+comment_4=
+comment_5=
+comment_6=
+comment_7=
+comment_8=
+comment_9=
+comment_0=
+project_name=
+project_creator=
+project_copyright=
+project_license=
+project_time=
+project_date=08:12:49 PM 02/05/2022
+project_comment=
+aftcommandon=0
+unitdirson=2
+ 69631
+ 69631
+macroon=0
+macronames=0
+macrovalues=0
+macrogroup=0
+groupcomments=10
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+toolsave=0
+toolhide=0
+toolparse=0
+toolmessages=0
+toolshortcuts=0
+fontalias=0
+fontancestors=0
+fontheights=0
+fontwidths=0
+fontoptions=0
+fontxscales=0
+expandprojectfilemacros=0
+loadprojectfile=0
+newinheritedforms=11
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+uid=0
+sourcefilemasks=5
+ "*.pas" "*.dpr" "*.lpr" "*.pp" "*.inc"
+ "*.c" "*.cc" "*.h"
+ "*.java"
+ "*.pyw"
+ "*.mfm"
+syntaxdeffiles=5
+ ${SYNTAXDEFDIR}pascal.sdef
+ ${SYNTAXDEFDIR}cpp.sdef
+ ${SYNTAXDEFDIR}java.sdef
+ ${SYNTAXDEFDIR}python.sdef
+ ${SYNTAXDEFDIR}objecttext.sdef
+filemasknames=3
+ Source
+ Formes
+ Tous les fichiers
+filemasks=3
+ "*.pp" "*.pas" "*.inc" "*.dpr" "*.lpr"
+ *.mfm
+ *
+showgrid=1
+snaptogrid=1
+moveonfirstclick=1
+noformdesignerdocking=0
+componenthints=1
+gridsizex=8
+gridsizey=8
+autoindent=1
+blockindent=1
+linenumberson=1
+rightmarginon=1
+rightmarginchars=80
+scrollheight=0
+tabstops=4
+spacetabs=0
+showtabs=0
+tabindent=0
+editfontname=mseide_source
+editfontheight=0
+editfontwidth=0
+editfontextraspace=0
+editfontcolor=-1879048183
+editbkcolor=-1879048186
+statementcolor=14745599
+pairmarkcolor=-1610612712
+editfontantialiased=1
+editmarkbrackets=1
+editmarkpairwords=1
+fpgdesigner=1
+backupfilecount=0
+encoding=1
+eolstyle=1
+trimtrailingwhitespace=0
+codetemplatedirs=1
+ ${TEMPLATEDIR}
+debugcommand=${DEBUGGER}
+debugoptions=
+debugtarget=
+runcommand=
+xtermcommand=xterm -S${PTSN}/${PTSH}
+remoteconnection=
+uploadcommand=
+gdbprocessor=auto
+gdbservercommand=
+gdbservercommandattach=
+beforeconnect=
+afterconnect=
+beforeload=
+afterload=
+beforerun=
+sourcebase=
+sourcedirs=3
+ ${MSELIBDIR}kernel/$TARGETOSDIR/
+ ${MSELIBDIR}*/
+ ./
+defines=0
+progparameters=
+progworkingdirectory=
+envvarnames=0
+envvarvalues=0
+defineson=0
+stoponexception=0
+valuehints=1
+activateonbreak=1
+raiseonbreak=1
+showconsole=1
+externalconsole=0
+settty=1
+gdbdownload=0
+downloadalways=0
+restartgdbbeforeload=0
+startupbkpt=0
+startupbkpton=0
+gdbsimulator=0
+gdbserverstartonce=0
+gdbloadtimeout=
+gdbserverwait=0
+nogdbserverexit=0
+gdbservertty=0
+exceptclassnames=1
+ EconvertError
+exceptignore=1
+ 0
+nodebugbeginend=0
+fpcgdbworkaround=1
+sigsettings=27
+ 1,1,T,F
+ 3,3,T,F
+ 4,4,T,F
+ 6,6,T,F
+ 7,7,T,F
+ 8,8,T,F
+ 9,9,T,F
+ 10,10,T,F
+ 11,11,T,F
+ 12,12,T,F
+ 13,13,T,F
+ 15,15,T,F
+ 16,16,T,F
+ 17,17,F,F
+ 18,18,T,F
+ 19,19,T,F
+ 20,20,T,F
+ 21,21,T,F
+ 22,22,T,F
+ 23,23,T,F
+ 24,24,T,F
+ 25,25,T,F
+ 26,26,T,F
+ 27,27,T,F
+ 28,28,T,F
+ 29,29,T,F
+ 30,30,T,F
+defaultmake=1
+[breakpoints]
+on=35
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+path=35
+ /home/fred/drumspract/main.pas
+ /home/fred/strumpract/uos.pas
+ /home/fred/strumpract/uos.pas
+ /home/fred/strumpract/src/uos_flat.pas
+ /home/fred/strumpract/src/uos_aac.pas
+ /home/fred/strumpract_dock/src/songplayer.pas
+ /home/fred/strumpract_dock/src/main.pas
+ /home/fred/strumpract_dock/src/main.pas
+ /home/fred/strumpract_dock/src/main.pas
+ /home/fred/strumpract/src/msefiledialog.pas
+ /home/fred/strumpract/src/strumpract.pas
+ /home/fred/strumpract/src/uos.pas
+ /home/fred/strumpract/src/main.pas
+ /home/fred/strumpract/src/songplayer.pas
+ /home/fred/strumpract/src/commander.pas
+ /home/fred/strumpract/src/drums.pas
+ /home/fred/strumpract/src/commander.pas
+ /home/fred/strumpract/src/drums.pas
+ /home/fred/strumpract/src/drums.pas
+ /home/fred/strumpract/src/drums.pas
+ /home/fred/strumpract/src/songplayer2.pas
+ /home/fred/strumpract/src/songplayer.pas
+ /home/fred/strumpract/src/songplayer2.pas
+ /home/fred/strumpract/src/songplayer2.pas
+ /home/fred/strumpract/src/main.pas
+ /home/fred/strumpract/src/filelistform.pas
+ /home/fred/strumpract/src/filelistform.mfm
+ /home/fred/strumpract/src/commander.pas
+ /home/fred/strumpract/src/uos.pas
+ /home/fred/strumpract/src/waveform.pas
+ /home/fred/strumpract/src/songplayer.pas
+ /home/fred/strumpract/src/waveform.pas
+ /home/fred/strumpract/src/songplayer.pas
+ /home/fred/strumpract/src/imagedancer.pas
+ /home/fred/strumpract/src/imagedancer.pas
+line=35
+ 553
+ 6389
+ 7495
+ 1766
+ 764
+ 88
+ 65
+ 137
+ 343
+ 587
+ 246
+ 5734
+ 2199
+ 1490
+ 326
+ 319
+ 571
+ 553
+ 773
+ 785
+ 701
+ 1566
+ 209
+ 1136
+ 4680
+ 491
+ 5
+ 793
+ 1518
+ 169
+ 1494
+ 368
+ 1717
+ 622
+ 1014
+address=35
+ 5007158
+ 7989638
+ 8000139
+ 7891945
+ 0
+ 5134581
+ 4995427
+ 4995427
+ 5003665
+ 7843321
+ 0
+ 7983948
+ 5024963
+ 5155424
+ 5186754
+ 5110905
+ 5190423
+ 5114840
+ 5118944
+ 5119045
+ 4653474
+ 5157019
+ 4646880
+ 4661851
+ 5081110
+ 4779520
+ 0
+ 5194885
+ 7919115
+ 5271480
+ 5155424
+ 5276214
+ 5159099
+ 5234779
+ 5244023
+addbkpt=35
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ignore=35
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+condition=35
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+panels=1
+ panel1
+units=
+ (
+ a=0,8229,6,Pascal Units
+ )
+cmodules=
+ (
+ a=0,8228,6,C Modules
+ )
+files=
+ (
+ a=0,8229,6,Text Files
+ )
+[componentstore]
+storedir=/home/fred/mseide-msegui/apps/ide/compstore/
+filename=
+[components]
+[selecteditpage]
+colwidth=100
+x=331
+y=131
+cx=704
+cy=473
+[progparams]
+progparamhistory=0
+workdirparamhistory=0
+envvarons=0
+[edit]
+hintwidth=314
+hintheight=200
+finddtext=uses
+findhistory=1
+ uses
+findoptions=1
+editpos=2
+ 0,4
+ 0,4
+bookmarks0=0
+bookmarks1=0
+sourcefiles=2
+ ${PROJECTDIR}/PO2MO.pas
+ ${PROJECTDIR}/POtoMO.pas
+relpaths=2
+ PO2MO.pas
+ POtoMO.pas
+ismoduletexts=2
+ 0
+ 0
+modules=0
+moduleoptions=0
+visiblemodules=0
+nomenumodules=0
+[sourcefo.files_tab]
+firsttab=0
+index=0
+[layout]
+windowlayout=521
+ [mainfo.basedock]
+ splitdir=2
+ useroptions=268450944
+ [mainfo]
+ splitdir=0
+ useroptions=301990011
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=51
+ y=62
+ cx=1224
+ cy=621
+ rcx=0
+ rcy=0
+ wsize=0
+ active=1
+ visible=1
+ [findmessagefo.findtext]
+ value=not inlined
+ history=3
+  not inlined
+  linux
+  used
+ [findmessagefo.casesensitive]
+ value=0
+ [findmessagefo.copytoclip]
+ value=1
+ [targetconsolefo]
+ splitdir=0
+ useroptions=268451945
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=493
+ y=171
+ cx=497
+ cy=314
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [threadsfo]
+ splitdir=0
+ useroptions=268451945
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=444
+ y=431
+ cx=418
+ cy=126
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [memoryfo]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=dialogfilesfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=100
+ y=100
+ cx=453
+ cy=354
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [memoryfo.add]
+ value=0
+ [memoryfo.memon]
+ value=0
+ [memoryfo.bitwidth]
+ value=0
+ [memoryfo.cnt]
+ value=0
+ [disassfo]
+ splitdir=0
+ useroptions=268451947
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=162
+ y=502
+ cx=564
+ cy=210
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [findinfilefo]
+ splitdir=0
+ useroptions=268451947
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=239
+ y=115
+ cx=678
+ cy=414
+ rcx=0
+ rcy=0
+ [projecttreefo]
+ splitdir=0
+ useroptions=268484715
+ parent=mainfo.panel1.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=205
+ cy=451
+ rcx=0
+ rcy=0
+ [projecttreefo.grid]
+ propcolwidthref=88
+ width0=117
+ sortdescend0=0
+ width1=86
+ sortdescend1=0
+ sorted=0
+ col=0
+ row=2
+ rowheight=17
+ [stackfo]
+ splitdir=0
+ useroptions=268460137
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=423
+ y=321
+ cx=344
+ cy=155
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo]
+ splitdir=0
+ useroptions=268451945
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=537
+ y=26
+ cx=483
+ cy=210
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [watchpointsfo.grid]
+ propcolwidthref=332
+ sortdescend0=0
+ values1=0
+ values1_ci=-1
+ width1=33
+ sortdescend1=0
+ values2=0
+ width2=149
+ sortdescend2=0
+ width4=34
+ sortdescend4=0
+ values5=0
+ values5_ci=-1
+ width5=38
+ sortdescend5=0
+ values6=0
+ width6=172
+ sortdescend6=0
+ [breakpointsfo]
+ splitdir=0
+ useroptions=268451947
+ stackedunder=conflangfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=107
+ y=404
+ cx=477
+ cy=128
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [breakpointsfo.bkptson]
+ value=0
+ [objectinspectorfo.grid]
+ propcolwidthref=242
+ width0=107
+ sortdescend0=0
+ width1=129
+ sortdescend1=0
+ [symbolfo]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=142
+ y=257
+ cx=361
+ cy=137
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [symbolfo.grid]
+ propcolwidthref=207
+ values0=18
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ width0=111
+ sortdescend0=0
+ width1=125
+ sortdescend1=0
+ [symbolfo.symbol]
+ [watchfo]
+ splitdir=0
+ useroptions=268460137
+ parent=mainfo.basedock
+ visible=0
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=53
+ y=0
+ cx=247
+ cy=44
+ rcx=1262
+ rcy=583
+ [watchfo.grid]
+ propcolwidthref=121
+ values0=0
+ values0_ci=-1
+ sortdescend0=0
+ values1=0
+ width1=66
+ sortdescend1=0
+ values3=0
+ values3_ci=-1
+ sortdescend3=0
+ values4=0
+ values4_ci=-1
+ width4=13
+ sortdescend4=0
+ [watchfo.watchon]
+ [watchfo.expression]
+ [watchfo.watcheson]
+ value=0
+ [messagefo]
+ splitdir=0
+ useroptions=268517483
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=507
+ cx=1212
+ cy=93
+ rcx=0
+ rcy=0
+ [componentstorefo]
+ splitdir=0
+ useroptions=268460155
+ stackedunder=
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=100
+ y=100
+ cx=445
+ cy=354
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [componentstorefo.grid]
+ propcolwidthref=435
+ width0=111
+ sortdescend0=0
+ sortdescend1=0
+ width2=160
+ sortdescend2=0
+ width3=185
+ sortdescend3=0
+ [componentstorefo.storefiledialog]
+ filenames=1
+  /home/fred/mseide-msegui/apps/ide/compstore/
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ [componentstorefo.groupfiledialog]
+ filenames=1
+  /home/fred/mseide-msegui/apps/ide/compstore/
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ [componentstorefo.compfiledialog]
+ filenames=0
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ lastdir=
+ filehistory=0
+ filefilterindex=0
+ filefilter=
+ [componentpalettefo]
+ splitdir=0
+ useroptions=268460139
+ stackedunder=
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=240
+ y=139
+ cx=956
+ cy=77
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [componentpalettefo.componentpages]
+ activetab=0
+ [debuggerfo]
+ splitdir=0
+ useroptions=24683
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=0
+ cx=1212
+ cy=50
+ rcx=0
+ rcy=0
+ [debuggerfo.basedock]
+ splitdir=2
+ useroptions=268582019
+ parent=debuggerfo.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=1212
+ ncy=57
+ x=0
+ y=0
+ cx=1212
+ cy=57
+ rcx=0
+ rcy=0
+ [debuggerfo.edit_options]
+ value=X
+ [debuggerfo.edit_compilernum]
+ value=0
+ [debuggerfo.edit_compiler]
+ value=Pascal
+ [debuggerfo.file_history]
+ value=/home/fred/POtoMO/PO2MO.pas
+ history=1
+  /home/fred/POtoMO/PO2MO.pas
+ [debuggerfo.project_options]
+ value=1
+ [debuggerfo.hints]
+ value=1
+ [sourcefo]
+ splitdir=0
+ useroptions=16489
+ parent=mainfo.panel1.container
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=208
+ y=0
+ cx=1004
+ cy=451
+ rcx=0
+ rcy=0
+ [sourcefo.files_tab]
+ firsttab=0
+ index=0
+ [confideufo.usedefaulteditoroptions]
+ value=0
+ [cpuc86_64fo]
+ irqoff=0
+ splitdir=0
+ useroptions=268451947
+ stackedunder=confdebuggerfo
+ parent=
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=183
+ y=113
+ cx=352
+ cy=277
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=0
+ [mainfo.panel1]
+ splitdir=1
+ useroptions=302087659
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=53
+ cx=1212
+ cy=451
+ rcx=0
+ rcy=0
+[targetconsole]
+finddtext=
+findhistory=0
+findoptions=1

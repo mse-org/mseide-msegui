@@ -89,7 +89,7 @@ var
 implementation
 
 uses
-  form_conflang,
+  captionpodemo,
   form_potools_mfm;
 
 procedure theaderfo.extractcaption(const Sender: TObject; fn: msestring);
@@ -245,7 +245,7 @@ var
   imodalresultty: modalresultty;
   iextendedty: extendedty;
   istockcaptionty: stockcaptionty;
-  imyformty: myformty;
+  iconflangfoty: conflangfoty;
 begin
 
   setlength(defaultresult, length(en_modalresulttext));
@@ -268,9 +268,9 @@ begin
     defaultresult[y + Ord(iextendedty)] := en_extendedtext[(iextendedty)];
 
   y := length(defaultresult);
-  setlength(defaultresult, length(en_myformtext) + y);
-  for imyformty := Low(myformty) to High(myformty) do
-    defaultresult[y + Ord(imyformty)] := en_myformtext[(imyformty)];
+  setlength(defaultresult, length(en_conflangfotext) + y);
+  for iconflangfoty := Low(conflangfoty) to High(conflangfoty) do
+    defaultresult[y + Ord(iconflangfoty)] := en_conflangfotext[(iconflangfoty)];
 
   // Languages must be the last in po
   y     := length(defaultresult);

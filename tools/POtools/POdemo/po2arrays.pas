@@ -30,7 +30,7 @@ implementation
 uses
   msestockobjects,
   mseconsts,
-  form_conflang;
+  captionpodemo;
 
 var
   constvaluearray: array of msestring;
@@ -124,9 +124,9 @@ var
   default_modalresulttext, default_modalresulttextnoshortcut, default_stockcaption,
   default_langnamestext, default_extendedtext: array of msestring;
   // Your enum
-  imyformty: myformty;
+  iconflangfoty: conflangfoty;
   // Your array
-  default_myformtext: array of msestring;
+  default_conflangfotext: array of msestring;
 begin
 
   str1 := ExtractFilePath(ParamStr(0)) + 'lang' + directoryseparator + 'podemo_' + alang + '.po';
@@ -152,10 +152,10 @@ begin
       lang_extended[Ord(iextendedty)] :=
         en_extendedtext[(iextendedty)];
 
-    setlength(lang_myform, length(en_myformtext));
-    for imyformty := Low(myformty) to High(myformty) do
-      lang_myform[Ord(imyformty)] :=
-        en_myformtext[(imyformty)];
+    setlength(lang_conflangfo, length(en_conflangfotext));
+    for iconflangfoty := Low(conflangfoty) to High(conflangfoty) do
+      lang_conflangfo[Ord(iconflangfoty)] :=
+        en_conflangfotext[(iconflangfoty)];
 
     findpofiles();
 
@@ -309,10 +309,10 @@ begin
       default_extendedtext[Ord(iextendedty)] :=
         en_extendedtext[(iextendedty)];
 
-    setlength(default_myformtext, length(en_myformtext));
-    for imyformty := Low(myformty) to High(myformty) do
-      default_myformtext[Ord(imyformty)] :=
-        en_myformtext[(imyformty)];
+    setlength(default_conflangfotext, length(en_conflangfotext));
+    for iconflangfoty := Low(conflangfoty) to High(conflangfoty) do
+      default_conflangfotext[Ord(iconflangfoty)] :=
+        en_conflangfotext[(iconflangfoty)];
 
     setlength(default_langnamestext, length(en_langnamestext));
     for x := 0 to length(en_langnamestext) - 1 do
@@ -393,22 +393,22 @@ begin
 
     end;
 
-    setlength(lang_myform, length(default_myformtext));
+    setlength(lang_conflangfo, length(default_conflangfotext));
 
-    for x := 0 to length(default_myformtext) - 1 do
+    for x := 0 to length(default_conflangfotext) - 1 do
     begin
-      dosearch(default_myformtext, x);
+      dosearch(default_conflangfotext, x);
 
       if hasfound then
       else
-        astrt := default_myformtext[x];
+        astrt := default_conflangfotext[x];
       if trim(astrt) = '' then
-        astrt := default_myformtext[x];
+        astrt := default_conflangfotext[x];
 
       astrt := utf8StringReplace(astrt, ',', '‚', [rfReplaceAll]);
       astrt := utf8StringReplace(astrt, #039, '‘', [rfReplaceAll]);
 
-      lang_myform[x] := astrt;
+      lang_conflangfo[x] := astrt;
     end;
 
     setlength(lang_langnames, length(default_langnamestext));

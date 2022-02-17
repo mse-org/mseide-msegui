@@ -1,0 +1,261 @@
+object headerfo: theaderfo
+  visible = False
+  bounds_x = 495
+  bounds_y = 203
+  bounds_cx = 427
+  bounds_cy = 482
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.bounds = (
+    0
+    0
+    427
+    482
+  )
+  options = [fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  statfile = conflangfo.tstatfile1
+  caption = 'Po <> Po converter'
+  windowopacity = -Inf
+  oncreate = oncreateform
+  oncreated = oncreated
+  moduleclassname = 'tmseform'
+  object memopoheader: tmemodialogedit
+    frame.caption = 'Default PO header'
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.buttons.count = 1
+    frame.buttons.items = <    
+      item
+        imagenr = 17
+      end>
+    frame.button.imagenr = 17
+    frame.outerframe = (
+      0
+      18
+      0
+      0
+    )
+    bounds_x = 8
+    bounds_y = 41
+    bounds_cx = 409
+    bounds_cy = 36
+    value = '# SOME DESCRIPTIVE TITLE.'#10'# Copyright (C) YEAR THE PACKAGE''S COPYRIGHT HOLDER'#10'# This file is distributed under the same license as the PACKAGE package.'#10'# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.'#10'#'#10'#, fuzzy'#10'msgid ""'#10'msgstr ""'#10'"Project-Id-Version: \n"'#10'"Report-Msgid-Bugs-To: \n"'#10'"POT-Creation-Date: 2019-03-04 23:54+0300\n"'#10'"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"'#10'"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"'#10'"Language-Team: LANGUAGE <LL@li.org>\n"'#10'"Language: \n"'#10'"MIME-Version: 1.0\n"'#10'"Content-Type: text/plain; charset=UTF-8\n"'#10'"Content-Transfer-Encoding: 8bit\n"'
+    reffontheight = 15
+  end
+  object tbutton2: tbutton
+    taborder = 1
+    bounds_x = 25
+    bounds_y = 268
+    bounds_cx = 377
+    bounds_cy = 117
+    state = [as_localdisabled, as_localcaption, as_localonexecute]
+    caption = 'After creating a translation from "podemo_empty.txt"   (by Google translate for example and saved as  "podemo_xz.txt" ("xz" is the code lang)).  Check if Google keep all the original lang code and did not translate some.  Convert it into Po file with original "msgid" + translated "msgstr" clicking here.    When done, paste that new po file into /lang directory.'
+    textflags = [tf_left, tf_xcentered, tf_ycentered, tf_wordbreak]
+    onexecute = createnew
+  end
+  object alldir: tbooleanedit
+    frame.caption = 'All files of directory'
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.outerframe = (
+      0
+      2
+      117
+      2
+    )
+    taborder = 2
+    bounds_x = 264
+    bounds_y = 22
+    bounds_cx = 130
+    bounds_cy = 17
+    visible = False
+  end
+  object tbutton4: tbutton
+    Tag = 1
+    taborder = 4
+    bounds_x = 16
+    bounds_y = 152
+    bounds_cx = 402
+    bounds_cy = 52
+    state = [as_localdisabled, as_localcaption, as_localonexecute]
+    caption = 'Create new "podemo_empty.po" file ready to be translated.   Paste a copy of it in /lang directory if arrays were updated.'
+    textflags = [tf_left, tf_xcentered, tf_ycentered, tf_wordbreak]
+    onexecute = createnew
+  end
+  object outputdir: tfilenameeditx
+    frame.caption = 'Output Directory'
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.buttons.count = 1
+    frame.buttons.items = <    
+      item
+        imagenr = 17
+      end>
+    frame.button.imagenr = 17
+    frame.outerframe = (
+      0
+      18
+      0
+      0
+    )
+    taborder = 5
+    bounds_x = 32
+    bounds_y = 100
+    bounds_cx = 370
+    bounds_cy = 39
+    controller.fontheight = 0
+    controller.fontname = 'stf_default'
+    controller.fontcolor = -1610612734
+    controller.backcolor = -2147483647
+    controller.nopanel = False
+    controller.compact = False
+    controller.showoptions = False
+    controller.hidehistory = False
+    controller.hideicons = False
+    controller.showhidden = False
+    controller.options = [fdo_directory, fdo_savelastdir]
+    reffontheight = 15
+  end
+  object tlabel1: tlabel
+    optionswidget1 = [ow1_fontglyphheight]
+    taborder = 6
+    bounds_x = 72
+    bounds_y = 424
+    bounds_cx = 298
+    bounds_cy = 43
+    caption = 'Sorry this form is not yet translated, feel free to do it as exercice! '
+    font.height = 16
+    font.name = 'stf_default'
+    font.localprops = [flp_height]
+    textflags = [tf_ycentered, tf_wordbreak]
+    reffontheight = 19
+  end
+  object tbutton3: tbutton
+    Tag = 2
+    taborder = 7
+    bounds_x = 16
+    bounds_y = 216
+    bounds_cx = 402
+    bounds_cy = 36
+    state = [as_localdisabled, as_localcaption, as_localonexecute]
+    caption = 'Create new "podemo_empty.txt" file ready for Google Translate'
+    onexecute = createnew
+  end
+  object tbutton5: tbutton
+    Tag = 3
+    taborder = 8
+    bounds_x = 16
+    bounds_y = 8
+    bounds_cx = 338
+    bounds_cy = 28
+    state = [as_localdisabled, as_localcaption, as_localonexecute]
+    caption = 'Extract all the captions from a form.mfm file '
+    onexecute = createnew
+  end
+  object tmemoedit1: tmemoedit
+    frame.localprops = []
+    frame.localprops1 = []
+    frame.sbhorz.pagesize = 1
+    frame.sbvert.pagesize = 1
+    taborder = 9
+    visible = False
+    bounds_x = 0
+    bounds_y = 88
+    bounds_cx = 427
+    bounds_cy = 389
+    anchors = [an_left, an_top, an_right, an_bottom]
+    reffontheight = 15
+  end
+  object tbutton1: tbutton
+    taborder = 10
+    bounds_x = 367
+    bounds_y = 8
+    bounds_cx = 50
+    bounds_cy = 28
+    anchors = [an_top, an_right]
+    state = [as_invisible, as_localinvisible, as_localcaption, as_localonexecute]
+    caption = 'Close'
+    onexecute = onclose
+  end
+  object paneldone: tgroupbox
+    frame.colorclient = 16765345
+    frame.localprops = [frl_colorclient]
+    frame.localprops1 = []
+    taborder = 3
+    visible = False
+    bounds_x = 88
+    bounds_y = 237
+    bounds_cx = 427
+    bounds_cy = 476
+    anchors = [an_left, an_top, an_right, an_bottom]
+    object labdone: tlabel
+      optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autoheight]
+      color = -2147483645
+      bounds_x = 44
+      bounds_y = 197
+      bounds_cx = 353
+      bounds_cy = 48
+      caption = 'Done.'
+      font.height = 40
+      font.name = 'stf_default'
+      font.localprops = [flp_height]
+      textflags = [tf_xcentered, tf_ycentered]
+      reffontheight = 48
+    end
+  end
+  object ttimer1: ttimer
+    interval = 500000
+    options = [to_single]
+    ontimer = ontime
+    left = 80
+    top = 112
+  end
+  object sc: tstringcontainer
+    strings.data = (
+      'Working'
+      'Done'
+    )
+    left = 16
+    top = 120
+  end
+  object impexpfiledialog: tfiledialogx
+    statfile = conflangfo.tstatfile1
+    controller.fontheight = 0
+    controller.fontname = 'stf_default'
+    controller.fontcolor = -1610612734
+    controller.backcolor = -2147483647
+    controller.nopanel = False
+    controller.icon.options = [bmo_masked]
+    controller.icon.origformat = 'png'
+    controller.icon.image = {
+      00000000020000001000000010000000F0010000000000000000000000000000
+      000000000000000000000000000000000000000000EF001531FFFF014AFFFF01
+      6BFFFF01A5FFFF01B5FFFF01A5FFFF0100EF00096BFFF70131FFFF0152FFFF01
+      7BFFFF01B5FFFF01C6FFFF01A5FFFF0200EF000708EF080118FFAD0139FFFF01
+      5AFFFF018CFFFF01C6FFFF01D6FFFF01A5FFFF015AFFB50129FF290100EF0005
+      31EF310108EF080118FFAD0142FFFF016BFFFF01A5FFFF01E7FFFF01DEFFFF01
+      A5FFFF0152FFB50129FF290142FF420100EF000431EF310108EF080118FF5A01
+      42FFF7017BFFFF01C6FFFF03A5FFFF014AFF840129FF290139F7390100EF0004
+      31EF310108EF080118FF21014AFFCE0194FFFF01DEFFFF01C6FFFF029CFFE701
+      42FF4A0121FF210139F7390100EF000431EF310108EF080118FF180152FF6B01
+      DEFFFF01C6FFFF0394FFA50142FF420121FF210139F7390100EF000431EF3101
+      08E7080110F7100139F73901DEF7DE01C6FFFF02DEF7DE015AFF5A0121FF2101
+      10F7100131EF310100EF000431EF310100E7000208E7080173EF7301C6FFFF02
+      73EF730110E7100100E7000231EF310100EF000431EF310100E7000310E71001
+      29DE290210E7100100E7000331EF310100EF000431EF310100E7000200DE0005
+      00E7000331EF310100EF000431EF310100E7000A31EF310100EF000431EF3101
+      00E7000A31EF310100EF000573EF730100DE000100E7000500DE000273EF7301
+      00EF001300000000E0070000F00F0000F81F0000FC3F0000FC3F0000FC3F0000
+      FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000F81F0000
+      00000000
+    }
+    controller.compact = False
+    controller.showoptions = False
+    controller.hidehistory = False
+    controller.hideicons = False
+    controller.showhidden = False
+    controller.captionopen = 'Choose a Po file'
+    left = 150
+    top = 86
+  end
+end
