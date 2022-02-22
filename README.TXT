@@ -1,11 +1,11 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2021-10-03 Version 5.6.4.
+2022-02-21 Version 5.6.6.
 Copyright (c) 1999-2021 by Martin Schreiber and friends.
 
 - Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2 or 3.3.1.
-- For FreeBSD-x86_64, Linux-i386, Linux-x86_64, Linux-arm(Raspberry Pi),
-  Windows-i386, Windows-x86_64.
+- For FreeBSD-x86_64, Linux-i386, Linux-x86_64, Linux-Rpi-arm32,
+  Linux-Rpi-aarch64,  Windows-i386, Windows-x86_64.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is utf-16.
 - Uses anti aliased fonts on Linux (Xft).

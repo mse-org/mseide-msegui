@@ -1,5 +1,10 @@
 MSEide+MSEgui changes version history
 **********************************************
+Version 5.6.6
+2022-02-21
+ Added option to dynamic loading of PO-GetText files ( -dmse_dynpo parameter).
+Compatible with trunk fpc 3.3.1. date: 2022-02-21.
+
 Version 5.6.4
 2021-10-03
  Added Zeos DB mse components.

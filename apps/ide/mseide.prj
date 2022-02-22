@@ -57,8 +57,10 @@ findinfiledialog=63
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=ifndef
+ value=copyrighttext
  history=20
+  copyrighttext
+  versiontext
   ifndef
   addrow([s
   ac_stoperror
@@ -71,14 +73,12 @@ findinfiledialog=63
   filedialogfo
   controller.panel
   dialogx
-  versiontext
   5.0.0
   4.6.3
   RunCommandSleepTime
   about
   {$warn
   warnon
-  inline
  [findinfileadialogfo]
  stackedunder=
  x=309
@@ -114,7 +114,7 @@ options=114
  sortdescend6=0
  width7=56
  sortdescend7=0
- width8=82
+ width8=79
  sortdescend8=0
  width9=322
  sortdescend9=0
@@ -540,7 +540,7 @@ makeoptionson=10
  508
  255
  4095
- 4
+ 0
  0
 compilerusedon=29
  3879
@@ -875,30 +875,35 @@ findhistory=20
  filedialog
  template
 findoptions=1
-editpos=5
+editpos=6
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,447
+ 0,48
+ 0,36
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
-sourcefiles=5
+bookmarks5=0
+sourcefiles=6
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/mseide.pas
- /home/fred/mseide-msegui/apps/ide/main.pas
-relpaths=5
+ ${PROJECTDIR}/main.pas
+ /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+relpaths=6
  mseide.pas
  sourceform.pas
  actionsmodule.pas
  mseide.pas
  main.pas
-ismoduletexts=5
+ ../lib/common/kernel/msegui.pas
+ismoduletexts=6
+ 0
  0
  0
  0
@@ -1039,7 +1044,7 @@ windowlayout=549
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -1055,7 +1060,7 @@ windowlayout=549
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=mainfo
+ stackedunder=findinfilefo
  parent=
  mdistate=3
  nx=0
@@ -1080,7 +1085,7 @@ windowlayout=549
  sorted=0
  col=1
  row=0
- rowheight=16
+ rowheight=17
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1325,7 +1330,7 @@ windowlayout=549
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1382,11 +1387,11 @@ windowlayout=549
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/msegui_dynpo/demo/po2arrays.pas
+ value=/home/fred/mseide-msegui/apps/ide/main.pas
  history=10
+  /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/msegui_dynpo/demo/po2arrays.pas
   /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
-  /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts.pas
   /home/fred/mseide-msegui (copy 1)/lib/common/lang_consts/mseconsts.pas
@@ -1395,7 +1400,7 @@ windowlayout=549
   /home/fred/ideu_captionideu/src/ideusettings.pas
   /home/fred/ideu_captionideu/src/potools.pas
  [debuggerfo.project_options]
- value=1
+ value=6
  [debuggerfo.hints]
  value=1
  [sourcefo]
