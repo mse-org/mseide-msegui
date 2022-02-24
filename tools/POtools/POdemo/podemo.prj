@@ -21,7 +21,7 @@ order18=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/tools/POtools/POdemo
 projectfilename=/home/fred/mseide-msegui/tools/POtools/POdemo/podemo.prj
-findinfiledialog=54
+findinfiledialog=55
  [findinfileadialogfo.subdirs]
  value=1
  [findinfileadialogfo.incurrentfile]
@@ -31,9 +31,9 @@ findinfiledialog=54
  [findinfileadialogfo.wholeword]
  value=0
  [findinfileadialogfo.indirectories]
- value=0
- [findinfileadialogfo.inprojectdir]
  value=1
+ [findinfileadialogfo.inprojectdir]
+ value=0
  [findinfileadialogfo.casesensitive]
  value=0
  [findinfileadialogfo.mask]
@@ -53,8 +53,9 @@ findinfiledialog=54
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=_dynpo
- history=15
+ value=lang_modalresult
+ history=16
+  lang_modalresult
   _dynpo
   mainform
   modalresulttext
@@ -212,8 +213,8 @@ options=114
  index=2
  [projectoptionsfo]
  stackedunder=
- x=270
- y=121
+ x=567
+ y=189
  cx=724
  cy=574
 settings=8
@@ -463,14 +464,17 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=0
-moduletypes=0
-modulefiles=0
+modulenames=1
+ STOCKDATA
+moduletypes=1
+ TSTOCKDATA
+modulefiles=1
+ /home/fred/mseide-msegui/lib/common/lang_consts/msestockobjects.mfm
 befcommandon=0
 makeoptionson=6
  4095
  4095
- 4059
+ 4063
  4095
  4095
  60
@@ -787,34 +791,48 @@ findhistory=20
  '2'
  sc_cancelspeech
 findoptions=1
-editpos=3
+editpos=5
+ 0,0
  0,-1073741823
- 0,32
- 0,8
+ 0,-1073741823
+ 0,-1073741823
+ 0,24
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
-sourcefiles=3
- ${PROJECTDIR}/podemo.pas
- /home/fred/mseide-msegui/tools/POtools/POdemo/po2arrays.pas
- /home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
-relpaths=3
+bookmarks3=0
+bookmarks4=0
+sourcefiles=5
+ /home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
+ ${PROJECTDIR}/po2arrays.pas
+ ${PROJECTDIR}/captionpodemo.pas
+ /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts.pas
+ /home/fred/mseide-msegui/lib/common/lang_consts/msestockobjects.pas
+relpaths=5
  podemo.pas
  po2arrays.pas
  captionpodemo.pas
-ismoduletexts=3
+ lib/common/lang_consts/mseconsts.pas
+ ../../lib/common/lang_consts/msestockobjects.pas
+ismoduletexts=5
  0
  0
  0
-modules=0
-moduleoptions=0
-visiblemodules=0
-nomenumodules=0
+ 0
+ 0
+modules=1
+ /home/fred/mseide-msegui/lib/common/lang_consts/msestockobjects.mfm
+moduleoptions=1
+ 0
+visiblemodules=1
+ -1
+nomenumodules=1
+ 0
 [sourcefo.files_tab]
 firsttab=0
-index=2
+index=0
 [layout]
-windowlayout=537
+windowlayout=558
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -939,8 +957,8 @@ windowlayout=537
  ny=0
  ncx=0
  ncy=0
- x=239
- y=115
+ x=333
+ y=133
  cx=678
  cy=414
  rcx=0
@@ -1275,8 +1293,10 @@ windowlayout=537
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
- history=14
+ value=/home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
+ history=16
+  /home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
+  /home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
   /home/fred/msegui_dynpo-mod/modemo.pas
   /home/fred/msegui_dynpo-mod/captionmodemo.pas
   /home/fred/strumpract/src/status.pas
@@ -1313,7 +1333,7 @@ windowlayout=537
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=2
+ index=0
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1352,6 +1372,25 @@ windowlayout=537
  cy=456
  rcx=0
  rcy=0
+ [_mse_stockdata_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=projecttreefo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=129
+ y=57
+ cx=198
+ cy=85
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
 [targetconsole]
 finddtext=
 findhistory=0

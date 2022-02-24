@@ -18,6 +18,7 @@ object projectfo: tprojectfo
   options = [fo_closeonesc, fo_savepos, fo_savestate]
   statfile = projectstat
   caption = 'Edit Translate Project'
+  windowopacity = -Inf
   onlayout = childscaled
   moduleclassname = 'tmseform'
   object impexpencoding: tenumtypeedit
@@ -26,28 +27,33 @@ object projectfo: tprojectfo
     frame.localprops = []
     frame.localprops1 = []
     frame.button.color = -2147483646
+    frame.buttons.count = 1
+    frame.buttons.items = <    
+      item
+        color = -2147483646
+      end>
     frame.outerframe = (
       0
       0
-      126
+      160
       0
     )
     taborder = 6
     bounds_x = 8
-    bounds_y = 476
-    bounds_cx = 226
-    bounds_cy = 19
+    bounds_y = 474
+    bounds_cx = 260
+    bounds_cy = 21
     anchors = [an_left, an_bottom]
     statfile = projectstat
     valuedefault = 1
-    min = 0
-    max = 2
+    valuemin = 0
+    valuemax = 2
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
       end>
     oninit = impexpencinit
-    reffontheight = 13
+    reffontheight = 15
   end
   object grid: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets]
@@ -61,46 +67,46 @@ object projectfo: tprojectfo
     anchors = [an_top]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_colchangeontabkey, og_wrapcol, og_autopopup]
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
-        height = 15
+        height = 17
         captions.count = 3
-        captions.items = <
+        captions.items = <        
           item
             caption = 'Rootname'
             textflags = []
-          end
+          end        
           item
             caption = 'File'
             textflags = []
-          end
+          end        
           item
             caption = 'Kind'
             textflags = []
           end>
       end>
     datacols.count = 3
-    datacols.items = <
+    datacols.items = <    
       item[rootname]
         width = 71
         options = [co_readonly, co_savevalue, co_savestate]
         widgetname = 'rootname'
         dataclass = tgridmsestringdatalist
-      end
+      end    
       item[filename]
         width = 479
         options = [co_fill, co_savevalue]
         widgetname = 'filename'
         dataclass = tgridmsestringdatalist
-      end
+      end    
       item[filekind]
         width = 126
         widgetname = 'filekind'
         dataclass = tgridenumdatalist
       end>
-    datarowheight = 15
+    datarowheight = 17
     statfile = projectstat
-    reffontheight = 13
+    reffontheight = 15
     object rootname: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
       color = -1879048185
@@ -113,10 +119,10 @@ object projectfo: tprojectfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 71
-      bounds_cy = 15
+      bounds_cy = 17
       optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
-      reffontheight = 13
+      reffontheight = 15
     end
     object filename: tfilenameedit
       frame.levelo = 0
@@ -124,7 +130,7 @@ object projectfo: tprojectfo
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.localprops1 = []
       frame.buttons.count = 1
-      frame.buttons.items = <
+      frame.buttons.items = <      
         item
           color = -2147483646
           imagenr = 17
@@ -136,11 +142,11 @@ object projectfo: tprojectfo
       bounds_x = 72
       bounds_y = 0
       bounds_cx = 479
-      bounds_cy = 15
+      bounds_cy = 17
       ondataentered = filenamedataentered
       controller.historymaxcount = 0
       controller.captionopen = 'Select unit or form file'
-      reffontheight = 13
+      reffontheight = 15
     end
     object filekind: tenumtypeedit
       optionswidget1 = [ow1_fontglyphheight]
@@ -149,18 +155,23 @@ object projectfo: tprojectfo
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.localprops1 = []
       frame.button.color = -2147483646
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -2147483646
+        end>
       taborder = 3
       visible = False
       bounds_x = 552
       bounds_y = 0
       bounds_cx = 126
-      bounds_cy = 15
+      bounds_cy = 17
       dropdown.cols.count = 1
-      dropdown.cols.items = <
+      dropdown.cols.items = <      
         item
         end>
       oninit = filekindoninit
-      reffontheight = 13
+      reffontheight = 15
     end
   end
   object datafilename: tfilenameedit
@@ -168,7 +179,7 @@ object projectfo: tprojectfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
         color = -2147483646
         imagenr = 17
@@ -177,15 +188,15 @@ object projectfo: tprojectfo
     frame.button.imagenr = 17
     frame.outerframe = (
       0
-      16
+      18
       0
       0
     )
     taborder = 1
     bounds_x = 0
-    bounds_y = 0
+    bounds_y = -2
     bounds_cx = 683
-    bounds_cy = 35
+    bounds_cy = 39
     anchors = [an_top]
     statfile = projectstat
     controller.filterlist.data = (
@@ -200,7 +211,7 @@ object projectfo: tprojectfo
     )
     controller.defaultext = 'trd'
     controller.historymaxcount = 0
-    reffontheight = 13
+    reffontheight = 15
   end
   object grid2: twidgetgrid
     optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_focusbackonesc, ow_destroywidgets]
@@ -214,37 +225,37 @@ object projectfo: tprojectfo
     anchors = [an_top, an_bottom]
     optionsgrid = [og_colsizing, og_rowmoving, og_keyrowmoving, og_rowinserting, og_rowdeleting, og_focuscellonenter, og_autofirstrow, og_autoappend, og_wrapcol, og_autopopup]
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
-        height = 15
+        height = 17
         captions.count = 2
-        captions.items = <
+        captions.items = <        
           item
             caption = 'Language'
             textflags = []
-          end
+          end        
           item
             caption = 'Directory'
             textflags = []
           end>
       end>
     datacols.count = 2
-    datacols.items = <
+    datacols.items = <    
       item[lang]
         width = 94
         widgetname = 'lang'
         dataclass = tgridmsestringdatalist
-      end
+      end    
       item[dir]
         width = 583
         options = [co_fill, co_savevalue]
         widgetname = 'dir'
         dataclass = tgridmsestringdatalist
       end>
-    datarowheight = 15
+    datarowheight = 17
     statfile = projectstat
     onrowsdeleted = langdeleted
-    reffontheight = 13
+    reffontheight = 15
     object lang: tstringedit
       optionswidget1 = [ow1_fontglyphheight]
       frame.levelo = 0
@@ -256,8 +267,8 @@ object projectfo: tprojectfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 94
-      bounds_cy = 15
-      reffontheight = 13
+      bounds_cy = 17
+      reffontheight = 15
     end
     object dir: tdirdropdownedit
       frame.levelo = 0
@@ -265,13 +276,18 @@ object projectfo: tprojectfo
       frame.localprops = [frl_levelo, frl_colorclient]
       frame.localprops1 = []
       frame.button.color = -2147483646
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          color = -2147483646
+        end>
       taborder = 2
       visible = False
       bounds_x = 95
       bounds_y = 0
       bounds_cx = 583
-      bounds_cy = 15
-      reffontheight = 13
+      bounds_cy = 17
+      reffontheight = 15
     end
   end
   object splitter: tsplitter
@@ -291,28 +307,28 @@ object projectfo: tprojectfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
         imagenr = 17
       end>
     frame.button.imagenr = 17
     frame.outerframe = (
       0
-      16
+      18
       0
       0
     )
     taborder = 2
     onshowhint = showhintexe
     bounds_x = 0
-    bounds_y = 144
+    bounds_y = 142
     bounds_cx = 644
-    bounds_cy = 35
+    bounds_cy = 39
     anchors = [an_left, an_top, an_right]
     statfile = projectstat
     value = '${COMPILER} -Fu${MSELIBDIR}i18n ${LIBFILE}'
     onsetvalue = makecommandsetvalue
-    reffontheight = 13
+    reffontheight = 15
   end
   object makeon: tbooleanedit
     frame.caption = 'on'
@@ -320,16 +336,16 @@ object projectfo: tprojectfo
     frame.localprops = []
     frame.localprops1 = []
     frame.outerframe = (
-      0
-      16
-      1
+      2
+      18
+      2
       0
     )
     taborder = 3
-    bounds_x = 656
-    bounds_y = 149
-    bounds_cx = 14
-    bounds_cy = 29
+    bounds_x = 654
+    bounds_y = 147
+    bounds_cx = 17
+    bounds_cy = 31
     anchors = [an_top, an_right]
     statfile = projectstat
     value = True
@@ -361,70 +377,70 @@ object projectfo: tprojectfo
     frame.localprops1 = []
     frame.outerframe = (
       0
-      16
+      18
       0
       0
     )
     taborder = 9
     bounds_x = 0
-    bounds_y = 56
+    bounds_y = 54
     bounds_cx = 683
-    bounds_cy = 35
+    bounds_cy = 39
     anchors = [an_top]
     statfile = projectstat
-    reffontheight = 13
+    reffontheight = 15
   end
   object beforemake: tmemodialogedit
     frame.caption = 'Before make'
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
         imagenr = 17
       end>
     frame.button.imagenr = 17
     frame.outerframe = (
       0
-      16
+      18
       0
       0
     )
     taborder = 10
     onshowhint = showhintexe
     bounds_x = 0
-    bounds_y = 104
+    bounds_y = 102
     bounds_cx = 683
-    bounds_cy = 35
+    bounds_cy = 39
     anchors = [an_top]
     statfile = projectstat
-    reffontheight = 13
+    reffontheight = 15
   end
   object aftermake: tmemodialogedit
     frame.caption = 'After make'
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
         imagenr = 17
       end>
     frame.button.imagenr = 17
     frame.outerframe = (
       0
-      16
+      18
       0
       0
     )
     taborder = 11
     onshowhint = showhintexe
     bounds_x = 0
-    bounds_y = 184
+    bounds_y = 182
     bounds_cx = 683
-    bounds_cy = 35
+    bounds_cy = 39
     anchors = [an_top]
     statfile = projectstat
-    reffontheight = 13
+    reffontheight = 15
   end
   object projectstat: tstatfile
     onstatupdate = projectstatonupdatestat

@@ -481,7 +481,7 @@ befcommandon=0
 makeoptionson=6
  63
  63
- 27
+ 31
  63
  63
  60
@@ -779,34 +779,39 @@ finddtext=utf8
 findhistory=1
  utf8
 findoptions=1
-editpos=6
+editpos=7
  0,-1073741823
  0,0
  0,-1073741823
  0,-1073741823
- 0,-1073741823
  0,0
+ 0,0
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
 bookmarks5=0
-sourcefiles=6
+bookmarks6=0
+sourcefiles=7
  ${PROJECTDIR}/modemo.pas
  /home/fred/mseide-msegui/tools/POtools/MOdemo/form_conflang.pas
- ${PROJECTDIR}/captionmodemo.pas
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/captionmodemo.pas
  ${PROJECTDIR}/mo2arrays.pas
- ${PROJECTDIR}/form_potools.pas
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
  /home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
-relpaths=6
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/mo2arrays.pas
+relpaths=7
  modemo.pas
  form_conflang.pas
  captionmodemo.pas
  mo2arrays.pas
  form_potools.pas
  modemo.pas
-ismoduletexts=6
+ mo2arrays.pas
+ismoduletexts=7
+ 0
  0
  0
  0
@@ -826,17 +831,18 @@ nomenumodules=2
  0
  0
 [sourcefo.files_tab]
-order=6
+order=7
  0
- 3
- 4
  1
- 5
  2
+ 4
+ 6
+ 5
+ 3
 firsttab=0
-index=4
+index=5
 [layout]
-windowlayout=584
+windowlayout=586
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -970,7 +976,7 @@ windowlayout=584
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=conflangfo
+ stackedunder=_mse_conflangfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1054,7 +1060,7 @@ windowlayout=584
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -1297,9 +1303,10 @@ windowlayout=584
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
- history=16
+ value=/home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
+ history=17
   /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
+  /home/fred/mseide-msegui/tools/POtools/MOdemo/captionmodemo.pas
   /home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
   /home/fred/msegui_dynpo-mod/modemo.pas
   /home/fred/msegui_dynpo-mod/captionmodemo.pas
@@ -1336,15 +1343,16 @@ windowlayout=584
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=6
+ order=7
   0
-  3
-  4
   1
-  5
   2
+  4
+  6
+  5
+  3
  firsttab=0
- index=4
+ index=5
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]

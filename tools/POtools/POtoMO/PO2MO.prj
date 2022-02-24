@@ -85,8 +85,8 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/POtoMO
-projectfilename=/home/fred/POtoMO/PO2MO.prj
+projectdir=/home/fred/mseide-msegui/tools/POtools/POtoMO
+projectfilename=/home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.prj
 finddialog=8
  [finddialogfo.selectedonly]
  value=0
@@ -553,7 +553,7 @@ befcommandon=0
 makeoptionson=5
  4095
  4095
- 4063
+ 4095
  4095
  32
 compilerusedon=29
@@ -1097,11 +1097,11 @@ findhistory=1
 findoptions=1
 editpos=2
  0,4
- 0,4
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
- ${PROJECTDIR}/PO2MO.pas
+ /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
  ${PROJECTDIR}/POtoMO.pas
 relpaths=2
  PO2MO.pas
@@ -1117,7 +1117,7 @@ nomenumodules=0
 firsttab=0
 index=0
 [layout]
-windowlayout=521
+windowlayout=522
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1235,7 +1235,7 @@ windowlayout=521
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -1518,7 +1518,7 @@ windowlayout=521
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=
+ stackedunder=findinfilefo
  parent=
  mdistate=3
  nx=0
@@ -1575,8 +1575,9 @@ windowlayout=521
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/POtoMO/PO2MO.pas
- history=1
+ value=/home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
+ history=2
+  /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
   /home/fred/POtoMO/PO2MO.pas
  [debuggerfo.project_options]
  value=1
