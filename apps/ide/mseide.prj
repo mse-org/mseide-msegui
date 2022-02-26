@@ -881,7 +881,7 @@ editpos=6
  0,-1073741823
  0,-1073741823
  0,48
- 0,36
+ 0,35
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -943,8 +943,8 @@ windowlayout=549
  ny=0
  ncx=0
  ncy=0
- x=80
- y=56
+ x=132
+ y=142
  cx=1231
  cy=621
  rcx=0
@@ -1044,7 +1044,7 @@ windowlayout=549
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1060,7 +1060,7 @@ windowlayout=549
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=findinfilefo
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -1085,7 +1085,7 @@ windowlayout=549
  sorted=0
  col=1
  row=0
- rowheight=17
+ rowheight=16
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1330,7 +1330,7 @@ windowlayout=549
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=_mse_mainfo_mse_
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1400,7 +1400,7 @@ windowlayout=549
   /home/fred/ideu_captionideu/src/ideusettings.pas
   /home/fred/ideu_captionideu/src/potools.pas
  [debuggerfo.project_options]
- value=6
+ value=1
  [debuggerfo.hints]
  value=1
  [sourcefo]
