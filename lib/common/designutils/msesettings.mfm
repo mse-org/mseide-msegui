@@ -171,7 +171,7 @@ object settingsfo: tsettingsfo
       onsetvalue = setprintcomm
       reffontheight = 15
     end
-    object debugger: tfilenameeditx
+    object debugger: tfilenameedit
       Tag = 8
       frame.caption = '${DEBUGGER}'
       frame.localprops = []
@@ -196,21 +196,11 @@ object settingsfo: tsettingsfo
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
       controller.captionopen = 'Debugger path'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
-    object compiler: tfilenameeditx
+    object compiler: tfilenameedit
       Tag = 7
       frame.caption = '${COMPILER}'
       frame.localprops = []
@@ -235,21 +225,11 @@ object settingsfo: tsettingsfo
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
       controller.captionopen = 'Compiler path'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
-    object compstoredir: tfilenameeditx
+    object compstoredir: tfilenameedit
       Tag = 6
       frame.caption = '${COMPSTOREDIR}'
       frame.localprops = []
@@ -274,16 +254,6 @@ object settingsfo: tsettingsfo
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
       controller.filterlist.data = (
         (
           'Project files'
@@ -292,11 +262,10 @@ object settingsfo: tsettingsfo
       )
       controller.options = [fdo_directory]
       controller.captionopen = 'Directory for component stores'
-      controller.captiondir = 'Directory for component stores'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
-    object templatedir: tfilenameeditx
+    object templatedir: tfilenameedit
       Tag = 5
       frame.caption = '${TEMPLATEDIR}'
       frame.localprops = []
@@ -321,16 +290,6 @@ object settingsfo: tsettingsfo
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
       controller.filterlist.data = (
         (
           'Project files'
@@ -339,11 +298,10 @@ object settingsfo: tsettingsfo
       )
       controller.options = [fdo_directory]
       controller.captionopen = 'Project template directory'
-      controller.captiondir = 'Project template directory'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
-    object syntaxdefdir: tfilenameeditx
+    object syntaxdefdir: tfilenameedit
       Tag = 4
       frame.caption = '${SYNTAXDEFDIR}'
       frame.localprops = []
@@ -368,16 +326,6 @@ object settingsfo: tsettingsfo
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
       controller.filterlist.data = (
         (
           'Syntax definitions'
@@ -386,11 +334,10 @@ object settingsfo: tsettingsfo
       )
       controller.options = [fdo_directory]
       controller.captionopen = 'Directory for syntax definition files'
-      controller.captiondir = 'Directory for syntax definition files'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
-    object mselibdir: tfilenameeditx
+    object mselibdir: tfilenameedit
       Tag = 3
       frame.caption = '${MSELIBDIR}'
       frame.localprops = []
@@ -415,23 +362,12 @@ object settingsfo: tsettingsfo
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'MSEgui library directory'
-      controller.captiondir = 'MSEgui library directory'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
-    object msedir: tfilenameeditx
+    object msedir: tfilenameedit
       Tag = 2
       frame.caption = '${MSEDIR}'
       frame.localprops = []
@@ -456,23 +392,12 @@ object settingsfo: tsettingsfo
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'MSEgui root directory'
-      controller.captiondir = 'MSEgui root directory'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
-    object fpclibdir: tfilenameeditx
+    object fpclibdir: tfilenameedit
       Tag = 1
       frame.caption = '${FPCLIBDIR}'
       frame.localprops = []
@@ -496,22 +421,11 @@ object settingsfo: tsettingsfo
       bounds_cx = 330
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
       controller.options = [fdo_directory]
       controller.captionopen = 'FPC library directory'
-      controller.captiondir = 'FPC library directory'
       reffontheight = 15
     end
-    object fpcdir: tfilenameeditx
+    object fpcdir: tfilenameedit
       frame.caption = '${FPCDIR}'
       frame.localprops = []
       frame.localprops1 = []
@@ -534,18 +448,6 @@ object settingsfo: tsettingsfo
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
       onsetvalue = setvalue
-      controller.fontheight = 0
-      controller.fontname = 'stf_default'
-      controller.fontcolor = -1610612734
-      controller.backcolor = -2147483647
-      controller.nopanel = False
-      controller.compact = False
-      controller.showoptions = False
-      controller.hidehistory = False
-      controller.hideicons = False
-      controller.showhidden = False
-      controller.options = [fdo_directory]
-      controller.captiondir = 'FPC root directory'
       controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end

@@ -31,9 +31,9 @@ findinfiledialog=63
  [findinfileadialogfo.wholeword]
  value=0
  [findinfileadialogfo.indirectories]
- value=1
- [findinfileadialogfo.inprojectdir]
  value=0
+ [findinfileadialogfo.inprojectdir]
+ value=1
  [findinfileadialogfo.casesensitive]
  value=0
  [findinfileadialogfo.mask]
@@ -57,8 +57,9 @@ findinfiledialog=63
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=copyrighttext
+ value=msefiledialogx
  history=20
+  msefiledialogx
   copyrighttext
   versiontext
   ifndef
@@ -78,11 +79,10 @@ findinfiledialog=63
   RunCommandSleepTime
   about
   {$warn
-  warnon
  [findinfileadialogfo]
  stackedunder=
- x=309
- y=166
+ x=200
+ y=100
  cx=339
  cy=308
 finddialog=8
@@ -90,8 +90,8 @@ finddialog=8
  value=0
  [finddialogfo]
  stackedunder=
- x=942
- y=494
+ x=200
+ y=100
  cx=300
  cy=269
 options=114
@@ -518,17 +518,14 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=3
+modulenames=2
  ACTIONSMO
- MAINFO
  SOURCEFO
-moduletypes=3
+moduletypes=2
  TACTIONSMO
- TMAINFO
  TSOURCEFO
-modulefiles=3
+modulefiles=2
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
- /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
 befcommandon=0
 makeoptionson=10
@@ -852,8 +849,12 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=createnewlang
+finddtext=msefiledialog
 findhistory=20
+ msefiledialog
+ captiondir
+ fontname
+ fontheigh
  createnewlang
  newl
  gettext
@@ -870,41 +871,27 @@ findhistory=20
  fpstattofileinfo
  editprojectoptions
  onloaded
- panel
- tfilenameedit
- filedialog
- template
 findoptions=1
-editpos=6
+editpos=4
  0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,48
- 0,35
+ 0,0
+ 0,331
+ 8,26
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-bookmarks4=0
-bookmarks5=0
-sourcefiles=6
+sourcefiles=4
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
- ${PROJECTDIR}/mseide.pas
- ${PROJECTDIR}/main.pas
- /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
-relpaths=6
+ /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
+relpaths=4
  mseide.pas
  sourceform.pas
  actionsmodule.pas
- mseide.pas
- main.pas
- ../lib/common/kernel/msegui.pas
-ismoduletexts=6
- 0
- 0
+ ../lib/common/designutils/msesettings.pas
+ismoduletexts=4
  0
  0
  0
@@ -918,18 +905,18 @@ moduleoptions=3
  0
  0
 visiblemodules=3
- -1
+ 0
  -1
  -1
 nomenumodules=3
- 0
+ -1
  0
  0
 [sourcefo.files_tab]
 firsttab=0
-index=4
+index=3
 [layout]
-windowlayout=549
+windowlayout=546
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -943,8 +930,8 @@ windowlayout=549
  ny=0
  ncx=0
  ncy=0
- x=132
- y=142
+ x=88
+ y=94
  cx=1231
  cy=621
  rcx=0
@@ -1060,7 +1047,7 @@ windowlayout=549
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=mainfo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=3
  nx=0
@@ -1085,7 +1072,7 @@ windowlayout=549
  sorted=0
  col=1
  row=0
- rowheight=16
+ rowheight=17
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1163,10 +1150,10 @@ windowlayout=549
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=242
- width0=58
+ propcolwidthref=423
+ width0=192
  sortdescend0=0
- width1=178
+ width1=225
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1330,7 +1317,7 @@ windowlayout=549
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1387,18 +1374,9 @@ windowlayout=549
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/main.pas
- history=10
-  /home/fred/mseide-msegui/apps/ide/main.pas
-  /home/fred/msegui_dynpo/demo/po2arrays.pas
-  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
-  /home/fred/mseide-msegui/apps/ide/mseide.pas
-  /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts.pas
-  /home/fred/mseide-msegui (copy 1)/lib/common/lang_consts/mseconsts.pas
-  /home/fred/mseide-msegui (copy 1)/lib/common/lang_consts/msestockobjects.pas
-  /home/fred/ideu_captionideu/src/finddialogform.pas
-  /home/fred/ideu_captionideu/src/ideusettings.pas
-  /home/fred/ideu_captionideu/src/potools.pas
+ value=/home/fred/mseide-msegui/lib/common/designutils/msesettings.mfm
+ history=1
+  /home/fred/mseide-msegui/lib/common/dialogs/msestringenter.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1420,6 +1398,12 @@ windowlayout=549
  rcx=0
  rcy=0
  [sourcefo.files_tab]
+ order=5
+  0
+  1
+  2
+  6
+  3
  firsttab=0
  index=4
  [confideufo.usedefaulteditoroptions]
@@ -1478,7 +1462,7 @@ windowlayout=549
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
 [targetconsole]
 finddtext=
 findhistory=0
