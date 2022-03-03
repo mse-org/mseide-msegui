@@ -30,16 +30,16 @@ object stringenterfo: tstringenterfo
     bounds_x = 7
     bounds_y = 12
     bounds_cx = 384
-    bounds_cy = 16
+    bounds_cy = 15
     anchors = [an_left, an_top, an_right]
     caption = 'lab'
     textflags = [tf_ycentered, tf_wordbreak]
   end
   object tlayouter1: tlayouter
     bounds_x = 8
-    bounds_y = 36
+    bounds_y = 35
     bounds_cx = 383
-    bounds_cy = 22
+    bounds_cy = 21
     anchors = [an_left, an_top, an_right]
     optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     optionslayout = [lao_placex, lao_aligny]
@@ -56,12 +56,12 @@ object stringenterfo: tstringenterfo
       bounds_x = 333
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 22
+      bounds_cy = 21
       bounds_cxmin = 50
       state = [as_localcaption]
       caption = '&Cancel'
       modalresult = mr_cancel
-      reffontheight = 16
+      reffontheight = 15
     end
     object ok: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
@@ -70,12 +70,12 @@ object stringenterfo: tstringenterfo
       bounds_x = 275
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 22
+      bounds_cy = 21
       bounds_cxmin = 50
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
-      reffontheight = 16
+      reffontheight = 15
     end
     object value: tstringedit
       optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -84,11 +84,11 @@ object stringenterfo: tstringenterfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 267
-      bounds_cy = 22
+      bounds_cy = 21
       anchors = [an_left, an_top, an_right]
       optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick]
-      reffontheight = 16
+      reffontheight = 15
     end
   end
 end

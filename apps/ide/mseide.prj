@@ -57,8 +57,9 @@ findinfiledialog=63
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=msefiledialogx
+ value=dialogx
  history=20
+  dialogx
   msefiledialogx
   copyrighttext
   versiontext
@@ -73,7 +74,6 @@ findinfiledialog=63
   statname
   filedialogfo
   controller.panel
-  dialogx
   5.0.0
   4.6.3
   RunCommandSleepTime
@@ -212,9 +212,9 @@ options=114
 settings=8
  [settings_form]
  x=457
- y=123
+ y=103
  cx=446
- cy=578
+ cy=660
  wsize=0
  active=1
  visible=1
@@ -518,14 +518,20 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=2
+modulenames=4
  ACTIONSMO
+ MAINFO
+ SETTINGSFO
  SOURCEFO
-moduletypes=2
+moduletypes=4
  TACTIONSMO
+ TMAINFO
+ TSETTINGSFO
  TSOURCEFO
-modulefiles=2
+modulefiles=4
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
+ /home/fred/mseide-msegui/apps/ide/main.mfm
+ /home/fred/mseide-msegui/lib/common/designutils/msesettings.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
 befcommandon=0
 makeoptionson=10
@@ -872,51 +878,60 @@ findhistory=20
  editprojectoptions
  onloaded
 findoptions=1
-editpos=4
+editpos=5
+ 0,24
  0,-1073741823
- 0,0
- 0,331
- 8,26
+ 0,-1073741823
+ 0,298
+ 0,297
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-sourcefiles=4
+bookmarks4=0
+sourcefiles=5
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
-relpaths=4
+ ${PROJECTDIR}/main.pas
+relpaths=5
  mseide.pas
  sourceform.pas
  actionsmodule.pas
  ../lib/common/designutils/msesettings.pas
-ismoduletexts=4
+ main.pas
+ismoduletexts=5
  0
  0
  0
  0
-modules=3
+ 0
+modules=4
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
-moduleoptions=3
+ /home/fred/mseide-msegui/lib/common/designutils/msesettings.mfm
+moduleoptions=4
  0
  0
  0
-visiblemodules=3
  0
+visiblemodules=4
  -1
  -1
-nomenumodules=3
  -1
+ -1
+nomenumodules=4
+ 0
+ 0
  0
  0
 [sourcefo.files_tab]
 firsttab=0
 index=3
 [layout]
-windowlayout=546
+windowlayout=562
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -930,8 +945,8 @@ windowlayout=546
  ny=0
  ncx=0
  ncy=0
- x=88
- y=94
+ x=82
+ y=78
  cx=1231
  cy=621
  rcx=0
@@ -963,7 +978,7 @@ windowlayout=546
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -1047,7 +1062,7 @@ windowlayout=546
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=objectinspectorfo
+ stackedunder=_mse_settingsfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1072,7 +1087,7 @@ windowlayout=546
  sorted=0
  col=1
  row=0
- rowheight=17
+ rowheight=16
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1317,7 +1332,7 @@ windowlayout=546
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=_mse_mainfo_mse_
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1348,7 +1363,7 @@ windowlayout=546
  x=0
  y=0
  cx=1219
- cy=51
+ cy=63
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1360,11 +1375,11 @@ windowlayout=546
  nx=0
  ny=0
  ncx=1219
- ncy=59
+ ncy=71
  x=0
  y=0
  cx=1219
- cy=59
+ cy=71
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1374,8 +1389,11 @@ windowlayout=546
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/designutils/msesettings.mfm
- history=1
+ value=/home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
+ history=4
+  /home/fred/mseide-msegui/apps/ide/mseide.pas
+  /home/fred/mseide-msegui/apps/ide/main.pas
+  /home/fred/mseide-msegui/lib/common/designutils/msesettings.mfm
   /home/fred/mseide-msegui/lib/common/dialogs/msestringenter.pas
  [debuggerfo.project_options]
  value=1
@@ -1394,18 +1412,12 @@ windowlayout=546
  x=0
  y=0
  cx=1219
- cy=455
+ cy=443
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=5
-  0
-  1
-  2
-  6
-  3
  firsttab=0
- index=4
+ index=3
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1439,9 +1451,9 @@ windowlayout=546
  ncx=0
  ncy=0
  x=0
- y=54
+ y=66
  cx=1219
- cy=455
+ cy=443
  rcx=0
  rcy=0
  [_mse_mainfo_mse_]
@@ -1462,7 +1474,26 @@ windowlayout=546
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
+ [_mse_settingsfo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=objectinspectorfo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=528
+ y=128
+ cx=358
+ cy=570
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
 [targetconsole]
 finddtext=
 findhistory=0

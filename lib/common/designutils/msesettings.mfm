@@ -82,7 +82,7 @@ object settingsfo: tsettingsfo
     optionslayout = [lao_placey]
     linkbottom = macrogrid
     object tspacer1: tlayouter
-      taborder = 9
+      taborder = 8
       bounds_x = 8
       bounds_y = 351
       bounds_cx = 330
@@ -162,7 +162,7 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 10
+      taborder = 9
       bounds_x = 8
       bounds_y = 390
       bounds_cx = 330
@@ -188,7 +188,7 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 8
+      taborder = 7
       hint = 'Path to debugger (gdb).'
       bounds_x = 8
       bounds_y = 312
@@ -217,7 +217,7 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 7
+      taborder = 6
       hint = 'Path to compiler (ppc386).'
       bounds_x = 8
       bounds_y = 273
@@ -246,7 +246,7 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 6
+      taborder = 5
       hint = 'Directory for component store files.'
       bounds_x = 8
       bounds_y = 234
@@ -282,7 +282,7 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 5
+      taborder = 4
       hint = 'Directory for project template files.'
       bounds_x = 8
       bounds_y = 195
@@ -318,7 +318,7 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 4
+      taborder = 3
       hint = 'Directory for syntax definition files.'
       bounds_x = 8
       bounds_y = 156
@@ -354,7 +354,7 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 3
+      taborder = 2
       hint = 'Root directory of MSEgui library.'
       bounds_x = 8
       bounds_y = 117
@@ -384,7 +384,7 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 2
+      taborder = 1
       hint = 'Root directory of MSEgui.'
       bounds_x = 8
       bounds_y = 78
@@ -395,6 +395,34 @@ object settingsfo: tsettingsfo
       controller.options = [fdo_directory]
       controller.captionopen = 'MSEgui root directory'
       controller.ongetfilename = epandfilenamemacro
+      reffontheight = 15
+    end
+    object fpcdir: tfilenameedit
+      Tag = 1
+      frame.caption = '${FPCDIR}'
+      frame.localprops = []
+      frame.localprops1 = []
+      frame.buttons.count = 1
+      frame.buttons.items = <      
+        item
+          imagenr = 17
+        end>
+      frame.button.imagenr = 17
+      frame.outerframe = (
+        0
+        18
+        0
+        0
+      )
+      hint = 'Root directory of FPC library (not used by the default project templates).'
+      bounds_x = 8
+      bounds_y = 0
+      bounds_cx = 330
+      bounds_cy = 39
+      anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
+      controller.options = [fdo_directory]
+      controller.captionopen = 'FPC root directory'
       reffontheight = 15
     end
     object fpclibdir: tfilenameedit
@@ -414,41 +442,16 @@ object settingsfo: tsettingsfo
         0
         0
       )
-      taborder = 1
-      hint = 'Root directory of FPC library (not used by the default project templates).'
+      taborder = 10
+      hint = 'Root directory of Free Pascal library (not used by the default project templates).'
       bounds_x = 8
       bounds_y = 39
       bounds_cx = 330
       bounds_cy = 39
       anchors = [an_left, an_top, an_right]
+      onsetvalue = setvalue
       controller.options = [fdo_directory]
       controller.captionopen = 'FPC library directory'
-      reffontheight = 15
-    end
-    object fpcdir: tfilenameedit
-      frame.caption = '${FPCDIR}'
-      frame.localprops = []
-      frame.localprops1 = []
-      frame.buttons.count = 1
-      frame.buttons.items = <      
-        item
-          imagenr = 17
-        end>
-      frame.button.imagenr = 17
-      frame.outerframe = (
-        0
-        18
-        0
-        0
-      )
-      hint = 'Root directory of Free Pascal system (not used by the default project templates).'
-      bounds_x = 8
-      bounds_y = 0
-      bounds_cx = 330
-      bounds_cy = 39
-      anchors = [an_left, an_top, an_right]
-      onsetvalue = setvalue
-      controller.ongetfilename = epandfilenamemacro
       reffontheight = 15
     end
   end
@@ -553,7 +556,7 @@ object settingsfo: tsettingsfo
   object tstatfile1: tstatfile
     filename = 'settingsfo.sta'
     options = [sfo_memory]
-    left = 16
-    top = 32
+    left = 224
+    top = 80
   end
 end

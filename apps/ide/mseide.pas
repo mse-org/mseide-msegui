@@ -33,7 +33,7 @@ program mseide;
  {$endif}
 {$endif}
 uses
- cmem,
+// cmem,
 {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif}
 //  mseopenglgdiinit,
   mseskindesign,menusdesign,findmessage,
