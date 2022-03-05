@@ -285,7 +285,7 @@ befcommand=0
 aftcommand=0
 makeoptions=10
  -Xg -l -Sh -Fcutf8
- -gl -O-
+ -gl
  -dmse_with_zeoslib
  -B
  -O1
@@ -536,7 +536,7 @@ modulefiles=4
 befcommandon=0
 makeoptionson=10
  4095
- 3
+ 67
  4095
  4094
  255
@@ -878,30 +878,35 @@ findhistory=20
  editprojectoptions
  onloaded
 findoptions=1
-editpos=5
- 0,24
+editpos=6
  0,-1073741823
  0,-1073741823
- 0,298
- 0,297
+ 0,5
+ 0,278
+ 0,-1073741823
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
-sourcefiles=5
+bookmarks5=0
+sourcefiles=6
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
  ${PROJECTDIR}/main.pas
-relpaths=5
+ /home/fred/mseide-msegui/lib/common/db/mmysqlconn.inc
+relpaths=6
  mseide.pas
  sourceform.pas
  actionsmodule.pas
  ../lib/common/designutils/msesettings.pas
  main.pas
-ismoduletexts=5
+ lib/common/db/mmysqlconn.inc
+ismoduletexts=6
+ 0
  0
  0
  0
@@ -921,7 +926,7 @@ visiblemodules=4
  -1
  -1
  -1
- -1
+ 0
 nomenumodules=4
  0
  0
@@ -929,9 +934,9 @@ nomenumodules=4
  0
 [sourcefo.files_tab]
 firsttab=0
-index=3
+index=2
 [layout]
-windowlayout=562
+windowlayout=566
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -945,8 +950,8 @@ windowlayout=562
  ny=0
  ncx=0
  ncy=0
- x=82
- y=78
+ x=50
+ y=109
  cx=1231
  cy=621
  rcx=0
@@ -978,7 +983,7 @@ windowlayout=562
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -1062,7 +1067,7 @@ windowlayout=562
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=_mse_settingsfo_mse_
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -1332,7 +1337,7 @@ windowlayout=562
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -1363,7 +1368,7 @@ windowlayout=562
  x=0
  y=0
  cx=1219
- cy=63
+ cy=50
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1375,11 +1380,11 @@ windowlayout=562
  nx=0
  ny=0
  ncx=1219
- ncy=71
+ ncy=59
  x=0
  y=0
  cx=1219
- cy=71
+ cy=58
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1389,8 +1394,12 @@ windowlayout=562
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
- history=4
+ value=/home/fred/mseide-msegui/apps/ide/actionsmodule.pas
+ history=8
+  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
+  /home/fred/mseide-msegui/lib/common/db/mmysqlconn.inc
+  /home/fred/mseide-msegui/apps/ide/sourceform.pas
+  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
   /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/mseide-msegui/lib/common/designutils/msesettings.mfm
@@ -1412,12 +1421,12 @@ windowlayout=562
  x=0
  y=0
  cx=1219
- cy=443
+ cy=456
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=3
+ index=2
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1451,9 +1460,9 @@ windowlayout=562
  ncx=0
  ncy=0
  x=0
- y=66
+ y=53
  cx=1219
- cy=443
+ cy=456
  rcx=0
  rcy=0
  [_mse_mainfo_mse_]
@@ -1478,7 +1487,7 @@ windowlayout=562
  [_mse_settingsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=objectinspectorfo
+ stackedunder=componentpalettefo
  parent=
  mdistate=3
  nx=0
@@ -1493,7 +1502,7 @@ windowlayout=562
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
 [targetconsole]
 finddtext=
 findhistory=0

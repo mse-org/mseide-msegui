@@ -1,0 +1,127 @@
+#
+#   ideU theme
+#  Fred van Stappen
+#
+
+# COLORS [[[fontcolor [backgroundcolor [statementcolor]]]
+#                      cl_default for project options settings 
+
+# COLORS font/paper/statement/pairmark/fontline/line/focusline/selected
+COLORS cl_black cl_white cl_white cl_ltyellow cl_dkgray cl_ltgray cl_white $E6D9FF
+
+caseinsensitive
+
+pairwords
+ 'BEGIN' 'CASE' 'TRY' 'RECORD' 'CLASS' 'OBJECT' 'INTERFACE' 'END'
+ 'REPEAT' 'UNTIL'
+
+styles
+ default ''
+ words 'b' cl_black
+ comment '' cl_blue 
+ option '' cl_red 
+ string '' cl_dkgreen
+ symbol '' cl_red
+ beginend 'b' $4D006B
+
+keyworddefs pascal
+ 'ABSOLUTE' 'ABSTRACT' 'AND' 'ARRAY' 'AS' 'ASM' 'ASSEMBLER' 
+ 'BREAK' 'CDECL' 'CONST' 'CONSTREF' 'CONSTRUCTOR'
+ 'CONTINUE' 'DEFAULT' 'DEPRECATED' 'DESTRUCTOR' 'DISPOSE' 'DIV' 'DO' 'DOWNTO'
+ 'ELSE' 'EXCEPT' 'EXIT' 'EXPORT' 'EXPORTS' 'EXTERNAL' 'FAIL'
+ 'FALSE' 'FAR' 'FILE' 'FINALIZATION' 'FINALLY' 'FOR' 'FORWARD' 'FUNCTION' 'GOTO' 'IF'
+ 'IMPLEMENTATION' 'IMPLEMENTS' 'IN' 'INDEX' 'INHERITED'
+ 'INITIALIZATION' 'INLINE' 'INTERRUPT' 'IS' 'LABEL' 'LIBRARY'
+ 'MESSAGE' 'MOD' 'NEW' 'NIL' 'NODEFAULT' 'NOT' 
+ 'OF' 'ON' 'OPERATOR' 'OR' 'OUT' 'OTHERWISE' 'PACKED' 'POPSTACK' 'PRIVATE' 
+ 'PROCEDURE' 'PROGRAM' 'PROPERTY' 'PROTECTED'
+ 'PUBLIC' 'PUBLISHED' 'RAISE' 'READ' 'REINTRODUCE' 
+ 'RESOURCESTRING'
+ 'SELF' 'SET' 'SHL' 'SHR'
+ 'STDCALL' 'STORED' 'THEN' 'THREADVAR' 'TO' 'TRUE' 'TYPE' 'UNIT' 
+ 'USES' 'VAR' 'VIRTUAL' 'WHILE' 'WITH' 'WRITE' 'XOR'
+ 'OVERLOAD' 'OVERRIDE'
+
+keyworddefs pascalplus
+'BEGIN' 'CASE' 'TRY' 'RECORD' 'CLASS' 'OBJECT' 'INTERFACE' 'END'
+ 'REPEAT' 'UNTIL'
+
+scope option option
+ endtokens
+  '}'
+  
+scope comment1 comment
+ endtokens
+  '}'
+
+scope comment2 comment
+ endtokens
+  ''
+scope comment3 comment
+ endtokens
+  '*)'
+  
+scope string string
+ endtokens
+  '''' ''
+
+scope string1 string
+ jumptokens
+  '$' string1
+  '0' string1
+  '1' string1
+  '2' string1
+  '3' string1
+  '4' string1
+  '5' string1
+  '6' string1
+  '7' string1
+  '8' string1
+  '9' string1
+return
+
+scope symbol1 symbol
+return
+
+scope beginend1 beginend
+ return
+
+# No endtokens, scope terminates immediately
+
+
+scope main
+
+ keywords words
+  pascal
+
+ pascalplus beginend  
+   
+ calltokens
+  '{$' option
+  '{' comment1
+  '//' comment2
+  '(*' comment3
+  '''' string
+  '#' string1
+  ':' symbol1
+  '.' symbol1
+  ';' symbol1
+  ',' symbol1
+  '=' symbol1
+  '<>' symbol1
+  '<' symbol1
+  '>' symbol1
+  '(' symbol1
+  ')' symbol1
+  '+' symbol1
+  '-' symbol1
+  '/' symbol1
+  '*' symbol1
+  '[' symbol1
+  ']' symbol1
+  
+  
+  
+  
+  
+

@@ -1096,13 +1096,13 @@ findhistory=1
  uses
 findoptions=1
 editpos=2
- 0,4
- 0,-1073741823
+ 0,37
+ 0,169
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
  /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
- ${PROJECTDIR}/POtoMO.pas
+ /home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
 relpaths=2
  PO2MO.pas
  POtoMO.pas
@@ -1115,7 +1115,7 @@ visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
 firsttab=0
-index=0
+index=1
 [layout]
 windowlayout=522
  [mainfo.basedock]
@@ -1235,7 +1235,7 @@ windowlayout=522
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1261,7 +1261,7 @@ windowlayout=522
  x=0
  y=0
  cx=205
- cy=451
+ cy=449
  rcx=0
  rcy=0
  [projecttreefo.grid]
@@ -1351,10 +1351,10 @@ windowlayout=522
  [breakpointsfo.bkptson]
  value=0
  [objectinspectorfo.grid]
- propcolwidthref=242
- width0=107
+ propcolwidthref=423
+ width0=187
  sortdescend0=0
- width1=129
+ width1=230
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1518,7 +1518,7 @@ windowlayout=522
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=findinfilefo
+ stackedunder=
  parent=
  mdistate=3
  nx=0
@@ -1549,7 +1549,7 @@ windowlayout=522
  x=0
  y=0
  cx=1212
- cy=50
+ cy=52
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1565,7 +1565,7 @@ windowlayout=522
  x=0
  y=0
  cx=1212
- cy=57
+ cy=59
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1575,7 +1575,7 @@ windowlayout=522
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
+ value=/home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
  history=2
   /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
   /home/fred/POtoMO/PO2MO.pas
@@ -1596,12 +1596,12 @@ windowlayout=522
  x=208
  y=0
  cx=1004
- cy=451
+ cy=449
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=0
+ index=1
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1635,9 +1635,9 @@ windowlayout=522
  ncx=0
  ncy=0
  x=0
- y=53
+ y=55
  cx=1212
- cy=451
+ cy=449
  rcx=0
  rcy=0
 [targetconsole]
