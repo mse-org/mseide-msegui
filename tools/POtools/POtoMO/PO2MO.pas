@@ -2,6 +2,8 @@ PROGRAM PO2MO;
 {$mode objfpc}
 {$LONGSTRINGS ON}
 
+// By Sieghard 2022
+
 USES
   SysUtils, POtoMO, {StrUtils,} Classes;
 

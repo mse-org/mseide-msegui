@@ -2,6 +2,8 @@ UNIT POtoMO;
 {$mode objfpc}
 {$LONGSTRINGS ON}
 
+// By Sieghard 2022
+
 INTERFACE
 
 USES
