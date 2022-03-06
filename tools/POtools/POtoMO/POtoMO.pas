@@ -2,8 +2,6 @@ UNIT POtoMO;
 {$mode objfpc}
 {$LONGSTRINGS ON}
 
-// By Sieghard 2022
-
 INTERFACE
 
 USES
@@ -83,25 +81,33 @@ FUNCTION MObuilder.parsed (InString: String): String;
 
 PROCEDURE MObuilder.BuildHashtable (VAR Hashes: HashArray);
  VAR
-   i, h, SkipSize: longword;
+   i, n, h,
+   SkipSize: longword;
+   HashSet:  HashArray;
  BEGIN
+   SetLength (HashSet, Length (Hashes));          // Create de-duplication store
    FOR i:= 0 TO High (IDentry) DO BEGIN
      h:= Hash (IDs [i]);
 
-     IF h =  longword (-1) THEN Hashes [0]:= succ (i)   // insert in first position
+     IF h = longword (-1) THEN Hashes [0]:= succ (i)   // insert in first position
      ELSE BEGIN
        SkipSize:= succ (h MOD (Length (Hashes)- 2));
-       h:= h MOD Length (Hashes);
+       n:= h MOD Length (Hashes);
 
-       IF (0 < h) AND (h < Length (Hashes)) AND (Hashes [h] = 0)
-       THEN Hashes [h]:= succ (i)                 // direct insertion possible
+       IF (0 < n) AND (n < Length (Hashes)) AND (Hashes [n] = 0) THEN BEGIN
+         Hashes [n]:= succ (i);                   // direct insertion possible
+         HashSet [n]:= h;                         // and remember item used
+       END
        ELSE BEGIN                                 // need overflow handling
          REPEAT                                   // find suitable free position
-           IF h >= (Length (Hashes)- SkipSize)
-             THEN Dec (h, Length (Hashes)- SkipSize)
-             ELSE Inc (h, SkipSize);
-         UNTIL (0 < h) AND (h < Length (Hashes)) AND (Hashes [h] = 0);
-         Hashes [h]:= succ (i);                   // insert overflow
+           IF n >= (Length (Hashes)- SkipSize)
+             THEN Dec (n, Length (Hashes)- SkipSize)
+             ELSE Inc (n, SkipSize);
+         UNTIL (0 < n) AND (n < Length (Hashes)) AND ((Hashes [n] = 0) OR (HashSet [n] = h));
+         IF Hashes [n] = 0 THEN BEGIN             // If not a duplicate
+           Hashes [n]:= succ (i);                 // insert overflow
+           HashSet [n]:= h;                       // and remember item used
+         END;
        END (* ELSE *);
      END (* ELSE *);
    END (* FOR i:= 0 TO High (IDentry) *);
@@ -121,6 +127,7 @@ CONSTRUCTOR MObuilder.Create;
 
 PROCEDURE MObuilder.POparse (POstream: TStream);
  VAR
+   skipdup: boolean;
    i, n:    integer;
    MsgKind: MsgType;
    InpLine: String;
@@ -128,8 +135,12 @@ PROCEDURE MObuilder.POparse (POstream: TStream);
  BEGIN
    AssignStream (POfile, POstream); Reset (POfile);
 
-   IDs:= TStringList.Create;  IDs.sorted:=   true; IDs.CaseSensitive:= true; IDs.Duplicates:= dupIgnore;
+   IDs:= TStringList.Create; 
+   WITH IDs DO BEGIN
+     sorted:= true; CaseSensitive:= true; Duplicates:= dupError{Ignore};
+   END (* WITH IDs *);
    Msgs:=TStringList.Create;  Msgs.sorted:= false; n:= 0; MsgKind:= isNot;
+   skipdup:= false;
 
    WHILE NOT EoF (POfile) DO BEGIN
      ReadLn (POfile, InpLine); InpLine:= Trim (InpLine);
@@ -146,14 +157,14 @@ PROCEDURE MObuilder.POparse (POstream: TStream);
                  BEGIN
                    InpLine:= Copy (InpLine, 2, Length (InpLine)- 2);
                    IF IDs.Count <> 0 THEN IDs [n]:= IDs [n]+ parsed (InpLine)
-                   ELSE WriteLn (StdErr, 'MsgID continuation found w/o MsgID: "', InpLine);
+                   ELSE WriteLn (StdErr, 'MsgID continuation found w/o MsgID: "', InpLine, '"');
                  END (* isID *);
                isStr:
-                 BEGIN
+                 IF NOT skipdup THEN BEGIN
                    InpLine:= Copy (InpLine, 2, Length (InpLine)- 2);
                    IF Copy (InpLine, 1, 12) <> 'POT-Creation' THEN
                    IF IDs.Count <> 0 THEN Msgs [n]:= Msgs [n]+ parsed (InpLine)
-                   ELSE WriteLn (StdErr, 'MsgStr continuation found w/o MsgID: "', InpLine);
+                   ELSE WriteLn (StdErr, 'MsgStr continuation found w/o MsgID: "', InpLine, '"');
                  END (* isID *);
              END (* CASE MsgKind *);
            END (* Quote: *);
@@ -163,13 +174,24 @@ PROCEDURE MObuilder.POparse (POstream: TStream);
              IF Copy (InpLine, 1, Length (MsgId)) = MsgId THEN BEGIN
                MsgKind:= isID; i:= Pos (Quote, InpLine);
                InpLine:= parsed (Copy (InpLine, succ (i), pred (Length (InpLine)- i)));
-               n:= IDs.add (InpLine);
+               TRY
+                 n:= IDs.add (InpLine);
+                 skipdup:= false;
+               EXCEPT
+                 ON EStringListError DO BEGIN
+                   skipdup:= true;
+                   WriteLn (StdErr, 'Duplicate MsgID found: "', InpLine, '"')
+                 END (* ON EStringListError *);
+               END (* TRY *);
              END (* IF Copy (InpLine, 1, Length (MsgId)) ... *)
              ELSE IF Copy (InpLine, 1, Length (MsgStr)) = MsgStr THEN BEGIN
-               MsgKind:= isStr; i:= Pos (Quote, InpLine);
-               InpLine:= parsed (Copy (InpLine, succ (i), pred (Length (InpLine)- i)));
-               IF IDs.Count <> 0 THEN Msgs.Insert (n, InpLine)
-               ELSE WriteLn (StdErr, 'MsgStr found w/o MsgID: "', InpLine);
+               MsgKind:= isStr;
+               IF NOT skipdup THEN BEGIN
+                 i:= Pos (Quote, InpLine);
+                 InpLine:= parsed (Copy (InpLine, succ (i), pred (Length (InpLine)- i)));
+                 IF IDs.Count <> 0 THEN Msgs.Insert (n, InpLine)
+                 ELSE WriteLn (StdErr, 'MsgStr found w/o MsgID: "', InpLine, '"');
+               END (* IF NOT skipdup *);
              END (* IF Copy (InpLine, 1, Length (MsgStr)) ... *)
              { ELSE perhaps more, but ignored for now };
            END (* MsgStart: *);

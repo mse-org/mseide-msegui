@@ -894,7 +894,7 @@ bookmarks5=0
 sourcefiles=6
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
- ${PROJECTDIR}/actionsmodule.pas
+ /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
  ${PROJECTDIR}/main.pas
  /home/fred/mseide-msegui/lib/common/db/mmysqlconn.inc
@@ -1337,7 +1337,7 @@ windowlayout=566
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=objectinspectorfo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1380,7 +1380,7 @@ windowlayout=566
  nx=0
  ny=0
  ncx=1219
- ncy=59
+ ncy=58
  x=0
  y=0
  cx=1219
@@ -1487,7 +1487,7 @@ windowlayout=566
  [_mse_settingsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=componentpalettefo
+ stackedunder=confideufo
  parent=
  mdistate=3
  nx=0

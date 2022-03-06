@@ -1096,13 +1096,13 @@ findhistory=1
  uses
 findoptions=1
 editpos=2
- 0,37
- 0,169
+ 0,-1073741823
+ 0,151
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
- /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
- /home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
+ ${PROJECTDIR}/PO2MO.pas
+ ${PROJECTDIR}/POtoMO.pas
 relpaths=2
  PO2MO.pas
  POtoMO.pas
@@ -1117,7 +1117,7 @@ nomenumodules=0
 firsttab=0
 index=1
 [layout]
-windowlayout=522
+windowlayout=523
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1261,7 +1261,7 @@ windowlayout=522
  x=0
  y=0
  cx=205
- cy=449
+ cy=451
  rcx=0
  rcy=0
  [projecttreefo.grid]
@@ -1273,7 +1273,7 @@ windowlayout=522
  sorted=0
  col=0
  row=2
- rowheight=17
+ rowheight=16
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1332,7 +1332,7 @@ windowlayout=522
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=conflangfo
+ stackedunder=memoryfo
  parent=
  mdistate=0
  nx=0
@@ -1351,10 +1351,10 @@ windowlayout=522
  [breakpointsfo.bkptson]
  value=0
  [objectinspectorfo.grid]
- propcolwidthref=423
- width0=187
+ propcolwidthref=242
+ width0=107
  sortdescend0=0
- width1=230
+ width1=129
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1549,7 +1549,7 @@ windowlayout=522
  x=0
  y=0
  cx=1212
- cy=52
+ cy=50
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1565,7 +1565,7 @@ windowlayout=522
  x=0
  y=0
  cx=1212
- cy=59
+ cy=57
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1576,7 +1576,8 @@ windowlayout=522
  value=Pascal
  [debuggerfo.file_history]
  value=/home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
- history=2
+ history=3
+  /home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
   /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
   /home/fred/POtoMO/PO2MO.pas
  [debuggerfo.project_options]
@@ -1596,7 +1597,7 @@ windowlayout=522
  x=208
  y=0
  cx=1004
- cy=449
+ cy=451
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1635,9 +1636,9 @@ windowlayout=522
  ncx=0
  ncy=0
  x=0
- y=55
+ y=53
  cx=1212
- cy=449
+ cy=451
  rcx=0
  rcy=0
 [targetconsole]
