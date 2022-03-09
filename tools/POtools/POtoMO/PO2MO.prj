@@ -1096,12 +1096,12 @@ findhistory=1
  uses
 findoptions=1
 editpos=2
+ 0,33
  0,-1073741823
- 0,151
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
- ${PROJECTDIR}/PO2MO.pas
+ /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
  ${PROJECTDIR}/POtoMO.pas
 relpaths=2
  PO2MO.pas
@@ -1115,9 +1115,9 @@ visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
 firsttab=0
-index=1
+index=0
 [layout]
-windowlayout=523
+windowlayout=524
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1131,8 +1131,8 @@ windowlayout=523
  ny=0
  ncx=0
  ncy=0
- x=51
- y=62
+ x=0
+ y=186
  cx=1224
  cy=621
  rcx=0
@@ -1273,7 +1273,7 @@ windowlayout=523
  sorted=0
  col=0
  row=2
- rowheight=16
+ rowheight=17
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1332,7 +1332,7 @@ windowlayout=523
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=memoryfo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -1575,10 +1575,11 @@ windowlayout=523
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
- history=3
-  /home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
+ value=/home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
+ history=4
   /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
+  /home/fred/ideu/src/POtoMO.pas
+  /home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
   /home/fred/POtoMO/PO2MO.pas
  [debuggerfo.project_options]
  value=1
@@ -1602,7 +1603,7 @@ windowlayout=523
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=1
+ index=0
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]

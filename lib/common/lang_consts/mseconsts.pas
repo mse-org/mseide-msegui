@@ -302,6 +302,16 @@ const
  en_textgenerator: defaultgeneratortextty = (
               {$ifdef FPC}@{$endif}delete_n_selected_rows //tg_delete_n_selected_rows
                                              );
+                                             
+ en_langnamestext: array[0..5] of msestring = (
+    'English [en]',
+    'Russian [ru]',
+    'French [fr]',
+    'German [de]',
+    'Spanish [es]',
+    'Portuguese [pt]'
+    );
+                                             
 
 procedure setitem(var item: langinfoty;
            const name: string;
@@ -504,15 +514,6 @@ end.
 en_extendedtext: extendedaty =
     ('Delete selected row?',    // ex_del_row_selected
     'Delete %s selected rows?'  // ex_del_rows_selected
-    );
-
-  en_langnamestext: array[0..5] of msestring = (
-    'English [en]',
-    'Russian [ru]',
-    'French [fr]',
-    'German [de]',
-    'Spanish [es]',
-    'Portuguese [pt]'
     );
 
 implementation
