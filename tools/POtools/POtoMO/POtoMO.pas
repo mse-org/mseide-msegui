@@ -73,7 +73,8 @@ CONST
 
 FUNCTION MObuilder.HashSpace (Entries: integer): integer;
  BEGIN
-   HashSpace:= succ (4* Entries) DIV 3;
+   Result:= succ (4* Entries) DIV 3;
+   IF (Result MOD 2) = 0 THEN Inc (Result);
  END;
 
 FUNCTION MObuilder.parsed (InString: String): String;
@@ -83,12 +84,16 @@ FUNCTION MObuilder.parsed (InString: String): String;
 
 PROCEDURE MObuilder.BuildHashtable (VAR Hashes: HashArray);
  VAR
-   i, n, h,
+   i, n, h, l,
    SkipSize: longword;
    HashSet:  HashArray;
+id, st: string;
  BEGIN
    SetLength (HashSet, Length (Hashes));          // Create de-duplication store
    FOR i:= 0 TO High (IDentry) DO BEGIN
+id:= ids [i];
+st:= msgs [i];
+l:= length (hashes);
      h:= Hash (IDs [i]);
 
      IF h = longword (-1) THEN Hashes [0]:= succ (i)   // insert in first position
