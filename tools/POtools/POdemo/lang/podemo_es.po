@@ -540,20 +540,5 @@ msgid "This is the end."
 msgstr "Este es el final."
 
 msgid "English [en]"
-msgstr "Inglés [en]"
-
-msgid "Russian [ru]"
-msgstr "Ruso [ru]"
-
-msgid "French [fr]"
-msgstr "Francés [fr]"
-
-msgid "German [de]"
-msgstr "Alemán [de]"
-
-msgid "Spanish [es]"
 msgstr "Español [es]"
-
-msgid "Portuguese [pt]"
-msgstr "Portugués [pt]"
 

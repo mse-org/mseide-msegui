@@ -6201,7 +6201,7 @@ begin
   hintfont.height := messagefontheight;
   hintfont.name := ansistring(messagefontname);
 
-// drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],
+//  drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],
 //                                      stockobjects.fonts[stf_hint]);
 
   drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],hintfont);

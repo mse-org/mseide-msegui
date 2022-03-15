@@ -781,10 +781,10 @@ findhistory=1
 findoptions=1
 editpos=7
  0,-1073741823
+ 0,0
  0,-1073741823
  0,-1073741823
- 0,-1073741823
- 0,-1073741823
+ 0,0
  0,0
  0,-1073741823
 bookmarks0=0
@@ -796,12 +796,12 @@ bookmarks5=0
 bookmarks6=0
 sourcefiles=7
  ${PROJECTDIR}/modemo.pas
- ${PROJECTDIR}/form_conflang.pas
- ${PROJECTDIR}/captionmodemo.pas
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/form_conflang.pas
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/captionmodemo.pas
  ${PROJECTDIR}/mo2arrays.pas
- ${PROJECTDIR}/form_potools.pas
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
  /home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
- ${PROJECTDIR}/mo2arrays.pas
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/mo2arrays.pas
 relpaths=7
  modemo.pas
  form_conflang.pas
@@ -842,7 +842,7 @@ order=7
 firsttab=0
 index=5
 [layout]
-windowlayout=587
+windowlayout=586
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -976,7 +976,7 @@ windowlayout=587
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=conflangfo
+ stackedunder=_mse_conflangfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1060,7 +1060,7 @@ windowlayout=587
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -1079,10 +1079,10 @@ windowlayout=587
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=242
- width0=57
+ propcolwidthref=486
+ width0=115
  sortdescend0=0
- width1=179
+ width1=365
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1277,7 +1277,7 @@ windowlayout=587
  x=0
  y=0
  cx=1223
- cy=50
+ cy=51
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1289,11 +1289,11 @@ windowlayout=587
  nx=0
  ny=0
  ncx=1223
- ncy=57
+ ncy=58
  x=0
  y=0
  cx=1223
- cy=57
+ cy=58
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1304,8 +1304,7 @@ windowlayout=587
  value=Pascal
  [debuggerfo.file_history]
  value=/home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
- history=18
-  /home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
+ history=17
   /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
   /home/fred/mseide-msegui/tools/POtools/MOdemo/captionmodemo.pas
   /home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
@@ -1340,7 +1339,7 @@ windowlayout=587
  x=0
  y=0
  cx=1223
- cy=470
+ cy=469
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1387,9 +1386,9 @@ windowlayout=587
  ncx=0
  ncy=0
  x=0
- y=53
+ y=54
  cx=1223
- cy=470
+ cy=469
  rcx=0
  rcy=0
  [_mse_conflangfo_mse_]

@@ -1,4 +1,5 @@
 
+msgstr "English [en]"
 
 msgstr "&Cancel"
 
@@ -347,16 +348,4 @@ msgstr "This is a test of internationalization."
 msgstr "That is a other test."
 
 msgstr "This is the end."
-
-msgstr "English [en]"
-
-msgstr "Russian [ru]"
-
-msgstr "French [fr]"
-
-msgstr "German [de]"
-
-msgstr "Spanish [es]"
-
-msgstr "Portuguese [pt]"
 

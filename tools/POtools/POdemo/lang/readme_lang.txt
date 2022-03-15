@@ -3,11 +3,12 @@ To add a new language, use as layout of  '/podemo_empty.po' and fill all the msg
 
 When done, rename the file with the code of your language after the "_" , like 'podemo_xz.po'.
 
-You may also add the translation of the new language name at end of each .po file (not obligatory).
-Example add this at end of of the po files:
+You may also add  the new language name at begin of each .po file.
 
-msgid "Mylanguage [xz]"
-msgstr "MyTranslatedLanguage [xz]"
+Example:
+
+msgid "English  [en]"
+msgstr "MyLanguage [xz]"
 
 When your .po file is ready, just add it into '/yourapp/lang/' folder.
 

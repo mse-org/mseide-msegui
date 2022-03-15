@@ -1,7 +1,5 @@
 unit mo2arrays;
 
-// By Sieghard 2022
-
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 

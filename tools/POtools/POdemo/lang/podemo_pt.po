@@ -17,6 +17,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "English [en]"
+msgstr "Português [pt]"
+
 msgid "&Cancel"
 msgstr "&Cancelar"
 
@@ -539,21 +542,4 @@ msgstr "Esse é outro teste."
 msgid "This is the end."
 msgstr "Este é o fim."
 
-msgid "English [en]"
-msgstr "Inglês [en]"
-
-msgid "Russian [ru]"
-msgstr "Russo [ru]"
-
-msgid "French [fr]"
-msgstr "Francês [fr]"
-
-msgid "German [de]"
-msgstr "Alemão [de]"
-
-msgid "Spanish [es]"
-msgstr "Espanhol [es]"
-
-msgid "Portuguese [pt]"
-msgstr "Português [pt]"
 

@@ -271,11 +271,6 @@ begin
   for iconflangfoty := Low(conflangfoty) to High(conflangfoty) do
     defaultresult[y + Ord(iconflangfoty)] := en_conflangfotext[(iconflangfoty)];
 
-  // Languages must be the last in po
-  y     := length(defaultresult);
-  setlength(defaultresult, length(en_langnamestext) + y);
-  for x := 0 to length(en_langnamestext) - 1 do
-    defaultresult[x + y] := en_langnamestext[x];
 
   // check if double "msgid"
   str1 := '';
@@ -315,7 +310,9 @@ begin
   else
     file1.writeln();
 
-  file1.writeln();
+     file1.writeln('msgid "English [en]"');
+     file1.writeln('msgstr ""');
+    file1.writeln();
 
   for x := 0 to length(defaultresult) - 1 do
     if trim(defaultresult[x]) <> '' then

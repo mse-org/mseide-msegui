@@ -101,7 +101,6 @@ begin
 
   conflangfo.tlabel2.Caption := lang_conflangfo[Ord(my_test2)];  // captions from this application.
 
-
   conflangfo.tlabel3.Caption := lang_conflangfo[Ord(my_test3)]; // captions from this application.
 
 {$endif}

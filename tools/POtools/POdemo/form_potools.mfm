@@ -13,7 +13,6 @@ object headerfo: theaderfo
     482
   )
   options = [fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
-  statfile = conflangfo.tstatfile1
   caption = 'Po <> Po converter'
   windowopacity = -Inf
   oncreate = oncreateform
@@ -219,7 +218,6 @@ object headerfo: theaderfo
     top = 120
   end
   object impexpfiledialog: tfiledialogx
-    statfile = conflangfo.tstatfile1
     controller.fontheight = 0
     controller.fontname = 'stf_default'
     controller.fontcolor = -1610612734

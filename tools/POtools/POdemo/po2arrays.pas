@@ -1,6 +1,8 @@
+
 unit po2arrays;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+
 interface
 
 uses
@@ -22,7 +24,7 @@ uses
 
 procedure createnewlang(alang: msestring);
 procedure dosearch(thearray: array of msestring; theindex: integer);
-procedure findpofiles();
+procedure listpofiles();
 
 implementation
 
@@ -36,15 +38,16 @@ var
   astro, astrt, acomp: mseString;
   hasfound: Boolean = False;
   empty: Boolean = False;
-  lang_langnamestmp: array of msestring;
 
-procedure findpofiles();
+procedure listpofiles();
 var
   ListOfFiles: array of string;
   SearchResult: TSearchRec;
+  file1: ttextdatastream;
   Attribute: word;
   i: integer = 0;
-  str1: string;
+  x: integer;
+  str1, str2, pat: string;
 begin
   Attribute := faReadOnly or faArchive;
 
@@ -56,23 +59,61 @@ begin
   FindFirst(str1 + '*.po', Attribute, SearchResult);
   while (i = 0) do
   begin
-    SetLength(ListOfFiles, Length(ListOfFiles) + 1);     // Increase the list
-    ListOfFiles[High(ListOfFiles)] := SearchResult.Name; // Add it at the end of the list
+    SetLength(ListOfFiles, Length(ListOfFiles) + 1);
+    // Increase the list
+    ListOfFiles[High(ListOfFiles)] := SearchResult.Name;
+    // Add it at the of the list
     i := FindNext(SearchResult);
   end;
   FindClose(SearchResult);
 
-  setlength(lang_langnamestmp, 1);
-  lang_langnamestmp[0] := '[en]';
+  setlength(lang_langnames, 1);
+  lang_langnames[0] := 'English [en]';
+
+  pat := ExtractFilePath(ParamStr(0)) + 'lang' + directoryseparator;
 
   for i := Low(ListOfFiles) to High(ListOfFiles) do
     if system.pos('empty', ListOfFiles[i]) = 0 then
     begin
-      setlength(lang_langnamestmp, length(lang_langnamestmp) + 1);
+      setlength(lang_langnames, length(lang_langnames) + 1);
       str1 := ListOfFiles[i];
-      str1 := StringReplace(str1, 'podemo_', '', [rfReplaceAll]);
-      str1 := StringReplace(str1, '.po', '', [rfReplaceAll]);
-      lang_langnamestmp[length(lang_langnamestmp) - 1] := '[' + trim(str1) + ']';
+     {
+      writeln(str1 + '  ' + inttostr(FileAge(str1)));
+      writeln(str1 + DateTimeToStr(FileDateToDateTime(FileAge(pat + directoryseparator + str1))));
+
+      str2 := copy(str1,1,system.pos('.',str1)) + 'mo';
+      writeln(str2 +DateTimeToStr(FileDateToDateTime(FileAge(pat + directoryseparator + str2))));
+
+     if FileDateToDateTime(FileAge(pat + directoryseparator + str1))
+      < FileDateToDateTime(FileAge(pat + directoryseparator + str2)) then
+      writeln(str1 + ' is younger than ' + str2) else
+       writeln(str1 + ' is older than ' + str2);
+
+      writeln();
+      }
+
+      //writeln(pat+str1);
+      file1 := ttextdatastream.Create(pat + str1, fm_read);
+      file1.encoding := ce_utf8;
+      x := 0;
+      while (not file1.EOF) and (x = 0) do
+      begin
+        str1 := '';
+        file1.readln(str1);
+        if system.pos('msgid "English [en]"', str1) > 0 then
+        begin
+          file1.readln(str1);
+          if system.pos('msgstr', str1) > 0 then
+          begin
+            x    := 1;
+            str1 := StringReplace(str1, 'msgstr', '', [rfReplaceAll]);
+            str1 := StringReplace(str1, '"', '', [rfReplaceAll]);
+            lang_langnames[length(lang_langnames) - 1] := trim(str1);
+          end;
+          // writeln(lang_langnamestmp[length(lang_langnamestmp) - 1]);
+        end;
+      end;
+      file1.Free;
     end;
 end;
 
@@ -87,14 +128,14 @@ begin
   while (y < length(constvaluearray)) and (hasfound = False) do
   begin
     str2  := (constvaluearray[y]);
-    acomp := system.Copy(str2, 1, system.pos(';', str2) - 1);
+    acomp := Copy(str2, 1, system.pos(';', str2) - 1);
     // writeln('---acomp:' + acomp);
-    str2  := (system.Copy(str2, system.pos(';', str2) + 1, length(str2) - system.pos(';', str2) + 1));
-    astro := (system.Copy(str2, 1, system.pos(';', str2) - 1));
+    str2  := (Copy(str2, system.pos(';', str2) + 1, length(str2) - system.pos(';', str2) + 1));
+    astro := (Copy(str2, 1, system.pos(';', str2) - 1));
     astro := StringReplace(astro, '\"', '"', [rfReplaceAll]);
     //  writeln('---astro:' + astro);
-    str2  := (system.Copy(str2, system.pos(';', str2) + 1, length(str2) - system.pos(';', str2) + 1));
-    astrt := system.Copy(str2, 1, length(str2));
+    str2  := (Copy(str2, system.pos(';', str2) + 1, length(str2) - system.pos(';', str2) + 1));
+    astrt := Copy(str2, 1, length(str2));
     astrt := StringReplace(astrt, '\"', '"', [rfReplaceAll]);
 
     if thearray[theindex] = astro then
@@ -109,26 +150,22 @@ procedure createnewlang(alang: msestring);
 var
   x, x2, x3: integer;
   file1: ttextdatastream;
-  str1: msestring;
+  str1, strinit, strlang, filename1: msestring;
   str2, str3, str4, strtemp: mseString;
+  int1: integer;
   isstring: Boolean = False;
   isid: Boolean = False;
   iscontext: Boolean = False;
   ispocontext: Boolean = False;
-  // The enums of msegui widgets:
   imodalresultty: modalresultty;
+  iconflangfoty: conflangfoty;
   iextendedty: extendedty;
   istockcaptionty: stockcaptionty;
-  // The arrays of msegui widgets:
-  default_modalresulttext, default_modalresulttextnoshortcut, default_stockcaption,
-  default_langnamestext, default_extendedtext: array of msestring;
-  // Your enum
-  iconflangfoty: conflangfoty;
-  // Your array
-  default_conflangfotext: array of msestring;
+  default_conflangfo, defaultresult, default_resulttext, default_modalresulttext, default_modalresulttextnoshortcut, default_stockcaption, default_extendedtext: array of msestring;
 begin
 
-  str1 := ExtractFilePath(ParamStr(0)) + 'lang' + directoryseparator + 'podemo_' + alang + '.po';
+  strlang := '';
+  str1    := ExtractFilePath(ParamStr(0)) + 'lang' + directoryseparator + 'podemo_' + alang + '.po';
 
   if (not fileexists(str1)) or (lowercase(alang) = 'en') or (trim(alang) = '') then
   begin
@@ -139,7 +176,8 @@ begin
     setlength(lang_modalresultnoshortcut, length(en_modalresulttextnoshortcut));
     for imodalresultty := Low(modalresultty) to High(modalresultty) do
       lang_modalresultnoshortcut[Ord(imodalresultty)] :=
-        en_modalresulttextnoshortcut[(imodalresultty)];
+        en_modalresulttextnoshortcut[(
+        imodalresultty)];
 
     setlength(lang_stockcaption, length(en_stockcaption));
     for istockcaptionty := Low(stockcaptionty) to High(stockcaptionty) do
@@ -151,40 +189,14 @@ begin
       lang_extended[Ord(iextendedty)] :=
         en_extendedtext[(iextendedty)];
 
+    // You applcation
     setlength(lang_conflangfo, length(en_conflangfotext));
     for iconflangfoty := Low(conflangfoty) to High(conflangfoty) do
       lang_conflangfo[Ord(iconflangfoty)] :=
         en_conflangfotext[(iconflangfoty)];
 
-    findpofiles();
+    listpofiles();
 
-    if length(lang_langnamestmp) > length(en_langnamestext) then
-      setlength(lang_langnames, length(lang_langnamestmp))
-    else
-      setlength(lang_langnames, length(en_langnamestext));
-
-    for x := 0 to length(en_langnamestext) - 1 do
-      lang_langnames[x] := en_langnamestext[x];
-
-    if length(lang_langnames) > length(en_langnamestext) then
-    begin
-      for x := 0 to high(lang_langnames) do
-      begin
-        str2   := trim(copy(lang_langnames[x], system.pos('[', lang_langnames[x]), 10));
-        for x2 := 0 to high(lang_langnamestmp) do
-          if trim(lang_langnamestmp[x2]) = str2 then
-            lang_langnamestmp[x2] := '';
-      end;
-
-      x2    := length(en_langnamestext);
-      for x := 0 to high(lang_langnamestmp) do
-        if trim(lang_langnamestmp[x]) <> '' then
-        begin
-          lang_langnames[x2] := 'Language ' + trim(lang_langnamestmp[x]);
-          Inc(x2);
-        end;
-
-    end;
   end
   else if fileexists(str1) then
   begin
@@ -195,8 +207,8 @@ begin
 
     setlength(constvaluearray, 0);
 
-    str2 := '';
     str3 := '';
+    str2 := '';
     str4 := '';
 
     while not file1.EOF do
@@ -205,19 +217,19 @@ begin
       file1.readln(str1);
       strtemp := '';
 
-      if (trim(str1) <> '') and (system.Copy(str1, 1, 1) <> '#') then
-        if (system.Copy(str1, 1, 7) = 'msgctxt') then
+      if (trim(str1) <> '') and (Copy(str1, 1, 1) <> '#') then
+        if (Copy(str1, 1, 7) = 'msgctxt') then
         begin
           ispocontext := True;
 
           setlength(constvaluearray, length(constvaluearray) + 1);
-          str2      := str4 + String(';') + str2 + String(';') + str3;
+          str2      := str4 + string(';') + str2 + string(';') + str3;
           str2      := StringReplace(str2, '\n', '', [rfReplaceAll]);
           str2      := StringReplace(str2, '\', '', [rfReplaceAll]);
           constvaluearray[length(constvaluearray) - 1] := str2;
           str3      := '';
           str4      := '';
-          str4      := (system.Copy(str1, 10, length(str1) - 10));
+          str4      := (Copy(str1, 10, length(str1) - 10));
           iscontext := True;
           isid      := False;
           isstring  := False;
@@ -227,21 +239,21 @@ begin
           if ispocontext = False then
           begin
             setlength(constvaluearray, length(constvaluearray) + 1);
-            str2 := str4 + String(';') + str2 + String(';') + str3;
+            str2 := str4 + string(';') + str2 + string(';') + str3;
             str2 := StringReplace(str2, '\n', '', [rfReplaceAll]);
             str2 := StringReplace(str2, '\', '', [rfReplaceAll]);
             constvaluearray[length(constvaluearray) - 1] := str2;
             str3 := '';
             str4 := '';
           end;
-          str2 := system.Copy(str1, 8, length(str1) - 8);
+          str2 := Copy(str1, 8, length(str1) - 8);
           iscontext := False;
           isid      := True;
           isstring  := False;
         end
-        else if (system.Copy(str1, 1, 6) = 'msgstr') then
+        else if (Copy(str1, 1, 6) = 'msgstr') then
         begin
-          str3      := (system.Copy(str1, 9, length(str1) - 9));
+          str3      := (Copy(str1, 9, length(str1) - 9));
           str3      := StringReplace(str3, '\n', '', [rfReplaceAll]);
           iscontext := False;
           isid      := False;
@@ -249,40 +261,41 @@ begin
         end
         else if iscontext then
         begin
-          strtemp := system.Copy(str1, 2, length(str1) - 2);
+          strtemp := Copy(str1, 2, length(str1) - 2);
           if (system.pos('\n', strtemp) > 0) then
           begin
             strtemp := StringReplace(strtemp, '\n', '', [rfReplaceAll]);
-            str4    := str4 + strtemp + String(sLineBreak);
+            str4    := str4 + strtemp + string(sLineBreak);
           end
           else
             str4    := str4 + strtemp;
         end
         else if isid then
         begin
-          strtemp := system.Copy(str1, 2, length(str1) - 2);
+          strtemp := Copy(str1, 2, length(str1) - 2);
           if (system.pos('\n', strtemp) > 0) then
           begin
             strtemp := StringReplace(strtemp, '\n', '', [rfReplaceAll]);
-            str2    := str2 + strtemp + String(sLineBreak);
+            str2    := str2 + strtemp + string(sLineBreak);
           end
           else
             str2    := str2 + strtemp;
         end
         else if isstring then
         begin
-          strtemp := system.Copy(str1, 2, length(str1) - 2);
+          strtemp := Copy(str1, 2, length(str1) - 2);
           if (system.pos('\n', strtemp) > 0) then
           begin
             strtemp := StringReplace(strtemp, '\n', '', [rfReplaceAll]);
-            str3    := (str3 + strtemp + String(sLineBreak));
+            str3    := (str3 + strtemp + string(sLineBreak));
           end
           else
             str3    := str3 + strtemp;
         end;
     end;
+
     setlength(constvaluearray, length(constvaluearray) + 1);
-    str2 := str4 + String(';') + str2 + String(';') + str3;
+    str2 := str4 + string(';') + str2 + string(';') + str3;
     str2 := StringReplace(str2, '\n', '', [rfReplaceAll]);
     str2 := StringReplace(str2, '\', '', [rfReplaceAll]);
     constvaluearray[length(constvaluearray) - 1] := str2;
@@ -308,14 +321,11 @@ begin
       default_extendedtext[Ord(iextendedty)] :=
         en_extendedtext[(iextendedty)];
 
-    setlength(default_conflangfotext, length(en_conflangfotext));
+    // You applcation
+    setlength(default_conflangfo, length(en_conflangfotext));
     for iconflangfoty := Low(conflangfoty) to High(conflangfoty) do
-      default_conflangfotext[Ord(iconflangfoty)] :=
+      default_conflangfo[Ord(iconflangfoty)] :=
         en_conflangfotext[(iconflangfoty)];
-
-    setlength(default_langnamestext, length(en_langnamestext));
-    for x := 0 to length(en_langnamestext) - 1 do
-      default_langnamestext[x] := en_langnamestext[x];
 
     setlength(lang_modalresult, length(default_modalresulttext));
 
@@ -392,65 +402,28 @@ begin
 
     end;
 
-    setlength(lang_conflangfo, length(default_conflangfotext));
+    // Your application
+    setlength(lang_conflangfo, length(default_conflangfo));
 
-    for x := 0 to length(default_conflangfotext) - 1 do
+    for x := 0 to length(default_conflangfo) - 1 do
     begin
-      dosearch(default_conflangfotext, x);
+      dosearch(default_conflangfo, x);
 
       if hasfound then
       else
-        astrt := default_conflangfotext[x];
+        astrt := default_conflangfo[x];
       if trim(astrt) = '' then
-        astrt := default_conflangfotext[x];
+        astrt := default_conflangfo[x];
 
       astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
       astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
 
       lang_conflangfo[x] := astrt;
-    end;
-
-    setlength(lang_langnames, length(default_langnamestext));
-
-    for x := 0 to length(default_langnamestext) - 1 do
-    begin
-      dosearch(default_langnamestext, x);
-
-      if hasfound then
-      else
-        astrt := default_langnamestext[x];
-      if trim(astrt) = '' then
-        astrt := default_langnamestext[x];
-
-      astrt := StringReplace(astrt, ',', '‚', [rfReplaceAll]);
-      astrt := StringReplace(astrt, #039, '‘', [rfReplaceAll]);
-
-      lang_langnames[x] := astrt;
 
     end;
 
-    findpofiles();
+    listpofiles();
 
-    if length(lang_langnamestmp) > length(lang_langnames) then
-    begin
-      x3     := length(lang_langnames);
-      setlength(lang_langnames, length(lang_langnamestmp));
-      for x  := 0 to high(lang_langnames) do
-      begin
-        str2 := trim(copy(lang_langnames[x], system.pos('[', lang_langnames[x]), 10));
-        for x2 := 0 to high(lang_langnamestmp) do
-          if trim(lang_langnamestmp[x2]) = str2 then
-            lang_langnamestmp[x2] := '';
-      end;
-
-      for x := 0 to high(lang_langnamestmp) do
-        if trim(lang_langnamestmp[x]) <> '' then
-        begin
-          lang_langnames[x3] := 'Language ' + trim(lang_langnamestmp[x]);
-          Inc(x3);
-        end;
-
-    end;
   end;
 end;
 

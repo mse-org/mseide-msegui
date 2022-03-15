@@ -82,9 +82,9 @@ finddialog=8
  value=0
  [finddialogfo]
  stackedunder=
- x=560
- y=494
- cx=266
+ x=570
+ y=381
+ cx=298
  cy=269
 replacedialog=15
  [replacedialogfo.promptonreplace]
@@ -100,7 +100,7 @@ replacedialog=15
  stackedunder=
  x=447
  y=253
- cx=254
+ cx=389
  cy=200
 options=114
  [projectoptionsfo.toolshortcuts]
@@ -464,17 +464,20 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=1
- STOCKDATA
-moduletypes=1
- TSTOCKDATA
-modulefiles=1
- /home/fred/mseide-msegui/lib/common/lang_consts/msestockobjects.mfm
+modulenames=2
+ CONFLANGFO
+ HEADERFO
+moduletypes=2
+ TCONFLANGFO
+ THEADERFO
+modulefiles=2
+ /home/fred/mseide-msegui/tools/POtools/POdemo/form_conflang.mfm
+ /home/fred/mseide-msegui/tools/POtools/POdemo/form_potools.mfm
 befcommandon=0
 makeoptionson=6
  4095
  4095
- 4063
+ 4059
  4095
  4095
  60
@@ -768,9 +771,12 @@ envvarons=0
 [edit]
 hintwidth=314
 hintheight=214
-finddtext=utf8
+finddtext=createnewlang
 findhistory=20
+ createnewlang
+ setlangdemo
  utf8
+ statfile
  mainform
  sc_directory
  ok.ca
@@ -787,52 +793,43 @@ findhistory=20
  msest
  stocko
  demo
- writeln(
- '2'
- sc_cancelspeech
 findoptions=1
-editpos=5
- 0,0
+editpos=3
+ 0,13
  0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,24
+ 37,76
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
-bookmarks3=0
-bookmarks4=0
-sourcefiles=5
- /home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
- ${PROJECTDIR}/po2arrays.pas
- ${PROJECTDIR}/captionpodemo.pas
- /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts.pas
- /home/fred/mseide-msegui/lib/common/lang_consts/msestockobjects.pas
-relpaths=5
+sourcefiles=3
+ ${PROJECTDIR}/podemo.pas
+ ${PROJECTDIR}/form_conflang.pas
+ ${PROJECTDIR}/form_potools.pas
+relpaths=3
  podemo.pas
- po2arrays.pas
- captionpodemo.pas
- lib/common/lang_consts/mseconsts.pas
- ../../lib/common/lang_consts/msestockobjects.pas
-ismoduletexts=5
+ form_conflang.pas
+ form_potools.pas
+ismoduletexts=3
  0
  0
  0
+modules=2
+ /home/fred/mseide-msegui/tools/POtools/POdemo/form_potools.mfm
+ /home/fred/mseide-msegui/tools/POtools/POdemo/form_conflang.mfm
+moduleoptions=2
  0
  0
-modules=1
- /home/fred/mseide-msegui/lib/common/lang_consts/msestockobjects.mfm
-moduleoptions=1
- 0
-visiblemodules=1
+visiblemodules=2
  -1
-nomenumodules=1
+ -1
+nomenumodules=2
+ 0
  0
 [sourcefo.files_tab]
 firsttab=0
 index=0
 [layout]
-windowlayout=558
+windowlayout=565
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -846,10 +843,10 @@ windowlayout=558
  ny=0
  ncx=0
  ncy=0
- x=132
- y=41
- cx=1231
- cy=621
+ x=0
+ y=29
+ cx=1368
+ cy=711
  rcx=0
  rcy=0
  wsize=0
@@ -1069,10 +1066,10 @@ windowlayout=558
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=486
- width0=117
+ propcolwidthref=242
+ width0=58
  sortdescend0=0
- width1=363
+ width1=178
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1165,8 +1162,8 @@ windowlayout=558
  ncx=0
  ncy=0
  x=0
- y=512
- cx=1219
+ y=602
+ cx=1356
  cy=88
  rcx=0
  rcy=0
@@ -1266,7 +1263,7 @@ windowlayout=558
  ncy=0
  x=0
  y=0
- cx=1219
+ cx=1356
  cy=50
  rcx=0
  rcy=0
@@ -1278,11 +1275,11 @@ windowlayout=558
  mdistate=0
  nx=0
  ny=0
- ncx=1219
- ncy=58
+ ncx=1356
+ ncy=59
  x=0
  y=0
- cx=1219
+ cx=1356
  cy=58
  rcx=0
  rcy=0
@@ -1293,23 +1290,11 @@ windowlayout=558
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
- history=16
-  /home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
-  /home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
-  /home/fred/msegui_dynpo-mod/modemo.pas
-  /home/fred/msegui_dynpo-mod/captionmodemo.pas
-  /home/fred/strumpract/src/status.pas
-  /home/fred/strumpract/src/findmessage.pas
-  /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts.pas
-  /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts_ru.pas
-  /home/fred/strumpract/src/captionstrumpract.pas
-  /home/fred/strumpract/src/config.mfm
-  /home/fred/strumpract (copy 1)/src/main.mfm
-  /home/fred/strumpract/src/equalizer.pas
-  /home/fred/strumpract/src/infos.pas
-  /home/fred/strumpract/src/potools.pas
-  /home/fred/strumpract/src/po2arrays.pas
+ value=/home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.mfm
+ history=4
+  /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.mfm
+  /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
+  /home/fred/mseide-msegui/tools/POtools/MOdemo/mo2arrays.pas
   /home/fred/strumpract/src/conflang.pas
  [debuggerfo.project_options]
  value=1
@@ -1327,8 +1312,8 @@ windowlayout=558
  ncy=0
  x=0
  y=0
- cx=1219
- cy=456
+ cx=1356
+ cy=546
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1340,7 +1325,7 @@ windowlayout=558
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=confdebuggerfo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -1368,11 +1353,30 @@ windowlayout=558
  ncy=0
  x=0
  y=53
- cx=1219
- cy=456
+ cx=1356
+ cy=546
  rcx=0
  rcy=0
- [_mse_stockdata_mse_]
+ [_mse_headerfo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=_mse_conflangfo_mse_
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=495
+ y=203
+ cx=437
+ cy=482
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [_mse_conflangfo_mse_]
  splitdir=0
  useroptions=268451963
  stackedunder=projecttreefo
@@ -1382,10 +1386,10 @@ windowlayout=558
  ny=0
  ncx=0
  ncy=0
- x=129
- y=57
- cx=198
- cy=85
+ x=444
+ y=269
+ cx=341
+ cy=262
  rcx=0
  rcy=0
  wsize=0
