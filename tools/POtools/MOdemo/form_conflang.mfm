@@ -24,7 +24,7 @@ object conflangfo: tconflangfo
     frame.optionsskin = [fso_flat]
     frame.localprops = [frl_optionsskin]
     frame.localprops1 = []
-    bounds_x = 236
+    bounds_x = 124
     bounds_y = 6
     bounds_cx = 78
     bounds_cy = 26
@@ -138,19 +138,8 @@ object conflangfo: tconflangfo
       reffontheight = 15
     end
   end
-  object bpotools: tbutton
-    taborder = 2
-    bounds_x = 34
-    bounds_y = 6
-    bounds_cx = 132
-    bounds_cy = 26
-    anchors = [an_top, an_right]
-    state = [as_localcaption, as_localonexecute]
-    caption = 'Po tools'
-    onexecute = ontools
-  end
   object tlabel1: tlabel
-    taborder = 3
+    taborder = 2
     bounds_x = 48
     bounds_y = 168
     bounds_cx = 41
@@ -159,7 +148,7 @@ object conflangfo: tconflangfo
     reffontheight = 15
   end
   object tlabel2: tlabel
-    taborder = 4
+    taborder = 3
     bounds_x = 48
     bounds_y = 200
     bounds_cx = 41
@@ -168,7 +157,7 @@ object conflangfo: tconflangfo
     reffontheight = 15
   end
   object tlabel3: tlabel
-    taborder = 5
+    taborder = 4
     bounds_x = 48
     bounds_y = 232
     bounds_cx = 41

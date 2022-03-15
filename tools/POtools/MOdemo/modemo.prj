@@ -81,7 +81,7 @@ finddialog=8
  stackedunder=
  x=716
  y=372
- cx=266
+ cx=298
  cy=269
 replacedialog=16
  [replacedialogfo.promptonreplace]
@@ -468,15 +468,12 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=2
+modulenames=1
  CONFLANGFO
- HEADERFO
-moduletypes=2
+moduletypes=1
  TCONFLANGFO
- THEADERFO
-modulefiles=2
+modulefiles=1
  /home/fred/mseide-msegui/tools/POtools/MOdemo/form_conflang.mfm
- /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.mfm
 befcommandon=0
 makeoptionson=6
  63
@@ -639,8 +636,8 @@ tabstops=4
 spacetabs=0
 showtabs=0
 tabindent=0
-editfontname=
-editfontheight=14
+editfontname=mseide_source
+editfontheight=16
 editfontwidth=0
 editfontextraspace=0
 editfontcolor=-1879048183
@@ -775,74 +772,47 @@ envvarons=0
 [edit]
 hintwidth=314
 hintheight=214
-finddtext=utf8
+finddtext=findpofiles
 findhistory=1
  utf8
 findoptions=1
-editpos=7
+editpos=4
+ 0,2
  0,-1073741823
+ 0,6
  0,0
- 0,-1073741823
- 0,-1073741823
- 0,0
- 0,0
- 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-bookmarks4=0
-bookmarks5=0
-bookmarks6=0
-sourcefiles=7
- ${PROJECTDIR}/modemo.pas
- /home/fred/mseide-msegui/tools/POtools/MOdemo/form_conflang.pas
- /home/fred/mseide-msegui/tools/POtools/MOdemo/captionmodemo.pas
- ${PROJECTDIR}/mo2arrays.pas
- /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
+sourcefiles=4
  /home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
+ ${PROJECTDIR}/form_conflang.pas
  /home/fred/mseide-msegui/tools/POtools/MOdemo/mo2arrays.pas
-relpaths=7
+ /home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
+relpaths=4
  modemo.pas
  form_conflang.pas
- captionmodemo.pas
  mo2arrays.pas
- form_potools.pas
  modemo.pas
- mo2arrays.pas
-ismoduletexts=7
+ismoduletexts=4
  0
  0
  0
  0
- 0
- 0
- 0
-modules=2
+modules=1
  /home/fred/mseide-msegui/tools/POtools/MOdemo/form_conflang.mfm
- /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.mfm
-moduleoptions=2
+moduleoptions=1
  0
- 0
-visiblemodules=2
+visiblemodules=1
  -1
- -1
-nomenumodules=2
- 0
+nomenumodules=1
  0
 [sourcefo.files_tab]
-order=7
- 0
- 1
- 2
- 4
- 6
- 5
- 3
 firsttab=0
-index=5
+index=2
 [layout]
-windowlayout=586
+windowlayout=548
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -856,8 +826,8 @@ windowlayout=586
  ny=0
  ncx=0
  ncy=0
- x=41
- y=63
+ x=52
+ y=29
  cx=1235
  cy=635
  rcx=0
@@ -892,7 +862,7 @@ windowlayout=586
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -976,7 +946,7 @@ windowlayout=586
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=_mse_conflangfo_mse_
+ stackedunder=conflangfo
  parent=
  mdistate=3
  nx=0
@@ -993,15 +963,15 @@ windowlayout=586
  active=0
  visible=0
  [projecttreefo.grid]
- propcolwidthref=28
+ propcolwidthref=30
  width0=141
  sortdescend0=0
- width1=26
+ width1=28
  sortdescend1=0
  sorted=0
  col=1
  row=0
- rowheight=16
+ rowheight=17
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1060,7 +1030,7 @@ windowlayout=586
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=conflangfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1079,10 +1049,10 @@ windowlayout=586
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=486
- width0=115
+ propcolwidthref=227
+ width0=53
  sortdescend0=0
- width1=365
+ width1=168
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1176,7 +1146,7 @@ windowlayout=586
  ncy=0
  x=0
  y=526
- cx=1223
+ cx=1225
  cy=88
  rcx=0
  rcy=0
@@ -1276,8 +1246,8 @@ windowlayout=586
  ncy=0
  x=0
  y=0
- cx=1223
- cy=51
+ cx=1225
+ cy=50
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1289,11 +1259,11 @@ windowlayout=586
  nx=0
  ny=0
  ncx=1223
- ncy=58
+ ncy=57
  x=0
  y=0
- cx=1223
- cy=58
+ cx=1225
+ cy=57
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1303,24 +1273,13 @@ windowlayout=586
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
- history=17
+ value=/home/fred/mseide-msegui/tools/POtools/MOdemo/mo2arrays.pas
+ history=6
+  /home/fred/mseide-msegui/tools/POtools/MOdemo/mo2arrays.pas
+  /home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
+  /home/fred/ideu/src/mo4stock.pas
+  /home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
   /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
-  /home/fred/mseide-msegui/tools/POtools/MOdemo/captionmodemo.pas
-  /home/fred/mseide-msegui/tools/POtools/POdemo/captionpodemo.pas
-  /home/fred/msegui_dynpo-mod/modemo.pas
-  /home/fred/msegui_dynpo-mod/captionmodemo.pas
-  /home/fred/strumpract/src/status.pas
-  /home/fred/strumpract/src/findmessage.pas
-  /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts.pas
-  /home/fred/mseide-msegui/lib/common/lang_consts/mseconsts_ru.pas
-  /home/fred/strumpract/src/captionstrumpract.pas
-  /home/fred/strumpract/src/config.mfm
-  /home/fred/strumpract (copy 1)/src/main.mfm
-  /home/fred/strumpract/src/equalizer.pas
-  /home/fred/strumpract/src/infos.pas
-  /home/fred/strumpract/src/potools.pas
-  /home/fred/strumpract/src/po2arrays.pas
   /home/fred/strumpract/src/conflang.pas
  [debuggerfo.project_options]
  value=1
@@ -1338,28 +1297,20 @@ windowlayout=586
  ncy=0
  x=0
  y=0
- cx=1223
- cy=469
+ cx=1225
+ cy=470
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=7
-  0
-  1
-  2
-  4
-  6
-  5
-  3
  firsttab=0
- index=5
+ index=2
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=confdebuggerfo
+ stackedunder=_mse_conflangfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1386,15 +1337,15 @@ windowlayout=586
  ncx=0
  ncy=0
  x=0
- y=54
- cx=1223
- cy=469
+ y=53
+ cx=1225
+ cy=470
  rcx=0
  rcy=0
  [_mse_conflangfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=_mse_headerfo_mse_
+ stackedunder=targetconsolefo
  parent=
  mdistate=3
  nx=0
@@ -1405,25 +1356,6 @@ windowlayout=586
  y=269
  cx=341
  cy=262
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
- [_mse_headerfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=mainfo
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=495
- y=203
- cx=437
- cy=482
  rcx=0
  rcy=0
  wsize=0

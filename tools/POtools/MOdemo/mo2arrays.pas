@@ -44,9 +44,10 @@ procedure findpofiles();
 var
   ListOfFiles: array of string;
   SearchResult: TSearchRec;
+  MOfile: TMOfile;
   Attribute: word;
   i: integer = 0;
-  str1: string;
+  str1, str2: string;
 begin
   Attribute := faReadOnly or faArchive;
 
@@ -55,7 +56,7 @@ begin
   str1 := ExtractFilePath(ParamStr(0)) + 'lang' + directoryseparator;
 
   // List the files
-  FindFirst(str1 + '*.po', Attribute, SearchResult);
+  FindFirst(str1 + '*.mo', Attribute, SearchResult);
   while (i = 0) do
   begin
     SetLength(ListOfFiles, Length(ListOfFiles) + 1);     // Increase the list
@@ -64,19 +65,20 @@ begin
   end;
   FindClose(SearchResult);
 
-  setlength(lang_langnamestmp, 1);
-  lang_langnamestmp[0] := '[en]';
+  setlength(lang_langnames, 1);
+  lang_langnames[0] := 'English [en]';
 
   for i := Low(ListOfFiles) to High(ListOfFiles) do
     if system.pos('empty', ListOfFiles[i]) = 0 then
     begin
-      setlength(lang_langnamestmp, length(lang_langnamestmp) + 1);
-      str1 := ListOfFiles[i];
-      str1 := StringReplace(str1, appname, '', [rfReplaceAll]);
-      str1 := StringReplace(str1, langext, '', [rfReplaceAll]);
-      lang_langnamestmp[length(lang_langnamestmp) - 1] := '[' + trim(str1) + ']';
-      //writeln(lang_langnamestmp[length(lang_langnamestmp) - 1]);
-    end;
+     setlength(lang_langnames, length(lang_langnames) + 1);
+       str2 := ListOfFiles[i];
+       MOfile:= TMOfile.Create (str1+str2);
+       str2 := MOfile.Translate('English [en]');
+       //writeln(str1);
+       lang_langnames[length(lang_langnames) - 1] := trim(str2);
+       MOfile.Destroy;
+     end;
 end;
 
 procedure translate_stock (var lang_stocktext, default_stocktext: {array of msestring}msestringarty;
@@ -140,36 +142,9 @@ begin
 
     findpofiles();
 
-    if length(lang_langnamestmp) > length(en_langnamestext) then
-      setlength(lang_langnames, length(lang_langnamestmp))
-    else
-      setlength(lang_langnames, length(en_langnamestext));
-
-    //    writeln('length(en_langnamestext) ' + inttostr(length(en_langnamestext)));
+   //    writeln('length(en_langnamestext) ' + inttostr(length(en_langnamestext)));
     //       writeln('lang_langnames[x] ' + inttostr(length(lang_langnames)));
 
-    for x := 0 to length(en_langnamestext) - 1 do
-      lang_langnames[x] := en_langnamestext[x];
-
-    if length(lang_langnames) > length(en_langnamestext) then
-    begin
-      for x := 0 to high(lang_langnames) do
-      begin
-        str2:= trim(copy(lang_langnames[x], system.pos('[', lang_langnames[x]), 10));
-        for x2 := 0 to high(lang_langnamestmp) do
-          if trim(lang_langnamestmp[x2]) = str2 then
-            lang_langnamestmp[x2] := '';
-      end;
-
-      x2    := length(en_langnamestext);
-      for x := 0 to high(lang_langnamestmp) do
-        if trim(lang_langnamestmp[x]) <> '' then
-        begin
-          lang_langnames[x2] := 'Language ' + trim(lang_langnamestmp[x]);
-          Inc(x2);
-        end;
-
-    end;
   end
   else if fileexists(str1) then
   begin
@@ -179,42 +154,16 @@ begin
     buildlangtext (default_modalresulttext, default_modalresulttextnoshortcut, default_stockcaption,
                    default_extendedtext, default_mainformtext);
 
-    setlength(default_langnamestext, length(en_langnamestext));
-//    for x := 0 to length(en_langnamestext) - 1 do
-//      default_langnamestext[x] := MOfile.translate (en_langnamestext[x]);
-    default_langnamestext:= en_langnamestext;
-
     translate_stock (lang_modalresult, default_modalresulttext, MOfile);
     translate_stock (lang_modalresultnoshortcut, default_modalresulttextnoshortcut, MOfile);
     translate_stock (lang_stockcaption, default_stockcaption, MOfile);
     translate_stock (lang_extended, default_extendedtext, MOfile);
     translate_stock (lang_mainform, default_mainformtext, MOfile);
-    translate_stock (lang_langnames, default_langnamestext, MOfile);
 
     MOfile.Destroy;
 
     findpofiles();
 
-    if length(lang_langnamestmp) > length(lang_langnames) then
-    begin
-      x3     := length(lang_langnames);
-      setlength(lang_langnames, length(lang_langnamestmp));
-      for x  := 0 to high(lang_langnames) do
-      begin
-        str2 := trim(copy(lang_langnames[x], system.pos('[', lang_langnames[x]), 10));
-        for x2 := 0 to high(lang_langnamestmp) do
-          if trim(lang_langnamestmp[x2]) = str2 then
-            lang_langnamestmp[x2] := '';
-      end;
-
-      for x := 0 to high(lang_langnamestmp) do
-        if trim(lang_langnamestmp[x]) <> '' then
-        begin
-          lang_langnames[x3] := 'Language ' + trim(lang_langnamestmp[x]);
-          Inc(x3);
-        end;
-
-    end;
   end;
 end;
 

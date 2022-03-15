@@ -18,7 +18,6 @@ type
     gridlangcaption: tstringedit;
     gridlangbool: tbooleaneditradio;
     gridlangcode: tstringedit;
-    bpotools: TButton;
     tlabel1: tlabel;
     tlabel2: tlabel;
     tlabel3: tlabel;
@@ -26,7 +25,6 @@ type
     procedure oncok(const Sender: TObject);
     procedure oncreat(const Sender: TObject);
     procedure oncellev(const Sender: TObject; var info: celleventinfoty);
-    procedure ontools(const Sender: TObject);
     procedure setlangdemo(thelang: string);
   end;
 
@@ -44,7 +42,6 @@ uses
  msestockobjects,
 {$endif}
   captionmodemo,
-  form_potools,
   form_conflang_mfm;
 
 procedure tconflangfo.setlangdemo(thelang: string);
@@ -67,8 +64,6 @@ begin
   end;
 
   conflangfo.ok.Caption := lang_modalresult[Ord(mr_ok)];
-
-  conflangfo.bpotools.Caption := 'Po ' + lang_stockcaption[Ord(sc_tools)];
 
   conflangfo.Caption := lang_stockcaption[Ord(sc_lang)];
 
@@ -115,11 +110,5 @@ begin
 {$endif}
 end;
 
-procedure tconflangfo.ontools(const Sender: TObject);
-begin
-{$ifdef mse_dynpo}
- headerfo.Visible := True;
-{$endif}
-end;
 
 end.

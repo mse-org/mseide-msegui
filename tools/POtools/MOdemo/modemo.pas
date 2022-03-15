@@ -10,14 +10,11 @@ uses
  {$ifdef FPC} {$ifdef unix}cthreads, {$endif} {$endif}
   msegui,
   gettext,
-  form_conflang,
-  form_potools;
+  form_conflang;
 
 begin
   Gettext.GetLanguageIDs(MSELang, MSEFallbackLang);
   application.createform(tconflangfo, conflangfo);
-  application.createform(theaderfo, headerfo);
-  headerfo.close;
   application.run;
 end.
 

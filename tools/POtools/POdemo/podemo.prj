@@ -477,7 +477,7 @@ befcommandon=0
 makeoptionson=6
  4095
  4095
- 4059
+ 4063
  4095
  4095
  60
@@ -797,7 +797,7 @@ findoptions=1
 editpos=3
  0,13
  0,-1073741823
- 37,76
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -829,7 +829,7 @@ nomenumodules=2
 firsttab=0
 index=0
 [layout]
-windowlayout=565
+windowlayout=562
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -843,10 +843,10 @@ windowlayout=565
  ny=0
  ncx=0
  ncy=0
- x=0
- y=29
- cx=1368
- cy=711
+ x=34
+ y=45
+ cx=1231
+ cy=621
  rcx=0
  rcy=0
  wsize=0
@@ -879,7 +879,7 @@ windowlayout=565
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -901,7 +901,7 @@ windowlayout=565
  [memoryfo]
  splitdir=0
  useroptions=268451963
- stackedunder=dialogfilesfo
+ stackedunder=findmessagefo
  parent=
  mdistate=0
  nx=0
@@ -954,8 +954,8 @@ windowlayout=565
  ny=0
  ncx=0
  ncy=0
- x=333
- y=133
+ x=239
+ y=115
  cx=678
  cy=414
  rcx=0
@@ -963,7 +963,7 @@ windowlayout=565
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=mainfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=3
  nx=0
@@ -1026,14 +1026,14 @@ windowlayout=565
  active=0
  visible=0
  [watchpointsfo.grid]
- propcolwidthref=332
+ propcolwidthref=352
  sortdescend0=0
  values1=0
  values1_ci=-1
  width1=33
  sortdescend1=0
  values2=0
- width2=149
+ width2=158
  sortdescend2=0
  width4=34
  sortdescend4=0
@@ -1042,7 +1042,7 @@ windowlayout=565
  width5=38
  sortdescend5=0
  values6=0
- width6=172
+ width6=184
  sortdescend6=0
  [breakpointsfo]
  splitdir=0
@@ -1162,8 +1162,8 @@ windowlayout=565
  ncx=0
  ncy=0
  x=0
- y=602
- cx=1356
+ y=512
+ cx=1219
  cy=88
  rcx=0
  rcy=0
@@ -1263,8 +1263,8 @@ windowlayout=565
  ncy=0
  x=0
  y=0
- cx=1356
- cy=50
+ cx=1219
+ cy=57
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1275,12 +1275,12 @@ windowlayout=565
  mdistate=0
  nx=0
  ny=0
- ncx=1356
- ncy=59
+ ncx=1221
+ ncy=77
  x=0
  y=0
- cx=1356
- cy=58
+ cx=1219
+ cy=65
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1290,12 +1290,9 @@ windowlayout=565
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.mfm
- history=4
-  /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.mfm
-  /home/fred/mseide-msegui/tools/POtools/MOdemo/form_potools.pas
-  /home/fred/mseide-msegui/tools/POtools/MOdemo/mo2arrays.pas
-  /home/fred/strumpract/src/conflang.pas
+ value=/home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
+ history=1
+  ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1312,8 +1309,8 @@ windowlayout=565
  ncy=0
  x=0
  y=0
- cx=1356
- cy=546
+ cx=1219
+ cy=449
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1341,22 +1338,6 @@ windowlayout=565
  wsize=0
  active=0
  visible=0
- [mainfo.panel1]
- splitdir=1
- useroptions=302022123
- parent=mainfo.basedock
- visible=1
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=0
- y=53
- cx=1356
- cy=546
- rcx=0
- rcy=0
  [_mse_headerfo_mse_]
  splitdir=0
  useroptions=268451963
@@ -1395,6 +1376,22 @@ windowlayout=565
  wsize=0
  active=0
  visible=1
+ [mainfo.panel1]
+ splitdir=1
+ useroptions=302022123
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=60
+ cx=1219
+ cy=449
+ rcx=0
+ rcy=0
 [targetconsole]
 finddtext=
 findhistory=0
