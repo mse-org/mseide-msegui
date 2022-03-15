@@ -21,7 +21,7 @@ uses
   mseguiglob;
 
 procedure createnewlang(alang: msestring);
-procedure findpofiles();
+procedure findmofiles();
 
 implementation
 
@@ -35,12 +35,8 @@ const
   appname = 'modemo_';
   langext = '.mo';
 
-var
-  lang_langnamestmp: array of msestring;
 
-///////////////
-
-procedure findpofiles();
+procedure findmofiles();
 var
   ListOfFiles: array of string;
   SearchResult: TSearchRec;
@@ -140,12 +136,9 @@ begin
     buildlangtext (lang_modalresult, lang_modalresultnoshortcut, lang_stockcaption,
                    lang_extended, lang_mainform);
 
-    findpofiles();
+    findmofiles();
 
-   //    writeln('length(en_langnamestext) ' + inttostr(length(en_langnamestext)));
-    //       writeln('lang_langnames[x] ' + inttostr(length(lang_langnames)));
-
-  end
+   end
   else if fileexists(str1) then
   begin
 
@@ -162,7 +155,7 @@ begin
 
     MOfile.Destroy;
 
-    findpofiles();
+    findmofiles();
 
   end;
 end;

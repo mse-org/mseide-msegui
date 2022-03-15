@@ -773,23 +773,24 @@ envvarons=0
 hintwidth=314
 hintheight=214
 finddtext=findpofiles
-findhistory=1
+findhistory=2
+ findpofiles
  utf8
 findoptions=1
 editpos=4
  0,2
  0,-1073741823
- 0,6
- 0,0
+ 9,14
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 sourcefiles=4
- /home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
+ ${PROJECTDIR}/modemo.pas
  ${PROJECTDIR}/form_conflang.pas
- /home/fred/mseide-msegui/tools/POtools/MOdemo/mo2arrays.pas
- /home/fred/mseide-msegui/tools/POtools/MOdemo/modemo.pas
+ ${PROJECTDIR}/mo2arrays.pas
+ ${PROJECTDIR}/modemo.pas
 relpaths=4
  modemo.pas
  form_conflang.pas
@@ -946,7 +947,7 @@ windowlayout=548
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=conflangfo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=3
  nx=0
@@ -963,15 +964,15 @@ windowlayout=548
  active=0
  visible=0
  [projecttreefo.grid]
- propcolwidthref=30
+ propcolwidthref=28
  width0=141
  sortdescend0=0
- width1=28
+ width1=26
  sortdescend1=0
  sorted=0
  col=1
  row=0
- rowheight=17
+ rowheight=16
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1030,7 +1031,7 @@ windowlayout=548
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -1049,10 +1050,10 @@ windowlayout=548
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=227
- width0=53
+ propcolwidthref=242
+ width0=57
  sortdescend0=0
- width1=168
+ width1=179
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1146,7 +1147,7 @@ windowlayout=548
  ncy=0
  x=0
  y=526
- cx=1225
+ cx=1223
  cy=88
  rcx=0
  rcy=0
@@ -1246,7 +1247,7 @@ windowlayout=548
  ncy=0
  x=0
  y=0
- cx=1225
+ cx=1223
  cy=50
  rcx=0
  rcy=0
@@ -1262,7 +1263,7 @@ windowlayout=548
  ncy=57
  x=0
  y=0
- cx=1225
+ cx=1223
  cy=57
  rcx=0
  rcy=0
@@ -1297,7 +1298,7 @@ windowlayout=548
  ncy=0
  x=0
  y=0
- cx=1225
+ cx=1223
  cy=470
  rcx=0
  rcy=0
@@ -1310,7 +1311,7 @@ windowlayout=548
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_conflangfo_mse_
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1338,7 +1339,7 @@ windowlayout=548
  ncy=0
  x=0
  y=53
- cx=1225
+ cx=1223
  cy=470
  rcx=0
  rcy=0

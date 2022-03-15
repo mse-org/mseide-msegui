@@ -795,14 +795,14 @@ findhistory=20
  demo
 findoptions=1
 editpos=3
- 0,13
+ 0,6
  0,-1073741823
  0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 sourcefiles=3
- ${PROJECTDIR}/podemo.pas
+ /home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
  ${PROJECTDIR}/form_conflang.pas
  ${PROJECTDIR}/form_potools.pas
 relpaths=3
@@ -829,7 +829,7 @@ nomenumodules=2
 firsttab=0
 index=0
 [layout]
-windowlayout=562
+windowlayout=563
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -901,7 +901,7 @@ windowlayout=562
  [memoryfo]
  splitdir=0
  useroptions=268451963
- stackedunder=findmessagefo
+ stackedunder=dialogfilesfo
  parent=
  mdistate=0
  nx=0
@@ -963,7 +963,7 @@ windowlayout=562
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=targetconsolefo
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -980,15 +980,15 @@ windowlayout=562
  active=0
  visible=1
  [projecttreefo.grid]
- propcolwidthref=28
+ propcolwidthref=30
  width0=141
  sortdescend0=0
- width1=26
+ width1=28
  sortdescend1=0
  sorted=0
  col=1
  row=0
- rowheight=16
+ rowheight=17
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1163,7 +1163,7 @@ windowlayout=562
  ncy=0
  x=0
  y=512
- cx=1219
+ cx=1221
  cy=88
  rcx=0
  rcy=0
@@ -1263,7 +1263,7 @@ windowlayout=562
  ncy=0
  x=0
  y=0
- cx=1219
+ cx=1221
  cy=57
  rcx=0
  rcy=0
@@ -1275,11 +1275,11 @@ windowlayout=562
  mdistate=0
  nx=0
  ny=0
- ncx=1221
- ncy=77
+ ncx=1219
+ ncy=65
  x=0
  y=0
- cx=1219
+ cx=1221
  cy=65
  rcx=0
  rcy=0
@@ -1291,7 +1291,8 @@ windowlayout=562
  value=Pascal
  [debuggerfo.file_history]
  value=/home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
- history=1
+ history=2
+  /home/fred/mseide-msegui/tools/POtools/POdemo/podemo.pas
   ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
@@ -1309,7 +1310,7 @@ windowlayout=562
  ncy=0
  x=0
  y=0
- cx=1219
+ cx=1221
  cy=449
  rcx=0
  rcy=0
@@ -1322,7 +1323,7 @@ windowlayout=562
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=objectinspectorfo
+ stackedunder=_mse_headerfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1338,6 +1339,22 @@ windowlayout=562
  wsize=0
  active=0
  visible=0
+ [mainfo.panel1]
+ splitdir=1
+ useroptions=302022123
+ parent=mainfo.basedock
+ visible=1
+ mdistate=0
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=0
+ y=60
+ cx=1221
+ cy=449
+ rcx=0
+ rcy=0
  [_mse_headerfo_mse_]
  splitdir=0
  useroptions=268451963
@@ -1360,7 +1377,7 @@ windowlayout=562
  [_mse_conflangfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=projecttreefo
+ stackedunder=targetconsolefo
  parent=
  mdistate=3
  nx=0
@@ -1376,22 +1393,6 @@ windowlayout=562
  wsize=0
  active=0
  visible=1
- [mainfo.panel1]
- splitdir=1
- useroptions=302022123
- parent=mainfo.basedock
- visible=1
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=0
- y=60
- cx=1219
- cy=449
- rcx=0
- rcy=0
 [targetconsole]
 finddtext=
 findhistory=0
