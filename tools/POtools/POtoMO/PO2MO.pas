@@ -1,4 +1,7 @@
 			PROGRAM PO2MO;
+
+// By Sieghard 2022			
+			
 {$mode objfpc}
 {$LONGSTRINGS ON}
 
