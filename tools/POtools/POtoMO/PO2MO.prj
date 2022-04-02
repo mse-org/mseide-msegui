@@ -94,7 +94,7 @@ finddialog=8
  stackedunder=
  x=944
  y=114
- cx=266
+ cx=298
  cy=269
 options=114
  [projectoptionsfo.toolshortcuts]
@@ -1091,22 +1091,44 @@ envvarons=0
 [edit]
 hintwidth=314
 hintheight=200
-finddtext=uses
-findhistory=1
+finddtext=writeln
+findhistory=3
+ writeln
+ wrileln
  uses
 findoptions=1
-editpos=2
+editpos=6
  0,20
  0,-1073741823
+ 0,0
+ 9,687
+ 0,6
+ 16,6370
 bookmarks0=0
 bookmarks1=0
-sourcefiles=2
+bookmarks2=0
+bookmarks3=0
+bookmarks4=0
+bookmarks5=0
+sourcefiles=6
  ${PROJECTDIR}/PO2MO.pas
  ${PROJECTDIR}/POtoMO.pas
-relpaths=2
+ /home/fred/mseide-msegui/lib/common/kernel/msectypes.pas
+ /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
+ /home/fred/mseide-msegui/lib/common/kernel/linux/mseuniintf.pas
+ /home/fred/mseide-msegui/lib/common/kernel/linux/mseguiintf.pas
+relpaths=6
  PO2MO.pas
  POtoMO.pas
-ismoduletexts=2
+ ../../lib/common/kernel/msectypes.pas
+ ../../lib/common/kernel/linux/msesysintf.pas
+ ../../lib/common/kernel/linux/mseuniintf.pas
+ ../../lib/common/kernel/linux/mseguiintf.pas
+ismoduletexts=6
+ 0
+ 0
+ 0
+ 0
  0
  0
 modules=0
@@ -1114,10 +1136,17 @@ moduleoptions=0
 visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
+order=6
+ 0
+ 2
+ 3
+ 4
+ 5
+ 1
 firsttab=0
-index=0
+index=4
 [layout]
-windowlayout=524
+windowlayout=541
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1131,8 +1160,8 @@ windowlayout=524
  ny=0
  ncx=0
  ncy=0
- x=46
- y=53
+ x=423
+ y=214
  cx=1224
  cy=621
  rcx=0
@@ -1575,12 +1604,22 @@ windowlayout=524
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
- history=4
-  /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
-  /home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
-  /home/fred/ideu/src/POtoMO.pas
-  /home/fred/POtoMO/PO2MO.pas
+ value=/home/fred/mseide-msegui/lib/common/kernel/linux/mseguiintf.pas
+ history=14
+  /home/fred/mseide-msegui/lib/common/kernel/linux/mseuniintf.pas
+  /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
+  /home/fred/mseide-msegui/lib/common/kernel/msectypes.pas
+  /home/fred/cafecentral/cc_backuplast.bat
+  /home/fred/ideu/src/ideU (copy 1).pas
+  /home/fred/strumpract/src/uos_flat.pas
+  /home/fred/uos/src/uos.pas
+  /home/fred/strumpract/src/uos.pas
+  /home/fred/strumpract/src/infos.pas
+  /home/fred/strumpract/src/conflang.pas
+  /home/fred/ideu/src/conflang.pas
+  /home/fred/ideu/src/mo4stock.pas
+  /home/fred/ideu/src/mo4stocknew.pas
+  /home/fred/ideu/src/po2arrays.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1602,8 +1641,15 @@ windowlayout=524
  rcx=0
  rcy=0
  [sourcefo.files_tab]
+ order=6
+  0
+  2
+  3
+  4
+  5
+  1
  firsttab=0
- index=0
+ index=4
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]

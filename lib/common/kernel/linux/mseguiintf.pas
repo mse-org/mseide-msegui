@@ -4646,12 +4646,12 @@ begin
  result:= 0;
  case akind of
   sywi_tray: begin
-  writeln('sywi_tray');
+//  writeln('sywi_tray');
    at1:= netatoms[net_system_tray_s0];
-    writeln('at1:= ' + inttostr(at1));
+//    writeln('at1:= ' + inttostr(at1));
    if at1 <> 0 then begin
     result:= xgetselectionowner(appdisp,at1);
-     writeln('result:= ' + inttostr(result));
+//     writeln('result:= ' + inttostr(result));
    end;
   end;
   else; // For case statment added to make compiler happy.
