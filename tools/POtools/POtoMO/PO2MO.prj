@@ -1101,7 +1101,7 @@ editpos=2
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
- /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
+ ${PROJECTDIR}/PO2MO.pas
  ${PROJECTDIR}/POtoMO.pas
 relpaths=2
  PO2MO.pas
@@ -1131,8 +1131,8 @@ windowlayout=524
  ny=0
  ncx=0
  ncy=0
- x=51
- y=123
+ x=46
+ y=53
  cx=1224
  cy=621
  rcx=0
@@ -1610,7 +1610,7 @@ windowlayout=524
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0

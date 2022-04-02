@@ -1,8 +1,6 @@
-PROGRAM PO2MO;
+			PROGRAM PO2MO;
 {$mode objfpc}
 {$LONGSTRINGS ON}
-
-// By Sieghard 2022
 
 USES
   SysUtils, POtoMO, {StrUtils,} Classes;
@@ -10,24 +8,24 @@ USES
 VAR
   MOmake: MObuilder;
 
+PROCEDURE WriteErr (Msg: string);
+ BEGIN
+   WriteLn (Msg);
+ END;
+
 BEGIN
   IF ParamCount < 1 THEN Halt (1);
   MOmake:= MObuilder.Create;
   WITH MOmake DO
     TRY
+//    Use this output method if you want
+//    to process errors one by one
+//    LogError:= @WriteErr;
       MObuild (Paramstr (1));
     FINALLY
+//    Use this output method if you want
+//    to process errors once for all
+//    IF Errors.Count <> 0 THEN WriteLn (Errors.Text);
       Free;
     END;
 END.
-
-// BEGIN
-//   IF ParamCount < 1 THEN Halt (1);
-//   IF ParamCount < 2 THEN Halt (2);
-//   MOmake:= MObuilder.Create;
-//   WITH MOmake DO BEGIN
-//     POparse (Paramstr (1));
-//     MOwrite (Paramstr (2));
-//     Free;
-//   END;
-// END.
