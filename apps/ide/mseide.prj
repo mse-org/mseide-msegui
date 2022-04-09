@@ -57,8 +57,9 @@ findinfiledialog=63
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=dialogx
+ value='5.6
  history=20
+  '5.6
   dialogx
   msefiledialogx
   copyrighttext
@@ -78,7 +79,6 @@ findinfiledialog=63
   4.6.3
   RunCommandSleepTime
   about
-  {$warn
  [findinfileadialogfo]
  stackedunder=
  x=200
@@ -536,7 +536,7 @@ modulefiles=4
 befcommandon=0
 makeoptionson=10
  4095
- 67
+ 3
  4095
  4094
  255
@@ -878,34 +878,39 @@ findhistory=20
  editprojectoptions
  onloaded
 findoptions=1
-editpos=6
- 0,-1073741823
+editpos=7
+ 0,0
  0,-1073741823
  0,5
  0,278
+ 0,49
  0,-1073741823
- 0,-1073741823
+ 0,21
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
 bookmarks5=0
-sourcefiles=6
+bookmarks6=0
+sourcefiles=7
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
- /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
+ ${PROJECTDIR}/actionsmodule.pas
  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
  ${PROJECTDIR}/main.pas
  /home/fred/mseide-msegui/lib/common/db/mmysqlconn.inc
-relpaths=6
+ /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+relpaths=7
  mseide.pas
  sourceform.pas
  actionsmodule.pas
  ../lib/common/designutils/msesettings.pas
  main.pas
  lib/common/db/mmysqlconn.inc
-ismoduletexts=6
+ ../lib/common/kernel/msegui.pas
+ismoduletexts=7
+ 0
  0
  0
  0
@@ -933,10 +938,18 @@ nomenumodules=4
  0
  0
 [sourcefo.files_tab]
+order=7
+ 0
+ 1
+ 2
+ 3
+ 4
+ 6
+ 5
 firsttab=0
-index=2
+index=5
 [layout]
-windowlayout=566
+windowlayout=588
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1170,10 +1183,10 @@ windowlayout=566
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=423
- width0=192
+ propcolwidthref=367
+ width0=167
  sortdescend0=0
- width1=225
+ width1=194
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1337,7 +1350,7 @@ windowlayout=566
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -1368,7 +1381,7 @@ windowlayout=566
  x=0
  y=0
  cx=1219
- cy=50
+ cy=54
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1394,18 +1407,32 @@ windowlayout=566
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/actionsmodule.pas
- history=8
-  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
-  /home/fred/mseide-msegui/lib/common/db/mmysqlconn.inc
-  /home/fred/mseide-msegui/apps/ide/sourceform.pas
-  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
-  /home/fred/mseide-msegui/apps/ide/mseide.pas
-  /home/fred/mseide-msegui/apps/ide/main.pas
-  /home/fred/mseide-msegui/lib/common/designutils/msesettings.mfm
-  /home/fred/mseide-msegui/lib/common/dialogs/msestringenter.pas
+ value=/home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+ history=22
+  /home/fred/Downloads/fpGUI-develop/src/corelib/gdi/fpg_gdi.pas
+  /home/fred/Downloads/fpGUI-develop/src/corelib/x11/fpg_x11.pas
+  /home/fred/Downloads/fpGUI-develop/src/corelib/fpg_base.pas
+  /home/fred/fpGUI/src/corelib/gdi/fpg_gdi.pas
+  /home/fred/fpGUI/src/corelib/x11/fpg_x11.pas
+  /home/fred/fpGUI/src/corelib/fpg_base.pas
+  /home/fred/fpGUI-maint/src/corelib/gdi/fpg_gdi.pas
+  /home/fred/mseide-msegui/lib/common/kernel/linux/mseguiintf.pas
+  /home/fred/mseide-msegui/lib/common/kernel/linux/mseuniintf.pas
+  /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
+  /home/fred/mseide-msegui/lib/common/kernel/msectypes.pas
+  /home/fred/cafecentral/cc_backuplast.bat
+  /home/fred/ideu/src/ideU (copy 1).pas
+  /home/fred/strumpract/src/uos_flat.pas
+  /home/fred/uos/src/uos.pas
+  /home/fred/strumpract/src/uos.pas
+  /home/fred/strumpract/src/infos.pas
+  /home/fred/strumpract/src/conflang.pas
+  /home/fred/ideu/src/conflang.pas
+  /home/fred/ideu/src/mo4stock.pas
+  /home/fred/ideu/src/mo4stocknew.pas
+  /home/fred/ideu/src/po2arrays.pas
  [debuggerfo.project_options]
- value=1
+ value=6
  [debuggerfo.hints]
  value=1
  [sourcefo]
@@ -1421,19 +1448,27 @@ windowlayout=566
  x=0
  y=0
  cx=1219
- cy=456
+ cy=452
  rcx=0
  rcy=0
  [sourcefo.files_tab]
+ order=7
+  0
+  1
+  2
+  3
+  4
+  6
+  5
  firsttab=0
- index=2
+ index=5
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=confdebuggerfo
+ stackedunder=_mse_settingsfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1460,9 +1495,9 @@ windowlayout=566
  ncx=0
  ncy=0
  x=0
- y=53
+ y=57
  cx=1219
- cy=456
+ cy=452
  rcx=0
  rcy=0
  [_mse_mainfo_mse_]
@@ -1487,7 +1522,7 @@ windowlayout=566
  [_mse_settingsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=confideufo
+ stackedunder=componentpalettefo
  parent=
  mdistate=3
  nx=0

@@ -1,5 +1,9 @@
 MSEide+MSEgui changes version history
 **********************************************
+Version 5.6.8
+2022-04-09
+Mainly fixes of version 5.6.6.
+
 Version 5.6.6
 2022-02-21
  Added option to dynamic loading of PO-GetText files ( -dmse_dynpo parameter).

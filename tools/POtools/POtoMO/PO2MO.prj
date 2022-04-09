@@ -87,6 +87,51 @@ order18=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/tools/POtools/POtoMO
 projectfilename=/home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.prj
+findinfiledialog=44
+ [findinfileadialogfo.subdirs]
+ value=1
+ [findinfileadialogfo.incurrentfile]
+ value=0
+ [findinfileadialogfo.inopenfiles]
+ value=0
+ [findinfileadialogfo.wholeword]
+ value=0
+ [findinfileadialogfo.indirectories]
+ value=1
+ [findinfileadialogfo.inprojectdir]
+ value=0
+ [findinfileadialogfo.casesensitive]
+ value=0
+ [findinfileadialogfo.mask]
+ value="*.pas" "*.pp" "*.inc"
+ history=1
+  "*.pas" "*.pp" "*.inc"
+ [findinfileadialogfo.dir]
+ filenames=1
+  /home/fred/fpc-ootb_331ok/
+ filecolwidth=174
+ x=0
+ y=0
+ cx=0
+ cy=0
+ filehistory=2
+  /home/fred/fpc-ootb_331ok/
+  /home/fred/fpGUI-maint/
+ filefilterindex=0
+ filefilter="*.pas" "*.pp" "*.inc"
+ [findinfileadialogfo.findtext]
+ value=LoadCursor
+ history=4
+  LoadCursor
+  HCURSOR
+  mcHourGlass
+  
+ [findinfileadialogfo]
+ stackedunder=
+ x=573
+ y=142
+ cx=300
+ cy=308
 finddialog=8
  [finddialogfo.selectedonly]
  value=0
@@ -1097,34 +1142,49 @@ findhistory=3
  wrileln
  uses
 findoptions=1
-editpos=6
+editpos=9
  0,20
- 0,-1073741823
  0,0
- 9,687
- 0,6
- 16,6370
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,2691
+ 0,1380
+ 0,1404
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
 bookmarks5=0
-sourcefiles=6
- ${PROJECTDIR}/PO2MO.pas
- ${PROJECTDIR}/POtoMO.pas
+bookmarks6=0
+bookmarks7=0
+bookmarks8=0
+sourcefiles=9
+ /home/fred/mseide-msegui/tools/POtools/POtoMO/PO2MO.pas
+ /home/fred/mseide-msegui/tools/POtools/POtoMO/POtoMO.pas
  /home/fred/mseide-msegui/lib/common/kernel/msectypes.pas
  /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
  /home/fred/mseide-msegui/lib/common/kernel/linux/mseuniintf.pas
  /home/fred/mseide-msegui/lib/common/kernel/linux/mseguiintf.pas
-relpaths=6
+ /home/fred/fpGUI-maint/src/corelib/x11/fpg_x11.pas
+ /home/fred/fpGUI-maint/src/corelib/gdi/fpg_gdi.pas
+ /home/fred/fpc-ootb_331ok/packages/graph/src/win32/graph.pp
+relpaths=9
  PO2MO.pas
  POtoMO.pas
- ../../lib/common/kernel/msectypes.pas
- ../../lib/common/kernel/linux/msesysintf.pas
- ../../lib/common/kernel/linux/mseuniintf.pas
- ../../lib/common/kernel/linux/mseguiintf.pas
-ismoduletexts=6
+ ../lib/common/kernel/msectypes.pas
+ ../lib/common/kernel/linux/msesysintf.pas
+ ../lib/common/kernel/linux/mseuniintf.pas
+ ../lib/common/kernel/linux/mseguiintf.pas
+ ../../../fpGUI-maint/src/corelib/x11/fpg_x11.pas
+ ../../../fpGUI-maint/src/corelib/gdi/fpg_gdi.pas
+ ../../../fpc-ootb_331ok/packages/graph/src/win32/graph.pp
+ismoduletexts=9
+ 0
+ 0
+ 0
  0
  0
  0
@@ -1136,17 +1196,20 @@ moduleoptions=0
 visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
-order=6
+order=9
  0
- 2
+ 6
+ 7
+ 8
  3
  4
  5
  1
+ 2
 firsttab=0
-index=4
+index=3
 [layout]
-windowlayout=541
+windowlayout=545
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1160,10 +1223,10 @@ windowlayout=541
  ny=0
  ncx=0
  ncy=0
- x=423
- y=214
+ x=88
+ y=60
  cx=1224
- cy=621
+ cy=608
  rcx=0
  rcy=0
  wsize=0
@@ -1264,7 +1327,7 @@ windowlayout=541
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
@@ -1273,7 +1336,7 @@ windowlayout=541
  ncy=0
  x=239
  y=115
- cx=678
+ cx=986
  cy=414
  rcx=0
  rcy=0
@@ -1290,7 +1353,7 @@ windowlayout=541
  x=0
  y=0
  cx=205
- cy=451
+ cy=440
  rcx=0
  rcy=0
  [projecttreefo.grid]
@@ -1380,10 +1443,10 @@ windowlayout=541
  [breakpointsfo.bkptson]
  value=0
  [objectinspectorfo.grid]
- propcolwidthref=242
- width0=107
+ propcolwidthref=369
+ width0=163
  sortdescend0=0
- width1=129
+ width1=200
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1476,9 +1539,9 @@ windowlayout=541
  ncx=0
  ncy=0
  x=0
- y=507
+ y=495
  cx=1214
- cy=93
+ cy=92
  rcx=0
  rcy=0
  [componentstorefo]
@@ -1578,7 +1641,7 @@ windowlayout=541
  x=0
  y=0
  cx=1214
- cy=50
+ cy=49
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1589,7 +1652,7 @@ windowlayout=541
  mdistate=0
  nx=0
  ny=0
- ncx=1197
+ ncx=1199
  ncy=53
  x=0
  y=0
@@ -1604,8 +1667,9 @@ windowlayout=541
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/kernel/linux/mseguiintf.pas
- history=14
+ value=/home/fred/fpc-ootb_331ok/packages/graph/src/win32/graph.pp
+ history=15
+  /home/fred/mseide-msegui/lib/common/kernel/linux/mseguiintf.pas
   /home/fred/mseide-msegui/lib/common/kernel/linux/mseuniintf.pas
   /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
   /home/fred/mseide-msegui/lib/common/kernel/msectypes.pas
@@ -1637,26 +1701,29 @@ windowlayout=541
  x=208
  y=0
  cx=1006
- cy=451
+ cy=440
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=6
+ order=9
   0
-  2
+  6
+  7
+  8
   3
   4
   5
   1
+  2
  firsttab=0
- index=4
+ index=3
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=targetconsolefo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -1683,9 +1750,9 @@ windowlayout=541
  ncx=0
  ncy=0
  x=0
- y=53
+ y=52
  cx=1214
- cy=451
+ cy=440
  rcx=0
  rcy=0
 [targetconsole]
