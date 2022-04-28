@@ -48,13 +48,13 @@ Package maintainers may delete the files "apps/ide/COPYING.GPL",
    http://www.freepascal.org/download.var
 2. Download mseide-msegui source from 
    https://github.com/mse-org/mseide-msegui/archive/master.zip
-3. Extract them to a directory of your choice. (sourcedirectory)
+3. Extract them to a directory of your choice. Example "/home/me/mseide-msegui".
 4. Download and unzip mseide binary according your OS from here:
    https://github.com/mse-org/mseide-msegui/releases/
 5. Run 'yourdirectory/mseide_linxx/mseide' on Linux or FreeBSD
    or 'yourdirectory\mseide_winxx\mseide.exe' on Windows.
 6. In 'Settings'-'Configure MSEide'-'${MSEDIR}' select 'sourcedirectory'.
-7. In 'Project'-'Open' select 'sourcedirectory/apps/demo/demo.prj'.
+7. In 'Project'-'Open' select '/home/me/mseide-msegui/apps/demo/demo.prj'.
 8. 'Target'-'Continue'.
 
 If you get the error "/usr/bin/ld: cannot find -lX11" install the
