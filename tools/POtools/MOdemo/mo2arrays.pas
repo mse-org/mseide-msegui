@@ -1,6 +1,7 @@
 unit mo2arrays;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$modeswitch arraytodynarray}
 interface
 
 uses
