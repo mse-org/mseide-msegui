@@ -2942,7 +2942,8 @@ var
  rect1: rectty;
  classname: string;
  ownerwindow: winidty;
- region : THandle;
+ region, region2 : THandle;
+ x, deco_x, deco_y : integer;
 begin
  fillchar(awindow,sizeof(awindow),0);
  with awindow,win32windowty(awindow.platformdata).d,options do begin
@@ -3038,7 +3039,7 @@ begin
    inc(windowcount);
 {$endif}
 
-  // ellipse or rounded
+  // ellipse, rounded or transparent background
   if wo_ellipse in options then
   begin
   region := CreateEllipticRgn(0,0, rect1.cx, rect1.cy -1);
@@ -3048,7 +3049,35 @@ begin
   begin
   region := CreateRoundRectRgn(0,0, rect1.cx, rect1.cy - 1, mse_radiuscorner, mse_radiuscorner);
   SetWindowRgn(id, region, True);
-  end;
+  end else
+  if wo_transparentbackground in options then
+  begin
+   if length(mse_formchild) = 0 then
+       begin
+       region := CreateRectRgn(0,0, rect1.cx, rect1.cy -1);
+       end else
+       begin
+       region := CreateRectRgn(0, 0, 0, 0);
+        
+       deco_y := GetSystemMetrics(SM_CYFRAME)+
+                GetSystemMetrics(SM_CYCAPTION);
+                
+       deco_x := GetSystemMetrics(SM_CXFRAME);
+    
+       application.processmessages;
+      
+        for x := 0 to length(mse_formchild) - 1 do
+           begin
+             region2 := CreateRectRgn(mse_formchild[x].left + deco_x,mse_formchild[x].top + deco_y,
+                                      mse_formchild[x].left + mse_formchild[x].Width + deco_x, 
+                                      mse_formchild[x].top + mse_formchild[x].height + deco_y);
+             CombineRgn(region, region, region2, RGN_OR);
+            end;
+       end;
+    SetWindowRgn(id, region, True);
+    DeleteObject(region2);
+    DeleteObject(region);
+   end;
 
     
    if not (pos = wp_default) and (parent = 0) then begin

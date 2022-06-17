@@ -4057,7 +4057,7 @@ function gui_createwindow(const rect: rectty;
 var
  attributes: xsetwindowattributes;
  valuemask: longword;
- width,height: integer;
+ width,height,x: integer;
  id1: winidty;
  icmask: longword;
  colormap1: tcolormap;
@@ -4128,7 +4128,8 @@ var
   if (wo_alwaysontop in options.options)  then
     setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
 
-  if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)) then
+  if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)
+  or (wo_transparentbackground  in options.options)) then
  begin
  // shape
   //* create a graphics context for drawing on the window */
@@ -4158,9 +4159,25 @@ XSetForeground(appdisp, shape_gc, 1);
   XDrawarc(appdisp, pmap, shape_gc, 0, 0, width-1 , height-1,  0, 360*64);
   XFillarc(appdisp, pmap, shape_gc, 0, 0, width-1 , height-1,  0, 360*64);
  end else
-
+ if (wo_transparentbackground in options.options) then
+  begin
+     if length(mse_formchild) = 0 then
+       begin
+         XDrawRectangle(appdisp, pmap, shape_gc, 0, 0, Width, Height);
+         XFillRectangle(appdisp, pmap, shape_gc, 0, 0, Width, Height);
+       end else
+       begin
+         for x := 0 to length(mse_formchild) - 1 do
+           begin
+             XDrawRectangle(appdisp, pmap, shape_gc, mse_formchild[x].left, mse_formchild[x].top,
+                mse_formchild[x].Width, mse_formchild[X].Height);
+             XFillRectangle(appdisp, pmap, shape_gc, mse_formchild[x].left, mse_formchild[x].top,
+                mse_formchild[x].Width, mse_formchild[X].Height);
+            end;
+       end;
+  end else
+ if (wo_rounded in options.options) then
  begin
-
   XDrawarc(appdisp, pmap, shape_gc, 0, 0, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
   XFillarc(appdisp, pmap, shape_gc, 0, 0, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
   XDrawarc(appdisp, pmap, shape_gc, width - mse_radiuscorner, 0, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
@@ -4171,21 +4188,13 @@ XSetForeground(appdisp, shape_gc, 1);
   XDrawarc(appdisp, pmap, shape_gc, width - mse_radiuscorner, height- mse_radiuscorner -1, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
   XFillarc(appdisp, pmap, shape_gc, width - mse_radiuscorner, height- mse_radiuscorner -1, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
 
-  XDrawRectangle(appdisp, pmap, shape_gc,
-                 mse_radiuscorner div 2, 0,
-  width - (mse_radiuscorner) , height);
+  XDrawRectangle(appdisp, pmap, shape_gc,mse_radiuscorner div 2, 0, width - (mse_radiuscorner) , height);
   
-  XFillRectangle(appdisp, pmap, shape_gc,
-                 mse_radiuscorner div 2, 0,
-  width - (mse_radiuscorner) , height);
+  XFillRectangle(appdisp, pmap, shape_gc, mse_radiuscorner div 2, 0, width - (mse_radiuscorner) , height);
   
-  XDrawRectangle(appdisp, pmap, shape_gc,
-                 0, mse_radiuscorner div 2,
-  width , height - (mse_radiuscorner));
+  XDrawRectangle(appdisp, pmap, shape_gc, 0, mse_radiuscorner div 2, width, height - (mse_radiuscorner));
   
-  XFillRectangle(appdisp, pmap, shape_gc,
-                 0, mse_radiuscorner div 2,
-  width , height - (mse_radiuscorner));
+  XFillRectangle(appdisp, pmap, shape_gc, 0, mse_radiuscorner div 2, width, height - (mse_radiuscorner));
  end;
  
 XShapeCombineMask(appdisp, id, ShapeBounding, 0, 0, pmap, ShapeSet);

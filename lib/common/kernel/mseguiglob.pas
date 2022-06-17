@@ -133,7 +133,8 @@ type
                    wo_sysdnd, //activate system drag and drop (xdnd on Linux)
                    wo_alwaysontop,
                    wo_ellipse,
-                   wo_rounded
+                   wo_rounded,
+                   wo_transparentbackground
                    );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;

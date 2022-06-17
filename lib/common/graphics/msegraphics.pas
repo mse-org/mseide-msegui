@@ -33,6 +33,17 @@ const
  defaultfontalias = 'stf_default';
 
  invalidgchandle = ptruint(-1);
+ 
+type 
+ childbounds = record  // for wo_transparentbackground     
+  left: integer;
+  top: integer;
+  height: integer;
+  width: integer;
+ end; 
+ 
+var
+ mse_formchild : array of childbounds; // for wo_transparentbackground       
 
 type
  gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
@@ -1427,6 +1438,7 @@ procedure freeimage(var image: maskedimagety);
 procedure zeropad(var image: imagety);
 procedure checkimagebgr(var aimage: imagety; const bgr: boolean);
 procedure movealignment(const source: alignmentsty; var dest: alignmentsty);
+procedure setchildbounds(const sender: TObject);
 
 var
  flushgdi: boolean;
@@ -1438,7 +1450,8 @@ procedure checkgdiunlocked;
 implementation
 uses
  SysUtils,msegui,mseguiintf,msestreaming,mseformatstr,
- msestockobjects,
+ msestockobjects, mseforms, msesimplewidgets, msedispwidgets, mseedit,
+ msegrids, mseimage,msegraphedits,
  msearrayutils,mselist,msebits,msewidgets,msesystypes,
  msesysintf1,msesysintf,msesysutils,msefont;
 {$ifndef mse_allwarnings}
@@ -1457,6 +1470,78 @@ type
 var
  gdilockcount: integer;
  gdilockthread: threadty;
+ 
+procedure GetChildProc(const sender: TObject); 
+begin
+end;
+ 
+procedure setchildbounds(const sender: TObject);
+var
+x, y : integer;
+begin
+   
+setlength(mse_formchild,0);
+
+if sender is tmseform then
+ for x:=0 to tmseform(sender).ChildrenCount-1 do
+  if tmseform(sender).Children[x] is tcustombutton then
+  begin
+  setlength(mse_formchild,length(mse_formchild) + 1);
+  mse_formchild[length(mse_formchild) - 1].left := tcustombutton(tmseform(sender).Children[X]).left;
+  mse_formchild[length(mse_formchild) - 1].top  := tcustombutton(tmseform(sender).Children[X]).top;
+  mse_formchild[length(mse_formchild) - 1].width  := tcustombutton(tmseform(sender).Children[X]).width;
+  mse_formchild[length(mse_formchild) - 1].height  := tcustombutton(tmseform(sender).Children[X]).height;
+  end  else
+  if tmseform(sender).Children[x] is tcustomstringdisp then
+  begin
+  setlength(mse_formchild,length(mse_formchild) + 1);
+  mse_formchild[length(mse_formchild) - 1].left := tcustomstringdisp(tmseform(sender).Children[X]).left;
+  mse_formchild[length(mse_formchild) - 1].top  := tcustomstringdisp(tmseform(sender).Children[X]).top;
+  mse_formchild[length(mse_formchild) - 1].width  := tcustomstringdisp(tmseform(sender).Children[X]).width;
+  mse_formchild[length(mse_formchild) - 1].height  := tcustomstringdisp(tmseform(sender).Children[X]).height;
+  end else
+  if tmseform(sender).Children[x] is tcustomedit then
+  begin
+  setlength(mse_formchild,length(mse_formchild) + 1);
+  mse_formchild[length(mse_formchild) - 1].left := tcustomedit(tmseform(sender).Children[X]).left;
+  mse_formchild[length(mse_formchild) - 1].top  := tcustomedit(tmseform(sender).Children[X]).top;
+  mse_formchild[length(mse_formchild) - 1].width  := tcustomedit(tmseform(sender).Children[X]).width;
+  mse_formchild[length(mse_formchild) - 1].height  := tcustomedit(tmseform(sender).Children[X]).height;
+  end else
+  if tmseform(sender).Children[x] is tcustomstringgrid then
+  begin
+  setlength(mse_formchild,length(mse_formchild) + 1);
+  mse_formchild[length(mse_formchild) - 1].left := tcustomstringgrid(tmseform(sender).Children[X]).left;
+  mse_formchild[length(mse_formchild) - 1].top  := tcustomstringgrid(tmseform(sender).Children[X]).top;
+  mse_formchild[length(mse_formchild) - 1].width  := tcustomstringgrid(tmseform(sender).Children[X]).width;
+  mse_formchild[length(mse_formchild) - 1].height  := tcustomstringgrid(tmseform(sender).Children[X]).height;
+  end else
+  if tmseform(sender).Children[x] is tscrollbox then
+  begin
+  setlength(mse_formchild,length(mse_formchild) + 1);
+  mse_formchild[length(mse_formchild) - 1].left := tscrollbox(tmseform(sender).Children[X]).left;
+  mse_formchild[length(mse_formchild) - 1].top  := tscrollbox(tmseform(sender).Children[X]).top;
+  mse_formchild[length(mse_formchild) - 1].width  := tscrollbox(tmseform(sender).Children[X]).width;
+  mse_formchild[length(mse_formchild) - 1].height  := tscrollbox(tmseform(sender).Children[X]).height;
+  end else
+  if tmseform(sender).Children[x] is tscrollingwidget then
+  begin
+  setlength(mse_formchild,length(mse_formchild) + 1);
+  mse_formchild[length(mse_formchild) - 1].left := tscrollingwidget(tmseform(sender).Children[X]).left;
+  mse_formchild[length(mse_formchild) - 1].top  := tscrollingwidget(tmseform(sender).Children[X]).top;
+  mse_formchild[length(mse_formchild) - 1].width  := tscrollingwidget(tmseform(sender).Children[X]).width;
+  mse_formchild[length(mse_formchild) - 1].height  := tscrollingwidget(tmseform(sender).Children[X]).height;
+  end else
+  if tmseform(sender).Children[x] is tcustombooleanedit then
+  begin
+  setlength(mse_formchild,length(mse_formchild) + 1);
+  mse_formchild[length(mse_formchild) - 1].left := tcustombooleanedit(tmseform(sender).Children[X]).left;
+  mse_formchild[length(mse_formchild) - 1].top  := tcustombooleanedit(tmseform(sender).Children[X]).top;
+  mse_formchild[length(mse_formchild) - 1].width  := tcustombooleanedit(tmseform(sender).Children[X]).width;
+  mse_formchild[length(mse_formchild) - 1].height  := tcustombooleanedit(tmseform(sender).Children[X]).height;
+  end;
+ 
+ end;
 
 procedure initdefaultvalues(var avalue: edgecolorinfoty);
 begin
