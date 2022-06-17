@@ -1471,10 +1471,6 @@ var
  gdilockcount: integer;
  gdilockthread: threadty;
  
-procedure GetChildProc(const sender: TObject); 
-begin
-end;
- 
 procedure setchildbounds(const sender: TObject);
 var
 x, y : integer;
