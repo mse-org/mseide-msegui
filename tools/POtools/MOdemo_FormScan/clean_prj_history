@@ -1,0 +1,21 @@
+#! /bin/sh
+
+[ "$1" ] && { [ "${1%.prj}" = "$1" ] || [ "${1%.prj}" = "${1%.*}" ]; } &&\
+    PRJ="${1%.prj}".prj ||\
+    { echo "Project file (*.prj) required!"; exit 1; }
+[ -e "$PRJ" ] || { echo "Project file ($PRJ) not found!"; exit 2; }
+
+pwd="$(pwd)"
+awk -F "=" -vpwd="${pwd##*/}"\
+    ' /history=/ { print $1 "=0"; for (i= $2; i; i--) getline; next }
+      /=\//      { if (match ($0, pwd))
+                      { printf ("%s=./%s\n", $1, substr ($2, index ($2, pwd)+ length (pwd)+ 1)) }
+                   else print
+                   next }
+      /^ *\//    { if ((n= match ($0, pwd)))
+                      { printf ("%s./%s\n", substr ($0, 1, index ($0, "/")- 1), substr ($0, n+ length (pwd)+ 1)) }
+                   else print
+                   next }
+      { print }
+    ' "$PRJ" > "$PRJ.new" &&\
+    { mv "$PRJ" "${PRJ}~" && mv -f "$PRJ.new" "$PRJ"; }

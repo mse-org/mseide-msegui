@@ -1,0 +1,7 @@
+///////////////////////////////////////////
+  FormScanner,
+{$Macro On}
+{$define createform:=CreateFormEx}
+{$define createdatamodule:=CreateDataModuleEx}
+{$define run:=runApplicationEx}
+///////////////////////////////////////////

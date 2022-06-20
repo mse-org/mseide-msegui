@@ -1,0 +1,485 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-03-04 23:54+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Abort"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "Yes all"
+msgstr ""
+
+msgid "No all"
+msgstr ""
+
+msgid "Ignore"
+msgstr ""
+
+msgid "Skip"
+msgstr ""
+
+msgid "Skip a&ll"
+msgstr ""
+
+msgid "Continue"
+msgstr ""
+
+msgid "OK"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "Working"
+msgstr ""
+
+msgid "WARNING"
+msgstr ""
+
+msgid "Exception"
+msgstr ""
+
+msgid "is invalid"
+msgstr ""
+
+msgid "Format error"
+msgstr ""
+
+msgid "Value is required"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Min"
+msgstr ""
+
+msgid "Max"
+msgstr ""
+
+msgid "Range error"
+msgstr ""
+
+msgid "Undo"
+msgstr ""
+
+msgid "Redo"
+msgstr ""
+
+msgid "Copy"
+msgstr ""
+
+msgid "Cut"
+msgstr ""
+
+msgid "Paste"
+msgstr ""
+
+msgid "Select all"
+msgstr ""
+
+msgid "&Insert Row"
+msgstr ""
+
+msgid "Append Row"
+msgstr ""
+
+msgid "Delete Row"
+msgstr ""
+
+msgid "Dir"
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+msgid "Up"
+msgstr ""
+
+msgid "New"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Show hidden files"
+msgstr ""
+
+msgid "Filter"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Open"
+msgstr ""
+
+
+msgid "Create new directory"
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "Forward"
+msgstr ""
+
+msgid "File"
+msgstr ""
+
+msgid "exists, do you want to overwrite?"
+msgstr ""
+
+msgid "is modified. Save?"
+msgstr ""
+
+msgid "System"
+msgstr ""
+
+msgid "does not exist"
+msgstr ""
+
+msgid "PASSWORD"
+msgstr ""
+
+msgid "Enter password"
+msgstr ""
+
+msgid "Invalid password!"
+msgstr ""
+
+msgid "Can not read directory"
+msgstr ""
+
+msgid "Graphic format not supported"
+msgstr ""
+
+msgid "Graphic format error"
+msgstr ""
+
+msgid "All Images"
+msgstr ""
+
+msgid "Confirmation"
+msgstr ""
+
+msgid "Delete record?"
+msgstr ""
+
+msgid "Copy record?"
+msgstr ""
+
+msgid "Close page"
+msgstr ""
+
+msgid "First"
+msgstr ""
+
+msgid "Prior"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Last"
+msgstr ""
+
+msgid "Append"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Post"
+msgstr ""
+
+msgid "Annul"
+msgstr ""
+
+msgid "Refresh"
+msgstr ""
+
+msgid "Edit filter"
+msgstr ""
+
+msgid "Edit filter minimum"
+msgstr ""
+
+msgid "Edit filter maximum"
+msgstr ""
+
+msgid "Reset filter"
+msgstr ""
+
+msgid "Filter on"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Auto edit"
+msgstr ""
+
+msgid "Copy record"
+msgstr ""
+
+msgid "Dialog"
+msgstr ""
+
+msgid "Insert"
+msgstr ""
+
+msgid "Row insert"
+msgstr ""
+
+msgid "Row append"
+msgstr ""
+
+msgid "Row delete"
+msgstr ""
+
+msgid "Filter off"
+msgstr ""
+
+msgid "Portrait"
+msgstr ""
+
+msgid "Landscape"
+msgstr ""
+
+msgid "Delete row?"
+msgstr ""
+
+msgid "selected rows?"
+msgstr ""
+
+msgid "Single item only"
+msgstr ""
+
+msgid "Copy Cells"
+msgstr ""
+
+msgid "Paste Cells"
+msgstr ""
+
+msgid "Maximize"
+msgstr ""
+
+msgid "Normalize"
+msgstr ""
+
+msgid "Minimize"
+msgstr ""
+
+msgid "Fix size"
+msgstr ""
+
+msgid "Float"
+msgstr ""
+
+msgid "Stay on top"
+msgstr ""
+
+msgid "Stay in background"
+msgstr ""
+
+msgid "Lock children"
+msgstr ""
+
+msgid "No lock"
+msgstr ""
+
+msgid "Input"
+msgstr ""
+
+msgid "Button"
+msgstr ""
+
+msgid "On"
+msgstr ""
+
+msgid "Off"
+msgstr ""
+
+msgid "Left border"
+msgstr ""
+
+msgid "Top border"
+msgstr ""
+
+msgid "Right border"
+msgstr ""
+
+msgid "Bottom border"
+msgstr ""
+
+msgid "Begin of text"
+msgstr ""
+
+msgid "End of text"
+msgstr ""
+
+msgid "Inputmode"
+msgstr ""
+
+msgid "Overwrite"
+msgstr ""
+
+msgid "Deleted"
+msgstr ""
+
+msgid "Copied"
+msgstr ""
+
+msgid "Inserted"
+msgstr ""
+
+msgid "Pasted"
+msgstr ""
+
+msgid "Withdrawn"
+msgstr ""
+
+msgid "Window activated"
+msgstr ""
+
+msgid "Menu"
+msgstr ""
+
+msgid "Beginning of file"
+msgstr ""
+
+msgid "End of file"
+msgstr ""
+
+msgid "Voice output"
+msgstr ""
+
+msgid "Speak again"
+msgstr ""
+
+msgid "First column"
+msgstr ""
+
+msgid "First row"
+msgstr ""
+
+msgid "Last column"
+msgstr ""
+
+msgid "Last row"
+msgstr ""
+
+msgid "Selection"
+msgstr ""
+
+msgid "Speak path"
+msgstr ""
+
+msgid "Disabled button"
+msgstr ""
+
+msgid "First field"
+msgstr ""
+
+msgid "Last field"
+msgstr ""
+
+msgid "First element"
+msgstr ""
+
+msgid "Last element"
+msgstr ""
+
+msgid "Slower"
+msgstr ""
+
+msgid "Faster"
+msgstr ""
+
+msgid "Window"
+msgstr ""
+
+msgid "Area"
+msgstr ""
+
+msgid "Area activated"
+msgstr ""
+
+msgid "Volume down"
+msgstr ""
+
+msgid "Volume up"
+msgstr ""
+
+msgid "Cancel speech"
+msgstr ""
+
+msgid "Languages"
+msgstr ""
+
+msgid "Directory"
+msgstr ""
+
+msgid "No icons"
+msgstr ""
+
+msgid "No lateral"
+msgstr ""
+
+msgid "Compact"
+msgstr ""
+
+msgid "Path"
+msgstr ""
+
+msgid "Delete selected row?"
+msgstr ""
+
+msgid "Delete %s selected rows?"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Tools"
+msgstr ""
+
+msgid "This is a test of internationalization."
+msgstr ""
+
+msgid "That is another test."
+msgstr ""
+
+msgid "This is the end."
+msgstr ""
+
+msgid "English [en]"
+msgstr ""
+
