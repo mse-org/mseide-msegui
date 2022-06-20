@@ -2954,6 +2954,10 @@ begin
    windowstyleex:= windowstyleex or ws_ex_noactivate;
   end;
   
+  if wo_inalldesktops in options then begin 
+   windowstyleex:= windowstyleex or WS_EX_TOOLWINDOW ;
+  end;
+  
   // Thanks to Alexander.
  if wo_alwaysontop in options then begin
   windowstyleex:= windowstyleex or WS_EX_TOPMOST;
@@ -3077,8 +3081,36 @@ begin
     SetWindowRgn(id, region, True);
     DeleteObject(region2);
     DeleteObject(region);
+   end else
+   if wo_transparentbackgroundround in options then
+   begin
+    if length(mse_formchild) = 0 then
+       begin
+        region := CreateRoundRectRgn(0,0, rect1.cx, rect1.cy - 1, mse_radiuscorner, mse_radiuscorner);
+       end else
+       begin
+       region := CreateRoundRectRgn(0, 0, 0, 0, 0, 0);
+        
+       deco_y := GetSystemMetrics(SM_CYFRAME)+
+                GetSystemMetrics(SM_CYCAPTION);
+                
+       deco_x := GetSystemMetrics(SM_CXFRAME);
+    
+       application.processmessages;
+      
+        for x := 0 to length(mse_formchild) - 1 do
+           begin
+             region2 := CreateRoundRectRgn(mse_formchild[x].left + deco_x,mse_formchild[x].top + deco_y,
+                                      mse_formchild[x].left + mse_formchild[x].Width + deco_x, 
+                                      mse_formchild[x].top + mse_formchild[x].height + deco_y,
+                                      mse_radiuscorner, mse_radiuscorner);
+             CombineRgn(region, region, region2, RGN_OR);
+            end;
+       end;
+    SetWindowRgn(id, region, True);
+    DeleteObject(region2);
+    DeleteObject(region);
    end;
-
     
    if not (pos = wp_default) and (parent = 0) then begin
     result:= gui_reposwindow(id,rect);

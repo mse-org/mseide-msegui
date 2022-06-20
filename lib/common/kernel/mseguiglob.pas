@@ -134,7 +134,9 @@ type
                    wo_alwaysontop,
                    wo_ellipse,
                    wo_rounded,
-                   wo_transparentbackground
+                   wo_transparentbackground,
+                   wo_transparentbackgroundround, 
+                   wo_inalldesktops
                    );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;
@@ -323,7 +325,7 @@ var
  noreconfigurewmwindow: boolean;
  toplevelraise: boolean;
  nostaticgravity: boolean;
- mse_radiuscorner : integer = 22;
+ mse_radiuscorner : integer = 8;
 // exabug: boolean;
 // nocreatestaticgravity: boolean;
 

@@ -970,7 +970,7 @@ begin
 end;
 
 procedure setwinidproperty(id: winidty; prop: atom; value: winidty);
-begin
+ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif}
@@ -1652,8 +1652,8 @@ var
 begin
  result:= 0;
  if getnetcardinal(id,net_wm_desktop,lwo1) then begin
-  result:= lwo1;
- end;
+ result:= lwo1;
+end;
 end;
 
 function changenetwmstate(id: winidty; const operation: netwmstateoperationty;
@@ -4062,6 +4062,8 @@ var
  icmask: longword;
  colormap1: tcolormap;
  opt1: windowtypeoptionty;
+ valall: ptruint;
+ 
  // shape from Xext
  xgcv :TXGCValues;
  pmap : pixmapty;
@@ -4129,7 +4131,7 @@ var
     setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
 
   if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)
-  or (wo_transparentbackground  in options.options)) then
+  or (wo_transparentbackground  in options.options) or (wo_transparentbackgroundround  in options.options)) then
  begin
  // shape
   //* create a graphics context for drawing on the window */
@@ -4176,6 +4178,56 @@ XSetForeground(appdisp, shape_gc, 1);
             end;
        end;
   end else
+  if (wo_transparentbackgroundround in options.options) then
+  begin
+     if length(mse_formchild) = 0 then
+       begin
+         XDrawRectangle(appdisp, pmap, shape_gc, 0, 0, Width, Height);
+         XFillRectangle(appdisp, pmap, shape_gc, 0, 0, Width, Height);
+       end else
+       begin
+         for x := 0 to length(mse_formchild) - 1 do
+           begin
+  XDrawarc(appdisp, pmap, shape_gc, mse_formchild[x].left, mse_formchild[x].top,
+            mse_radiuscorner , mse_radiuscorner,  mse_formchild[x].top, 360*64);
+  XFillarc(appdisp, pmap, shape_gc, mse_formchild[x].left, mse_formchild[x].top,
+            mse_radiuscorner , mse_radiuscorner,  mse_formchild[x].top, 360*64);
+  
+  XDrawarc(appdisp, pmap, shape_gc, mse_formchild[x].left + mse_formchild[x].Width - mse_radiuscorner, mse_formchild[x].top,
+   mse_radiuscorner , mse_radiuscorner,  mse_formchild[x].top, 360*64);
+  XFillarc(appdisp, pmap, shape_gc, mse_formchild[x].left + mse_formchild[x].Width - mse_radiuscorner, mse_formchild[x].top,
+   mse_radiuscorner , mse_radiuscorner,  mse_formchild[x].top, 360*64);
+   
+  XDrawarc(appdisp, pmap, shape_gc, mse_formchild[x].left,
+                                    mse_formchild[X].Height + mse_formchild[x].top - mse_radiuscorner -1,
+                                    mse_radiuscorner-1 , mse_radiuscorner,  mse_formchild[x].left, 360*64);
+  XFillarc(appdisp, pmap, shape_gc, mse_formchild[x].left,
+                                    mse_formchild[X].Height + mse_formchild[x].top - mse_radiuscorner -1,
+                                    mse_radiuscorner-1 , mse_radiuscorner,  mse_formchild[x].left, 360*64);
+ 
+  XDrawarc(appdisp, pmap, shape_gc, mse_formchild[x].left + mse_formchild[x].Width - mse_radiuscorner,
+                                    mse_formchild[X].Height + mse_formchild[x].top - mse_radiuscorner -1,
+                                    mse_radiuscorner , mse_radiuscorner,  mse_formchild[x].left, 360*64);
+                                    
+  XFillarc(appdisp, pmap, shape_gc, mse_formchild[x].left + mse_formchild[x].Width - mse_radiuscorner,
+                                    mse_formchild[X].Height + mse_formchild[x].top - mse_radiuscorner -1,
+                                    mse_radiuscorner , mse_radiuscorner,  mse_formchild[x].left, 360*64);
+  
+  XDrawRectangle(appdisp, pmap, shape_gc,mse_formchild[x].left + (mse_radiuscorner div 2),
+     mse_formchild[x].top, mse_formchild[x].Width - (mse_radiuscorner) , mse_formchild[X].Height);
+  
+   XFillRectangle(appdisp, pmap, shape_gc,mse_formchild[x].left + (mse_radiuscorner div 2),
+     mse_formchild[x].top, mse_formchild[x].Width - (mse_radiuscorner) , mse_formchild[X].Height);
+
+
+   XDrawRectangle(appdisp, pmap, shape_gc, mse_formchild[x].left, mse_formchild[x].top + (mse_radiuscorner div 2),
+                                         mse_formchild[x].Width, mse_formchild[X].Height - (mse_radiuscorner));
+  
+   XFillRectangle(appdisp, pmap, shape_gc, mse_formchild[x].left, mse_formchild[x].top + (mse_radiuscorner div 2),
+                                         mse_formchild[x].Width, mse_formchild[X].Height - (mse_radiuscorner));
+   end;
+   end;
+ end else
  if (wo_rounded in options.options) then
  begin
   XDrawarc(appdisp, pmap, shape_gc, 0, 0, mse_radiuscorner , mse_radiuscorner,  0, 360*64);
@@ -4200,7 +4252,7 @@ XSetForeground(appdisp, shape_gc, 1);
 XShapeCombineMask(appdisp, id, ShapeBounding, 0, 0, pmap, ShapeSet);
 
 XFreePixmap(appdisp, pmap);
-
+ 
 //* register events: ExposureMask for re-drawing, ButtonPressMask
 // to capture mouse button press events */
 
@@ -4211,7 +4263,14 @@ XSync(appdisp, False);
 
 //   fin shape  
 end;
-            
+
+ if (wo_inalldesktops in options.options) then
+ begin
+  options.options := options.options + [wo_dock];
+  valall := $FFFFFFFF;
+  xchangeproperty(appdisp,id,netatoms[NET_WM_DESKTOP],cardinalatom,32,propmodereplace,@valall,1);
+ end;
+
    if colormap <> 0 then begin
     xfreecolormap(appdisp,colormap);
     colormap:= 0;
@@ -4312,7 +4371,7 @@ end;
   end;
  end;
  
- gdi_unlock;
+  gdi_unlock;
 end;
 
 
