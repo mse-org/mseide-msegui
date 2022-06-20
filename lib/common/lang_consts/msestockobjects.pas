@@ -20,11 +20,14 @@ const
  boxsize = 11;      //for treelistitem expand box
  checkboxsize = 13; //for listitem checkbox
 
-{$ifdef mse_dynpo}
-var
-   lang_stockcaption, lang_modalresult, lang_modalresultnoshortcut,
-  lang_extended, lang_langnames: array of msestring;
-{$endif}
+{.$ifdef mse_dynpo}
+VAR
+  lang_stockcaption,
+  lang_modalresult,
+  lang_modalresultnoshortcut,
+  lang_extended,
+  lang_langnames: array of msestring;
+{.$endif}
 
 type
 
@@ -100,13 +103,13 @@ const
  firsttracesymbol = stg_circlesmall;
  lasttracesymbol = stg_triatopbig;
 
-{$ifdef mse_dynpo}
+{.$ifdef mse_dynpo}
 type
   extendedty = (
     ex_del_row_selected,
     ex_del_rows_selected
     );
-{$endif}
+{.$endif}
 type
   stockcaptionty = (sc_none, sc_is_invalid, sc_Format_error, sc_Value_is_required,
     sc_Error, sc_Min, sc_Max, sc_Range_error,
@@ -171,19 +174,23 @@ type
   private
    fbitmaps: array[stockbitmapty] of tbitmap;
    ffonts: array[stockfontty] of twidgetfont;
-  fglyphs: timagelist;
+   fglyphs: timagelist;
    ffontaliasregistered: boolean;
    function getbitmaps(index: stockbitmapty): tbitmap;
    function getfonts(index: stockfontty): twidgetfont;
    procedure setmseicon(const avalue: tmaskedbitmap);
-  function getmseicon: tmaskedbitmap;
-  function getglyphs: timagelist;
-  procedure fontchanged(const sender: tobject);
-  {$ifndef mse_dynpo}
+   function getmseicon: tmaskedbitmap;
+   function getglyphs: timagelist;
+   procedure fontchanged(const sender: tobject);
+//  {$ifndef mse_dynpo}
    function getmodalresulttext(index: modalresultty): msestring;
    function getmodalresulttextnoshortcut(index: modalresultty): msestring;
-    function getcaptions(index: stockcaptionty): msestring;
+   function getcaptions(index: stockcaptionty): msestring;
+  {$ifndef mse_dynpo}
    function gettextgenerator(index: textgeneratorty): textgeneratorfuncty;
+  {$else}
+   function getextended  (index: extendedty): msestring;
+   function getlangnames (index: integer): msestring;
   {$endif}
   public
    constructor create;
@@ -196,15 +203,19 @@ type
    property fonts[index: stockfontty]: twidgetfont read getfonts;
    property glyphs: timagelist read getglyphs;
    property mseicon: tmaskedbitmap read getmseicon write setmseicon;
-  {$ifndef mse_dynpo}
+//  {$ifndef mse_dynpo}
    property modalresulttext[index: modalresultty]: msestring
                                                read getmodalresulttext;
    property modalresulttextnoshortcut[index: modalresultty]: msestring
                                             read getmodalresulttextnoshortcut;
    property captions[index: stockcaptionty]: msestring read getcaptions;
+{$ifndef mse_dynpo}
    property textgenerators[index: textgeneratorty]: textgeneratorfuncty
                                                        read gettextgenerator;
-{$endif}  
+{$else}
+   property extended [index: extendedty]: msestring read getextended;
+   property langname [index: integer]:    msestring read getlangnames;
+{$endif}
 end;
 
 type
@@ -214,10 +225,10 @@ type
  end;
 
 function stockobjects: tstockobjects;
- {$ifndef mse_dynpo}
 function sc(const acaption: stockcaptionty): msestring;
+{$ifdef mse_dynpo}
+function stockcaptions (const acaption: stockcaptionty): msestring;
 {$endif}
-
 procedure init;
 procedure deinit;
 
@@ -335,13 +346,16 @@ begin
  result:= stockobjs;
 end;
 
- {$ifndef mse_dynpo}
 function sc(const acaption: stockcaptionty): msestring;
 begin
  result:= stockobjects.captions[acaption];
 end;
- {$endif}
-
+{$ifdef mse_dynpo}
+function stockcaptions (const acaption: stockcaptionty): msestring;
+begin
+ result:= stockobjects.captions[acaption];
+end;
+{$endif}
 procedure init;
 begin
 // deinit;
@@ -555,6 +569,34 @@ end;
 function tstockobjects.gettextgenerator(index: textgeneratorty): textgeneratorfuncty;
 begin
  result:= stocktextgenerators(index);
+end;
+ {$else}
+function tstockobjects.getmodalresulttext (index: modalresultty): msestring;
+begin
+// result:= mseconsts.modalresulttext(index);
+ result:= lang_modalresult [ord (index)];
+end;
+
+function tstockobjects.getmodalresulttextnoshortcut (index: modalresultty): msestring;
+begin
+// result:= mseconsts.modalresulttextnoshortcut(index);
+ result:= lang_modalresultnoshortcut [ord (index)];
+end;
+
+function tstockobjects.getcaptions (index: stockcaptionty): msestring;
+begin
+// result:= stockcaptions(index);
+ result:= lang_stockcaption [ord (index)];
+end;
+
+function tstockobjects.getextended (index: extendedty): msestring;
+begin
+ result:= lang_extended [ord (index)];
+end;
+
+function tstockobjects.getlangnames (index: integer): msestring;
+begin
+ result:= lang_langnames [index];
 end;
  {$endif}
 
