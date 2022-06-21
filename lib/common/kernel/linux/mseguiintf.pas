@@ -4131,7 +4131,8 @@ var
     setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
 
   if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)
-  or (wo_transparentbackground  in options.options) or (wo_transparentbackgroundround  in options.options)) then
+  or (wo_transparentbackground  in options.options) or (wo_transparentbackgroundround  in options.options)
+  or (wo_transparentbackgroundellipse in options.options)) then
  begin
  // shape
   //* create a graphics context for drawing on the window */
@@ -4178,6 +4179,23 @@ XSetForeground(appdisp, shape_gc, 1);
             end;
        end;
   end else
+  if (wo_transparentbackgroundellipse in options.options) then
+   begin
+    if length(mse_formchild) = 0 then
+       begin
+         XDrawarc(appdisp, pmap, shape_gc, 0, 0, width-1 , height-1,  0, 360*64);
+         XFillarc(appdisp, pmap, shape_gc, 0, 0, width-1 , height-1,  0, 360*64);
+       end else
+        begin
+         for x := 0 to length(mse_formchild) - 1 do
+           begin
+             XDrawarc(appdisp, pmap, shape_gc, mse_formchild[x].left, mse_formchild[x].top,
+                       mse_formchild[x].width-1 , mse_formchild[x].height-1,  0, 360*64);
+             XFillarc(appdisp, pmap, shape_gc, mse_formchild[x].left, mse_formchild[x].top,
+                       mse_formchild[x].width-1 , mse_formchild[x].height-1,  0, 360*64);
+            end;  
+        end;              
+ end else
   if (wo_transparentbackgroundround in options.options) then
   begin
      if length(mse_formchild) = 0 then

@@ -126,7 +126,8 @@ type
                    wo_noframe, //uses motif hints on linux
                    wo_noactivate,wo_overrideredirect,
                    wo_embedded,
-                   wo_buttonendmodal,wo_groupleader,
+                   wo_buttonendmodal,
+                   wo_groupleader,
                    wo_taskbar,    //win32 only
                    wo_notaskbar,
                    wo_windowcentermessage, //showmessage centered in window
@@ -135,6 +136,7 @@ type
                    wo_ellipse,
                    wo_rounded,
                    wo_transparentbackground,
+                   wo_transparentbackgroundellipse,
                    wo_transparentbackgroundround, 
                    wo_inalldesktops
                    );

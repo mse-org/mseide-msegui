@@ -3082,6 +3082,35 @@ begin
     DeleteObject(region2);
     DeleteObject(region);
    end else
+   if wo_transparentbackgroundellipse in options then
+  begin
+   if length(mse_formchild) = 0 then
+       begin
+       region := CreateEllipticRgn(0,0, rect1.cx, rect1.cy -1);
+       SetWindowRgn(id, region, True);
+       end else
+       begin
+       region := CreateRectRgn(0, 0, 0, 0);
+        
+       deco_y := GetSystemMetrics(SM_CYFRAME)+
+                GetSystemMetrics(SM_CYCAPTION);
+                
+       deco_x := GetSystemMetrics(SM_CXFRAME);
+    
+       application.processmessages;
+      
+        for x := 0 to length(mse_formchild) - 1 do
+           begin
+             region2 := CreateEllipticRgn(mse_formchild[x].left + deco_x,mse_formchild[x].top + deco_y,
+                                      mse_formchild[x].left + mse_formchild[x].Width + deco_x, 
+                                      mse_formchild[x].top + mse_formchild[x].height + deco_y);
+             CombineRgn(region, region, region2, RGN_OR);
+            end;
+       end;
+    SetWindowRgn(id, region, True);
+    DeleteObject(region2);
+    DeleteObject(region);
+   end else
    if wo_transparentbackgroundround in options then
    begin
     if length(mse_formchild) = 0 then
