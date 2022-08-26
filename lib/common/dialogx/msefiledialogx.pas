@@ -2905,6 +2905,20 @@ begin
       fo.places[0][x] := tmp + 'D:\';
       fo.places[1][x] := msestring('D:\');
     end;
+    if directoryexists('E:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'E:\';
+      fo.places[1][x] := msestring('E:\');
+    end;
+     if directoryexists('F:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'F:\';
+      fo.places[1][x] := msestring('F:\');
+    end;
     if directoryexists('C:\users') then
     begin
       Inc(x);
