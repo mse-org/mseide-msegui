@@ -1906,31 +1906,31 @@ begin
   begin
 
      if (fdo_directory in dialogoptions) or (filename.tag = 1) then
-      str1 := quotefilename(listview.directory)
+      str1 := tosysfilepath(quotefilename(listview.directory))
     else
     begin
-      str1 := quotefilename(listview.directory, filename.Value);
+      str1 := tosysfilepath(quotefilename(listview.directory, filename.Value));
     end;
     unquotefilename(str1, filenames);
     if (defaultext <> '') then
       for int1 := 0 to high(filenames) do
         if not hasfileext(filenames[int1]) then
-          filenames[int1] := filenames[int1] + '.' + defaultext;
+          filenames[int1] := tosysfilepath(filenames[int1] + '.' + defaultext);
     if (fdo_checkexist in dialogoptions) and not ((filename.Value = '') and (fdo_acceptempty in dialogoptions)) then
     begin
       if fdo_directory in dialogoptions then
-        bo1 := finddir(filenames[0])
+        bo1 := finddir(tosysfilepath(filenames[0]))
       else
-        bo1 := findfile(filenames[0]);
+        bo1 := findfile(tosysfilepath(filenames[0]));
       if fdo_save in dialogoptions then
       begin
         if bo1 then
 {$ifdef mse_dynpo}
-           if not askok(lang_stockcaption[ord(sc_file)]  + ' "' + filenames[0] +
+           if not askok(lang_stockcaption[ord(sc_file)]  + ' "' + tosysfilepath(filenames[0]) +
               '" ' + lang_stockcaption[ord(sc_exists_overwrite)],
               lang_stockcaption[ord(sc_warningupper)]) then
 {$else}
-           if not askok(sc(sc_file)  + ' "' + filenames[0] +
+           if not askok(sc(sc_file)  + ' "' + tosysfilepath(filenames[0]) +
               '" ' + sc(sc_exists_overwrite),
               sc(sc_warningupper)) then
 {$endif}
@@ -1944,11 +1944,11 @@ begin
       else if not bo1 then
       begin
 {$ifdef mse_dynpo}
-             showerror(lang_stockcaption[ord(sc_file)] + ' "' + filenames[0] + '" ' +
+             showerror(lang_stockcaption[ord(sc_file)] + ' "' + tosysfilepath(filenames[0]) + '" ' +
             lang_stockcaption[ord(sc_does_not_exist)] + '.',
             uppercase(lang_stockcaption[ord(sc_error)]));
 {$else}
-             showerror(sc(sc_file) + ' "' + filenames[0] + '" ' +
+             showerror(sc(sc_file) + ' "' + tosysfilepath(filenames[0]) + '" ' +
             sc(sc_does_not_exist) + '.',
             uppercase(sc(sc_error)));
 {$endif}
@@ -2888,23 +2888,27 @@ begin
       tmp := ' ';
 
     x := -1;
-
+    fo.places.rowcount := 0;
+    
     {$ifdef windows}
     if directoryexists('C:\') then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'C:\';
       fo.places[1][x] := msestring('C:\');
     end;
     if directoryexists('D:\') then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'D:\';
       fo.places[1][x] := msestring('D:\');
     end;
     if directoryexists('C:\users') then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'C:\users';
       fo.places[1][x] := msestring('C:\users');
     end;
@@ -2912,12 +2916,14 @@ begin
     if directoryexists('/') then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + '/';
       fo.places[1][x] := msestring('/');
     end;
     if directoryexists('/usr') then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + '/usr';
       fo.places[1][x] := msestring('/usr');
     end;
@@ -2926,47 +2932,54 @@ begin
     if directoryexists(tosysfilepath(sys_getuserhomedir)) then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'Home';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir));
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop')) then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'Desktop';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Desktop'));
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music')) then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'Music';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Music'));
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures')) then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'Pictures';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Pictures'));
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos')) then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'Videos';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Videos'));
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Documents')) then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'Documents';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Documents'));
     end;
     if directoryexists(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads')) then
     begin
       Inc(x);
+      fo.places.rowcount := x+1;
       fo.places[0][x] := tmp + 'Downloads';
       fo.places[1][x] := msestring(tosysfilepath(sys_getuserhomedir + directoryseparator + 'Downloads'));
     end;
 
-    fo.places.rowcount := x + 1;
+    fo.places.rowcount := fo.places.rowcount +1;;
 
     if length(ffilenamescust) > 0 then
     begin
