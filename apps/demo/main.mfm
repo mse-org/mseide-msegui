@@ -1,8 +1,10 @@
 object mainfo: tmainfo
-  bounds_x = 153
-  bounds_y = 240
+  bounds_x = 114
+  bounds_y = 313
   bounds_cx = 341
   bounds_cy = 166
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -10,6 +12,7 @@ object mainfo: tmainfo
     166
   )
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  windowopacity = -Inf
   moduleclassname = 'tmseform'
   object tbutton1: tbutton
     bounds_x = 144
@@ -19,7 +22,7 @@ object mainfo: tmainfo
     state = [as_localcaption, as_localonexecute]
     caption = 'Exit'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale]
     onexecute = exitonexecute
   end
 end
