@@ -600,18 +600,23 @@ hintheight=0
 finddtext=
 findhistory=0
 findoptions=1
-editpos=2
- 0,4
- 0,0
+editpos=3
+ 0,8
+ 0,-1073741823
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
-sourcefiles=2
+bookmarks2=0
+sourcefiles=3
  /home/fred/mseide-msegui/apps/demo/main.pas
+ ${PROJECTDIR}/demo.pas
  /home/fred/mseide-msegui/apps/demo/demo.pas
-relpaths=2
+relpaths=3
  main.pas
  demo.pas
-ismoduletexts=2
+ demo.pas
+ismoduletexts=3
+ 0
  0
  0
 modules=1
@@ -623,9 +628,9 @@ visiblemodules=1
 nomenumodules=1
  0
 [sourcefo.tabwidget]
-tabsize=66
+tabsize=80
 firsttab=0
-index=1
+index=0
 [layout]
 windowlayout=556
  [mainfo.openform]
@@ -670,7 +675,7 @@ windowlayout=556
  x=76
  y=29
  cx=1209
- cy=84
+ cy=80
  rcx=0
  rcy=0
  wsize=0
@@ -715,7 +720,7 @@ windowlayout=556
  [memoryfo]
  splitdir=0
  useroptions=268451963
- stackedunder=cpuc86_64fo
+ stackedunder=mainfo.panel2
  parent=
  mdistate=0
  nx=0
@@ -742,7 +747,7 @@ windowlayout=556
  [disassfo]
  splitdir=0
  useroptions=268451947
- stackedunder=targetconsolefo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -768,7 +773,7 @@ windowlayout=556
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=disassfo
  parent=
  mdistate=0
  nx=0
@@ -784,7 +789,7 @@ windowlayout=556
  [projecttreefo]
  splitdir=0
  useroptions=268451947
- stackedunder=disassfo
+ stackedunder=findinfilefo
  parent=
  mdistate=0
  nx=0
@@ -887,22 +892,22 @@ windowlayout=556
  [objectinspectorfo]
  splitdir=0
  useroptions=268451947
- stackedunder=findinfilefo
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=3
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=185
- y=360
+ x=187
+ y=470
  cx=254
  cy=248
  rcx=0
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [objectinspectorfo.grid]
  propcolwidthref=244
  width0=90
@@ -912,7 +917,7 @@ windowlayout=556
  [symbolfo]
  splitdir=0
  useroptions=268451963
- stackedunder=objectinspectorfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1062,7 +1067,7 @@ windowlayout=556
  ncy=0
  x=87
  y=152
- cx=916
+ cx=664
  cy=80
  rcx=0
  rcy=0
@@ -1084,7 +1089,7 @@ windowlayout=556
  x=0
  y=0
  cx=1199
- cy=46
+ cy=42
  rcx=0
  rcy=0
  [sourcefo]
@@ -1130,15 +1135,15 @@ windowlayout=556
  [mainfo.panel1]
  splitdir=2
  useroptions=302022123
- stackedunder=_mse_mainfo_mse_
+ stackedunder=mainfo
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=613
- y=165
+ x=582
+ y=148
  cx=685
  cy=551
  rcx=0
@@ -1149,7 +1154,7 @@ windowlayout=556
  [mainfo.panel2]
  splitdir=2
  useroptions=302022123
- stackedunder=
+ stackedunder=cpuc86_64fo
  parent=
  mdistate=0
  nx=0
@@ -1168,15 +1173,15 @@ windowlayout=556
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=mainfo
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
  ny=0
  ncx=0
  ncy=0
- x=114
- y=313
+ x=129
+ y=271
  cx=351
  cy=166
  rcx=0
