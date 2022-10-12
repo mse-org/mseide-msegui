@@ -107,14 +107,14 @@ uses
 
 constructor ttraywidget.create(aowner: tcomponent);
 begin
-(*
+//(*
  {$ifdef mse_usedbus}
  if not (csdesigning in componentstate) then begin
   fstatusnotifieritem:= tstatusnotifieritem.create();
   fstatusnotifieritem.oncontextmenu:= @dbusdocontextmenu;
  end;
  {$endif}
-*)
+//*)
  fimagenum:= -1;
  ficon:= tcenteredbitmap.create(bmk_rgb{false});
  ficon.onchange:= {$ifdef FPC}@{$endif}iconchanged;

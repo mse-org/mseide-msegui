@@ -138,7 +138,7 @@ type
                    wo_transparentbackground,
                    wo_transparentbackgroundellipse,
                    wo_transparentbackgroundround, 
-                   wo_inalldesktops
+                   wo_onalldesktops
                    );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;

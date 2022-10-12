@@ -4282,7 +4282,7 @@ XSync(appdisp, False);
 //   fin shape  
 end;
 
- if (wo_inalldesktops in options.options) then
+ if (wo_onalldesktops in options.options) then
  begin
   options.options := options.options + [wo_dock];
   valall := $FFFFFFFF;

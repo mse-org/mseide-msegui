@@ -2954,7 +2954,7 @@ begin
    windowstyleex:= windowstyleex or ws_ex_noactivate;
   end;
   
-  if wo_inalldesktops in options then begin 
+  if wo_onalldesktops in options then begin 
    windowstyleex:= windowstyleex or WS_EX_TOOLWINDOW ;
   end;
   
