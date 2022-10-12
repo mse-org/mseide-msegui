@@ -48,12 +48,13 @@ Package maintainers may delete the files "apps/ide/COPYING.GPL",
    http://www.freepascal.org/download.var
 2. Download mseide-msegui source from 
    https://github.com/mse-org/mseide-msegui/archive/master.zip
-3. Extract them to a directory of your choice. Example "/home/myself/mseide-msegui".
+3. Extract them to a directory of your choice. For example "/home/myself/mseide-msegui".
 4. Download and unzip mseide binary according your OS from here:
    https://github.com/mse-org/mseide-msegui/releases/
-5. Run 'yourdirectory/mseide_linxx/mseide' on Linux or FreeBSD
-   or 'yourdirectory\mseide_winxx\mseide.exe' on Windows.
-6. In 'Settings'-'Configure MSEide'-'${MSEDIR}' select the root directory of MSEgui source. (In example: "/home/myself/mseide-msegui").
+5. Run '/direcory-of-unzipped/mseide_linxx/mseide' on Linux or FreeBSD
+   or 'direcory-of-unzipped\mseide_winxx\mseide.exe' on Windows.
+6. In 'Settings'-'Configure MSEide'-'${MSEDIR}' select the root directory of MSEgui source. 
+   For example "/home/myself/mseide-msegui"
 7. In 'Project'-'Open' select '/home/myself/mseide-msegui/apps/demo/demo.prj'.
 8. 'Target'-'Continue'.
 
@@ -63,7 +64,7 @@ libX11-devel or libX11-dev package or make a symbolic link
 see
 https://bugs.freepascal.org/view.php?id=32367
 
-# If you wish to to compile the IDE
+# If you want to compile the IDE
 
 1. In 'Project'-'Open' select 'sourcedirectory/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
