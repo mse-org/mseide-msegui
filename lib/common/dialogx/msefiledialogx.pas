@@ -936,12 +936,23 @@ begin
 
     if acaption = '' then
     begin
-        if fdo_save in aoptions then
    {$ifdef mse_dynpo}
-          str1 := lang_stockcaption[ord(sc_save)]
+   if length(lang_stockcaption) > ord(sc_save) then
+   begin
+    if fdo_save in aoptions then
+         str1 := lang_stockcaption[ord(sc_save)]
         else
           str1 := lang_stockcaption[ord(sc_open)];
+    end else
+    begin
+    if fdo_save in aoptions then
+         str1 := 'Save'
+        else
+          str1 := 'Open';
+    end;
+          
    {$else}
+    if fdo_save in aoptions then
           str1 := sc(sc_save)
         else
           str1 := sc(sc_open);
@@ -1355,14 +1366,11 @@ begin
   mstr1 := '';
 
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_name) then
+begin 
     if stringenter(mstr1, lang_stockcaption[ord(sc_name)],
       lang_stockcaption[ord(sc_create_new_directory)]) = mr_ok then
-{$else}
-    if stringenter(mstr1, sc(sc_name),
-      sc(sc_create_new_directory)) = mr_ok then
-{$endif}
-
-    begin
+      begin
       places.defocuscell;
       places.datacols.clearselection;
       mstr1 := filepath(listview.directory, mstr1, fk_file);
@@ -1370,6 +1378,31 @@ begin
       changedir(mstr1);
       filename.SetFocus;
     end;
+end else
+begin 
+    if stringenter(mstr1, 'Name', 'Create new directory') = mr_ok then
+      begin
+      places.defocuscell;
+      places.datacols.clearselection;
+      mstr1 := filepath(listview.directory, mstr1, fk_file);
+      msefileutils.createdir(mstr1);
+      changedir(mstr1);
+      filename.SetFocus;
+    end;
+end
+    
+{$else}
+    if stringenter(mstr1, sc(sc_name),
+      sc(sc_create_new_directory)) = mr_ok then
+     begin
+      places.defocuscell;
+      places.datacols.clearselection;
+      mstr1 := filepath(listview.directory, mstr1, fk_file);
+      msefileutils.createdir(mstr1);
+      changedir(mstr1);
+      filename.SetFocus;
+    end;   
+{$endif}
 end;
 
 procedure tfiledialogxfo.listviewselectionchanged(const Sender: tcustomlistview);
@@ -1496,8 +1529,11 @@ begin
       Result := False;
       if errormessage then
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_can_not_read_directory) then
           showerror(lang_stockcaption[ord(sc_can_not_read_directory)] + ' ' +
-            msestring(esys(ex).Text), lang_stockcaption[ord(sc_error)]);
+            msestring(esys(ex).Text), lang_stockcaption[ord(sc_error)]) else
+         showerror('Can not read directory ' +
+            msestring(esys(ex).Text), 'ERROR');       
 {$else}
           showerror(sc(sc_can_not_read_directory) + ' ' +
             msestring(esys(ex).Text), sc(sc_error));
@@ -1537,7 +1573,10 @@ begin
   if (fdo_single in dialogoptions) and (high(fselectednames) > 0) then
   begin
 {$ifdef mse_dynpo}
-      ShowMessage(lang_stockcaption[ord(sc_single_item_only)] + '.', lang_stockcaption[ord(sc_error)]);
+if length(lang_stockcaption) > ord(sc_single_item_only) then
+      ShowMessage(lang_stockcaption[ord(sc_single_item_only)] +
+       '.', lang_stockcaption[ord(sc_error)]) else
+      ShowMessage('Single item only.', 'ERROR') ;
 {$else}
       ShowMessage(sc(sc_single_item_only) + '.', sc(sc_error));
 {$endif}
@@ -1901,7 +1940,6 @@ var
   int1: integer;
   str1: filenamety;
 begin
-
   if (filename.Value <> '') or (fdo_acceptempty in dialogoptions) or (filename.tag = 1) then
   begin
 
@@ -1926,27 +1964,51 @@ begin
       begin
         if bo1 then
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_file) then
+  begin
            if not askok(lang_stockcaption[ord(sc_file)]  + ' "' + tosysfilepath(filenames[0]) +
               '" ' + lang_stockcaption[ord(sc_exists_overwrite)],
               lang_stockcaption[ord(sc_warningupper)]) then
+            begin
+              filename.SetFocus;
+              Exit;
+            end;
+   end else
+   begin
+           if not askok('File "' + tosysfilepath(filenames[0]) +
+              '" exists, do you want to overwrite?',
+              'WARNING') then
+            begin
+              filename.SetFocus;
+              Exit;
+            end;
+   end;
+             
+   
 {$else}
            if not askok(sc(sc_file)  + ' "' + tosysfilepath(filenames[0]) +
               '" ' + sc(sc_exists_overwrite),
               sc(sc_warningupper)) then
-{$endif}
-            begin
-              //      if not askok('File "'+filenames[0]+
-              //            '" exists, do you want to overwrite?','WARNING') then begin
-              filename.SetFocus;
-              Exit;
+          begin
+             filename.SetFocus;
+             Exit;
             end;
+     
+{$endif}
+            
       end
       else if not bo1 then
       begin
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_file) then
              showerror(lang_stockcaption[ord(sc_file)] + ' "' + tosysfilepath(filenames[0]) + '" ' +
             lang_stockcaption[ord(sc_does_not_exist)] + '.',
-            uppercase(lang_stockcaption[ord(sc_error)]));
+            uppercase(lang_stockcaption[ord(sc_error)]))
+            else
+             showerror('File "' + tosysfilepath(filenames[0]) + 
+            '" does not exist.',
+            'ERROR');
+           
 {$else}
              showerror(sc(sc_file) + ' "' + tosysfilepath(filenames[0]) + '" ' +
             sc(sc_does_not_exist) + '.',
@@ -2061,11 +2123,15 @@ procedure tfiledialogxfo.buttonshowhint(const Sender: TObject; var ainfo: hintin
 begin
   with tcustombutton(Sender) do
 {$ifdef mse_dynpo}
-    ainfo.Caption := lang_stockcaption[ord(stockcaptionty(tag))] + ' ' +
+if length(lang_stockcaption) > ord(tag) then
+    ainfo.Caption := lang_stockcaption[ord(stockcaptionty(tag))] +
+      ' (' + encodeshortcutname(shortcut) + ')' else
+    ainfo.Caption := 'Tag (' + encodeshortcutname(shortcut) + ')' ;
 {$else}
-    ainfo.Caption := sc(stockcaptionty(tag)) + ' ' +
+    ainfo.Caption := sc(stockcaptionty(tag)) + 
+      ' (' + encodeshortcutname(shortcut) + ')';
 {$endif}
-      '(' + encodeshortcutname(shortcut) + ')';
+    
 end;
 
 procedure tfiledialogxfo.oncellev(const Sender: TObject; var info: celleventinfoty);
@@ -2425,6 +2491,8 @@ begin
      // caption := 'Select a file';
 
  {$ifdef mse_dynpo}
+ if length(lang_stockcaption) > 0 then
+ begin
    dir.frame.caption:= lang_stockcaption[ord(sc_directory)] + strz ;
     home.Caption         := lang_stockcaption[ord(sc_homehk)] + strz ;
     //  up.caption:= lang_stockcaption[ord(sc_uphk)] + strz ;
@@ -2438,6 +2506,7 @@ begin
     bnoicon.frame.caption:= lang_stockcaption[ord(sc_noicons)] + strz ;
     blateral.frame.caption:= lang_stockcaption[ord(sc_nolateral)] + strz ;
     bcompact.frame.caption:= lang_stockcaption[ord(sc_compact)] + strz ;
+    end;
 {$else}
     dir.frame.caption:= sc(sc_directory) + strz ;
     home.Caption         := sc(sc_homehk) + strz ;
@@ -2890,7 +2959,7 @@ begin
     x := -1;
     fo.places.rowcount := 0;
     
-    {$ifdef windows}
+ {$ifdef windows}
    if directoryexists('A:\') then
     begin
       Inc(x);
@@ -3099,16 +3168,20 @@ begin
       fo.filename.tag           := 1;
       fo.filename.Value         := fo.dir.Value;
 {$ifdef mse_dynpo}
+     if length(lang_stockcaption) > 0 then
       fo.filename.frame.Caption := lang_stockcaption[ord(sc_dirhk)];
     end
     else if (dialogkind in [fdk_save]) then
     begin
+      if length(lang_stockcaption) > 0 then
       fo.filename.frame.Caption :=  lang_stockcaption[ord(sc_namehk)];
       fo.filename.tag           := 2;
     end
     else if (dialogkind in [fdk_new]) then
+      if length(lang_stockcaption) > 0 then
       fo.filename.frame.Caption := lang_stockcaption[ord(sc_newfile)]
     else
+      if length(lang_stockcaption) > 0 then
       fo.filename.frame.Caption := lang_stockcaption[ord(sc_namehk)];
 {$else}
       fo.filename.frame.Caption := sc(sc_dirhk);
@@ -3269,12 +3342,23 @@ end;
 
 function tfiledialogxcontroller.canoverwrite(): Boolean;
 begin
-     Result := not findfile(filename) or
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_file) then
+ begin
+      Result := not findfile(filename) or
       askok(lang_stockcaption[ord(sc_file)] + ' "' + filename +
       '" ' + lang_stockcaption[ord(sc_exists_overwrite)],
       lang_stockcaption[ord(sc_warningupper)]);
+  end else
+  begin
+      Result := not findfile(filename) or
+      askok('File "' + filename +
+      '" exists, do you want to overwrite?',
+      'WARNING');
+  end;
+      
 {$else}
+      Result := not findfile(filename) or
       askok(sc(sc_file) + ' "' + filename +
       '" ' + sc(sc_exists_overwrite),
       sc(sc_warningupper));
