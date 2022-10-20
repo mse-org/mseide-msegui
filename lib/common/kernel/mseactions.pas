@@ -719,6 +719,7 @@ const
         sc_copy_cells,sc_paste_cells,sc_undo,sc_redo);
 begin
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_All) then
  result:= lang_stockcaption[ord(list[aitem])];
 {$else}
  result:= sc(list[aitem]);
@@ -734,6 +735,7 @@ const
         sc_slower,sc_faster,sc_volumedown,sc_volumeup);
 begin
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_All) then
  result:= lang_stockcaption[ord(list[aitem])];
 {$else}
  result:= sc(list[aitem]);

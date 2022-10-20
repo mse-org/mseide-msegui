@@ -168,7 +168,9 @@ begin
  orderarray(order,ar1);
  setlength(result,1);
 {$ifdef mse_dynpo}
- result[0]:= lang_stockcaption[ord(sc_All)];
+if length(lang_stockcaption) > ord(sc_All) then
+ result[0]:= lang_stockcaption[ord(sc_All)] else
+  result[0]:= 'All';
 {$else}
  result[0]:= sc(sc_All);
 {$endif}
@@ -327,8 +329,11 @@ begin
   end;
  end;
  if not atry then begin
-  if not found then begin
+ 
  {$ifdef mse_dynpo}
+ if length(lang_stockcaption) > ord(sc_graphic_format_not_supported)
+ then begin
+  if not found then begin
   formaterror(
       ansistring(lang_stockcaption[ord(sc_graphic_format_not_supported)]),
                                                               aformatlabel);
@@ -336,16 +341,30 @@ begin
   else begin
    formaterror(ansistring(lang_stockcaption[ord(sc_graphic_format_error)]),
                                                                 aformatlabel);
+ end else
+ begin
+  if not found then begin
+  formaterror(
+      ansistring('Graphic format not supported',
+                                                              aformatlabel);
+  end
+  else begin
+   formaterror('Graphic format error'),
+                                                                aformatlabel);
+ end;
+ 
+  end;                                                              
 {$else}
+  if not found then begin
   formaterror(
       ansistring(sc(sc_graphic_format_not_supported)),
                                                               aformatlabel);
   end
   else begin
    formaterror(ansistring(sc(sc_graphic_format_error)),
-                                                                aformatlabel);
+  end;                                                              aformatlabel);
 {$endif}
-  end;
+  
  end;
 end;
 
@@ -366,13 +385,19 @@ begin
   end;
  end;
  if int2 < 0 then begin
-  formaterror(
+ 
 {$ifdef mse_dynpo}
-        ansistring(lang_stockcaption[ord(sc_graphic_format_not_supported)]),
+ if length(lang_stockcaption) > ord(sc_graphic_format_not_supported) then
+  formaterror(
+        ansistring(lang_stockcaption[ord(sc_graphic_format_not_supported)]), aformatlabel)
+  else
+    formaterror(
+        ansistring('Graphic format not_supported', aformatlabel);      
 {$else}
-        ansistring(sc(sc_graphic_format_not_supported)),
+ formaterror(
+        ansistring(sc(sc_graphic_format_not_supported)),  aformatlabel);
 {$endif}
-                                                               aformatlabel);
+                                                             
  end;
  with formats[int2] do begin
   writeproc(dest,asource,aformatlabel,params);

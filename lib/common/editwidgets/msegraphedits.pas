@@ -3265,7 +3265,10 @@ function tcustombooleanedit.getassistivetext(): msestring;
 begin
  if value then begin
 {$ifdef mse_dynpo}
-  result:= lang_stockcaption[ord(sc_on)];
+  if length(lang_stockcaption) > ord(sc_on) then
+  result:= 
+  lang_stockcaption[ord(sc_on)] else
+  result:='On';
 {$else}
   result:= sc(sc_on);
 {$endif}
@@ -3273,7 +3276,10 @@ begin
  end
  else begin
 {$ifdef mse_dynpo}
-  result:= lang_stockcaption[ord(sc_off)];
+   if length(lang_stockcaption) > ord(sc_off) then
+  result:= 
+  lang_stockcaption[ord(sc_off)] else
+  result:='Off';
 {$else}
   result:= sc(sc_off);
 {$endif}

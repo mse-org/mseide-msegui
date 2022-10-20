@@ -805,10 +805,14 @@ begin
   if acaption = '' then begin
      if fdo_save in aoptions then begin
 {$ifdef mse_dynpo}
-   str1:= lang_stockcaption[ord(sc_save)];
+if length(lang_stockcaption) > ord(sc_save) then
+   str1:= lang_stockcaption[ord(sc_save)] else
+      str1:= 'Save';
     end
     else begin
-     str1:= lang_stockcaption[ord(sc_open)];
+    if length(lang_stockcaption) > ord(sc_open) then
+     str1:= lang_stockcaption[ord(sc_open)] else
+          str1:= 'Open';
 {$else}
    str1:= sc(sc_save);
     end
@@ -1221,18 +1225,37 @@ var
 begin
  mstr1:= '';
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_confirmation) then
+begin
   if stringenter(mstr1,lang_stockcaption[ord(sc_name)],
                lang_stockcaption[ord(sc_create_new_directory)])
-{$else}
-  if stringenter(mstr1,sc(sc_name),
-               sc(sc_create_new_directory))
-{$endif}
-                = mr_ok then begin
+               = mr_ok then begin
    mstr1:= filepath(listview.directory,mstr1,fk_file);
    msefileutils.createdir(mstr1);
    changedir(mstr1);
    filename.setfocus;
-  end;
+  end;  
+end else
+begin
+if stringenter(mstr1,'Name', 'Create new directory')
+               = mr_ok then begin
+   mstr1:= filepath(listview.directory,mstr1,fk_file);
+   msefileutils.createdir(mstr1);
+   changedir(mstr1);
+   filename.setfocus;
+  end;  
+end;             
+{$else}
+  if stringenter(mstr1,sc(sc_name),
+               sc(sc_create_new_directory))
+               = mr_ok then begin
+   mstr1:= filepath(listview.directory,mstr1,fk_file);
+   msefileutils.createdir(mstr1);
+   changedir(mstr1);
+   filename.setfocus;
+  end;             
+{$endif}
+       
 end;
 
 procedure tfiledialogfo.listviewselectionchanged(const sender: tcustomlistview);
@@ -1366,8 +1389,11 @@ begin
    result:= false;
    if errormessage then begin
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_confirmation) then
      showerror(lang_stockcaption[ord(sc_can_not_read_directory)]+ ' ' +
-                       msestring(esys(ex).text),lang_stockcaption[ord(sc_error)]);
+                       msestring(esys(ex).text),lang_stockcaption[ord(sc_error)]) else
+    showerror('Can not read directory ' +
+                       msestring(esys(ex).text),'ERROR');                   
 {$else}
       showerror(sc(sc_can_not_read_directory)+ ' ' +
                        msestring(esys(ex).text),sc(sc_error));
@@ -1403,7 +1429,9 @@ begin
  unquotefilename(avalue,fselectednames);
  if (fdo_single in dialogoptions) and (high(fselectednames) > 0) then begin
 {$ifdef mse_dynpo}
-   showmessage(lang_stockcaption[ord(sc_single_item_only)]+'.',lang_stockcaption[ord(sc_error)]);
+if length(lang_stockcaption) > ord(sc_confirmation) then
+   showmessage(lang_stockcaption[ord(sc_single_item_only)]+'.',lang_stockcaption[ord(sc_error)]) else
+   showmessage('Single item only.','ERROR');
 {$else}
    showmessage(sc(sc_single_item_only)+'.',sc(sc_error));
 {$endif}
@@ -1517,6 +1545,7 @@ var
  bo1: boolean;
  int1: integer;
  str1: filenamety;
+ stlang1, stlang2, stlang3: string;
 begin
 // if filename.checkvalue then begin
   if (filename.value <> '') or (fdo_acceptempty in dialogoptions) then begin
@@ -1544,10 +1573,24 @@ begin
     end;
     if fdo_save in dialogoptions then begin
      if bo1 then begin
+     
+ {$ifdef mse_dynpo} 
+ if length(lang_stockcaption) > ord(sc_confirmation) then
+ begin
+ stlang1 := lang_stockcaption[ord(sc_file)];
+ stlang2 := lang_stockcaption[ord(sc_exists_overwrite)];
+ stlang3 := lang_stockcaption[ord(sc_warningupper)];
+ end else
+ begin
+ stlang1 := 'File';
+ stlang2 := 'exists, overwrite ?';
+ stlang3 :=  'WARNING';
+ end;
+{$endif}   
+   
 {$ifdef mse_dynpo}
-       if not askok(lang_stockcaption[ord(sc_file)] +' "'+filenames[0]+
-            '" '+ lang_stockcaption[ord(sc_exists_overwrite)],
-            lang_stockcaption[ord(sc_warningupper)])
+       if not askok( stlang1 +' "'+filenames[0]+
+            '" '+ stlang2, stlang3)
 {$else}
        if not askok(sc(sc_file) +' "'+filenames[0]+
             '" '+ sc(sc_exists_overwrite),
@@ -1565,9 +1608,12 @@ begin
     else begin
      if not bo1 then begin
 {$ifdef mse_dynpo}
+ if length(lang_stockcaption) > ord(sc_confirmation) then
        showerror(lang_stockcaption[ord(sc_file)]+' "'+filenames[0]+'" '+
                                         lang_stockcaption[ord(sc_does_not_exist)]+'.',
-                  uppercase(lang_stockcaption[ord(sc_error)]));
+                  uppercase(lang_stockcaption[ord(sc_error)])) else
+       showerror('File "'+filenames[0]+'" does not exist.',
+                  'ERROR');           
 {$else}
        showerror(sc(sc_file)+' "'+filenames[0]+'" '+
                                         sc(sc_does_not_exist)+'.',
@@ -1625,6 +1671,8 @@ begin
  fcourseid:= -1;
 
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_confirmation) then
+begin 
   dir.frame.caption:= lang_stockcaption[ord(sc_dirhk)] + strz ;
   home.caption:= lang_stockcaption[ord(sc_homehk)] + strz ;
 //  up.caption:= lang_stockcaption[ord(sc_uphk] + strz ;
@@ -1634,6 +1682,7 @@ begin
   showhidden.frame.caption:= lang_stockcaption[ord(sc_show_hidden_fileshk)] + strz ;
   ok.caption:= lang_modalresult[ord(mr_ok)];
   cancel.caption:= lang_modalresult[ord(mr_cancel)];
+end;  
 {$else}
   dir.frame.caption:= sc(sc_dirhk) + strz ;
   home.caption:= sc(sc_homehk) + strz ;
@@ -1730,8 +1779,11 @@ procedure tfiledialogfo.buttonshowhint(const sender: TObject;
 begin
  with tcustombutton(sender) do begin
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_confirmation) then
   ainfo.caption:= lang_stockcaption[ord(stockcaptionty(tag))]+' '+
-                                     '('+encodeshortcutname(shortcut)+')';
+                                     '('+encodeshortcutname(shortcut)+')' else
+  ainfo.caption:= 'Tag ('+encodeshortcutname(shortcut)+')' ;
+                                    
 {$else}
   ainfo.caption:= sc(stockcaptionty(tag))+' '+
                                      '('+encodeshortcutname(shortcut)+')';
@@ -1998,12 +2050,18 @@ end;
 
 function tfiledialogcontroller.canoverwrite(): boolean;
 begin
-  result:= not findfile(filename) or
+
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_confirmation) then
+  result:= not findfile(filename) or
        askok(lang_stockcaption[ord(sc_file)]+' "'+filename+
             '" '+ lang_stockcaption[ord(sc_exists_overwrite)],
-            lang_stockcaption[ord(sc_warningupper)]);
+            lang_stockcaption[ord(sc_warningupper)]) else
+   result:= not findfile(filename) or           
+    askok('File "'+filename+
+            '" exists. Overwrite ?', 'WARNING');         
 {$else}
+  result:= not findfile(filename) or
        askok(sc(sc_file)+' "'+filename+
             '" '+ sc(sc_exists_overwrite),
             sc(sc_warningupper));

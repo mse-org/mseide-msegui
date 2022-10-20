@@ -4638,34 +4638,61 @@ begin
   end;
 {$ifdef mse_dynpo}
   dbr_close: begin
-   info.caption:= lang_stockcaption[ord(sc_close)];
+  if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_close)] else
+      info.caption:='Close';
   end;
   dbr_maximize: begin
-   info.caption:= lang_stockcaption[ord(sc_maximize)];
+   if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_maximize)] else
+      info.caption:='Maximize';
   end;
   dbr_normalize: begin
-   info.caption:= lang_stockcaption[ord(sc_normalize)];
+   if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_normalize)] else
+      info.caption:='Normalize';
+
   end;
   dbr_minimize: begin
-   info.caption:= lang_stockcaption[ord(sc_minimize)];
+    if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_minimize)] else
+      info.caption:='Minimize';
   end;
   dbr_fixsize: begin
-   info.caption:= lang_stockcaption[ord(sc_fix_size)];
+     if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_fix_size)] else
+      info.caption:='Fixed size';
+
   end;
   dbr_float: begin
-   info.caption:= lang_stockcaption[ord(sc_float)];
+       if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_float)] else
+      info.caption:='Float';
+
   end;
   dbr_top: begin
-   info.caption:= lang_stockcaption[ord(sc_stay_on_top)];
+     if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_stay_on_top)] else
+      info.caption:='Stay on top';
+
   end;
   dbr_background: begin
-   info.caption:= lang_stockcaption[ord(sc_stay_in_background)];
+       if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_stay_in_background)] else
+      info.caption:='Stay in background';
+
   end;
   dbr_lock: begin
-   info.caption:= lang_stockcaption[ord(sc_lock_children)];
+         if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_lock_children)] else
+      info.caption:='Lock children';
+
   end;
   dbr_nolock: begin
-   info.caption:= lang_stockcaption[ord(sc_no_lock)];
+         if length(lang_stockcaption) > ord(sc_All) then
+   info.caption:= lang_stockcaption[ord(sc_no_lock)] else
+      info.caption:='No lock';
+ 
 {$else}
   dbr_close: begin
    info.caption:= sc(sc_close);

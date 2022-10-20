@@ -10779,10 +10779,16 @@ begin
    end;
 
 {$ifdef mse_dynpo}
+  if length(lang_stockcaption) > ord(sc_All) then
   tpopupmenu.additems(amenu,self,mouseinfo,[
          lang_stockcaption[ord(sc_copy_cells)]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_copycells])+')'],
-                  [],[state1],[{$ifdef FPC}@{$endif}docopycells],not bo1);
+                  [],[state1],[{$ifdef FPC}@{$endif}docopycells],not bo1)
+  else
+    tpopupmenu.additems(amenu,self,mouseinfo,[
+         'Copy cells'+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_copycells])+')'],
+                  [],[state1],[{$ifdef FPC}@{$endif}docopycells],not bo1);                
 {$else}
    tpopupmenu.additems(amenu,self,mouseinfo,[
          sc(sc_copy_cells)+sepchar+
@@ -10802,10 +10808,17 @@ begin
    end;
 
 {$ifdef mse_dynpo}
+  if length(lang_stockcaption) > ord(sc_All) then
    tpopupmenu.additems(amenu,self,mouseinfo,[
         lang_stockcaption[ord(sc_paste_cells)]+sepchar+
       '('+encodeshortcutname(sysshortcuts[sho_pastecells])+')'],
+                 [],[state1],[{$ifdef FPC}@{$endif}dopastecells],not bo1)
+   else
+     tpopupmenu.additems(amenu,self,mouseinfo,[
+        'Paste cells'+sepchar+
+      '('+encodeshortcutname(sysshortcuts[sho_pastecells])+')'],
                  [],[state1],[{$ifdef FPC}@{$endif}dopastecells],not bo1);
+              
 
 {$else}
    tpopupmenu.additems(amenu,self,mouseinfo,[
@@ -10821,6 +10834,8 @@ begin
   if og_rowinserting in foptionsgrid then begin
 
    {$ifdef mse_dynpo}
+     if length(lang_stockcaption) > ord(sc_All) then
+begin
   tpopupmenu.additems(amenu,self,mouseinfo,[
               lang_stockcaption[ord(sc_insert_rowhk)]+sepchar+
          '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')'],[],
@@ -10831,11 +10846,26 @@ begin
               lang_stockcaption[ord(sc_append_rowhk)]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],
             menustates(canappendrow),[{$ifdef FPC}@{$endif}doappendrow],not bo1);
+end else
+begin
+  tpopupmenu.additems(amenu,self,mouseinfo,[
+              'Insert row'+sepchar+
+         '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')'],[],
+         menustates(caninsertrow),
+        [{$ifdef FPC}@{$endif}doinsertrow],not bo1);
+   bo1:= true;
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+              'Append row'+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_rowappend])+')'],[],
+            menustates(canappendrow),[{$ifdef FPC}@{$endif}doappendrow],not bo1);
+end;
+
 {$else}
   tpopupmenu.additems(amenu,self,mouseinfo,[
               sc(sc_insert_rowhk)+sepchar+
          '('+encodeshortcutname(sysshortcuts[sho_rowinsert])+')'],[],
          menustates(caninsertrow),
+     
         [{$ifdef FPC}@{$endif}doinsertrow],not bo1);
    bo1:= true;
    tpopupmenu.additems(amenu,self,mouseinfo,[
@@ -10858,10 +10888,16 @@ begin
    end;
 
 {$ifdef mse_dynpo}
+     if length(lang_stockcaption) > ord(sc_All) then
    tpopupmenu.additems(amenu,self,mouseinfo,[
          lang_stockcaption[ord(sc_delete_rowhk)]+sepchar+
        '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],
-                  [[mao_nocandefocus]],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);
+                  [[mao_nocandefocus]],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1)
+   else
+   tpopupmenu.additems(amenu,self,mouseinfo,[
+         'Delete row'+sepchar+
+       '('+encodeshortcutname(sysshortcuts[sho_rowdelete])+')'],
+                  [[mao_nocandefocus]],[state1],[{$ifdef FPC}@{$endif}dodeleterows],not bo1);               
 
 {$else}
    tpopupmenu.additems(amenu,self,mouseinfo,[
@@ -16472,8 +16508,13 @@ if noconfirmdelete then result := true
 else
 begin
 {$ifdef mse_dynpo}
+     if length(lang_stockcaption) > ord(sc_All) then
  result:= (og1_norowdeletequery in foptionsgrid1) or
-    askok(lang_stockcaption[ord(sc_Delete_row_question)],lang_stockcaption[ord(sc_Confirmation)]);
+    askok(lang_stockcaption[ord(sc_Delete_row_question)],lang_stockcaption[ord(sc_Confirmation)])
+    else
+result:= (og1_norowdeletequery in foptionsgrid1) or
+    askok('Delete row ?','Confirmation');
+    
 {$else}
  result:= (og1_norowdeletequery in foptionsgrid1) or
     askok(sc(sc_Delete_row_question),sc(sc_Confirmation));
@@ -16492,18 +16533,33 @@ procedure tcustomgrid.dodeleteselectedrows(const sender: tobject);
 var
  ar1: integerarty;
  int1: integer;
- str: string;
+ str, str1, str2, str3: string;
 begin
  ar1:= fdatacols.getselectedrows;
+ {$ifdef mse_dynpo}
+ if length(lang_stockcaption) > ord(sc_All) then
+ begin
+ str1 := lang_extended[ord(ex_del_row_selected)];
+ str2 := lang_extended[ord(ex_del_rows_selected)];
+ str3 := lang_stockcaption[ord(sc_Confirmation)];
+ end else
+ begin
+ str1 := 'Delete row selected ?';
+ str2 := 'Delete rows selected ?';
+ str3 := 'Confirmation';
+ end;
+  
+ {$endif}
+ 
  if high(ar1) >= 0 then begin
 
   {$ifdef mse_dynpo}
 if high(ar1) = 0 then
-    str := lang_extended[ord(ex_del_row_selected)]
-  else str := StringReplace(lang_extended[ord(ex_del_rows_selected)], #37#115,
+    str := str1
+  else str := StringReplace(str2, #37#115,
     inttostrmse(length(ar1)), [rfReplaceAll]);
 
-  if askok(str,lang_stockcaption[ord(sc_Confirmation)])
+  if askok(str,str3)
 
 {$else}
  if askok(stockobjects.textgenerators[tg_delete_n_selected_rows](

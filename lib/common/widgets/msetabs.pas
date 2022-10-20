@@ -5158,13 +5158,24 @@ begin
  if (tabo_autopopup in tab_options) then begin
   fpopuptab:= ftabs.tabatpos(translateclientpoint(mouseinfo.pos,self,ftabs));
   if fpopuptab >= 0 then begin
-   tpopupmenu.additems(amenu,self,mouseinfo,
+
 {$ifdef mse_dynpo}
+     if length(lang_stockcaption) > ord(sc_All) then
+ tpopupmenu.additems(amenu,self,mouseinfo,
       [lang_stockcaption[ord(sc_close_page)]],
+         [],[],[{$ifdef FPC}@{$endif}doclosepage])
+ else
+ tpopupmenu.additems(amenu,self,mouseinfo,
+      ['Close page'],
+         [],[],[{$ifdef FPC}@{$endif}doclosepage]);
+        
+   
 {$else}
+ tpopupmenu.additems(amenu,self,mouseinfo,
       [sc(sc_close_page)],
+        [],[],[{$ifdef FPC}@{$endif}doclosepage]);
+    
 {$endif}
-      [],[],[{$ifdef FPC}@{$endif}doclosepage]);
   end;
  end;
  inherited;

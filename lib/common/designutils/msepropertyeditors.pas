@@ -1075,12 +1075,20 @@ var
 
 function wantpropertydelete(const fromval,toval: int32): boolean;
 begin
+{$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_confirmation) then
  result:= (toval < fromval) or
           askok(mo.c[ord(wishdelete)]+' '+inttostrmse(fromval) +
          ' '+mo.c[ord(str_to)]+' '+ inttostrmse(toval) + '?',
-{$ifdef mse_dynpo}
-         lang_stockcaption[ord(sc_confirmation)]);
+        lang_stockcaption[ord(sc_confirmation)]) else
+ result:= (toval < fromval) or
+          askok(mo.c[ord(wishdelete)]+' '+inttostrmse(fromval) +
+         ' '+mo.c[ord(str_to)]+' '+ inttostrmse(toval) + '?',
+        'Confirmation');       
 {$else}
+ result:= (toval < fromval) or
+          askok(mo.c[ord(wishdelete)]+' '+inttostrmse(fromval) +
+         ' '+mo.c[ord(str_to)]+' '+ inttostrmse(toval) + '?',
          stockobjects.captions[sc_confirmation]);
 {$endif} 
 end;
@@ -2844,12 +2852,21 @@ end;
 
 function tclasspropertyeditor.checkfreeoptionalclass: boolean;
 begin
- result:= askok(mo.c[ord(wishdestroy)]+' ' + fname+' ('+
+ {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_confirmation) then
+result:= askok(mo.c[ord(wishdestroy)]+' ' + fname+' ('+
              msestring(ftypeinfo^.Name)+
                      ')?',
-{$ifdef mse_dynpo}
-         lang_stockcaption[ord(sc_confirmation)]);
+         lang_stockcaption[ord(sc_confirmation)]) else
+result:= askok('Do you wish to destroy ' + fname+' ('+
+             msestring(ftypeinfo^.Name)+
+                     ')?',
+         'Confirmation');         
+         
 {$else}
+result:= askok(mo.c[ord(wishdestroy)]+' ' + fname+' ('+
+             msestring(ftypeinfo^.Name)+
+                     ')?',
          stockobjects.captions[sc_confirmation]);
 {$endif} 
 end;
@@ -3627,6 +3644,7 @@ procedure tarraypropertyeditor.setvalue(const value: msestring);
 var
  int1: integer;
  va: integer;
+ confi : string;
 begin
  va:= strtoint(value);
  if va < 0 then begin
@@ -3637,11 +3655,17 @@ begin
    va:= propmaxarraycount;
   end;
  end;
+ {$ifdef mse_dynpo}
+ if length(lang_stockcaption) > ord(sc_confirmation) then
+ confi := lang_stockcaption[ord(sc_confirmation)] else
+ confi := 'Confirmation';
+ {$endif} 
+ 
  int1:= tarrayprop(getpointervalue).count;
  if ( int1 > va) and not askok(mo.c[ord(wishdelete)]+' '+inttostrmse(va) +
          ' '+mo.c[ord(str_to)]+' '+ inttostrmse(int1-1) + '?',
 {$ifdef mse_dynpo}
-         lang_stockcaption[ord(sc_confirmation)])
+         confi )
 {$else}
          stockobjects.captions[sc_confirmation])
 {$endif}          

@@ -75,8 +75,15 @@ begin
   try
    with fo do begin
 {$ifdef mse_dynpo}
+   if length(lang_stockcaption) > ord(sc_All) then
+   begin
     caption:= lang_stockcaption[ord(sc_passwordupper)];
     lab.caption:= lang_stockcaption[ord(sc_enterpassword)]+':';
+   end else
+   begin
+    caption:= 'PASSWORD';
+    lab.caption:= 'Enter password:';
+   end; 
 {$else}
     caption:= sc(sc_passwordupper);
     lab.caption:= sc(sc_enterpassword)+':';
@@ -87,7 +94,9 @@ begin
     result:= (modalresult = mr_ok) and (password = value.value);
     if not result and (modalresult = mr_ok) then begin
 {$ifdef mse_dynpo}
-     showerror(lang_stockcaption[ord(sc_invalidpassword)]);
+ if length(lang_stockcaption) > ord(sc_All) then
+      showerror(lang_stockcaption[ord(sc_invalidpassword)])
+  else       showerror('Invalid password');     
 {$else}
      showerror(sc(sc_invalidpassword));
 {$endif}

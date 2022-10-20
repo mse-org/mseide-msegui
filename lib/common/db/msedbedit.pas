@@ -2741,8 +2741,11 @@ end;
 function confirmdeleterecord: boolean;
 begin
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_Delete_record_question) then
  result:= askok(lang_stockcaption[ord(sc_Delete_record_question)],
- lang_stockcaption[ord(sc_confirmation)]);
+ lang_stockcaption[ord(sc_confirmation)]) else
+  result:= askok('Delete record ?', 'Confirmation') ;
+ 
 {$else}
  with stockobjects do begin
   result:= askok(captions[sc_Delete_record_question],captions[sc_confirmation]);
@@ -2753,8 +2756,11 @@ end;
 function confirmcopyrecord: boolean;
 begin
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_Delete_record_question) then
  result:= askok(lang_stockcaption[ord(sc_Delete_record_question)],
- lang_stockcaption[ord(sc_confirmation)]);
+ lang_stockcaption[ord(sc_confirmation)]) else
+ result:= askok('Delete record ?',
+ 'Confirmation');
 {$else}
  with stockobjects do begin
   result:= askok(captions[sc_Copy_record_question],captions[sc_confirmation])
@@ -3177,7 +3183,8 @@ begin
   with buttons[int1] do begin
 ////   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
 {$ifdef mse_dynpo}
-   hint:= lang_stockcaption[ord(dbnavighints[dbnavigbuttonty(int1)])];
+if length(lang_stockcaption) > ord(sc_Delete_record_question) then
+    hint:= lang_stockcaption[ord(dbnavighints[dbnavigbuttonty(int1)])] ;
 {$else}
    hint:= stockobjects.captions[dbnavighints[dbnavigbuttonty(int1)]];
 {$endif}   
@@ -3197,10 +3204,14 @@ begin
  with buttons[ord(dbnb_insert)] do begin
   if dno_append in self.options then begin
 {$ifdef mse_dynpo}
-   hint:= lang_stockcaption[ord(sc_append)];
+  if length(lang_stockcaption) > ord(sc_append) then
+   hint:= lang_stockcaption[ord(sc_append)] else
+     hint:= 'Append'; 
   end
   else begin
-   hint:= lang_stockcaption[ord(sc_insert)];
+    if length(lang_stockcaption) > ord(sc_insert) then
+   hint:= lang_stockcaption[ord(sc_insert)] else
+   hint:= 'Insert'; 
   end;
 {$else}
    hint:= stockobjects.captions[sc_append];

@@ -1870,8 +1870,11 @@ begin
  if not quiet then begin
 
 {$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_is_invalid) then
   showmessage(''''+text+''' '+ lang_stockcaption[ord(sc_is_invalid)]+'.',
-        lang_stockcaption[ord(sc_Format_error)]);
+        lang_stockcaption[ord(sc_Format_error)]) else
+   showmessage('" '+text+' " is invalid.',
+        'Format error');      
 {$else}
   showmessage(''''+text+''' '+ sc(sc_is_invalid)+'.',
         sc(sc_Format_error));
@@ -1884,8 +1887,11 @@ procedure tcustomdataedit.notnullerror(const quiet: boolean);
 begin
  if not quiet then begin
  {$ifdef mse_dynpo}
+ if length(lang_stockcaption) > ord(sc_is_invalid) then
  showmessage(lang_stockcaption[ord(sc_Value_is_required)]+'.',
-               lang_stockcaption[ord(sc_Error)]);
+               lang_stockcaption[ord(sc_Error)]) else
+  showmessage('Value is required.',
+               'Error');              
 {$else}
   showmessage(sc(sc_Value_is_required)+'.',
                sc(sc_Error));
@@ -1898,9 +1904,13 @@ begin
  if not quiet then begin
 
  {$ifdef mse_dynpo}
+  if length(lang_stockcaption) > ord(sc_is_invalid) then
  showmessage(lang_stockcaption[ord(sc_min)]+': '+datatotext(min)+' '+
              lang_stockcaption[ord(sc_Max)]+': ' +
-            datatotext(max) + '.',lang_stockcaption[ord(sc_Range_error)]);
+            datatotext(max) + '.',lang_stockcaption[ord(sc_Range_error)]) else
+ showmessage('Min: '+datatotext(min)+' Max: ' +
+            datatotext(max) + '.','Range error');
+           
 {$else}
   showmessage(sc(sc_min)+': '+datatotext(min)+' '+
              sc(sc_Max)+': ' +
