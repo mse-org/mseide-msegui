@@ -357,12 +357,11 @@ begin
 {$else}
   if not found then begin
   formaterror(
-      ansistring(sc(sc_graphic_format_not_supported)),
-                                                              aformatlabel);
+      ansistring(sc(sc_graphic_format_not_supported)), aformatlabel);
   end
   else begin
-   formaterror(ansistring(sc(sc_graphic_format_error)),
-  end;                                                              aformatlabel);
+   formaterror(ansistring(sc(sc_graphic_format_error)), aformatlabel);
+  end;  
 {$endif}
   
  end;
