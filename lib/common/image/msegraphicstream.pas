@@ -341,15 +341,14 @@ begin
   else begin
    formaterror(ansistring(lang_stockcaption[ord(sc_graphic_format_error)]),
                                                                 aformatlabel);
- end else
+ end; end else
  begin
   if not found then begin
-  formaterror(
-      ansistring('Graphic format not supported',
+  formaterror('Graphic format not supported',
                                                               aformatlabel);
   end
   else begin
-   formaterror('Graphic format error'),
+   formaterror('Graphic format error',
                                                                 aformatlabel);
  end;
  
@@ -390,8 +389,7 @@ begin
   formaterror(
         ansistring(lang_stockcaption[ord(sc_graphic_format_not_supported)]), aformatlabel)
   else
-    formaterror(
-        ansistring('Graphic format not_supported', aformatlabel);      
+    formaterror('Graphic format not_supported', aformatlabel);      
 {$else}
  formaterror(
         ansistring(sc(sc_graphic_format_not_supported)),  aformatlabel);
