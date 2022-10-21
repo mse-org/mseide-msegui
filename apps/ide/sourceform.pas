@@ -573,8 +573,9 @@ begin
    for int1:= 0 to designer.modules.count - 1 do begin
     with designer.modules[int1]^ do begin
      modulenames[int1]:= filename;
-     moduleoptions[int1]:=
-         {$ifdef FPC}longword{$else}byte{$endif}(designformintf.moduleoptions);
+  {$if defined(linux) and defined(cpuarm)} {$else}
+     moduleoptions[int1] := longword(designformintf.moduleoptions);
+  {$endif}
      ar1[int1]:= designform.visible;
      ar2[int1]:= not hasmenuitem;
 //     moduledock[int1]:= encodemoduledock(dockinfo);
@@ -657,28 +658,14 @@ begin
                                              [pro_preferenew,pro_rootpath]);
       po1:= mainfo.openformfile(filepath(mstr1),bo1,false,false,
                                                          not ar2[int1],true);
-{
-      mstr1:= relativepath(modulenames[int1],projectoptions.projectdir);
-      if findfile(mstr1) then begin
-       po1:= mainfo.openformfile(filepath(mstr1),bo1,false,false,
-                                                         not ar2[int1],true);
-      end
-      else begin
-       po1:= mainfo.openformfile(modulenames[int1],bo1,false,false,
-                                                         not ar2[int1],true);
-      end;
-}
-      if (po1 <> nil) then begin
-       with po1^ do begin
-        designformintf.moduleoptions:=
-             moduleoptionsty({$ifdef FPC}longword{$else}byte{$endif}
-                         (moduleoptions[int1])) * [mo_hidewidgets,mo_hidecomp];
-//        if decodemoduledock(moduledock[int1],dockinfo) then begin
-//         docktopanel(designformintf.getdockcontroller(),dockinfo.panelname,
-//                                                     dockinfo.rect);
-//        end;
-       end;
-      end;
+
+ {$if defined(linux) and defined(cpuarm)} {$else}
+           if (po1 <> nil) then
+              with po1^ do
+                designformintf.moduleoptions := moduleoptionsty(longword
+                  (moduleoptions[int1])) * [mo_hidewidgets, mo_hidecomp] ;
+  {$endif}
+           
      except
       if checkprojectloadabort then begin
        break; //do not load more modules
