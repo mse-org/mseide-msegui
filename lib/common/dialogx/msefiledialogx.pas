@@ -2438,19 +2438,28 @@ end;
 
 procedure tfiledialogxfo.ondrawcellplace(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
 var
-  aicon: integer;
+  aicon: integer = -1;
   apoint: pointty;
   astr: msestring;
+  {$ifdef windows}
+  achar : char;
+  {$endif}
 begin
   if bnoicon.Value = False then
   begin
     astr := trim(places[0][cellinfo.cell.row]);
-
-    if (lowercase(astr) = 'c:\') or (lowercase(astr) = 'd:\') or
-    (astr = '/') or (lowercase(astr) = '/usr') or
-     (lowercase(astr) = 'c:\users') then
-      aicon := 0
-    else if astr = 'Home' then
+   
+  {$ifdef windows}
+  for achar := 'A' to 'Z' do
+   if (uppercase(astr) = achar + ':\') then aicon := 0;
+  {$endif}
+  
+  if aicon <> 0 then  
+  if (astr = '/') or (lowercase(astr) = '/usr') or
+     (lowercase(astr) = 'c:\users') then aicon := 0;
+      
+  if aicon <> 0 then  
+    if astr = 'Home' then
       aicon := 13
     else if astr = 'Desktop' then
       aicon := 14
