@@ -2160,15 +2160,16 @@ object mainfo: tmainfo
   container.taborder = 1
   container.bounds = (
     0
-    30
+    31
     638
-    256
+    255
   )
   optionswindow = [wo_groupleader]
   mainmenu = mainmenu1
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'MSEide + MSEgui'
+  windowopacity = -Inf
   moduleclassname = 'tmseform'
   object tstringedit1: tstringedit
     color = -2147483645
@@ -2185,15 +2186,15 @@ object mainfo: tmainfo
     frame.localprops1 = []
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
     bounds_x = 107
-    bounds_y = 39
-    bounds_cy = 43
+    bounds_y = 38
+    bounds_cy = 45
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
   end
   object tstringedit2: tstringedit
     color = -2147483645
@@ -2212,7 +2213,7 @@ object mainfo: tmainfo
     frame.localprops1 = []
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
@@ -2230,10 +2231,10 @@ object mainfo: tmainfo
     face.localprops = [fal_faopacity]
     taborder = 1
     bounds_x = 262
-    bounds_y = 39
-    bounds_cy = 43
+    bounds_y = 38
+    bounds_cy = 45
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
   end
   object tstringedit3: tstringedit
     color = -2147483645
@@ -2252,7 +2253,7 @@ object mainfo: tmainfo
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
     frame.localprops1 = []
     frame.outerframe = (
-      81
+      83
       0
       0
       0
@@ -2271,12 +2272,12 @@ object mainfo: tmainfo
     face.fade_opacity = 8355711
     face.localprops = [fal_fadirection, fal_faopacity]
     taborder = 3
-    bounds_x = 23
+    bounds_x = 21
     bounds_y = 112
-    bounds_cx = 181
-    bounds_cy = 32
+    bounds_cx = 183
+    bounds_cy = 33
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
   end
   object tstringedit4: tstringedit
     color = -2147483645
@@ -2296,14 +2297,14 @@ object mainfo: tmainfo
       0
       0
       0
-      17
+      18
     )
     taborder = 6
     bounds_x = 261
     bounds_y = 177
-    bounds_cy = 49
+    bounds_cy = 51
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
   end
   object tstringedit5: tstringedit
     color = -2147483645
@@ -2322,18 +2323,18 @@ object mainfo: tmainfo
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_colorclient]
     frame.localprops1 = []
     frame.outerframe = (
-      28
+      25
       0
       0
-      17
+      18
     )
     taborder = 5
-    bounds_x = 76
+    bounds_x = 79
     bounds_y = 176
-    bounds_cx = 128
-    bounds_cy = 49
+    bounds_cx = 125
+    bounds_cy = 51
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
   end
   object tstringedit6: tstringedit
     color = -2147483645
@@ -2353,7 +2354,7 @@ object mainfo: tmainfo
     frame.outerframe = (
       0
       0
-      84
+      82
       0
     )
     face.fade_pos.count = 2
@@ -2372,10 +2373,10 @@ object mainfo: tmainfo
     taborder = 4
     bounds_x = 261
     bounds_y = 113
-    bounds_cx = 184
-    bounds_cy = 32
+    bounds_cx = 182
+    bounds_cy = 33
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
   end
   object tstringedit7: tstringedit
     color = -2147483645
@@ -3177,9 +3178,9 @@ object mainfo: tmainfo
     bounds_x = 400
     bounds_y = 40
     bounds_cx = 132
-    bounds_cy = 52
+    bounds_cy = 53
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
   end
   object tstringedit8: tstringedit
     color = -2147483645
@@ -3307,9 +3308,9 @@ object mainfo: tmainfo
     bounds_x = 400
     bounds_y = 168
     bounds_cx = 132
-    bounds_cy = 52
+    bounds_cy = 53
     statfile = tstatfile1
-    reffontheight = 14
+    reffontheight = 15
   end
   object buttonface1: tfacecomp
     template.fade_pos.count = 2
@@ -3339,63 +3340,63 @@ object mainfo: tmainfo
     itemframetemplateactive = mainmenuitemframe
     itemfacetemplateactive = buttonface2
     menu.submenu.count = 4
-    menu.submenu.items = <
+    menu.submenu.items = <    
       item
         submenu.count = 4
-        submenu.items = <
+        submenu.items = <        
           item
             submenu.count = 6
-            submenu.items = <
+            submenu.items = <            
               item
                 caption = 'ewrgqeg qewr '
                 state = [as_localcaption]
-              end
+              end            
               item
                 caption = 'qer qwetr'
                 state = [as_localcaption]
-              end
+              end            
               item
                 caption = 'uzkme56are'
                 state = [as_localcaption]
-              end
+              end            
               item
                 caption = 'w435 ertrh46'
                 state = [as_localcaption]
-              end
+              end            
               item
                 caption = '4w5gbsgfdbsw'
                 state = [as_localcaption]
-              end
+              end            
               item
                 caption = 'aerga aerg345 '
                 state = [as_localcaption]
               end>
             caption = '&1111111111'
             state = [as_localcaption]
-          end
+          end        
           item
             caption = '&22222222'
             state = [as_localcaption]
-          end
+          end        
           item
             caption = '&333333333'
             state = [as_localcaption]
-          end
+          end        
           item
             caption = '&4444444444'
             state = [as_localcaption]
           end>
         caption = '&Aaaaaaa'
         state = [as_localcaption]
-      end
+      end    
       item
         caption = '&Bbbbbb'
         state = [as_localcaption]
-      end
+      end    
       item
         caption = '&Cccccccc'
         state = [as_localcaption]
-      end
+      end    
       item
         caption = '&Ddddd'
         state = [as_localcaption]

@@ -3,6 +3,8 @@ object mainfo: tmainfo
   bounds_y = 247
   bounds_cx = 403
   bounds_cy = 196
+  container.frame.localprops = []
+  container.frame.localprops1 = []
   container.bounds = (
     0
     0
@@ -12,39 +14,42 @@ object mainfo: tmainfo
   optionswindow = [wo_groupleader]
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   caption = 'MSEi18n Demo'
+  windowopacity = -Inf
   oneventloopstart = formonloaded
   moduleclassname = 'tmseform'
   object disp1: tstringdisp
     frame.caption = 'Text of resource string 1'
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
     taborder = 4
     bounds_x = 16
-    bounds_y = 71
+    bounds_y = 70
     bounds_cx = 372
-    bounds_cy = 37
-    reffontheight = 14
+    bounds_cy = 39
+    reffontheight = 15
   end
   object disp2: tstringdisp
     frame.caption = 'Text of resource string 2'
-    frame.dummy = 0
+    frame.localprops = []
+    frame.localprops1 = []
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
     taborder = 3
     bounds_x = 16
-    bounds_y = 127
+    bounds_y = 126
     bounds_cx = 372
-    bounds_cy = 37
-    reffontheight = 14
+    bounds_cy = 39
+    reffontheight = 15
   end
   object default: tbutton
     bounds_x = 16
@@ -56,7 +61,7 @@ object mainfo: tmainfo
     font.height = 18
     font.name = 'stf_default'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale, flp_height]
     onexecute = defaultexe
   end
   object deutsch: tbutton
@@ -70,7 +75,7 @@ object mainfo: tmainfo
     font.height = 14
     font.name = 'stf_default'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale, flp_height]
     onexecute = deutschexe
   end
   object francais: tbutton
@@ -84,7 +89,7 @@ object mainfo: tmainfo
     font.height = 14
     font.name = 'stf_default'
     font.xscale = 1
-    font.dummy = 0
+    font.localprops = [flp_xscale, flp_height]
     onexecute = francaisexe
   end
 end

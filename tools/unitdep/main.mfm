@@ -20,7 +20,7 @@ object mainfo: tmainfo
     frame.localprops = []
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
         color = -2147483646
         imagenr = 17
@@ -31,6 +31,7 @@ object mainfo: tmainfo
     bounds_x = 1
     bounds_y = 6
     bounds_cx = 344
+    bounds_cy = 21
     anchors = [an_left, an_top, an_right]
     statfile = tstatfile1
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -42,7 +43,7 @@ object mainfo: tmainfo
       )
     )
     controller.options = [fdo_checkexist, fdo_savelastdir]
-    reffontheight = 14
+    reffontheight = 15
   end
   object tbutton1: tbutton
     taborder = 1
@@ -65,16 +66,16 @@ object mainfo: tmainfo
     bounds_cy = 186
     anchors = [an_left, an_top, an_right, an_bottom]
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
-        height = 16
+        height = 17
         captions.count = 1
-        captions.items = <
+        captions.items = <        
           item
           end>
       end>
     datacols.count = 1
-    datacols.items = <
+    datacols.items = <    
       item[treeedit]
         width = 396
         options = [co_readonly, co_fill, co_savevalue, co_savestate, co_mousescrollrow]
@@ -82,8 +83,8 @@ object mainfo: tmainfo
         dataclass = ttreeitemeditlist
       end>
     datarowlinewidth = 0
-    datarowheight = 16
-    reffontheight = 14
+    datarowheight = 17
+    reffontheight = 15
     object treeedit: ttreeitemedit
       optionsskin = [osk_framebuttononly]
       frame.levelo = 0
@@ -95,10 +96,10 @@ object mainfo: tmainfo
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 396
-      bounds_cy = 16
+      bounds_cy = 17
       optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_locate]
       options = [teo_treecolnavig]
-      reffontheight = 14
+      reffontheight = 15
     end
   end
   object start: tdropdownlistedit
@@ -107,21 +108,21 @@ object mainfo: tmainfo
     frame.localprops1 = []
     frame.button.color = -2147483646
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
         color = -2147483646
       end>
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
     taborder = 3
     bounds_x = 1
-    bounds_y = 218
+    bounds_y = 216
     bounds_cx = 198
-    bounds_cy = 37
+    bounds_cy = 39
     anchors = [an_left, an_bottom]
     statfile = tstatfile1
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly]
@@ -129,10 +130,10 @@ object mainfo: tmainfo
     ifilink = dropdownunits
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
       end>
-    reffontheight = 14
+    reffontheight = 15
   end
   object dest: tdropdownlistedit
     frame.caption = 'Dest. Unit'
@@ -140,21 +141,21 @@ object mainfo: tmainfo
     frame.localprops1 = []
     frame.button.color = -2147483646
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
         color = -2147483646
       end>
     frame.outerframe = (
       0
-      17
+      18
       0
       0
     )
     taborder = 4
     bounds_x = 202
-    bounds_y = 218
+    bounds_y = 216
     bounds_cx = 201
-    bounds_cy = 37
+    bounds_cy = 39
     anchors = [an_left, an_right, an_bottom]
     statfile = tstatfile1
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_forcereturncheckvalue, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly]
@@ -162,10 +163,10 @@ object mainfo: tmainfo
     ifilink = dropdownunits
     dropdown.options = [deo_selectonly, deo_autodropdown, deo_keydropdown, deo_cliphint]
     dropdown.cols.count = 1
-    dropdown.cols.items = <
+    dropdown.cols.items = <    
       item
       end>
-    reffontheight = 14
+    reffontheight = 15
   end
   object pathdisp: tmemodialogedit
     frame.levelo = -1
@@ -173,20 +174,20 @@ object mainfo: tmainfo
     frame.localprops = [frl_levelo, frl_colorclient]
     frame.localprops1 = []
     frame.buttons.count = 1
-    frame.buttons.items = <
+    frame.buttons.items = <    
       item
         imagenr = 17
       end>
     frame.button.imagenr = 17
     taborder = 5
     bounds_x = 1
-    bounds_y = 259
+    bounds_y = 258
     bounds_cx = 401
-    bounds_cy = 18
+    bounds_cy = 19
     anchors = [an_left, an_right, an_bottom]
     optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_readonlydialog, oe1_savevalue, oe1_savestate, oe1_checkvalueafterstatread]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 15
   end
   object tsplitter1: tsplitter
     color = -1879048189
@@ -210,7 +211,7 @@ object mainfo: tmainfo
   object dropdownunits: tifidropdownlistlinkcomp
     controller.optionsvalue = [vco_nosync]
     controller.dropdown.cols.count = 1
-    controller.dropdown.cols.items = <
+    controller.dropdown.cols.items = <    
       item
       end>
     left = 32
