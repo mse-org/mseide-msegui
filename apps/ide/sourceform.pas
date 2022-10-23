@@ -573,9 +573,9 @@ begin
    for int1:= 0 to designer.modules.count - 1 do begin
     with designer.modules[int1]^ do begin
      modulenames[int1]:= filename;
-  {$if defined(linux) and defined(cpuarm)} {$else}
-     moduleoptions[int1] := longword(designformintf.moduleoptions);
-  {$endif}
+
+    if assigned(designformintf) then moduleoptions[int1] := integer(designformintf.moduleoptions);
+
      ar1[int1]:= designform.visible;
      ar2[int1]:= not hasmenuitem;
 //     moduledock[int1]:= encodemoduledock(dockinfo);
@@ -659,13 +659,11 @@ begin
       po1:= mainfo.openformfile(filepath(mstr1),bo1,false,false,
                                                          not ar2[int1],true);
 
- {$if defined(linux) and defined(cpuarm)} {$else}
            if (po1 <> nil) then
               with po1^ do
-                designformintf.moduleoptions := moduleoptionsty(longword
+              if assigned(designformintf) then designformintf.moduleoptions := moduleoptionsty(integer
                   (moduleoptions[int1])) * [mo_hidewidgets, mo_hidecomp] ;
-  {$endif}
-           
+
      except
       if checkprojectloadabort then begin
        break; //do not load more modules

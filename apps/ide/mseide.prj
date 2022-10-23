@@ -720,15 +720,15 @@ sigsettings=27
 defaultmake=1
 units=
  (
- a=0,8229,6,Pascal Units
+ a=0,8228,6,Pascal Units
  )
 cmodules=
  (
- a=0,8229,6,C Modules
+ a=0,8228,6,C Modules
  )
 files=
  (
- a=0,8229,6,Text Files
+ a=0,8228,6,Text Files
  )
 [breakpoints]
 on=2
@@ -738,8 +738,8 @@ path=2
  /home/fred/mseide-msegui/apps/ide/sourceform.pas
  /home/fred/mseide-msegui/apps/ide/sourceform.pas
 line=2
- 1620
- 1628
+ 1618
+ 1626
 address=2
  4688601
  4688688
@@ -771,8 +771,9 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=msefiledialog
+finddtext=arm
 findhistory=20
+ arm
  msefiledialog
  captiondir
  fontname
@@ -792,15 +793,14 @@ findhistory=20
  ac_stoperror
  fpstattofileinfo
  editprojectoptions
- onloaded
 findoptions=1
 editpos=6
- 69,4
- 0,-1073741823
+ 0,4
+ 64,658
  0,-1073741823
  0,278
  0,-1073741823
- 0,21
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -809,7 +809,7 @@ bookmarks4=0
 bookmarks5=0
 sourcefiles=6
  /home/fred/mseide-msegui/apps/ide/mseide.pas
- ${PROJECTDIR}/sourceform.pas
+ /home/fred/mseide-msegui/apps/ide/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
  ${PROJECTDIR}/main.pas
@@ -820,7 +820,7 @@ relpaths=6
  actionsmodule.pas
  ../../lib/common/designutils/msesettings.pas
  main.pas
- ../../lib/common/kernel/msegui.pas
+ lib/common/kernel/msegui.pas
 ismoduletexts=6
  0
  0
@@ -849,7 +849,14 @@ nomenumodules=4
  0
  0
 [sourcefo.tabwidget]
-tabsize=129
+order=6
+ 1
+ 0
+ 2
+ 3
+ 4
+ 5
+tabsize=135
 firsttab=0
 index=0
 [layout]
@@ -865,7 +872,7 @@ windowlayout=573
  filefilterindex=0
  filefilter=
  [mainfo.projectfiledia]
- filecolwidth=174
+ filecolwidth=0
  x=0
  y=0
  cx=0
@@ -893,8 +900,8 @@ windowlayout=573
  ny=0
  ncx=0
  ncy=0
- x=67
- y=97
+ x=66
+ y=48
  cx=1231
  cy=621
  rcx=0
@@ -1299,7 +1306,7 @@ windowlayout=573
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=componentstorefo
+ stackedunder=_mse_settingsfo_mse_
  parent=
  mdistate=0
  nx=0
@@ -1357,7 +1364,7 @@ windowlayout=573
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=_mse_settingsfo_mse_
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
@@ -1411,7 +1418,7 @@ windowlayout=573
  [_mse_settingsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=componentpalettefo
+ stackedunder=componentstorefo
  parent=
  mdistate=3
  nx=0
