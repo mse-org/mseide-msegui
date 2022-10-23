@@ -1510,10 +1510,10 @@ end;
 procedure tfiledialogfo.listviewonlistread(const sender: tobject);
 begin
  with listview do begin
-  dir.value:= directory;
+  dir.value:= tosysfilepath(directory,true);
 //  if fa_dir in finclude then begin
   if fdo_directory in self.dialogoptions then begin
-   filename.value:= directory;
+   filename.value:= tosysfilepath(directory,true);
   end;
  end;
 end;
@@ -1721,7 +1721,7 @@ end;
 procedure tfiledialogfo.homeaction(const sender: TObject);
 begin
  if tryreadlist(sys_getuserhomedir,true) then begin
-  dir.value:= listview.directory;
+  dir.value:= tosysfilepath(listview.directory,true); 
   course(listview.directory);
  end;
 end;

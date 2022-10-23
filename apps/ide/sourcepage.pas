@@ -338,7 +338,7 @@ end;
 procedure tsourcepage.setsyntaxdef(const value: filenamety);
 begin
  try
-  edit.setsyntaxdef(value);
+  edit.setsyntaxdef(tosysfilepath(value,true));
   updatestatvalues;
  except
   on e: exception do begin
