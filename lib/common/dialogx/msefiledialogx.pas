@@ -3051,6 +3051,97 @@ begin
       fo.places[0][x] := tmp + 'M:\';
       fo.places[1][x] := msestring('M:\');
     end;
+    if directoryexists('N:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'N:\';
+      fo.places[1][x] := msestring('N:\');
+    end;
+    if directoryexists('O:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'O:\';
+      fo.places[1][x] := msestring('O:\');
+    end;
+    if directoryexists('P:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'P:\';
+      fo.places[1][x] := msestring('P:\');
+    end;
+    if directoryexists('Q:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'Q:\';
+      fo.places[1][x] := msestring('Q:\');
+    end;
+    if directoryexists('R:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'R:\';
+      fo.places[1][x] := msestring('R:\');
+    end;
+    if directoryexists('S:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'S:\';
+      fo.places[1][x] := msestring('S:\');
+    end;
+    if directoryexists('T:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'T:\';
+      fo.places[1][x] := msestring('T:\');
+    end;
+    if directoryexists('U:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'U:\';
+      fo.places[1][x] := msestring('U:\');
+    end;
+    if directoryexists('V:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'V:\';
+      fo.places[1][x] := msestring('V:\');
+    end;
+     if directoryexists('W:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'W:\';
+      fo.places[1][x] := msestring('W:\');
+    end;
+     if directoryexists('X:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'X:\';
+      fo.places[1][x] := msestring('X:\');
+    end;
+     if directoryexists('Y:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'Y:\';
+      fo.places[1][x] := msestring('Y:\');
+    end;
+     if directoryexists('Z:\') then
+    begin
+      Inc(x);
+      fo.places.rowcount := x+1;
+      fo.places[0][x] := tmp + 'Z:\';
+      fo.places[1][x] := msestring('Z:\');
+    end;
     if directoryexists('C:\users') then
     begin
       Inc(x);

@@ -29,7 +29,7 @@ finddialog=8
  x=319
  y=205
  cx=371
- cy=93
+ cy=269
 options=114
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
@@ -37,33 +37,33 @@ options=114
   70
   70
  [projectoptionsfo.twidgetgrid3]
- propcolwidthref=786
+ propcolwidthref=902
  sortdescend0=0
  sortdescend1=0
  sortdescend2=0
  sortdescend3=0
- width4=105
+ width4=120
  sortdescend4=0
- width5=85
+ width5=98
  sortdescend5=0
- width6=54
+ width6=62
  sortdescend6=0
- width7=54
+ width7=62
  sortdescend7=0
- width8=83
+ width8=99
  sortdescend8=0
- width9=321
+ width9=368
  sortdescend9=0
  [projectoptionsfo.twidgetgrid4]
- propcolwidthref=621
+ propcolwidthref=737
  width0=96
  sortdescend0=0
  sortdescend1=0
  width2=73
  sortdescend2=0
- width3=297
+ width3=352
  sortdescend3=0
- width4=314
+ width4=375
  sortdescend4=0
  sorted=0
  col=-1073741823
@@ -73,10 +73,10 @@ options=114
  firsttab=0
  index=0
  [projectoptionsfo.fontaliasgrid]
- propcolwidthref=467
+ propcolwidthref=583
  width0=98
  sortdescend0=0
- width1=456
+ width1=572
  sortdescend1=0
  width2=50
  sortdescend2=0
@@ -94,7 +94,7 @@ options=114
  xprop=1
  yprop=0.24131627056673
  [projectoptionsfo.macrogrid]
- propcolwidthref=559
+ propcolwidthref=675
  sortdescend0=0
  sortdescend1=0
  sortdescend2=0
@@ -107,7 +107,7 @@ options=114
  sortdescend9=0
  width10=146
  sortdescend10=0
- width11=543
+ width11=659
  sortdescend11=0
  [projectoptionsfo.comment_1]
  value=
@@ -119,31 +119,31 @@ options=114
  firsttab=0
  index=2
  [projectoptionsfo.exceptionsgrid]
- propcolwidthref=747
+ propcolwidthref=863
  width0=77
  sortdescend0=0
- width1=741
+ width1=857
  sortdescend1=0
  [projectoptionsfo.ttabwidget1]
  firsttab=0
  index=0
  [projectoptionsfo.filefiltergrid]
- propcolwidthref=660
+ propcolwidthref=738
  width0=186
  sortdescend0=0
- width1=653
+ width1=731
  sortdescend1=0
  [projectoptionsfo.ttabwidget2]
  firsttab=0
  index=0
  [projectoptionsfo.setting_tab]
  firsttab=0
- index=0
+ index=2
  [projectoptionsfo]
  stackedunder=
  x=212
  y=56
- cx=837
+ cx=953
  cy=606
 settings=14
  [settingsfo.macrogrid]
@@ -713,27 +713,23 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=fdir
-findhistory=1
+finddtext=directoryexists('A:\')
+findhistory=2
+ directoryexists('A:\')
  fdir
 findoptions=1
-editpos=3
- 0,7
- 0,-1073741823
- 0,-1073741823
+editpos=2
+ 0,1
+ 0,0
 bookmarks0=0
 bookmarks1=0
-bookmarks2=0
-sourcefiles=3
+sourcefiles=2
  ${PROJECTDIR}/main.pas
- /D:/mse/packs/standard/git/mseide-msegui/lib/common/i18n/msei18nutils.pas
  ${PROJECTDIR}/i18ndemo.pas
-relpaths=3
+relpaths=2
  main.pas
- lib/common/i18n/msei18nutils.pas
  i18ndemo.pas
-ismoduletexts=3
- 0
+ismoduletexts=2
  0
  0
 modules=1
@@ -746,9 +742,9 @@ nomenumodules=1
  0
 [sourcefo.files_tab]
 firsttab=0
-index=0
+index=1
 [layout]
-windowlayout=545
+windowlayout=549
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1194,8 +1190,8 @@ windowlayout=545
  mdistate=0
  nx=0
  ny=0
- ncx=1221
- ncy=77
+ ncx=1219
+ ncy=62
  x=0
  y=0
  cx=1219
@@ -1209,11 +1205,11 @@ windowlayout=545
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/i18ndemo/main.pas
+ value=/home/fred/ideU/src/msefiledialogx.mfm
  history=3
-  /home/fred/mseide-msegui/apps/i18ndemo/main.pas
-  /home/fred/ideU/src/main.pas
-  ${PROJECTDIR}/main.pas
+  /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
+  /home/fred/mseide-msegui/apps/ide/sourceform.pas
+  /home/fred/strumpract/src/drums.pas
  [debuggerfo.project_options]
  value=B
  [debuggerfo.hints]
@@ -1235,8 +1231,12 @@ windowlayout=545
  rcx=0
  rcy=0
  [sourcefo.files_tab]
+ order=3
+  0
+  2
+  1
  firsttab=0
- index=0
+ index=2
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
