@@ -875,30 +875,35 @@ findhistory=20
  mse_dynpo
  uses
 findoptions=1
-editpos=5
- 0,46
+editpos=6
+ 0,37
+ 0,0
  0,-1073741823
- 0,-1073741823
- 73,43
- 0,-1073741823
+ 0,56
+ 0,35
+ 0,0
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
-sourcefiles=5
+bookmarks5=0
+sourcefiles=6
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/main.pas
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
-relpaths=5
+ ${PROJECTDIR}/mseide.pas
+relpaths=6
  mseide.pas
  sourceform.pas
  actionsmodule.pas
  main.pas
- lib/common/kernel/msegui.pas
-ismoduletexts=5
+ ../lib/common/kernel/msegui.pas
+ mseide.pas
+ismoduletexts=6
+ 0
  0
  0
  0
@@ -921,10 +926,17 @@ nomenumodules=3
  0
  0
 [sourcefo.files_tab]
+order=6
+ 0
+ 1
+ 2
+ 3
+ 5
+ 4
 firsttab=0
-index=3
+index=1
 [layout]
-windowlayout=540
+windowlayout=555
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -938,8 +950,8 @@ windowlayout=540
  ny=0
  ncx=0
  ncy=0
- x=69
- y=29
+ x=104
+ y=83
  cx=1231
  cy=621
  rcx=0
@@ -1055,7 +1067,7 @@ windowlayout=540
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=mainfo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=3
  nx=0
@@ -1325,7 +1337,7 @@ windowlayout=540
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=objectinspectorfo
+ stackedunder=confdebuggerfo
  parent=
  mdistate=0
  nx=0
@@ -1382,9 +1394,17 @@ windowlayout=540
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/main.pas
- history=1
-  
+ value=/home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
+ history=9
+  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
+  /home/fred/mseide-msegui/apps/ide/sourcepage.pas
+  /home/fred/mseide-msegui/lib/common/dialogs/msedirtreesub_mfm.pas
+  /home/fred/mseide-msegui/apps/ide/make.pas
+  /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
+  /home/fred/ideU/src/msefiledialogx.pas
+  /home/fred/mseide-msegui/apps/ide/sourceform.pas
+  /home/fred/strumpract/src/drums.pas
  [debuggerfo.project_options]
  value=M
  [debuggerfo.hints]
@@ -1406,8 +1426,15 @@ windowlayout=540
  rcx=0
  rcy=0
  [sourcefo.files_tab]
+ order=6
+  0
+  1
+  2
+  3
+  5
+  4
  firsttab=0
- index=3
+ index=1
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]

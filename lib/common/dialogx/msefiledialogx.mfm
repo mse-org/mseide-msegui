@@ -1,8 +1,8 @@
 object filedialogxfo: Tfiledialogxfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
-  bounds_x = 656
-  bounds_y = 61
+  bounds_x = 545
+  bounds_y = 112
   bounds_cx = 608
   bounds_cy = 484
   bounds_cxmin = 30
@@ -191,6 +191,7 @@ object filedialogxfo: Tfiledialogxfo
     onchange = onchangdir
     dropdown.options = [deo_selectonly, deo_keydropdown]
     onsetvalue = dironsetvalue
+    onafterclosedropdown = afclosedropdir
     reffontheight = 15
   end
   object up: tstockglyphbutton
