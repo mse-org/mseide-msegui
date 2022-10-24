@@ -202,7 +202,7 @@ options=114
  index=1
  [projectoptionsfo.setting_tab]
  firsttab=0
- index=0
+ index=2
  [projectoptionsfo]
  stackedunder=
  x=255
@@ -441,7 +441,7 @@ stripmessageesc=0
 copymessages=0
 closemessages=0
 enablepurpose=0
-enablesource=1
+enablesource=0
 checkmethods=1
 colorerror=-1610612717
 colorwarning=-1610612712
@@ -535,7 +535,7 @@ makeoptionson=10
  255
  3
  255
- 191
+ 255
  255
  252
  255
@@ -543,13 +543,13 @@ makeoptionson=10
  0
  0
 compilerusedon=29
- 3895
- 0
- 8
+ 69631
  0
  0
- 64
- 128
+ 0
+ 0
+ 0
+ 0
  0
  0
  0
@@ -573,16 +573,16 @@ compilerusedon=29
  0
  0
 debuggerusedon=6
- 4095
+ 69631
  0
  0
  0
  0
  0
 exeusedon=15
- 3903
+ 69631
  0
- 192
+ 0
  0
  0
  0
@@ -612,7 +612,7 @@ project_creator=
 project_copyright=
 project_license=
 project_time=
-project_date=23:58:40 23/10/22
+project_date=
 project_comment=
 aftcommandon=0
 unitdirson=5
@@ -875,26 +875,31 @@ findhistory=20
  mse_dynpo
  uses
 findoptions=1
-editpos=4
+editpos=5
  0,46
  0,-1073741823
  0,-1073741823
- 0,885
+ 73,43
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-sourcefiles=4
+bookmarks4=0
+sourcefiles=5
  ${PROJECTDIR}/mseide.pas
  ${PROJECTDIR}/sourceform.pas
  ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/main.pas
-relpaths=4
+ /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+relpaths=5
  mseide.pas
  sourceform.pas
  actionsmodule.pas
  main.pas
-ismoduletexts=4
+ lib/common/kernel/msegui.pas
+ismoduletexts=5
+ 0
  0
  0
  0
@@ -917,9 +922,9 @@ nomenumodules=3
  0
 [sourcefo.files_tab]
 firsttab=0
-index=0
+index=3
 [layout]
-windowlayout=548
+windowlayout=540
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1220,7 +1225,7 @@ windowlayout=548
  rcx=1129
  rcy=679
  [watchfo.grid]
- propcolwidthref=121
+ propcolwidthref=136
  values0=0
  values0_ci=-1
  sortdescend0=0
@@ -1359,15 +1364,15 @@ windowlayout=548
  useroptions=268582019
  parent=debuggerfo.container
  visible=1
- mdistate=0
+ mdistate=3
  nx=0
  ny=0
- ncx=1219
- ncy=61
+ ncx=0
+ ncy=0
  x=0
- y=0
+ y=53
  cx=1219
- cy=61
+ cy=0
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1377,21 +1382,13 @@ windowlayout=548
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/mseide.pas
- history=9
-  /home/fred/mseide-msegui/apps/ide/mseide.pas
-  /home/fred/mseide-msegui/lib/common/designutils/msesettings.pas
-  /home/fred/mseide-msegui/apps/ide/sourcepage.pas
-  /home/fred/mseide-msegui/lib/common/dialogs/msedirtreesub_mfm.pas
-  /home/fred/mseide-msegui/apps/ide/make.pas
-  /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
-  /home/fred/ideU/src/msefiledialogx.pas
-  /home/fred/mseide-msegui/apps/ide/sourceform.pas
-  /home/fred/strumpract/src/drums.pas
+ value=/home/fred/mseide-msegui/apps/ide/main.pas
+ history=1
+  
  [debuggerfo.project_options]
- value=1
+ value=M
  [debuggerfo.hints]
- value=0
+ value=1
  [sourcefo]
  splitdir=0
  useroptions=16489
@@ -1410,7 +1407,7 @@ windowlayout=548
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=0
+ index=3
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
