@@ -341,6 +341,7 @@ object filedialogfo: Tfiledialogfo
       textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       dropdown.options = [deo_selectonly, deo_keydropdown]
       onsetvalue = dironsetvalue
+      onafterclosedropdown = afterclosedrop
       reffontheight = 15
     end
   end

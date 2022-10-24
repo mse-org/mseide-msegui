@@ -525,6 +525,7 @@ type
    procedure backexe(const sender: TObject);
    procedure forwardexe(const sender: TObject);
    procedure buttonshowhint(const sender: TObject; var ainfo: hintinfoty);
+   procedure afterclosedrop(const sender: TObject);
   private
    fselectednames: filenamearty;
    finit: boolean;
@@ -1500,9 +1501,9 @@ procedure tfiledialogfo.dironsetvalue(const sender: TObject;
   var avalue: mseString; var accept: Boolean);
 begin
 //
- accept:= tryreadlist(avalue,true);
+ accept:= tryreadlist(tosysfilepath(avalue,true),true);
  if accept then begin
-  course(avalue);
+  course(tosysfilepath(avalue,true));
  end;
 // listview.directory:= avalue;
 end;
@@ -1789,6 +1790,11 @@ if length(lang_stockcaption) > ord(sc_confirmation) then
                                      '('+encodeshortcutname(shortcut)+')';
 {$endif}
  end;
+end;
+
+procedure tfiledialogfo.afterclosedrop(const sender: TObject);
+begin
+dir.value:= tosysfilepath(dir.value,true);
 end;
 
 { tfiledialogcontroller }
