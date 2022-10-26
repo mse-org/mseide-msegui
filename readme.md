@@ -58,6 +58,9 @@ Package maintainers may delete the files "apps/ide/COPYING.GPL",
 7. In 'Project'-'Open' select '/home/myself/mseide-msegui/apps/demo/demo.prj'.
 8. 'Target'-'Continue'.
 
+Video of installation + load/run demo:
+https://user-images.githubusercontent.com/3421249/198116838-e3eaa3ca-0150-4df5-8c9f-b23bd945f5ba.mp4
+
 If you get the error "/usr/bin/ld: cannot find -lX11" install the
 libX11-devel or libX11-dev package or make a symbolic link
 /usr/lib/libX11.so -> /usr/lib/libX11.so.6
