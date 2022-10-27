@@ -2,7 +2,8 @@ MSEide+MSEgui changes version history
 **********************************************
 Version 5.6.10
 2022-10-24
-Mainly fixes of version 5.6.6.
+Fixes of version 5.6.6.
+Transparent background, rounded form.
 
 Version 5.6.8
 2022-04-09
