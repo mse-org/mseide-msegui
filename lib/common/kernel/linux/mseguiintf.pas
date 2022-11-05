@@ -2083,7 +2083,7 @@ var
 
  var
   parent,root: winidty;
-  ca1: longword;
+  ca1: Plongword;
   children: pwinid;
   int1: integer;
 //  id1: winidty;
@@ -2139,7 +2139,7 @@ end;
 function getwindowstack(const id: winidty): winidarty;
 var
  parent,root: winidty;
- ca1: longword;
+ ca1: Plongword;
  children: pwinid;
  count: integer;
 begin
@@ -2739,7 +2739,7 @@ end;
 
 function gui_getpointerpos: pointty;
 var
- ca1: longword;
+ ca1: Plongword;
 begin
  gdi_lock;
  xquerypointer(appdisp,rootid,@ca1,@ca1,@result.x,@result.y,@ca1,@ca1,@ca1);
@@ -3143,11 +3143,11 @@ end;
 
 function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
 var
-{$ifdef CPUAARCH64}
- ca1: culonglong;
- {$else} 
-  ca1: longword;
-  {$endif}  
+ // {$ifdef CPUAARCH64}
+ // ca1: culonglong;
+ // {$else} 
+  ca1: Plongword;
+ // {$endif}  
 begin
  gdi_lock;
 
@@ -3837,7 +3837,7 @@ var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwinid;
  count: integer;
- ca1: longword;
+ ca1: Plongword;
  id1: winidty;
 
 begin
@@ -3910,7 +3910,7 @@ var
  rootpath: longwordarty;
  ax,ay: integer;
  width,height,border: longword;
- ca1: longword;
+ ca1: Plongword;
  offset: pointty;
 begin
 {$ifdef mse_debuggdisync}
@@ -4689,7 +4689,7 @@ var
  root,parent: winidty;//{$ifdef FPC}dword{$else}xlib.twindow{$endif};
  children: pwinid;
 // count: integer;
- ca1: longword;
+ ca1: Plongword;
 begin
  gdi_lock;
  result:= 0;
