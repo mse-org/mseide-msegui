@@ -4636,64 +4636,6 @@ begin
     info.caption:= fgrip_hint;
    end;
   end;
-{$ifdef mse_dynpo}
-  dbr_close: begin
-  if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_close)] else
-      info.caption:='Close';
-  end;
-  dbr_maximize: begin
-   if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_maximize)] else
-      info.caption:='Maximize';
-  end;
-  dbr_normalize: begin
-   if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_normalize)] else
-      info.caption:='Normalize';
-
-  end;
-  dbr_minimize: begin
-    if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_minimize)] else
-      info.caption:='Minimize';
-  end;
-  dbr_fixsize: begin
-     if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_fix_size)] else
-      info.caption:='Fixed size';
-
-  end;
-  dbr_float: begin
-       if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_float)] else
-      info.caption:='Float';
-
-  end;
-  dbr_top: begin
-     if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_stay_on_top)] else
-      info.caption:='Stay on top';
-
-  end;
-  dbr_background: begin
-       if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_stay_in_background)] else
-      info.caption:='Stay in background';
-
-  end;
-  dbr_lock: begin
-         if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_lock_children)] else
-      info.caption:='Lock children';
-
-  end;
-  dbr_nolock: begin
-         if length(lang_stockcaption) > ord(sc_All) then
-   info.caption:= lang_stockcaption[ord(sc_no_lock)] else
-      info.caption:='No lock';
- 
-{$else}
   dbr_close: begin
    info.caption:= sc(sc_close);
   end;
@@ -4723,8 +4665,6 @@ begin
   end;
   dbr_nolock: begin
    info.caption:= sc(sc_no_lock);
-{$endif}
-
   end;
   else; // Added to make compiler happy
  end;

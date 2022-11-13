@@ -27,7 +27,7 @@ interface
 {$endif}
 
 uses
- baseunix,
+baseunix,
  msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,msecwstring,{$endif}msetypes,
  mselibc,msectypes,
  msestrings,msestream;
@@ -599,12 +599,12 @@ begin
  result:= sye_ok;
 end;
 
-const
- openmodes: array[fileopenmodety] of longword =
-//    fm_none,fm_read, fm_write,fm_readwrite,fm_create,
-     (0,      o_rdonly,o_wronly,o_rdwr,      o_rdwr or o_creat or o_trunc,
-//    fm_append
-      o_rdwr or o_creat {or o_trunc});
+// const
+//  openmodes: array[fileopenmodety] of longword =
+// //    fm_none,fm_read, fm_write,fm_readwrite,fm_create,
+//      (0,      o_rdonly,o_wronly,o_rdwr,      o_rdwr or o_creat or o_trunc,
+// //    fm_append
+//       o_rdwr or o_creat {or o_trunc});
 
 function getfilerights(const rights: filerightsty): longword;
 const

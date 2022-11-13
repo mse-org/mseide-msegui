@@ -14,11 +14,16 @@ type
              env_filename);
 const
 {
+UNDEFINED ENTRIES FOR env_globstatfile,env_storeglobalmacros,env_help
+
  sysenvvalues: array[envvarty] of argumentdefty =
-  ((kind: ak_pararg; name: '-macrodef'; anames: nil; flags: []; initvalue: ''),
+  (// missing: env_globstatfile
+   (kind: ak_pararg; name: '-macrodef'; anames: nil; flags: []; initvalue: ''),
+   // missing: env_storeglobalmacros
    (kind: ak_pararg; name: '-macrogroup'; anames: nil; flags: []; initvalue: ''),
    (kind: ak_par; name: 'np'; anames: nil; flags: []; initvalue: ''), //no project
    (kind: ak_par; name: 'ns'; anames: nil; flags: []; initvalue: ''), //no skin
+   // missing: env_help
    (kind: ak_envvar; name: 'FPCDIR'; anames: nil; flags: []; initvalue: ''),
    (kind: ak_envvar; name: 'FPCLIBDIR'; anames: nil; flags: []; initvalue: ''),
    (kind: ak_envvar; name: 'MSEDIR'; anames: nil; flags: []; initvalue: ''),

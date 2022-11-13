@@ -1754,6 +1754,7 @@ end;
 
 function gui_setwindowstate(id: winidty; size: windowsizety;
                                         visible: boolean): guierrorty;
+
  procedure fullscreen;
  begin
   if size = wsi_fullscreenvirt then begin
@@ -1761,7 +1762,7 @@ function gui_setwindowstate(id: winidty; size: windowsizety;
   end
   else begin
    gui_reposwindow(id,gui_getscreenrect(id));
-  end
+  end;
  end;
 
 begin
@@ -2086,7 +2087,6 @@ var
   ca1: Plongword;
   children: pwinid;
   int1: integer;
-//  id1: winidty;
   ar1: atomarty;
  begin
   children:= nil;
@@ -3143,11 +3143,8 @@ end;
 
 function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
 var
- // {$ifdef CPUAARCH64}
- // ca1: culonglong;
- // {$else} 
   ca1: Plongword;
- // {$endif}  
+ 
 begin
  gdi_lock;
 
@@ -3272,6 +3269,7 @@ begin
 
 // xseticfocus(getic(id));
  waitfordecoration(id);
+
  if netatoms[net_active_window] <> 0 then begin
   sendnetrootcardinalmessage(netatoms[net_active_window],id,
                                            [1,lasteventtime,lastfocuswindow]);
@@ -3288,6 +3286,7 @@ function gui_setimefocus(var awindow: windowty): guierrorty;
 begin
  gdi_lock;
  result:= gue_ok;
+
  with awindow,x11windowty(platformdata).d do begin
   if ic <> nil then begin
    xseticvalues(ic,pchar(xnfocuswindow),id,nil);
@@ -4052,6 +4051,7 @@ net_wm_window_type_popup_menu,net_wm_window_type_tooltip,
 net_wm_window_type_notification,net_wm_window_type_combo,net_wm_window_type_dnd
  );
 
+
 function gui_createwindow(const rect: rectty;
      var options: internalwindowoptionsty; var awindow: windowty): guierrorty;
 var
@@ -4062,7 +4062,7 @@ var
  icmask: longword;
  colormap1: tcolormap;
  opt1: windowtypeoptionty;
- valall: ptruint;
+// valall: ptruint;
  
  // shape from Xext
  xgcv :TXGCValues;
@@ -4125,10 +4125,23 @@ var
    width,height,0,
     depth,  copyfromparent,visual,
       valuemask,@attributes);
-      
+
+//////////////////////////////////////////////
+ if (wo_onalldesktops in options.options) then
+ begin
+//  options.options := options.options + [wo_dock];
+
+  setlongproperty (id, netatoms [net_wm_desktop], $FFFFFFFF);
+
+//  valall := $FFFFFFFF;
+//  xchangeproperty(appdisp,id,netatoms[NET_WM_DESKTOP],cardinalatom,32,propmodereplace,@valall,1);
+ end;
+
   // added thanks to Alexander
-  if (wo_alwaysontop in options.options)  then
-    setnetatomarrayitem(id,net_wm_state,net_wm_alwaystofront);
+  if (wo_alwaysontop in options.options)
+  then setnetatomarrayitem (id,net_wm_state, net_wm_alwaystofront)
+  else resetnetatomarrayitem (id,net_wm_state, net_wm_alwaystofront);
+//////////////////////////////////////////////
 
   if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)
   or (wo_transparentbackground  in options.options) or (wo_transparentbackgroundround  in options.options)
@@ -4281,13 +4294,6 @@ XSync(appdisp, False);
 
 //   fin shape  
 end;
-
- if (wo_onalldesktops in options.options) then
- begin
-  options.options := options.options + [wo_dock];
-  valall := $FFFFFFFF;
-  xchangeproperty(appdisp,id,netatoms[NET_WM_DESKTOP],cardinalatom,32,propmodereplace,@valall,1);
- end;
 
    if colormap <> 0 then begin
     xfreecolormap(appdisp,colormap);

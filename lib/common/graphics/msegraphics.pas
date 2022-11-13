@@ -1473,7 +1473,8 @@ var
  
 procedure setchildbounds(const sender: TObject);
 var
-x, y : integer;
+// x, y : integer;  // Note: Local variable "y" not used
+x : integer;
 begin
    
 setlength(mse_formchild,0);

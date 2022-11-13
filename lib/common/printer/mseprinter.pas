@@ -1801,20 +1801,8 @@ end;
 constructor tpageorientationselector.create(aowner: tcomponent);
 begin
  inherited;
-{$ifdef mse_dynpo}
-if length(lang_stockcaption) > ord(sc_All) then
-begin
- addrow([lang_stockcaption[ord(sc_portrait)]]);
- addrow([lang_stockcaption[ord(sc_landscape)]]);
-end else 
-begin
- addrow(['Portrait']);
- addrow(['Landscape']);
-end;
-{$else}
  addrow([stockcaptions(sc_portrait)]);
  addrow([stockcaptions(sc_landscape)]);
-{$endif}
 end;
 
 function tpageorientationselector.getvalue: pageorientationty;
@@ -1840,22 +1828,8 @@ procedure tpageorientationselector.getdropdowninfo(var aenums: integerarty;
                                                 const names: tdropdowndatacols);
 begin
  names.clear;
- {$ifdef mse_dynpo}
- if length(lang_stockcaption) > ord(sc_All) then
- begin
- names.addrow([lang_stockcaption[ord(sc_portrait)]]);
- names.addrow([lang_stockcaption[ord(sc_landscape)]]);
- end else
- begin
- names.addrow(['Portrait']);
- names.addrow(['Landscape']);
- end ;
-{$else}
  names.addrow([stockcaptions(sc_portrait)]);
  names.addrow([stockcaptions(sc_landscape)]);
- {$endif}
- 
- 
 end;
 
 procedure tpageorientationselector.dochange;

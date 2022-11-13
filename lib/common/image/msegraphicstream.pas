@@ -167,13 +167,7 @@ begin
  end;
  orderarray(order,ar1);
  setlength(result,1);
-{$ifdef mse_dynpo}
-if length(lang_stockcaption) > ord(sc_All) then
- result[0]:= lang_stockcaption[ord(sc_All)] else
-  result[0]:= 'All';
-{$else}
  result[0]:= sc(sc_All);
-{$endif}
  stackarray(ar1,result);
 end;
 
@@ -329,40 +323,13 @@ begin
   end;
  end;
  if not atry then begin
- 
- {$ifdef mse_dynpo}
- if length(lang_stockcaption) > ord(sc_graphic_format_not_supported)
- then begin
-  if not found then begin
-  formaterror(
-      ansistring(lang_stockcaption[ord(sc_graphic_format_not_supported)]),
-                                                              aformatlabel);
-  end
-  else begin
-   formaterror(ansistring(lang_stockcaption[ord(sc_graphic_format_error)]),
-                                                                aformatlabel);
- end; end else
- begin
-  if not found then begin
-  formaterror('Graphic format not supported',
-                                                              aformatlabel);
-  end
-  else begin
-   formaterror('Graphic format error',
-                                                                aformatlabel);
- end;
- 
-  end;                                                              
-{$else}
   if not found then begin
   formaterror(
       ansistring(sc(sc_graphic_format_not_supported)), aformatlabel);
   end
   else begin
    formaterror(ansistring(sc(sc_graphic_format_error)), aformatlabel);
-  end;  
-{$endif}
-  
+  end;
  end;
 end;
 
@@ -383,18 +350,8 @@ begin
   end;
  end;
  if int2 < 0 then begin
- 
-{$ifdef mse_dynpo}
- if length(lang_stockcaption) > ord(sc_graphic_format_not_supported) then
   formaterror(
-        ansistring(lang_stockcaption[ord(sc_graphic_format_not_supported)]), aformatlabel)
-  else
-    formaterror('Graphic format not_supported', aformatlabel);      
-{$else}
- formaterror(
-        ansistring(sc(sc_graphic_format_not_supported)),  aformatlabel);
-{$endif}
-                                                             
+        ansistring(sc(sc_graphic_format_not_supported)), aformatlabel);
  end;
  with formats[int2] do begin
   writeproc(dest,asource,aformatlabel,params);

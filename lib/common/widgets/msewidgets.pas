@@ -1696,37 +1696,7 @@ function confirmsavechangedfile(const filename: filenamety;
          out modalresult: modalresultty; multiple: boolean = false): boolean;
 begin
 
-  
- {$ifdef mse_dynpo}
-   if length(lang_stockcaption) > ord(sc_All) then
- begin  
- if multiple then begin
- modalresult:= showmessage(lang_stockcaption[ord(sc_file)] +' '+filename+' '+
-                  lang_stockcaption[ord(sc_is_modified_save)],lang_stockcaption[ord(sc_confirmation)],
-                   [mr_yes,mr_all,mr_no,mr_noall,mr_cancel],mr_yes);
-  end
-  else begin
-   modalresult:= showmessage(lang_stockcaption[ord(sc_file)]+' '+filename+' '+
-                  lang_stockcaption[ord(sc_is_modified_save)],lang_stockcaption[ord(sc_confirmation)],
-                   [mr_yes,mr_no,mr_cancel],mr_yes);
-    end;
-  end else
- begin  
- if multiple then begin
- modalresult:= showmessage('File '+filename+' is modified. Save ?',
- 'Confirmation',
-                   [mr_yes,mr_all,mr_no,mr_noall,mr_cancel],mr_yes);
-  end
-  else begin
-   modalresult:= showmessage('File '+filename+' is modified. Save ?',
-   'Confirmation',
-                   [mr_yes,mr_no,mr_cancel],mr_yes);
-    end;
-  end;
-  
-    
-{$else}
-if multiple then begin
+  if multiple then begin
   modalresult:= showmessage(sc(sc_file) +' '+filename+' '+
                   sc(sc_is_modified_save),sc(sc_confirmation),
                    [mr_yes,mr_all,mr_no,mr_noall,mr_cancel],mr_yes);
@@ -1736,8 +1706,6 @@ if multiple then begin
                   sc(sc_is_modified_save),sc(sc_confirmation),
                    [mr_yes,mr_no,mr_cancel],mr_yes);
   end;
-{$endif}
-
 
 {
  if multiple then begin
@@ -1976,17 +1944,8 @@ begin
     buttonheight:= acanvas.font.glyphheight + 6;
     buttonwidth:= 50;
     for int1:= 0 to ord(high(buttons)) do begin
-         
-{$ifdef mse_dynpo}
-   if length(lang_stockcaption) > ord(sc_All) then
-   int2:= acanvas.getstringwidth(
-                 lang_modalresultnoshortcut[Ord(buttons[int1])]) + 10
-   else
-   int2:= acanvas.getstringwidth('OK All') + 10;              
-{$else}
-int2:= acanvas.getstringwidth(
+         int2:= acanvas.getstringwidth(
                stockobjects.modalresulttextnoshortcut[buttons[int1]]) + 10;
-{$endif}
     if int2 > buttonwidth then begin
       buttonwidth:= int2;
      end;
@@ -2065,29 +2024,11 @@ int2:= acanvas.getstringwidth(
       widgetrect:= rect1;
       parentwidget:= widget;
       if buttons[int1] in noshortcut then begin
-       
-{$ifdef mse_dynpo}
-   if length(lang_stockcaption) > ord(sc_All) then
-   caption:=
-                 lang_modalresultnoshortcut[Ord(buttons[int1])]
-   else
-    caption:=   'OK';              
-{$else}
-caption:=
+       caption:=
                stockobjects.modalresulttextnoshortcut[buttons[int1]];
-{$endif}
-
      end
       else begin
-      
-{$ifdef mse_dynpo} 
- if length(lang_stockcaption) > ord(sc_All) then
-  caption:=      lang_modalresult[Ord(buttons[int1])] else
-  caption := 'OK';
-{$else}
-     caption :=  stockobjects.modalresulttext[buttons[int1]];
-{$endif}
-
+       caption:=  stockobjects.modalresulttext[buttons[int1]];
       end;
       if int1 <= high(actions) then begin
        onexecute:= actions[int1];
@@ -2271,13 +2212,7 @@ procedure showerror(const atext: msestring; caption: msestring = 'ERROR';
                     const async: boolean = false);
 begin
  if caption = 'ERROR' then begin
-{$ifdef mse_dynpo}
- if length(lang_stockcaption) > ord(sc_All) then
-  caption:= uppercase(lang_stockcaption[ord(sc_error)]) else
-  caption:= 'ERROR' ;  
-{$else}
  caption:= uppercase(sc(sc_error));
-{$endif}
  end;
  if async or not application.ismainthread then begin
   tshowerrormessageevent.create(atext,caption,minwidth,exttext);
@@ -2321,32 +2256,15 @@ function askconfirmation(const atext: msestring;
                     const minwidth: integer = 0): boolean;
                   //true if yes pressed
 begin
-{$ifdef mse_dynpo}
-if length(lang_stockcaption) > ord(sc_All) then
- 
-result:= showmessage(atext,lang_stockcaption[ord(sc_confirmation)],[mr_yes,mr_no],defaultbutton,[],
-                         minwidth) = mr_yes else
-result:= showmessage(atext,'Confirmation',[mr_yes,mr_no],defaultbutton,[],
-                         minwidth) = mr_yes;                         
-{$else}
 result:= showmessage(atext,sc(sc_confirmation),[mr_yes,mr_no],defaultbutton,[],
                          minwidth) = mr_yes;
-{$endif}
 end;
 
 function askconfirmationcancel(const atext: msestring;
                      const defaultbutton: modalresultty = mr_yes;
                      const minwidth: integer = 0): modalresultty;
 begin
-{$ifdef mse_dynpo}
-if length(lang_stockcaption) > ord(sc_All) then
- result:= askyesnocancel(atext,lang_stockcaption[ord(sc_confirmation)],
- defaultbutton,minwidth) else
- result:= askyesnocancel(atext,'Confirmation',
- defaultbutton,minwidth)
-{$else}
  result:= askyesnocancel(atext,sc(sc_confirmation),defaultbutton,minwidth);
-{$endif}
 end;
 
 { tframefont}
@@ -6244,7 +6162,7 @@ begin
   hintfont.height := messagefontheight;
   hintfont.name := ansistring(messagefontname);
 
-//  drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],
+// drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],
 //                                      stockobjects.fonts[stf_hint]);
 
   drawtext(canvas,fcaption,innerclientrect,[tf_wordbreak],hintfont);

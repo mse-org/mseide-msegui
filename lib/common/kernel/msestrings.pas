@@ -1447,7 +1447,7 @@ end;
      pointer(temp):=nil;
     end;
 
-{
+(*
 procedure stringaddref(var str: msestring);
 {$ifndef msestringsarenotrefcounted}
 var
@@ -1466,12 +1466,12 @@ begin
 {$endif}
  end;
 end;
-}
+*)
 
 procedure stringaddref(var str: msestring);
 var
 {$ifndef msestringsarenotrefcounted}
- po1: psizeint;
+// po1: psizeint;  // Note: Local variable "po1" not used
 {$endif}
  temp: msestring;
 begin

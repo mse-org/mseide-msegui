@@ -718,12 +718,7 @@ const
         sc_row_insert,sc_row_append,sc_row_delete,
         sc_copy_cells,sc_paste_cells,sc_undo,sc_redo);
 begin
-{$ifdef mse_dynpo}
-if length(lang_stockcaption) > ord(sc_All) then
- result:= lang_stockcaption[ord(list[aitem])];
-{$else}
  result:= sc(list[aitem]);
-{$endif}
 end;
 
 function getassistiveshortcutdispname(
@@ -734,12 +729,7 @@ const
         sc_cancelspeech,
         sc_slower,sc_faster,sc_volumedown,sc_volumeup);
 begin
-{$ifdef mse_dynpo}
-if length(lang_stockcaption) > ord(sc_All) then
- result:= lang_stockcaption[ord(list[aitem])];
-{$else}
  result:= sc(list[aitem]);
-{$endif}
 end;
 
 function isnormalkey(const akey: shortcutty): boolean;

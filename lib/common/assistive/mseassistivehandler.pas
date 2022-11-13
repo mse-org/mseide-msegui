@@ -1198,11 +1198,7 @@ end;
 procedure tassistivehandler.speaktext(const atext: stockcaptionty;
                const avoice: int32 = 0; const nocut: boolean = false);
 begin
-{$ifdef mse_dynpo}
- speaktext(lang_stockcaption[ord(atext)],avoice,nocut);
-{$else}
  speaktext(stockobjects.captions[atext],avoice,nocut);
-{$endif} 
 end;
 
 procedure tassistivehandler.speaktext1(const atext: stockcaptionty;
@@ -1288,21 +1284,6 @@ begin
  s2:= '';
  if asf_button in fla1 then begin
   if asf_disabled in fla1 then begin
-{$ifdef mse_dynpo}
-   s2:= lang_stockcaption[ord(sc_disabledbutton)] + ' ';
-  end
-  else begin
-   s2:= lang_stockcaption[ord(sc_button)] + ' ';
-  end;
- end;
- if asf_toplevel in fla1 then begin
-  if s2 <> '' then begin
-   s2:= lang_stockcaption[ord(sc_area)]+' '+s2;
-  end
-  else begin
-   s2:= lang_stockcaption[ord(sc_area)];
-  end;
-{$else}
    s2:= stockobjects.captions[sc_disabledbutton] + ' ';
   end
   else begin
@@ -1316,9 +1297,6 @@ begin
   else begin
    s2:= sc(sc_area);
   end;
-{$endif}   
-  
-  
  end;
 // speaktext(s1,fvoicefixed);
  s1:= '';
@@ -1707,20 +1685,11 @@ begin
      if aso_textfirst in foptions then begin
       speaktext(gettexttext(sender),i1);
       speaktext(s1,fvoicecaption);
- 
-{$ifdef mse_dynpo}
-      speaktext(lang_stockcaption[ord(sc_areaactivated)],fvoicefixed);
-     end
-     else begin
-      speaktext(s1,fvoicecaption);
-      speaktext(lang_stockcaption[ord(sc_areaactivated)],fvoicefixed);
-{$else}
       speaktext(sc(sc_areaactivated),fvoicefixed);
      end
      else begin
       speaktext(s1,fvoicecaption);
       speaktext(sc(sc_areaactivated),fvoicefixed);
-{$endif}      
       speaktext(gettexttext(sender),i1);
      end;
     end;

@@ -268,6 +268,7 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
     setlength(dest,length(dest)-outleft);
    {$ifdef mse_fpc_3}
    {$ifndef freebsd}
+if length (dest) > 0 then
     pansirec(pointer(dest)-sizeof(tansirec))^.codepage:= cp;
    {$endif} 
    {$endif}

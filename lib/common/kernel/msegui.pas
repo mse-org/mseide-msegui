@@ -21091,22 +21091,9 @@ begin
   end
   else begin
    mstr1:= leadingtext + e.Message;
-{$ifdef mse_dynpo}
-if length(lang_stockcaption) > ord(sc_exception) then
-   showmessage(mstr1,lang_stockcaption[ord(sc_exception)]  {$ifdef FPC},0,lineend+
-               getexceptiontext(exceptobject,
-                             exceptaddr,exceptframecount,exceptframes){$endif})
-  else
-      showmessage(mstr1,'Exception'  {$ifdef FPC},0,lineend+
-               getexceptiontext(exceptobject,
-                             exceptaddr,exceptframecount,exceptframes){$endif});
-
-{$else}
    showmessage(mstr1,sc(sc_exception) {$ifdef FPC},0,lineend+
                getexceptiontext(exceptobject,
                              exceptaddr,exceptframecount,exceptframes){$endif});
- 
-{$endif}
   end;
  end;
 end;

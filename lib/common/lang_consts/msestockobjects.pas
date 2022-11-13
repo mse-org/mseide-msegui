@@ -591,12 +591,12 @@ end;
 
 function tstockobjects.getextended (index: extendedty): msestring;
 begin
- result:= lang_extended [ord (index)];
+ result:= stockobjects.extended [index];
 end;
 
 function tstockobjects.getlangnames (index: integer): msestring;
 begin
- result:= lang_langnames [index];
+ result:= stockobjects.langname [index];
 end;
  {$endif}
 

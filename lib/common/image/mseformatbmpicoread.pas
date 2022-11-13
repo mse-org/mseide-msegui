@@ -494,12 +494,12 @@ end;
 
 procedure registerformat;
 begin
-{
+(*
  registergraphicformat(bmplabel,{$ifdef FPC}@{$endif}readgraphicbmp,nil,
                         lang_stockcaption[ord(sc_MS_Bitmap)],['*.bmp']);
  registergraphicformat(icolabel,{$ifdef FPC}@{$endif}readgraphicico,nil,
                         lang_stockcaption[ord(sc_MS_Icon)],['*.ico']);
- }
+ *)
 
 registergraphicformat(bmplabel,{$ifdef FPC}@{$endif}readgraphicbmp,nil,
                         'MS_Bitmap',['*.bmp']);
