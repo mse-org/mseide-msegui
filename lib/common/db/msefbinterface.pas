@@ -23,7 +23,9 @@ interface
 {$endif}
 
 uses
- firebird,msetypes,msefb3connection,mdb,msedb,msestrings;
+ firebird,msetypes,msefb3connection,mdb,msedb,msestrings,  //;
+ FieldTypeError;
+
 type
 
  paraminfoty = record
@@ -122,6 +124,7 @@ begin
     with params[fparambinding[i1]],fitems[i1] do begin
      _isnull:= isnull;
      scale:= 0;
+     // Warning: Case statement does not handle all possible cases
      case datatype of
       ftunknown: begin
        if _isnull then begin
@@ -188,6 +191,8 @@ begin
         sqllen:= length(data[i1]);
        end;
       end;
+      // Cover remaining cases by raising an exception:
+      else FieldError (datatype);
      end;
      if sqltype = 0 then begin
       databaseerrorfmt(sunsupportedparameter,[fieldtypenames[datatype]],

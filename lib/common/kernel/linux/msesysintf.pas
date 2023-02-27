@@ -689,11 +689,14 @@ begin
 //if openmode = fm_create then
 //writeln('openmode = fm_create');
 
-case openmode of
+case openmode of  // fm_none-,fm_read+,fm_write+,fm_readwrite+,fm_create-,fm_append+
   fm_read: aMode := fmOpenRead;
   fm_write: aMode := fmOpenWrite;
   fm_readwrite: aMode := fmOpenReadWrite;
   fm_append: aMode := fmOpenReadWrite;
+  // Warning: Case statement does not handle all possible cases: amendment:
+  fm_create: aMode := fmOpenReadWrite;  // ?
+  else { cannot occur, keep passed value };
 end;
 
 if openmode = fm_create then

@@ -32,6 +32,7 @@ uses
  mseapplication,mseinterfaces,
  sysutils,msebintree,mseact,msetimer,maskutils,mseifiglob,
  mseificompglob,mseeditglob,
+ FieldTypeError,
  msevariants{$ifndef FPC},classes_del{$endif};
 
 const
@@ -2732,6 +2733,7 @@ begin
                  (mstr1 <> tmsestringfield(field).asmsestring);
   end
   else begin
+   // Warning: Case statement does not handle all possible cases
    case field.datatype of
     ftString,ftFixedChar,ftmemo,ftblob,ftguid: begin
      str1:= field.asstring;
@@ -2777,7 +2779,8 @@ begin
  //    ftADT, ftArray, ftReference,
  //    ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
  //    ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
- 
+    // Cover remaining cases by raising an exception:
+    else FieldError (field.datatype);
    end;
   end;
   ds1.restorestate(statebefore); 

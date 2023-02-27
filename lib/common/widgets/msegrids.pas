@@ -16443,7 +16443,10 @@ procedure tcustomgrid.dodeleteselectedrows(const sender: tobject);
 var
  ar1: integerarty;
  int1: integer;
- str: string;
+{$ifdef mse_dynpo}
+ // Warning: Implicit string type conversion with potential data loss from "UnicodeString" to "AnsiString"
+ str: msestring;  // string;
+{$endif}
 begin
  ar1:= fdatacols.getselectedrows;
  if high(ar1) >= 0 then begin
@@ -16451,7 +16454,9 @@ begin
 {$ifdef mse_dynpo}
 if high(ar1) = 0 then
     str := stockobjects.extended [ex_del_row_selected]
-  else str := StringReplace(stockobjects.extended[ex_del_rows_selected], #37#115,
+  // Warning: Implicit string type conversion with potential data loss from "UnicodeString" to "AnsiString"
+  // else str := StringReplace(stockobjects.extended[ex_del_rows_selected], #37#115,
+  else str := UnicodeStringReplace(stockobjects.extended[ex_del_rows_selected], #37#115,
     inttostrmse(length(ar1)), [rfReplaceAll]);
 
   if askok(str,sc(sc_Confirmation))

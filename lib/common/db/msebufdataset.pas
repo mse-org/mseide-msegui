@@ -37,6 +37,7 @@ uses
  mdb,classes,mclasses,variants,msetypes,msearrayprops,mseclasses,mselist,
  msestrings,
  msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants,
+ FieldTypeError,
  msestream;
   
 const
@@ -6053,6 +6054,10 @@ begin
     fek_filtermax: begin
      result:= b1 or (i1 <= 0);
     end;
+    // Warning: Case statement does not handle all possible cases
+    else { cannot occur? }
+     Raise Exception.Create ('Unhandled case value, ordinal #'+ IntToStr (ord (akind))) AT
+           get_caller_addr (get_frame), get_caller_frame (get_frame);
    end;
   end
   else begin
@@ -6066,6 +6071,10 @@ begin
     fek_filtermax: begin
      result:= b1 or (afield.value <= v1);
     end;
+    // Warning: Case statement does not handle all possible cases
+    else { cannot occur? }
+     Raise Exception.Create ('Unhandled case value, ordinal #'+ IntToStr (ord (akind))) AT
+           get_caller_addr (get_frame), get_caller_frame (get_frame);
    end;
   end;
  end;
@@ -6316,6 +6325,7 @@ begin
  try
   int2:= ffieldinfos[index1].base.offset;
   po2:= pointer(findexes[0]);
+  // Warning: Case statement does not handle all possible cases
   case ffieldinfos[afield.fieldno-1].base.fieldtype of
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
@@ -6383,6 +6393,8 @@ begin
      end;
     end;
    end;
+   // Cover remaining cases by raising an exception:
+   else FieldError (ffieldinfos[afield.fieldno-1].base.fieldtype);
   end;
  finally
   restorestate(state1);
@@ -6406,6 +6418,7 @@ begin
  try
   int2:= ffieldinfos[index1].base.offset;
   po2:= pointer(findexes[0]);
+  // Warning: Case statement does not handle all possible cases
   case ffieldinfos[afield.fieldno-1].base.fieldtype of
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
@@ -6495,6 +6508,8 @@ begin
      end;
     end;
    end;
+   // Cover remaining cases by raising an exception:
+   else FieldError (ffieldinfos[afield.fieldno-1].base.fieldtype);
   end;
  finally
   restorestate(state1);
@@ -6586,6 +6601,7 @@ begin
  try
   int2:= ffieldinfos[index1].base.offset;
   po2:= pointer(findexes[0]);
+  // Warning: Case statement does not handle all possible cases
   case ffieldinfos[afield.fieldno-1].base.fieldtype of
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
@@ -6633,6 +6649,8 @@ begin
      end;
     end;
    end;
+   // Cover remaining cases by raising an exception:
+   else FieldError (ffieldinfos[afield.fieldno-1].base.fieldtype);
   end;
  finally
   restorestate(state1);
@@ -8567,6 +8585,7 @@ begin
  end;
  po2:= data;
  indexpo:= pointer(factindexpo^.ind);
+ // Warning: Case statement does not handle all possible cases
  case afieldtype of
   ftinteger: begin
    for int1:= 0 to fbrecordcount-1 do begin
@@ -8611,6 +8630,8 @@ begin
     inc(pchar(po2),step);
    end;
   end;
+  // Cover remaining cases by raising an exception:
+  else FieldError (afieldtype);
  end;
 end;
 
@@ -10781,6 +10802,7 @@ begin
                   {$else}vwidestring{$endif}:= pointer(mstr1);
    end
    else begin
+    // Warning: Case statement does not handle all possible cases
     case datatype of
      ftString,ftFixedChar,ftmemo,ftblob: begin
       str1:= asstring;
@@ -10822,6 +10844,8 @@ begin
       vtype:= vtint64;
       vint64:= @lint1;
      end;
+     // Cover remaining cases by raising an exception:
+     else FieldError (datatype);
     end;
    end;
   end;

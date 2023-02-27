@@ -33,7 +33,9 @@ interface
  {$endif}
 {$endif}
 uses
- sysutils,classes,mclasses,mdb,msetypes;
+ sysutils,classes,mclasses,mdb,msetypes,  //;
+ FieldTypeError;
+
 const
   // Stream Markers.
   MarkerSize  = SizeOf(Integer);
@@ -953,6 +955,7 @@ begin
               begin
               F1:=TField(L1[i]);
               F2:=TField(L2[I]);
+              // Warning: Case statement does not handle all possible cases
               Case F1.DataType of
                 ftString   : F1.AsString:=F2.AsString;
                 ftBoolean  : F1.AsBoolean:=F2.AsBoolean;
@@ -962,6 +965,8 @@ begin
                 ftInteger  : F1.AsInteger:=F2.AsInteger;
                 ftDate     : F1.AsDateTime:=F2.AsDateTime;
                 ftTime     : F1.AsDateTime:=F2.AsDateTime;
+                // Cover remaining cases by raising an exception:
+                else FieldError (F1.DataType);
               end;
               end;
             Try

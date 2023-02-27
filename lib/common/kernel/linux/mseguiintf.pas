@@ -2084,7 +2084,10 @@ var
 
  var
   parent,root: winidty;
-  ca1: Plongword;
+  // Warning: Conversion between ordinals and pointers is not portable AND
+  // Warning: Converting pointers to signed integers may result in wrong comparison results and range errors, use an unsigned type instead.
+  // ca1: Plongword;
+  ca1: longword;
   children: pwinid;
   int1: integer;
   ar1: atomarty;

@@ -41,6 +41,7 @@ uses
  classes,mclasses,SysUtils,msqldb,mdb,math,
   {$ifdef FPC}dbconst{$else}dbconst_del{$endif},msebufdataset,msedbevents,
      msesystypes,msestrings,msedb,msetypes,
+  FieldTypeError,
 {$IfDef LinkDynamically}
   ibase60dyn;
 {$Else}
@@ -997,6 +998,7 @@ begin
   for x := 0 to SQLDA^.SQLD - 1 do begin
    with SQLDA^.SQLVar[x] do begin
     TranslateFldType(SQLType,sqlsubtype,SQLLen,SQLScale,TransType,TransLen);
+    // Warning: Case statement does not handle all possible cases
     case transtype of
      ftstring: begin
       translen:= sqlsubtypetocharlen(sqlsubtype,translen);
@@ -1017,6 +1019,8 @@ begin
        end;
       end;
      end;
+     // Cover remaining cases by raising an exception:
+     else FieldError (transtype);
     end;
     if not(transtype in varsizefields) then begin
      translen:= 0;

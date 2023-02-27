@@ -2926,6 +2926,7 @@ begin
    end;
   end;
   with datasource.dataset do begin
+   // Warning: Case statement does not handle all possible cases
    case abutton of
     dbnb_first: first;
     dbnb_prior: begin
@@ -2994,6 +2995,9 @@ begin
       dscontroller.copyrecord(dno_append in options1);
      end;
     end;
+    else { cannot occur? }
+     Raise Exception.Create ('Unhandled case value, ordinal #'+ IntToStr (ord (abutton))) AT
+           get_caller_addr (get_frame), get_caller_frame (get_frame);
    end;
    if fdscontroller <> nil then begin
     if state = dsfilter then begin

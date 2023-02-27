@@ -1546,7 +1546,6 @@ var
  bo1: boolean;
  int1: integer;
  str1: filenamety;
- stlang1, stlang2, stlang3: string;
 begin
 // if filename.checkvalue then begin
   if (filename.value <> '') or (fdo_acceptempty in dialogoptions) then begin
@@ -1575,28 +1574,9 @@ begin
     if fdo_save in dialogoptions then begin
      if bo1 then begin
      
- {$ifdef mse_dynpo} 
- if length(lang_stockcaption) > ord(sc_confirmation) then
- begin
- stlang1 := lang_stockcaption[ord(sc_file)];
- stlang2 := lang_stockcaption[ord(sc_exists_overwrite)];
- stlang3 := lang_stockcaption[ord(sc_warningupper)];
- end else
- begin
- stlang1 := 'File';
- stlang2 := 'exists, overwrite ?';
- stlang3 :=  'WARNING';
- end;
-{$endif}   
-   
-{$ifdef mse_dynpo}
-       if not askok( stlang1 +' "'+filenames[0]+
-            '" '+ stlang2, stlang3)
-{$else}
        if not askok(sc(sc_file) +' "'+filenames[0]+
             '" '+ sc(sc_exists_overwrite),
             sc(sc_warningupper))
-{$endif}
 
             then begin
 //      if not askok('File "'+filenames[0]+
@@ -1608,18 +1588,9 @@ begin
      end
     else begin
      if not bo1 then begin
-{$ifdef mse_dynpo}
- if length(lang_stockcaption) > ord(sc_confirmation) then
-       showerror(lang_stockcaption[ord(sc_file)]+' "'+filenames[0]+'" '+
-                                        lang_stockcaption[ord(sc_does_not_exist)]+'.',
-                  uppercase(lang_stockcaption[ord(sc_error)])) else
-       showerror('File "'+filenames[0]+'" does not exist.',
-                  'ERROR');           
-{$else}
        showerror(sc(sc_file)+' "'+filenames[0]+'" '+
                                         sc(sc_does_not_exist)+'.',
                   uppercase(sc(sc_error)));
-{$endif}
 //      showerror('File "'+filenames[0]+'" does not exist.');
       filename.setfocus;
       exit;
