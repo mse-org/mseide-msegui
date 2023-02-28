@@ -564,6 +564,7 @@ type
    property caption;
    property icon;
    property dockingareacaption;
+   property windowopacity;
 
    property oncreate;
    property oncreated;
