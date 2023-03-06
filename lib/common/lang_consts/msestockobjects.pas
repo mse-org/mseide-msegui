@@ -574,30 +574,35 @@ end;
 function tstockobjects.getmodalresulttext (index: modalresultty): msestring;
 begin
 // result:= mseconsts.modalresulttext(index);
+ stockobjects;   // assure initialization
  result:= lang_modalresult [ord (index)];
 end;
 
 function tstockobjects.getmodalresulttextnoshortcut (index: modalresultty): msestring;
 begin
 // result:= mseconsts.modalresulttextnoshortcut(index);
+ stockobjects;   // assure initialization
  result:= lang_modalresultnoshortcut [ord (index)];
 end;
 
 function tstockobjects.getcaptions (index: stockcaptionty): msestring;
 begin
 // result:= stockcaptions(index);
+ stockobjects;   // assure initialization
  result:= lang_stockcaption [ord (index)];
 end;
 
 function tstockobjects.getextended (index: extendedty): msestring;
 begin
 // result:= stockobjects.extended [index];
+ stockobjects;   // assure initialization
  result:=   lang_extended [ord (index)];
 end;
 
 function tstockobjects.getlangnames (index: integer): msestring;
 begin
 // result:= stockobjects.langname [index];
+ stockobjects;   // assure initialization
  result:=  lang_langnames [ord (index)];
 end;
  {$endif}
