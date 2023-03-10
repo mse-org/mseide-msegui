@@ -1,7 +1,6 @@
 UNIT FieldTypeError;   (* Exception raise procedure for field type errors *)
 
-{$modeSwitch class+}
-{$modeSwitch exceptions+}
+{$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 INTERFACE
 
