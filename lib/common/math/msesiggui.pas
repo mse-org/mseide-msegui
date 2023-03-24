@@ -1835,17 +1835,17 @@ begin
 end;
 
 procedure tenvelopeedit.setactivetrace(avalue: integer);
-begin
- if avalue < 0 then begin
-  avalue:= 0;
- end;
- if avalue > 1 then begin
-  avalue:= 1;
- end;
- factivetrace:= avalue;
- fattack.activetrace:= avalue;
- fdecay.activetrace:= avalue;
- frelease.activetrace:= avalue;
+    begin
+     if avalue > 0 then begin
+      avalue:= 1;
+     end
+     else begin
+      avalue:= 0;
+     end;
+     factivetrace:= avalue;
+     fattack.activetrace:= avalue;
+     fdecay.activetrace:= avalue;
+     frelease.activetrace:= avalue;
 end;
 
 procedure tenvelopeedit.updatepopupmenu(var amenu: tpopupmenu;
