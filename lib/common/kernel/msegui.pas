@@ -15489,26 +15489,24 @@ begin
 end;
 
 function twidget.findtagchild(const atag: integer;
-               const aclass: widgetclassty): twidget;
+                   const aclass: widgetclassty): twidget;
 var
  int1: integer;
-begin
- result:= nil;
- for int1:= 0 to high(fwidgets) do begin
-  if (fwidgets[int1].tag = atag) and
-         ((aclass = nil) or (fwidgets[int1] is aclass)) then begin
-   result:= fwidgets[int1];
-   exit;
-  end;
- end;
- if result = nil then begin
-  for int1:= 0 to high(fwidgets) do begin
-   result:= fwidgets[int1].findtagchild(atag,aclass);
-   if result <> nil then begin
-    exit;
-   end;
-  end;
- end;
+    begin
+     result:= nil;
+     for int1:= 0 to high(fwidgets) do begin
+      if (fwidgets[int1].tag = atag) and
+             ((aclass = nil) or (fwidgets[int1] is aclass)) then begin
+       result:= fwidgets[int1];
+       exit;
+      end;
+     end;
+     for int1:= 0 to high(fwidgets) do begin
+      result:= fwidgets[int1].findtagchild(atag,aclass);
+      if result <> nil then begin
+       exit;
+      end;
+     end;
 end;
 
 function twidget.dofindwidget(const awidgets: widgetarty;
