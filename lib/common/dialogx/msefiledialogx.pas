@@ -1375,8 +1375,8 @@ end;
 {$else} 
 function tfiledialogxfo.LoadImage(const AFileName: msestring): msestring;
 begin
- result := tbitmapcomp1.bitmap.tryLoadFromFile(tosysfilepath(AFileName));
- if result <> '' then imImage.Bitmap := tbitmapcomp1.bitmap;
+ result := imImage.bitmap.tryLoadFromFile(tosysfilepath(AFileName));
+// if result <> '' then imImage.Bitmap := tbitmapcomp2.bitmap;
 end;
 {$endif}  
 
