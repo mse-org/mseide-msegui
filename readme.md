@@ -72,7 +72,7 @@ https://bugs.freepascal.org/view.php?id=32367
 1. In 'Project'-'Open' select 'sourcedirectory/apps/ide/mseide.prj'.
 2. 'Target'-'Continue'.
 
-## Compiling MSEide from commandline on Linux and FreeBSD
+## Compiling MSEide from commandline:
 On Unix:
 fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
