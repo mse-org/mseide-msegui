@@ -34,13 +34,13 @@ uses
  {$ifdef unix}baseunix,{$endif}Math,mseglob,mseguiglob,mseforms,Classes,
  mclasses,mseclasses,msewidgets,msegrids,mselistbrowser,mseedit,
  msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,msesystypes,msesys,
- msedispwidgets,msedatalist,msestat,msestatfile,msebitmap,msedatanodes,
+ msedispwidgets,msedatalist,msestat,msestatfile,msedatanodes,
  msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter,
  msemenus,msegridsglob,msegraphics,msegraphutils,msedirtree,msewidgetgrid,
  mseact,mseapplication,msegui,mseificomp,mseificompglob,mseifiglob,msestream,
  SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,msetimer,
- mseformatbmpicoread,mseformatjpgread,mseformatpngread,
- mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage;
+ {$ifdef BGRABITMAP_USE_MSEGUI}BGRABitmap,BGRADefaultBitmap,BGRABitmapTypes,
+ {$endif}mseimage,msebitmap;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -584,10 +584,18 @@ type
    bshowoptions: tbooleanedit;
    tsplitter2: tsplitter;
    bhidehistory: tbooleanedit;
-   tbitmapcomp1: tbitmapcomp;
+  
    imImage: timage;
    iconslist: timagelist;
+   
+    {$ifdef BGRABITMAP_USE_MSEGUI}
+    tbitmapcomp1: TBGRABitmap;
+    function LoadImagebgra(const AFileName: msestring): msestring;
+    {$else} 
+    tbitmapcomp1: tbitmapcomp;
     function LoadImage(const AFileName: msestring): msestring;
+   {$endif}    
+   
     procedure createdironexecute(const Sender: TObject);
     procedure listviewselectionchanged(const Sender: tcustomlistview);
     procedure listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
@@ -626,7 +634,9 @@ type
     procedure oncellevcustplaces(const Sender: TObject; var info: celleventinfoty);
     procedure onmovesplit(const Sender: TObject);
     procedure onsetvalnoicon(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
-   procedure afclosedropdir(const sender: TObject);
+    procedure afclosedropdir(const sender: TObject);
+    procedure onpain(const sender: twidget; const acanvas: tcanvas);
+   
   private
     fselectednames: filenamearty;
     finit: Boolean;
@@ -1354,11 +1364,21 @@ end;
 
 { tfiledialogxfo }
 
-function tfiledialogxfo.LoadImage(const AFileName: msestring) : msestring;
+{$ifdef BGRABITMAP_USE_MSEGUI}
+function tfiledialogxfo.LoadImagebgra(const AFileName: msestring): msestring;
 begin
- result := tbitmapcomp1.bitmap.TryLoadFromFile(tosysfilepath(AFileName));
- if result <> '' then imImage.Bitmap := tbitmapcomp1.bitmap;
+ tbitmapcomp1.free;
+ tbitmapcomp1 := TBGRABitmap.Create(tosysfilepath(AFileName));
+// imImage.Bitmap := tbitmapcomp1.bitmap;
+  Result := '0' ;
 end;
+{$else} 
+function tfiledialogxfo.LoadImage(const AFileName: msestring): msestring;
+begin
+ result := imImage.bitmap.tryLoadFromFile(tosysfilepath(AFileName));
+// if result <> '' then imImage.Bitmap := tbitmapcomp2.bitmap;
+end;
+{$endif}  
 
 procedure tfiledialogxfo.createdironexecute(const Sender: TObject);
 var
@@ -1444,18 +1464,25 @@ begin
       (lowercase(fileext(filename.Value)) = 'jpg') then
  begin
   if fileexists(dir.Value + filename.Value) then
+  {$ifdef BGRABITMAP_USE_MSEGUI}
+  if loadimagebgra(dir.Value + filename.Value) <> '' then
+  {$else} 
   if loadimage(dir.Value + filename.Value) <> '' then
-   begin
-   imImage.visible := true;
-   filename.left := imImage.right + 2 ;
-   filename.width := width - imImage.right - 6 ;
-   end;
+  {$endif} 
+       begin
+         imImage.visible := true;
+         filename.left := imImage.right + 2 ;
+         filename.width := width - imImage.right - 6 ;
+         imImage.invalidate;
+      end
   end else
   begin
    imImage.visible := false;
    filename.left := 4 ;
    filename.width := width - 8 ;
   end;
+// {$endif} 
+  
  end;
 
 function tfiledialogxfo.changedir(const adir: filenamety): Boolean;
@@ -2325,7 +2352,13 @@ begin
     thefilename := dir.value + trim(copy(thefilename,2,length(thefilename)));
 
 //    writeln(thefilename);
-     tbitmapcomp1.bitmap.LoadFromFile(tosysfilepath(thefilename));
+  
+    {$ifdef BGRABITMAP_USE_MSEGUI}
+    tbitmapcomp1.free;
+    tbitmapcomp1 := TBGRABitmap.Create(tosysfilepath(thefilename));
+    {$else} 
+    tbitmapcomp1.bitmap.LoadFromFile(tosysfilepath(thefilename));
+    {$endif}  
 
     recti.x := 0;
     recti.y := 0;
@@ -2776,6 +2809,18 @@ end;
 procedure tfiledialogxfo.afclosedropdir(const sender: TObject);
 begin
 dir.value:= tosysfilepath(dir.value,true);
+end;
+
+procedure tfiledialogxfo.onpain(const sender: twidget; const acanvas: tcanvas);
+{$ifdef BGRABITMAP_USE_MSEGUI}
+var stretched: TBGRABitmap;
+{$endif} 
+begin
+{$ifdef BGRABITMAP_USE_MSEGUI}
+  stretched := tbitmapcomp1.Resample(imImage.Width, imImage.Height) as TBGRABitmap;
+  stretched.Draw(aCanvas,0,0,True);
+  stretched.Free;
+{$endif} 
 end;
 
 { tfiledialogxcontroller }
