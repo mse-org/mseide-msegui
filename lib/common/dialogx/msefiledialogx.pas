@@ -40,7 +40,8 @@ uses
  mseact,mseapplication,msegui,mseificomp,mseificompglob,mseifiglob,msestream,
  SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,msetimer,
  {$ifdef BGRABITMAP_USE_MSEGUI}BGRABitmap,BGRADefaultBitmap,BGRABitmapTypes,
- {$endif}mseimage,msebitmap;
+ {$endif}mseformatbmpicoread,mseformatjpgread,mseformatpngread,
+ mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage,msebitmap;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
