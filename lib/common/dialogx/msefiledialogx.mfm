@@ -75,7 +75,7 @@ object filedialogxfo: Tfiledialogxfo
     onitemevent = listviewitemevent
     filelist.options = [flo_sortname, flo_sorttype]
     onlistread = listviewonlistread
-    reffontheight = 17
+    reffontheight = 15
   end
   object filename: thistoryedit
     frame.levelo = 0
@@ -97,7 +97,7 @@ object filedialogxfo: Tfiledialogxfo
       end>
     frame.outerframe = (
       0
-      20
+      18
       0
       0
     )
@@ -115,9 +115,9 @@ object filedialogxfo: Tfiledialogxfo
     face.localprops = [fal_fadirection]
     taborder = 5
     bounds_x = 4
-    bounds_y = 436
+    bounds_y = 438
     bounds_cx = 600
-    bounds_cy = 42
+    bounds_cy = 38
     optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
     optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
     textflags = [tf_xcentered, tf_ycentered, tf_noselect]
@@ -132,7 +132,7 @@ object filedialogxfo: Tfiledialogxfo
         textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
       end>
     onafterclosedropdown = afterclosedrop
-    reffontheight = 17
+    reffontheight = 15
   end
   object tlayouter2: tlayouter
     bounds_x = 1
@@ -165,7 +165,7 @@ object filedialogxfo: Tfiledialogxfo
       end>
     frame.outerframe = (
       0
-      20
+      18
       0
       0
     )
@@ -184,15 +184,15 @@ object filedialogxfo: Tfiledialogxfo
     taborder = 1
     onshowhint = dirshowhint
     bounds_x = 4
-    bounds_y = 68
+    bounds_y = 70
     bounds_cx = 412
-    bounds_cy = 44
+    bounds_cy = 40
     textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
     onchange = onchangdir
     dropdown.options = [deo_selectonly, deo_keydropdown]
     onsetvalue = dironsetvalue
     onafterclosedropdown = afclosedropdir
-    reffontheight = 17
+    reffontheight = 15
   end
   object up: tstockglyphbutton
     optionswidget1 = []
@@ -423,7 +423,7 @@ object filedialogxfo: Tfiledialogxfo
         face.localprops = []
         linecolor = 7895160
         linecolorfix = 7895160
-        height = 19
+        height = 17
         numstep = 1
         captions.count = 4
         captions.items = <        
@@ -459,10 +459,9 @@ object filedialogxfo: Tfiledialogxfo
     zebra_color = 13948116
     datarowlinecolorfix = -1610612731
     datarowlinecolor = -1610612731
-    datarowheight = 22
     statpriority = 1
     oncellevent = oncellev
-    reffontheight = 17
+    reffontheight = 15
   end
   object home: tbutton
     frame.optionsskin = [fso_flat]
@@ -576,16 +575,16 @@ object filedialogxfo: Tfiledialogxfo
     frame.localprops1 = []
     frame.outerframe = (
       0
+      2
+      57
       3
-      53
-      4
     )
     taborder = 13
     hint = 'Switch to compact layout'
     bounds_x = 310
-    bounds_y = 40
-    bounds_cx = 66
-    bounds_cy = 19
+    bounds_y = 41
+    bounds_cx = 70
+    bounds_cy = 17
     onsetvalue = onsetcomp
   end
   object tsplitter1: tsplitter
@@ -606,16 +605,16 @@ object filedialogxfo: Tfiledialogxfo
     frame.localprops1 = []
     frame.outerframe = (
       0
+      2
+      64
       3
-      61
-      4
     )
     taborder = 16
     hint = 'Hide / Show Lateral panel '
     bounds_x = 168
-    bounds_y = 39
-    bounds_cx = 74
-    bounds_cy = 19
+    bounds_y = 40
+    bounds_cx = 77
+    bounds_cy = 17
     onsetvalue = onlateral
   end
   object placespan: tstringdisp
@@ -627,8 +626,8 @@ object filedialogxfo: Tfiledialogxfo
     bounds_x = 0
     bounds_y = 126
     bounds_cx = 126
-    bounds_cy = 293
-    reffontheight = 17
+    bounds_cy = 291
+    reffontheight = 15
     object places: tstringgrid
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_noclampinview]
       frame.levelo = -1
@@ -722,10 +721,10 @@ object filedialogxfo: Tfiledialogxfo
       rowcount = 9
       datarowlinecolorfix = -1610612731
       datarowlinecolor = -1610612731
-      datarowheight = 26
+      datarowheight = 24
       statpriority = 1
       oncellevent = oncellevplaces
-      reffontheight = 17
+      reffontheight = 15
     end
     object tsplitter3: tsplitter
       taborder = 1
@@ -767,7 +766,7 @@ object filedialogxfo: Tfiledialogxfo
       bounds_x = 0
       bounds_y = 244
       bounds_cx = 126
-      bounds_cy = 49
+      bounds_cy = 47
       anchors = [an_left, an_top, an_right, an_bottom]
       optionsgrid = [og_rowdeleting, og_colchangeontabkey, og_wrapcol, og_autopopup, og_mousescrollcol]
       datacols.count = 2
@@ -816,10 +815,10 @@ object filedialogxfo: Tfiledialogxfo
       rowcount = 1
       datarowlinecolorfix = -1610612731
       datarowlinecolor = -1610612731
-      datarowheight = 26
+      datarowheight = 24
       statpriority = 1
       oncellevent = oncellevcustplaces
-      reffontheight = 17
+      reffontheight = 15
     end
   end
   object labtest: tlabel
@@ -827,10 +826,10 @@ object filedialogxfo: Tfiledialogxfo
     visible = False
     bounds_x = 74
     bounds_y = 83
-    bounds_cx = 38
-    bounds_cy = 17
+    bounds_cx = 41
+    bounds_cy = 15
     caption = 'tlabel1'
-    reffontheight = 17
+    reffontheight = 15
   end
   object filter: tdropdownlistedit
     frame.levelo = 0
@@ -852,7 +851,7 @@ object filedialogxfo: Tfiledialogxfo
       end>
     frame.outerframe = (
       0
-      20
+      18
       0
       0
     )
@@ -870,9 +869,9 @@ object filedialogxfo: Tfiledialogxfo
     face.localprops = [fal_fadirection]
     taborder = 6
     bounds_x = 420
-    bounds_y = 68
+    bounds_y = 70
     bounds_cx = 184
-    bounds_cy = 44
+    bounds_cy = 40
     onsetvalue = filteronsetvalue
     dropdown.options = [deo_keydropdown, deo_cliphint]
     dropdown.cols.count = 2
@@ -884,7 +883,7 @@ object filedialogxfo: Tfiledialogxfo
       end>
     dropdown.valuecol = 1
     onafterclosedropdown = filteronafterclosedropdown
-    reffontheight = 17
+    reffontheight = 15
   end
   object showhidden: tbooleanedit
     frame.levelo = 0
@@ -893,16 +892,16 @@ object filedialogxfo: Tfiledialogxfo
     frame.localprops1 = []
     frame.outerframe = (
       0
+      2
+      82
       3
-      74
-      4
     )
     taborder = 7
     hint = 'Show hidden files'
     bounds_x = 448
-    bounds_y = 39
-    bounds_cx = 87
-    bounds_cy = 19
+    bounds_y = 40
+    bounds_cx = 95
+    bounds_cy = 17
     onsetvalue = showhiddenonsetvalue
   end
   object bnoicon: tbooleanedit
@@ -912,16 +911,16 @@ object filedialogxfo: Tfiledialogxfo
     frame.localprops1 = []
     frame.outerframe = (
       0
+      2
+      55
       3
-      52
-      4
     )
     taborder = 19
     hint = 'Hide / Show Icons'
     bounds_x = 40
-    bounds_y = 39
-    bounds_cx = 65
-    bounds_cy = 19
+    bounds_y = 40
+    bounds_cx = 68
+    bounds_cy = 17
     visible = False
     onsetvalue = onsetvalnoicon
   end
@@ -932,16 +931,16 @@ object filedialogxfo: Tfiledialogxfo
     frame.localprops1 = []
     frame.outerframe = (
       0
+      2
+      84
       3
-      77
-      4
     )
     taborder = 20
     hint = 'Show hidden files'
     bounds_x = 240
-    bounds_y = 47
-    bounds_cx = 90
-    bounds_cy = 19
+    bounds_y = 48
+    bounds_cx = 97
+    bounds_cy = 17
     visible = False
   end
   object tsplitter2: tsplitter
@@ -962,16 +961,16 @@ object filedialogxfo: Tfiledialogxfo
     frame.localprops1 = []
     frame.outerframe = (
       0
+      2
+      74
       3
-      68
-      4
     )
     taborder = 22
     hint = 'Show hidden files'
     bounds_x = 344
-    bounds_y = 47
-    bounds_cx = 81
-    bounds_cy = 19
+    bounds_y = 48
+    bounds_cx = 87
+    bounds_cy = 17
     visible = False
     onsetvalue = showhiddenonsetvalue
   end
@@ -980,13 +979,17 @@ object filedialogxfo: Tfiledialogxfo
     frame.localprops = []
     frame.localprops1 = []
     taborder = 23
-    onpaint = onpain
     visible = False
     bounds_x = 2
     bounds_y = 432
     bounds_cx = 40
     bounds_cy = 48
+  end
+  object tbitmapcomp1: tbitmapcomp
+    bitmap.options = [bmo_graymask]
     bitmap.alignment = [al_stretchx, al_stretchy]
+    left = 240
+    top = 194
   end
   object iconslist: timagelist
     width = 18
