@@ -29,7 +29,7 @@
 
 {You have to enable Macros (compiler switch "-Sm") for compiling this unit!
  This is necessary for supporting different platforms with different calling
- conventions via a sinle unit.}
+ conventions via a single unit.}
 
 {$ifdef FPC}{$mode objfpc} {$h+}{$endif}
 
