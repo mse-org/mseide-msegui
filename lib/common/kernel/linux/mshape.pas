@@ -36,7 +36,7 @@ unit mshape;
 interface
 
 uses
-  dynlibs, ctypes, x, xlib, xutil;
+  dynlibs, ctypes, mx, mxlib, mxutil;
 
 
 const

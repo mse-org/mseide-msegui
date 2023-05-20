@@ -15,7 +15,7 @@ unit mseopengl;
 
 interface
 uses
- msegl,{$ifdef unix}mseglx,x,xlib,xutil,{$else}windows,{$endif}
+ msegl,{$ifdef unix}mseglx,mx,mxlib,mxutil,{$else}windows,{$endif}
  msegraphics,msetypes,mseguiglob,msegraphutils,mseopenglgdi;
 
 type

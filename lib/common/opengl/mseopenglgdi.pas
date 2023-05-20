@@ -18,7 +18,7 @@ unit mseopenglgdi;
 
 interface
 uses
- msegl,mseglext,mseglu,{$ifdef unix}mseglx,x,xlib,xutil,msectypes,
+ msegl,mseglext,mseglu,{$ifdef unix}mseglx,mx,mxlib,mxutil,msectypes,
  {$else}windows,{$endif}
  msegraphics,msetypes,msegraphutils,mseguiglob,mseglextglob;
 {

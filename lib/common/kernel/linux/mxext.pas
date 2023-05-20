@@ -30,7 +30,7 @@ unit mxext;
 interface
 
 uses
-  ctypes, xlib;
+  ctypes, mxlib;
 
 const
   libXext = 'libXext.so.6';

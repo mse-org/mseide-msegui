@@ -2,10 +2,10 @@ unit mxrender;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- {$ifdef FPC} x,{$endif}Xlib,mselibc,msectypes;
+ {$ifdef FPC} mx,{$endif}mselibc,msectypes;
 
   const
-    External_library='libXrender.so';
+    External_library='libXrender.so.1';
 
 {$IFDEF FPC}
  {$PACKRECORDS C}

@@ -35,9 +35,9 @@ interface
  {$define mse_debug}
 {$endif}
 uses
- {$ifdef FPC}xlib{$else}Xlib{$endif},msetypes,mseapplication,msesys,
+ {$ifdef FPC}mxlib{$else}Xlib{$endif},msetypes,mseapplication,msesys,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
- msethread{$ifdef FPC},x,xutil,dynlibs{$endif},
+ msethread{$ifdef FPC},mx,mxutil,dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
  msestrings,mxft,mxrender,mxrandr,mshape;
 
@@ -6970,7 +6970,7 @@ begin
   msex11gdi.init(appdisp,defvisual,defdepth);
   attrib.event_mask:= propertychangemask;
   appid:= xcreatewindow(appdisp,rootid,0,0,200,200,0,
-               0,inputonly,xlib.pvisual(copyfromparent),cweventmask,@attrib);
+               0,inputonly,mxlib.pvisual(copyfromparent),cweventmask,@attrib);
   if appid = 0 then begin
    result:= gue_createwindow;
    goto error;

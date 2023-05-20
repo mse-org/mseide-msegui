@@ -29,7 +29,7 @@
 
 {You have to enable Macros (compiler switch "-Sm") for compiling this unit!
  This is necessary for supporting different platforms with different calling
- conventions via a single unit.}
+ conventions via a sinle unit.}
 
 {$ifdef FPC}{$mode objfpc} {$h+}{$endif}
 
@@ -39,7 +39,7 @@ interface
 {$ifdef linux}{$define unix}{$endif}
 {$IFDEF Unix}
   uses
-    {$ifdef FPC}X,{$endif} XLib,{$ifdef FPC} XUtil,{$endif}mseglextglob;
+    {$ifdef FPC}mx,{$endif} mxlib,{$ifdef FPC} mxutil,{$endif}mseglextglob;
   {$DEFINE HasGLX}  // Activate GLX stuff
 {$ELSE}
   {$MESSAGE Unsupported platform.}
