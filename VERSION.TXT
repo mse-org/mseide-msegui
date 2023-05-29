@@ -1,5 +1,11 @@
 MSEide+MSEgui changes version history
 **********************************************
+
+Version 5.8.0
+2023-05-28
+Lot of fixes.
+Less warnings, compatible fpc-llvm.
+
 Version 5.6.10
 2022-10-24
 Fixes of version 5.6.6.

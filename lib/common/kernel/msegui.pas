@@ -33,8 +33,8 @@ uses
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
                    {$ifdef mse_with_ifi},mseifiglob,mseificompglob{$endif};
  const
- mseguiversiontext = '5.6.10';
- copyrighttext = 'Copyright 1999-2022';
+ mseguiversiontext = '5.8.0';
+ copyrighttext = 'Copyright 1999-2023';
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
  defaultfadecolor = cl_ltgray;
