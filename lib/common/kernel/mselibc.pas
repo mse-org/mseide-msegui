@@ -2023,8 +2023,12 @@ function sched_yield:longint;cdecl;external clib name 'sched_yield';
 function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'usleep';
 {$ifdef linux}
 function __errno_location: PInteger; cdecl;external clib name '__errno_location';
-{$else}
+{$endif}
+{$ifdef freebsd}
 function __errno_location: PInteger; cdecl;external clib name '__error';
+{$endif}
+{$ifdef openbsd}
+function __errno_location: PInteger; cdecl;external clib name '__errno';
 {$endif}
 function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;external clib name 'strerror_r';
 
