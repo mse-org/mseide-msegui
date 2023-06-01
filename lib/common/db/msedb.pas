@@ -1851,7 +1851,7 @@ uses
  rtlconsts,msefileutils,typinfo,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},
  msearrayutils,mseformatstr,msebits,msefloattostr,msebufdataset,
  msereal,variants,msedate,msesys,sysconst
- {,msedbgraphics}{$ifdef unix},msecwstring{$endif};
+ {,msedbgraphics}{$ifdef unix},{$ifdef openbsd} cwstring {$else} msecwstring {$endif}{$endif};
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -2865,10 +2865,13 @@ begin
   try
    result:= msestring(sender.asstring);
   except
+   {$ifndef freebsd}
    on e: eiconv do begin
     //no crash by iconverror
    end
-   else begin
+   else 
+   {$endif}
+   begin
     raise;
    end;
   end;

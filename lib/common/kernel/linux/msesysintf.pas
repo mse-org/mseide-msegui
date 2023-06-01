@@ -28,7 +28,7 @@ interface
 
 uses
 baseunix,
- msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,msecwstring,{$endif}msetypes,
+ msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,{$ifdef openbsd} cwstring {$else} msecwstring {$endif},{$endif}msetypes,
  mselibc,msectypes,
  msestrings,msestream;
  

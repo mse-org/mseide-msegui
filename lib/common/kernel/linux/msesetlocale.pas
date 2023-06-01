@@ -17,7 +17,7 @@ function getcodeset(): string;
 
 implementation
 uses
- msecwstring,sysutils,msestrings,mseformatstr,msetypes,msesysintf;
+{$ifdef openbsd} cwstring {$else} msecwstring {$endif} ,sysutils,msestrings,mseformatstr,msetypes,msesysintf;
 
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
