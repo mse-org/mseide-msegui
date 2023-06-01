@@ -1,4 +1,4 @@
-oobject filedialogfo: Tfiledialogfo
+object filedialogfo: Tfiledialogfo
   optionswidget = [ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets, ow_hinton]
   visible = False
   bounds_x = 249
