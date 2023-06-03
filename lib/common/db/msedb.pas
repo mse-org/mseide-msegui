@@ -2865,7 +2865,7 @@ begin
   try
    result:= msestring(sender.asstring);
   except
-   {$ifndef freebsd}
+   {$ifndef openbsd}
    on e: eiconv do begin
     //no crash by iconverror
    end
