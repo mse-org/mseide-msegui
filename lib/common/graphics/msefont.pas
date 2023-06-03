@@ -190,6 +190,7 @@ begin
    if ffontaliaslist.count = 0 then begin
     freeandnil(ffontaliaslist);
    end;
+   result:= true;
   end;
  end;
 end;
