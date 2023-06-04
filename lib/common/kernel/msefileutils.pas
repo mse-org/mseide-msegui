@@ -1182,21 +1182,34 @@ function findfileordir(const filename: filenamety): boolean;
 var
  info: fileinfoty;
 begin
+{$ifdef openbsd}
+if (fileexists(filename)) or (directoryexists(filename) then 
+ result := true else result := false;
+{$else}
  result:= sys_getfileinfo(filename,info);
+{$endif}  
 end;
 
 function findfile(const filename: filenamety): boolean; overload;
 var
  info: fileinfoty;
 begin
+{$ifdef openbsd}
+ result:= fileexists(filename);
+{$else}
  result:= sys_getfileinfo(filename,info) and (info.extinfo1.filetype <> ft_dir);
+{$endif} 
 end;
 
 function finddir(const filename: filenamety): boolean;
 var
  info: fileinfoty;
 begin
+{$ifdef openbsd}
+ result:= directoryexists(filename);
+{$else}
  result:= sys_getfileinfo(filename,info) and (info.extinfo1.filetype = ft_dir);
+{$endif}
 end;
 
 function quotefilename(const name: filenamety): filenamety; overload;
