@@ -898,7 +898,9 @@ function sys_threaddestroy(var info: threadinfoty): syserrorty;
 begin
  result:= sye_ok;
 {$ifdef FPC}
+{$ifndef openbsd} // killthread done by openbsd
  killthread(tthreadid(info.id));
+{$endif} 
 {$else}
  pthread_detach(info.id);
  pthread_cancel(info.id);
