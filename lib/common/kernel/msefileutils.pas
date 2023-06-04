@@ -1183,7 +1183,7 @@ var
  info: fileinfoty;
 begin
 {$ifdef openbsd}
-if (fileexists(filename)) or (directoryexists(filename) then 
+if (fileexists(filename)) or (directoryexists(filename)) then 
  result := true else result := false;
 {$else}
  result:= sys_getfileinfo(filename,info);
