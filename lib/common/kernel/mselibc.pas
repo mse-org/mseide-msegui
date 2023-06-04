@@ -663,7 +663,7 @@ const
    EVFILT_PROC = (-5); //* attached to struct proc */
    EVFILT_SIGNAL = (-6); //* attached to struct proc */
    EVFILT_TIMER = (-7); //* timers */
-//*	EVFILT_NETDEV = (-8); /   no longer supported */
+//*     EVFILT_NETDEV = (-8); /   no longer supported */
    EVFILT_FS = (-9); //* filesystem events */
    EVFILT_LIO = (-10); //* attached to lio requests */
    EVFILT_USER = (-11); //* User events */
@@ -864,8 +864,14 @@ type
  {$endif} // arm64
 
  {$else} //bsd
+ {$ifdef freebsd}
  ino_t = cuint32;
  mode_t = cuint16;
+ {$endif}
+ {$ifdef openbsd}
+ ino_t = cuint64;
+ mode_t = cuint64;
+ {$endif}
  n_link_t = cuint16;
  uid_t = cuint32;
  gid_t = cuint32;
@@ -875,7 +881,8 @@ type
  fflags_t = cuint32;
 
  _stat = packed record
-  st_dev: __dev_t;          //* inode's device */
+ {$ifdef freebsd}
+   st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
   st_mode: mode_t;          //* inode protection mode */
   st_nlink: n_link_t;       //* number of hard links */
@@ -895,9 +902,34 @@ type
   st_gen: cuint32;          //* file generation number */
   st_lspare: cint32;
   st_birthtim: timespec;    //* time of file creation */
+  {$endif}
+ 
+  {$ifdef openbsd}
+ st_dev: cuint64;          //* inode's device */
+  st_ino: cuint64;            //* inode's number */
+  st_mode: cuint32;          //* inode protection mode */
+  st_nlink: cuint32;       //* number of hard links */
+  st_uid: cuint32;            //* user ID of the file's owner */
+  st_gid: cuint32;            //* group ID of the file's group */
+  st_rdev: cuint64;         //* device type */
+  st_atime: cint64;         //* time of last access */
+  st_atime_nsec: cint64;
+  st_mtime: cint64;         //* time of last data modification */
+  st_mtime_nsec: cint64;
+  st_ctime: cint64;         //* time of last file status change */
+  st_ctime_nsec: cint64;
+  st_size: cint64;           //* file size, in bytes */
+  st_blocks: cuint64;      //* blocks allocated for file */
+  st_blksize: cuint32;    //* optimal blocksize for I/O */
+  st_flags: cuint32;       //* user defined flags for file */
+  st_gen: cuint32;          //* file generation number */
+  st_lspare: cint32;
+  st_birthtim: cint64;    //* time of file creation */
+   {$endif}
+    
  {$ifndef cpu64}
   pad: array[0..15-sizeof(timespec)] of byte;
- {$endif} //bsd
+ {$endif}
   (*
         /*
          * Explicitly pad st_birthtim to 16 bytes so that the size of
@@ -911,8 +943,7 @@ type
         unsigned int :(8 / 2) * (16 - (int)sizeof(struct timespec));
   *)
  end;
-{$endif} 
-
+{$endif} //bsd
 
  P_stat64 = ^_stat64;
  Pstat64 = ^_stat64;
@@ -1596,7 +1627,12 @@ const
 
  _LC_LAST = 7;  //* marks end */
 
+ {$ifdef freebsd}
  CODESET = 0; //* codeset name */
+{$endif}
+{$ifdef openbsd}
+ CODESET = 51; //* codeset name */
+{$endif}
  D_T_FMT = 1; //* string for formatting date and time */
  D_FMT = 2; //* date format string */
  T_FMT = 3; //* time format string */
@@ -2003,7 +2039,7 @@ type
   pw_uid: uid_t;     //* user uid */
   pw_gid: gid_t;     //* user gid */
   pw_change: time_t; //* password change time */
-  pw_class: pcchar;  //* user access class	*/
+  pw_class: pcchar;  //* user access class      */
   pw_gecos: pcchar;  //* Honeywell login info */
   pw_dir: pcchar;    //* home directory */
   pw_shell: pcchar;  //* default shell */
@@ -2084,11 +2120,22 @@ type
        end;
 {$else}
  dirent64 = record
+        {$ifdef freebsd}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
         d_type: cuint8;               //* file type, see below */
         d_namlen: cuint8;             //* length of string in d_name */
         d_name: array[0..255] of char;        //* name must be no longer than this */
+        {$endif}
+         {$ifdef openbsd}
+        d_fileno: cuint32;          //* file number of entry */
+        d_off : __off64_t;
+        d_reclen: cuint16;            //* length of this record */
+        d_type:  cuint8;               //* file type, see below */
+        d_namlen: cuint8;             //* length of string in d_name */
+        d_padding: array[0..3] of cuint8;
+        d_name: array[0..256] of char;        //* name must be no longer than this */
+        {$endif}
  end;
 {$endif}
 

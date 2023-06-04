@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msesysintf; //linux, freebsd
+unit msesysintf; //linux, freebsd, openbsd
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 {$ifdef mse_debuglock}
@@ -1330,7 +1330,7 @@ begin
   accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
   {$if fpc_fullversion >= 030100}
   ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
-  {$else}  
+  {$else} 
   ctime:= st_ctime;
   {$endif}
   id:= st_ino;
@@ -1338,7 +1338,7 @@ begin
   group:= st_gid;
  end;
 end;
-{$else} 
+{$else}
  procedure stattofileinfo(statbuffer: _stat64; var info: fileinfoty);
 begin
  with info,extinfo1,extinfo2,statbuffer do begin
@@ -1375,18 +1375,18 @@ begin
  clearfileinfo(info);
  str1:= tosysfilepath(path);
  
- {$ifdef linux} 
+ {$ifdef linux}
  fillchar(fpstatbuffer,sizeof(fpstatbuffer),0);
  result := fpstat(pchar(tosys(str1)),fpstatbuffer) = 0;
- {$else} 
+ {$else}
  fillchar(statbuffer,sizeof(statbuffer),0);
  result := stat64(pchar(tosys(str1)),@statbuffer) = 0;
  {$endif}
-  
+ 
  if result then begin
-   {$ifdef linux} 
+   {$ifdef linux}
    fpstattofileinfo(fpstatbuffer,info);
-   {$else} 
+   {$else}
    stattofileinfo(statbuffer,info);
    {$endif}
 
@@ -1404,18 +1404,18 @@ var
 begin
  clearfileinfo(info);
 
- {$ifdef linux} 
+ {$ifdef linux}
  fillchar(fpstatbuffer,sizeof(fpstatbuffer),0);
  result := fpfstat(fd,fpstatbuffer) = 0;
- {$else} 
+ {$else}
  fillchar(statbuffer,sizeof(statbuffer),0);
  result:= fstat64(fd,@statbuffer) = 0;
  {$endif}
 
  if result then begin
-   {$ifdef linux} 
+   {$ifdef linux}
    fpstattofileinfo(fpstatbuffer,info);
-   {$else} 
+   {$else}
    stattofileinfo(statbuffer,info);
    {$endif}
  end;
