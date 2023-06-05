@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2022 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2023 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -25,6 +25,11 @@ interface
   {$warn 6058 off}
  {$endif}
 {$endif}
+
+{$ifdef openbsd}
+{$define class_bridge} 
+{$endif}
+
 uses
  classes,mclasses,sysutils,msegraphics,msetypes,mseact,
  msestrings,mseerr,msegraphutils,mseapplication,msedragglob,
@@ -675,7 +680,7 @@ type
    constructor create(const intf: iframe); reintroduce;
    destructor destroy; override;
    procedure checktemplate(const sender: tobject); virtual;
-   procedure assign(source: tpersistent); override;
+   procedure assign(source: {$ifdef class_bridge}tpersistentbridge{$else}tpersistent{$endif}); override;
    procedure scale(const ascale: real); virtual;
    procedure checkwidgetsize(var asize: sizety); virtual;
                 //extends to minimal size
@@ -1392,7 +1397,7 @@ type
    constructor create(const intf: iface); reintroduce; overload;
    destructor destroy; override;
    procedure checktemplate(const sender: tobject);
-   procedure assign(source: tpersistent); override;
+   procedure assign(source: {$ifdef class_bridge}tpersistentbridge{$else}tpersistent{$endif}); override;
    procedure paint(const canvas: tcanvas; const arect: rectty);
    property options: faceoptionsty read fi.options write setoptions
                    stored isoptionsstored default [];
@@ -5946,11 +5951,11 @@ end;
 procedure tcustomframe.checktemplate(const sender: tobject);
 begin
  if sender = ftemplate then begin
-  assign(tpersistent(sender));
+  assign({$ifdef class_bridge}tpersistentbridge{$else}tpersistent{$endif}(sender));
  end;
 end;
 
-procedure tcustomframe.assign(source: tpersistent);
+procedure tcustomframe.assign(source: {$ifdef class_bridge}tpersistentbridge{$else}tpersistent{$endif});
 begin
  if source is tcustomframe then begin
   if not (csdesigning in fintf.getcomponentstate) then begin
@@ -7191,11 +7196,11 @@ end;
 procedure tcustomface.checktemplate(const sender: tobject);
 begin
  if sender = ftemplate then begin
-  assign(tpersistent(sender));
+  assign({$ifdef class_bridge}tpersistentbridge{$else}tpersistent{$endif}(sender));
  end;
 end;
 
-procedure tcustomface.assign(source: tpersistent);
+procedure tcustomface.assign(source: {$ifdef class_bridge}tpersistentbridge{$else}tpersistent{$endif});
 begin
  if source is tcustomface then begin
   if not (csdesigning in fintf.getcomponentstate) then begin
@@ -15489,24 +15494,26 @@ begin
 end;
 
 function twidget.findtagchild(const atag: integer;
-                   const aclass: widgetclassty): twidget;
+               const aclass: widgetclassty): twidget;
 var
  int1: integer;
-    begin
-     result:= nil;
-     for int1:= 0 to high(fwidgets) do begin
-      if (fwidgets[int1].tag = atag) and
-             ((aclass = nil) or (fwidgets[int1] is aclass)) then begin
-       result:= fwidgets[int1];
-       exit;
-      end;
-     end;
-     for int1:= 0 to high(fwidgets) do begin
-      result:= fwidgets[int1].findtagchild(atag,aclass);
-      if result <> nil then begin
-       exit;
-      end;
-     end;
+begin
+ result:= nil;
+ for int1:= 0 to high(fwidgets) do begin
+  if (fwidgets[int1].tag = atag) and
+         ((aclass = nil) or (fwidgets[int1] is aclass)) then begin
+   result:= fwidgets[int1];
+   exit;
+  end;
+ end;
+ if result = nil then begin
+  for int1:= 0 to high(fwidgets) do begin
+   result:= fwidgets[int1].findtagchild(atag,aclass);
+   if result <> nil then begin
+    exit;
+   end;
+  end;
+ end;
 end;
 
 function twidget.dofindwidget(const awidgets: widgetarty;
@@ -21089,9 +21096,11 @@ begin
   end
   else begin
    mstr1:= leadingtext + e.Message;
-   showmessage(mstr1,sc(sc_exception) {$ifdef FPC},0,lineend+
+
+ showmessage(mstr1,sc(sc_exception) {$ifdef FPC},0,lineend+
                getexceptiontext(exceptobject,
                              exceptaddr,exceptframecount,exceptframes){$endif});
+
   end;
  end;
 end;
