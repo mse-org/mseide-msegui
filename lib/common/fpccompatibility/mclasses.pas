@@ -34,6 +34,10 @@ unit mclasses;
 {$if fpc_fullversion >= 030000} {$define mse_fpc_3} {$endif}
 {$if FPC_FULLVERSION >= 030100} {$define mse_fpc_3_2} {$endif}
 
+{$ifdef openbsd}
+{$define class_bridge} 
+{$endif}
+
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
