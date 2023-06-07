@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msesysintf; //linux, freebsd, openbsd
+unit msesysintf; //linux, freebsd, openbsd, dragonfly
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 {$ifdef mse_debuglock}
@@ -66,7 +66,7 @@ uses
  msesysintf1,sysutils,msesysutils,msefileutils,msearrayutils
  {$ifdef FPC},dateutils{$else},DateUtils,classes_del{$endif},msedate
  {$ifdef mse_debugmutex},mseapplication{$endif}
- {$ifdef freebsd},msedynload{$endif};
+ {$if defined(freebsd) or defined(dragonfly)},msedynload{$endif};
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -204,7 +204,7 @@ begin
  end;
 end;
 
-{$ifdef freebsd}
+{$if defined(freebsd) or defined(dragonfly)}
 {$packrecords c}
 type
  procstat = record
@@ -1330,7 +1330,7 @@ var
  str1: filenamety;
  {$ifdef linux}
   fpstatbuffer : baseunix.stat;
- {$else} // for freebsd
+ {$else} // for bsd
   statbuffer: _stat64;
  {$endif}
 
@@ -1361,7 +1361,7 @@ function sys_getfdinfo(const fd: longint; var info: fileinfoty): boolean;
 var
  {$ifdef linux}
   fpstatbuffer : baseunix.stat;
- {$else} // for freebsd
+ {$else} // for bsd
   statbuffer: _stat64;
   {$endif}
 begin
@@ -1465,7 +1465,7 @@ begin
  sigaction(sigio,@info,nil);
 end;
 
-{$ifdef freebsd}
+{$if defined(freebsd) or defined(dragonfly)}
 procedure initfreebsd();
 begin
  haslibprocstat:= checkprocaddresses(['libprocstat.so.1','libprocstat.so'],
@@ -1478,7 +1478,7 @@ end;
 
 initialization
  setsighandlers;
-{$ifdef freebsd}
+{$if defined(freebsd) or defined(dragonfly)}
  initfreebsd();
 {$endif}
 end.

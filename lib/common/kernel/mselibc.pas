@@ -864,7 +864,7 @@ type
  {$endif} // arm64
 
  {$else} //bsd
- {$ifdef freebsd}
+{$if defined(freebsd) or defined(dragonfly)}
  ino_t = cuint32;
  mode_t = cuint16;
  {$endif}
@@ -881,7 +881,7 @@ type
  fflags_t = cuint32;
 
  _stat = packed record
- {$ifdef freebsd}
+{$if defined(freebsd) or defined(dragonfly)}
    st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
   st_mode: mode_t;          //* inode protection mode */
@@ -1627,7 +1627,7 @@ const
 
  _LC_LAST = 7;  //* marks end */
 
- {$ifdef freebsd}
+{$if defined(freebsd) or defined(dragonfly)}
  CODESET = 0; //* codeset name */
 {$endif}
 {$ifdef openbsd}
@@ -2060,7 +2060,7 @@ function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'uslee
 {$ifdef linux}
 function __errno_location: PInteger; cdecl;external clib name '__errno_location';
 {$endif}
-{$ifdef freebsd}
+{$if defined(freebsd) or defined(dragonfly)}
 function __errno_location: PInteger; cdecl;external clib name '__error';
 {$endif}
 {$ifdef openbsd}
@@ -2120,7 +2120,7 @@ type
        end;
 {$else}
  dirent64 = record
-        {$ifdef freebsd}
+        {$if defined(freebsd) or defined(dragonfly)}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
         d_type: cuint8;               //* file type, see below */

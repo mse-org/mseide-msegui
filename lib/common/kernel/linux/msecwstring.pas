@@ -84,7 +84,7 @@ Const
  libiconvname='c';  // is in libc under Linux.
 {$endif}
 
-{$if defined(darwin) or defined(freebsd) or defined(openbsd) and not defined(freebsd5)}
+{$if defined(darwin) or defined(freebsd) or defined(dragonfly) or defined(openbsd) and not defined(freebsd5)}
  prefix = 'lib';
 {$else}
  prefix = '';
@@ -267,7 +267,7 @@ procedure Wide2AnsiMove(source:pwidechar; var dest:ansistring; len:SizeInt);
     // truncate string
     setlength(dest,length(dest)-outleft);
    {$ifdef mse_fpc_3}
-   {$ifndef freebsd}
+   {$if not defined(freebsd) and not defined(dragonfly)}
 if length (dest) > 0 then
     pansirec(pointer(dest)-sizeof(tansirec))^.codepage:= cp;
    {$endif} 
