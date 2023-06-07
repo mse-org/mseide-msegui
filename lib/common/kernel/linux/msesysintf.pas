@@ -925,7 +925,6 @@ var
 begin
  str1:= tosys(oldfile);
  str2:= tosys(newfile);
- result:= sye_ok;
  sourceF := Tfilestream.create(str1,fmopenread);
  destF := Tfilestream.create(str2,fmcreate);
  if destF.copyfrom(sourceF,sourceF.size) = 0 then result := sye_copyfile
