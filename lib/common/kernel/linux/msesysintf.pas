@@ -928,7 +928,8 @@ begin
  result:= sye_ok;
  sourceF := Tfilestream.create(str1,fmopenread);
  destF := Tfilestream.create(str2,fmcreate);
- destF.copyfrom(sourceF,sourceF.size);
+ if destF.copyfrom(sourceF,sourceF.size) = 0 then result := sye_copyfile
+ else result:= sye_ok;
  sourceF.free;
  destF.free;
 end;
