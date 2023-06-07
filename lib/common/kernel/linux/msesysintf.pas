@@ -30,7 +30,7 @@ uses
 baseunix,
  msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,{$ifdef openbsd} cwstring {$else} msecwstring {$endif},{$endif}msetypes,
  mselibc,msectypes,
- msestrings,msestream;
+ msestrings,msestream,classes;
  
  {$packrecords c}
  
@@ -919,61 +919,18 @@ begin
 end;
 
 function sys_copyfile(const oldfile,newfile: msestring): syserrorty;
-const
- bufsize = $2000; //8k
 var
  str1,str2: string;
- source,dest: integer;
- stat: _stat64;
- lwo1: longword;
- po1: pointer;
+ sourceF,destF: Tfilestream;
 begin
  str1:= tosys(oldfile);
  str2:= tosys(newfile);
- result:= sye_copyfile;
- source:= mselibc.open(pchar(str1),o_rdonly);
- if source <> -1 then begin
-  if fstat64(source,@stat) = 0 then begin
-   dest:= mselibc.open(pchar(str2),o_rdwr or o_creat or o_trunc,
-                                                    [s_irusr or s_iwusr]);
-   if dest <> -1 then begin
-    getmem(po1,bufsize);
-    lwo1:= 0; //compiler warning
-    while true do begin
-     lwo1:= mselibc.__read(source,po1^,bufsize);
-     if (lwo1 = 0) or (lwo1 = longword(-1)) then begin
-      break;
-     end;
-     if mselibc.__write(dest,po1^,lwo1) <> integer(lwo1) then begin
-      break;
-     end;
-    end;
-    freemem(po1);
-    if lwo1 = 0 then begin
-     if mselibc.fchmod(dest,stat.st_mode) = 0 then begin
-      result:= sye_ok;
-     end
-     else begin
-      result:= syelasterror;
-     end;
-    end
-    else begin
-     result:= syelasterror;
-    end;
-    mselibc.__close(dest);
-   end
-   else begin
-    result:= syelasterror;
-   end;
-  end
-  else begin
-   result:= syelasterror;
-  end;
-  mselibc.__close(source);
- end
- else begin
-  result:= syelasterror;
- end;
+ result:= sye_ok;
+ sourceF := Tfilestream.create(str1,fmopenread);
+ destF := Tfilestream.create(str2,fmcreate);
+ destF.copyfrom(sourceF,sourceF.size);
+ sourceF.free;
+ destF.free;
 end;
 
 function sys_renamefile(const oldname,newname: filenamety): syserrorty;
