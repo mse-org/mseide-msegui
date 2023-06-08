@@ -868,7 +868,7 @@ type
  ino_t = cuint32;
  mode_t = cuint16;
  {$endif}
- {$ifdef openbsd}
+ {$if defined(openbsd) or defined(netbsd)}
  ino_t = cuint64;
  mode_t = cuint64;
  {$endif}
@@ -904,7 +904,7 @@ type
   st_birthtim: timespec;    //* time of file creation */
   {$endif}
  
-  {$ifdef openbsd}
+  {$if defined(openbsd) or defined(netbsd)}
  st_dev: cuint64;          //* inode's device */
   st_ino: cuint64;            //* inode's number */
   st_mode: cuint32;          //* inode protection mode */
@@ -1630,7 +1630,7 @@ const
 {$if defined(freebsd) or defined(dragonfly)}
  CODESET = 0; //* codeset name */
 {$endif}
-{$ifdef openbsd}
+{$if defined(openbsd) or defined(netbsd)}
  CODESET = 51; //* codeset name */
 {$endif}
  D_T_FMT = 1; //* string for formatting date and time */
@@ -2063,7 +2063,7 @@ function __errno_location: PInteger; cdecl;external clib name '__errno_location'
 {$if defined(freebsd) or defined(dragonfly)}
 function __errno_location: PInteger; cdecl;external clib name '__error';
 {$endif}
-{$ifdef openbsd}
+{$if defined(openbsd) or defined(netbsd)}
 function __errno_location: PInteger; cdecl;external clib name '__errno';
 {$endif}
 function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;external clib name 'strerror_r';
@@ -2127,7 +2127,7 @@ type
         d_namlen: cuint8;             //* length of string in d_name */
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
-         {$ifdef openbsd}
+         {$if defined(openbsd) or defined(netbsd)}
         d_fileno: cuint32;          //* file number of entry */
         d_off : __off64_t;
         d_reclen: cuint16;            //* length of this record */

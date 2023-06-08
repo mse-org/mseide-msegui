@@ -7,7 +7,7 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit msesysintf; //linux, freebsd, openbsd, dragonfly
+unit msesysintf; //linux, freebsd, openbsd, dragonfly, netbsd
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 
 {$ifdef mse_debuglock}
@@ -1225,7 +1225,7 @@ begin
        if d.needsstat or d.needstype and
        ((dirent.d_type = dt_unknown) or (dirent.d_type = dt_lnk)) then begin
         error:= stat64(pchar(string(d.dirpath)+str1),@statbuffer) <> 0;
-       {$ifdef openbsd}
+       {$if defined(openbsd) or defined(netbsd)}
        if statbuffer.st_mode = 1 then statbuffer.st_mode := 32768
           else statbuffer.st_mode := 16384; // dir
        {$endif}
