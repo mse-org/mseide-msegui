@@ -28,7 +28,7 @@ interface
 
 uses
 baseunix,
- msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads,{$ifdef openbsd} cwstring {$else} msecwstring {$endif},{$endif}msetypes,
+ msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads, {$if defined(bsd)} cwstring {$else} msecwstring {$endif},{$endif}msetypes,
  mselibc,msectypes,
  msestrings,msestream,classes;
  
@@ -1208,7 +1208,7 @@ var
  po1: pdirent64;
  statbuffer: _stat64;
  //stat1: tstatbuf;
- str1: string;
+ str1, strtmp: string;
  error: boolean;
 begin
  result:= false;
@@ -1216,10 +1216,15 @@ begin
  with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
   if not ((include <> []) and (fa_all in exclude)) then begin
    while true do begin
-    if (readdir64_r(pdir(d.dir),@dirent,@po1) = 0) and
+     if (readdir64_r(pdir(d.dir),@dirent,@po1) = 0) and
           (po1 <> nil) then begin
      with info do begin
       str1:= dirent.d_name;
+     
+      if (str1 = strtmp) or (trim(str1) = '') then break;
+             
+      strtmp := str1;
+      
       name:= fromsys(str1);
       if checkfilename(info.name,stream) then begin
        if d.needsstat or d.needstype and

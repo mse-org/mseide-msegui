@@ -864,11 +864,11 @@ type
  {$endif} // arm64
 
  {$else} //bsd
-{$if defined(freebsd) or defined(dragonfly)}
+{$if defined(freebsd) or defined(dragonfly) or defined(netbsd)}
  ino_t = cuint32;
  mode_t = cuint16;
  {$endif}
- {$if defined(openbsd) or defined(netbsd)}
+ {$if defined(openbsd}
  ino_t = cuint64;
  mode_t = cuint64;
  {$endif}
@@ -881,7 +881,7 @@ type
  fflags_t = cuint32;
 
  _stat = packed record
-{$if defined(freebsd) or defined(dragonfly)}
+{$if defined(freebsd) or defined(dragonfly) or defined(netbsd)}
    st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
   st_mode: mode_t;          //* inode protection mode */
@@ -904,7 +904,7 @@ type
   st_birthtim: timespec;    //* time of file creation */
   {$endif}
  
-  {$if defined(openbsd) or defined(netbsd)}
+  {$if defined(openbsd)}
  st_dev: cuint64;          //* inode's device */
   st_ino: cuint64;            //* inode's number */
   st_mode: cuint32;          //* inode protection mode */
@@ -1790,12 +1790,19 @@ type
     __spinlock : longint;
   end;
   Ppthread_mutexattr_t = ^pthread_mutexattr_t;
-
+ 
+  {$ifndef netbsd}
   pthread_mutexattr_t = record
    case integer of
     0:( __mutexkind : longint);
     1:(buffer: pointer);
   end;
+  {$else}
+   pthread_mutexattr_t = record
+   ptma_magic : cint;
+   ptma_private: pointer;
+  end;
+  {$endif}
 
   Ppthread_t = ^pthread_t;
   pthread_t = culong;
@@ -2001,16 +2008,23 @@ const
  __SIZEOF_PTHREAD_MUTEX_T = {$ifdef CPU64}40{$else}24{$endif};
 type
   Ppthread_mutex_t = ^pthread_mutex_t;
+
+{$ifndef netbsd}  
   pthread_mutex_t = array[0..__SIZEOF_PTHREAD_MUTEX_T-1] of byte;
-{
+{$else}
   pthread_mutex_t = record
-       __m_reserved : longint;
-       __m_count : longint;
-       __m_owner : _pthread_descr;
-       __m_kind : longint;
-       __m_lock : _pthread_fastlock;
-    end;
-}
+         ptm_magic : dword;
+         ptm_errorcheck: char;
+         ptm_pad: array[0..2] of char;
+         ptm_interlock: char;
+         ptm_pad2: array[0..2] of char;
+         ptm_owner: pointer;
+         ptm_waiter: pointer;
+         ptm_recursed: dword;
+         ptm_spare2: pointer;
+      end;
+{$endif}
+
   DIR = record end;
    __dirstream = DIR;
   PDIR = ^DIR;
@@ -2120,14 +2134,14 @@ type
        end;
 {$else}
  dirent64 = record
-        {$if defined(freebsd) or defined(dragonfly)}
+        {$if defined(freebsd) or defined(dragonfly) or defined(netbsd)}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
         d_type: cuint8;               //* file type, see below */
         d_namlen: cuint8;             //* length of string in d_name */
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
-         {$if defined(openbsd) or defined(netbsd)}
+        {$if defined(openbsd)}
         d_fileno: cuint32;          //* file number of entry */
         d_off : __off64_t;
         d_reclen: cuint16;            //* length of this record */
@@ -2506,9 +2520,16 @@ type
    end;
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll';
+{$ifndef netbsd}                                              
 function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                                 __ss: p__sigset_t): cint
                                               cdecl; external clib name 'ppoll';
+{$else}
+function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
+                                                __ss: p__sigset_t): cint
+                                              cdecl; external clib name 'pollts';
+{$endif} 
+                                             
 const
 {$ifdef linux}
    SIG_BLOCK = 0;
