@@ -868,7 +868,7 @@ type
  ino_t = cuint32;
  mode_t = cuint16;
  {$endif}
- {$if defined(openbsd}
+ {$if defined(openbsd)}
  ino_t = cuint64;
  mode_t = cuint64;
  {$endif}
