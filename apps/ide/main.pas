@@ -48,7 +48,14 @@ uses
 const
  versiontext = '5.8.0';
  idecaption = 'MSEide';
+
  statname = 'mseide';
+ 
+ {$ifndef netbsd}
+  statname = 'mseide';
+ {$else}
+  statname = '.mseide';
+ {$endif}
 
 type
  stringconsts = (
@@ -1853,8 +1860,8 @@ begin
   {$ifdef openbsd}
   mainstatfile.filename:= statname+'obsd.sta';
   {$endif}
-  {$ifdef bsd}
-  mainstatfile.filename:= statname+'bsd.sta';
+  {$ifdef netbsd}
+  mainstatfile.filename:= statname+'nbsd.sta';
   {$endif}
 endlab:
   mainstatfile.readstat;
