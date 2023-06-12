@@ -1238,10 +1238,17 @@ begin
        if d.needsstat or d.needstype and
        ((dirent.d_type = dt_unknown) or (dirent.d_type = dt_lnk)) then begin
         error:= stat64(pchar(string(d.dirpath)+str1),@statbuffer) <> 0;
-       {$if defined(openbsd) or defined(netbsd)}
+       
+       {$if defined(openbsd)}
        if statbuffer.st_mode = 1 then statbuffer.st_mode := 32768
           else statbuffer.st_mode := 16384; // dir
        {$endif}
+      
+       {$if defined(netbsd)}
+       if statbuffer.st_mode = 33188 then statbuffer.st_mode := 32768
+          else statbuffer.st_mode := 16384; // dir
+       {$endif}
+      
        end
        else begin
         error:= false;
