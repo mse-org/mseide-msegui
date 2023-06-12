@@ -3170,12 +3170,15 @@ function pthread_mutex_unlock(var Mutex: pthread_mutex_t): Integer; cdecl;
             external threadslib name 'pthread_mutex_unlock';
 
 {$ifdef linux}
-function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
-          __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
+//function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
+//          __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
+function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir';          
 {$else}
-function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
-          __result:PPdirent64):longint;cdecl;external clib name 'readdir_r';
+//function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
+//          __result:PPdirent64):integer;cdecl;external clib name 'readdir_r';
+function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir';          
 {$endif}
+
 function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;
             external clib name 'localtime_r';
 

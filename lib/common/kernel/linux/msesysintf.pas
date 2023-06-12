@@ -1213,15 +1213,23 @@ var
 begin
  result:= false;
  po1:= nil;
+ // writeln('********** sys_readdirstream dirname ' + stream.dirinfo.dirname);
  with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
   if not ((include <> []) and (fa_all in exclude)) then begin
    while true do begin
-     if (readdir64_r(pdir(d.dir),@dirent,@po1) = 0) and
-          (po1 <> nil) then begin
+ //    if (readdir64_r(pdir(d.dir),@dirent,@po1) = 0) and (po1 <> nil) then begin
+          
+    po1 := readdir64_r(pdir(d.dir)) ;      
+    if (po1 <> nil ) then begin
+     dirent :=  po1^;
+     
      with info do begin
       str1:= dirent.d_name;
-     
-      if (str1 = strtmp) or (trim(str1) = '') then break;
+   //   writeln(' sys_readdirstream dirent.d_name ' + str1);
+     if (str1 = strtmp) or (trim(str1) = '') then
+      begin
+       break;
+      end; 
              
       strtmp := str1;
       
