@@ -93,6 +93,7 @@ object sourcefo: tsourcefo
     FEFF7FBFFEFF7F08FEFF7F00FEFF7F02FEFF7F08FEFF7F00FEFF7F00FEFF7FBF
     FEFF7F0000000008
   }
+  windowopacity = -Inf
   onclosequery = sourcefoonclosequery
   onidle = formonidle
   moduleclassname = 'tdockform'
