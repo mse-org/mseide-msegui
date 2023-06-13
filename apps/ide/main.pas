@@ -49,8 +49,6 @@ const
  versiontext = '5.8.0';
  idecaption = 'MSEide';
 
- statname = 'mseide';
- 
  {$ifndef netbsd}
   statname = 'mseide';
  {$else}
