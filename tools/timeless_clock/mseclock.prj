@@ -19,8 +19,8 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/mse_clock
-projectfilename=/home/fred/mse_clock/mseclock.prj
+projectdir=/home/fred/mseide-msegui/tools/timeless_clock
+projectfilename=/home/fred/mseide-msegui/tools/timeless_clock/mseclock.prj
 finddialog=8
  [finddialogfo.selectedonly]
  value=0
@@ -141,8 +141,8 @@ options=114
  index=2
  [projectoptionsfo]
  stackedunder=
- x=315
- y=144
+ x=428
+ y=290
  cx=1073
  cy=572
 settings=8
@@ -418,15 +418,15 @@ modulenames=1
 moduletypes=1
  TMAINFO
 modulefiles=1
- /home/fred/mse_clock/main.mfm
+ /home/fred/mseide-msegui/tools/timeless_clock/main.mfm
 befcommandon=2
  0
  59
 makeoptionson=7
  4095
- 19
- 46
- 59
+ 3
+ 62
+ 63
  60
  4095
  4095
@@ -737,7 +737,7 @@ findhistory=0
 findoptions=1
 editpos=2
  0,2
- 43,13
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
@@ -750,7 +750,7 @@ ismoduletexts=2
  0
  0
 modules=1
- /home/fred/mse_clock/main.mfm
+ /home/fred/mseide-msegui/tools/timeless_clock/main.mfm
 moduleoptions=1
  0
 visiblemodules=1
@@ -759,9 +759,9 @@ nomenumodules=1
  0
 [sourcefo.files_tab]
 firsttab=0
-index=1
+index=0
 [layout]
-windowlayout=547
+windowlayout=549
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -902,7 +902,7 @@ windowlayout=547
  x=0
  y=0
  cx=205
- cy=436
+ cy=331
  rcx=0
  rcy=0
  [projecttreefo.grid]
@@ -1092,9 +1092,9 @@ windowlayout=547
  ncx=0
  ncy=0
  x=0
- y=505
+ y=400
  cx=1469
- cy=90
+ cy=195
  rcx=0
  rcy=0
  [componentstorefo]
@@ -1163,7 +1163,7 @@ windowlayout=547
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=_mse_mainfo_mse_
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -1220,8 +1220,10 @@ windowlayout=547
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/kernel/linux/libdl_225_mse.c
- history=7
+ value=/home/fred/mseide-msegui/tools/timeless_clock/mseclock.pas
+ history=9
+  /home/fred/mseide-msegui/tools/timeless_clock/mseclock.pas
+  /home/fred/mseide-msegui/tools/timeless_clock/main.pas
   /home/fred/mse_clock/mseclock.pas
   /home/fred/mse_clock/libdl_225_mse.c
   /home/fred/mse_clock/libdl_mse.c
@@ -1246,12 +1248,12 @@ windowlayout=547
  x=208
  y=0
  cx=1261
- cy=436
+ cy=331
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=1
+ index=0
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1287,13 +1289,13 @@ windowlayout=547
  x=0
  y=66
  cx=1469
- cy=436
+ cy=331
  rcx=0
  rcy=0
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=objectinspectorfo
+ stackedunder=componentpalettefo
  parent=
  mdistate=3
  nx=0

@@ -10,5 +10,20 @@ The options can be changed with Project-Options.
 
 3) Without any option (like it is by default) the linker will assign the last table of the sytsem that compiles.
    The binary will run on same systems as the compilation-system, futures too but not on system with previous version.
+
+
+You may check the result of each option-method via a terminal.
+
+> cd /directory-of-mseide-msegui/tools/timeless_clock/mseclock/
+
+> objdump -T mseclock | grep "("
    
+You will have the list of the versioned symbol for each method used.
+
+With option/method:
+
+ 1) You should see only @GLIBC_2.2.5 signature for all methods.
+ 2) Some methods of 1) are unisigned, they are part now of the "Base" symbols. (you may check with grep "Base")
+ 3) The majority of signature is @GLIBC_2.2.5 but there are some @GLIBC_2.34 or higher.
+
 
