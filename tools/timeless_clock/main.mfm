@@ -1,0 +1,44 @@
+object mainfo: tmainfo
+  bounds_x = 559
+  bounds_y = 334
+  bounds_cx = 272
+  bounds_cy = 52
+  bounds_cxmin = 272
+  bounds_cymin = 52
+  bounds_cxmax = 272
+  bounds_cymax = 52
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.bounds = (
+    0
+    0
+    272
+    52
+  )
+  options = [fo_main, fo_terminateonclose, fo_screencentered, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savezorder, fo_savestate]
+  caption = 'Timeless MSE clock'
+  windowopacity = -Inf
+  moduleclassname = 'tmainform'
+  object tlabel1: tlabel
+    optionswidget1 = [ow1_fontglyphheight, ow1_autoheight]
+    bounds_x = 16
+    bounds_y = 8
+    bounds_cx = 240
+    bounds_cy = 36
+    font.shadow_color = -1610612730
+    font.shadow_shiftx = 2
+    font.height = 26
+    font.name = 'stf_default'
+    font.options = [foo_antialiased2]
+    font.localprops = [flp_shadow_color, flp_shadow_shiftx, flp_shadow_shifty, flp_height, flp_options]
+    textflags = [tf_xcentered, tf_ycentered]
+    reffontheight = 36
+  end
+  object ttimer1: ttimer
+    interval = 500000
+    ontimer = ontim
+    enabled = True
+    left = 8
+    top = 8
+  end
+end

@@ -1,3 +1,5 @@
+// In /mseide-msegui/lib/common/kernel/linux/mseguiintf.pas
+
 { MSEgui Copyright (c) 1999-2018 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
@@ -6164,7 +6166,17 @@ begin
 //    int1:= poll(@pollinfo[0],length(pollinfo),1000);
 //                              //todo: use ppoll? no timeout?
     with pollinf^ do begin
-     i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
+ 
+{$ifdef linux} 
+ {$ifdef glibc225}
+  i1:= ppoll(@pollinfo[0],length(pollinfo),1000);
+ {$else}
+  i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
+ {$endif}
+{$else} 
+  i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
+{$endif}     
+    
      if pollinfo[1].revents <> 0 then begin
       repeat                                     //empty pipe
       until (__read(connectpipe.readdes,dummybyte,1) < 0) and
@@ -6901,7 +6913,15 @@ begin
   fillchar(pollinf^,sizeof(pollinfty),0);
   sys_mutexcreate(connectmutex1);
   sys_mutexcreate(connectmutex2);
-  pipe2(connectpipe,o_cloexec or o_nonblock);
+
+  {$ifdef glibc225}
+   pipe(connectpipe);
+   fcntl(connectpipe.ReadDes, F_SETFL, o_cloexec or o_nonblock); 
+   fcntl(connectpipe.WriteDes, F_SETFL, o_cloexec or o_nonblock); 
+  {$else}
+   pipe2(connectpipe,o_cloexec or o_nonblock);
+  {$endif}
+  
   resetrepeatkey;
   {$ifdef mse_flushgdi}
   xinitthreads;

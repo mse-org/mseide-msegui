@@ -173,7 +173,7 @@ begin
  end;
  if ft_load_glyph(fftface,charindex1,ft_load_default) = 0 then begin
   if ft_render_glyph(fftface^.glyph,ft_render_mode_normal) = 0 then begin
-   abitmap.options:= abitmap.options + [bmo_masked,bmo_graymask];
+   abitmap.options:= abitmap.options + [bmo_masked];
    with fftface^.glyph^.bitmap do begin //todo: check bitmap format
     if (width > 0) and (rows > 0) then begin
      sourcesize.cx:= width;
