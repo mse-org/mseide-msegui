@@ -1,11 +1,14 @@
-Demo the options to link libc.so with different signed symbols tables in Project-option.
+Demo to show the options to link libc.so with different signed symbols tables.
 
-1) When using option "-dglibc225" + second option in "Command before" + first option of "Command after" the oldest GLIBC_2.2.5 will be used. The binary will run on older distros, present and futures.
+The options can be changed with Project-Options.
 
-2) When using only first option in "Command before" + first option of "Command after" the "unsigned", symbols will be assigned.
-At running the binary will use the last table of the libc.so host. The binary will run on older distros, present and should be on futures version.
+1) When using in tab "Make" option "-dglibc225" + in tab "Command before" second line + in tab "Command after" first line, the oldest GLIBC_2.2.5 will be used.
+   The binary will run on older distros, present and futures.
+
+2) When using only in tab "Command before" first line + in tab "Command after" first line, the "unsigned" symbols will be assigned.
+   At running the binary will use the last table of the libc.so host. The binary will run on older distros, present and should be ok on future versions.
 
 3) Without any option (like it is by default) the linker will assign the last table of the sytsem that compiles.
-The binary will run on same system as the compilation-sytsem, futures but not on previous version.
-
+   The binary will run on same systems as the compilation-system, futures too but not on system with previous version.
+   
 
