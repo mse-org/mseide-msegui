@@ -30,7 +30,6 @@ uses
   classes,mclasses,SysUtils, msqldb, mdb,
   {$ifdef FPC}dbconst{$else}dbconst_del{$endif},
             msedbevents,msetypes{msestrings},msedb,
-  FieldTypeError,
 {$IfDef LinkDynamically}
   postgres3dyn;
 {$Else}
@@ -938,7 +937,6 @@ begin
    end
    else begin
     size:= PQfsize(Res,i);
-    // Warning: Case statement does not handle all possible cases
     case fieldtype of
      ftstring: begin
       if size = -1 then begin
@@ -974,8 +972,6 @@ begin
        end;
       end;
      end;
-     // Cover remaining cases by raising an exception:
-     else FieldError (fieldtype);
     end;
    end;
    str1:= PQfname(Res,i);

@@ -2740,16 +2740,32 @@ end;
 
 function confirmdeleterecord: boolean;
 begin
+{$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_Delete_record_question) then
+ result:= askok(lang_stockcaption[ord(sc_Delete_record_question)],
+ lang_stockcaption[ord(sc_confirmation)]) else
+  result:= askok('Delete record ?', 'Confirmation') ;
+ 
+{$else}
  with stockobjects do begin
   result:= askok(captions[sc_Delete_record_question],captions[sc_confirmation]);
  end;
+{$endif} 
 end;
 
 function confirmcopyrecord: boolean;
 begin
+{$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_Delete_record_question) then
+ result:= askok(lang_stockcaption[ord(sc_Delete_record_question)],
+ lang_stockcaption[ord(sc_confirmation)]) else
+ result:= askok('Delete record ?',
+ 'Confirmation');
+{$else}
  with stockobjects do begin
   result:= askok(captions[sc_Copy_record_question],captions[sc_confirmation])
   end;
+{$endif}  
 end;
 
 { tnavigdatalink }
@@ -2926,7 +2942,6 @@ begin
    end;
   end;
   with datasource.dataset do begin
-   // Warning: Case statement does not handle all possible cases
    case abutton of
     dbnb_first: first;
     dbnb_prior: begin
@@ -2995,9 +3010,6 @@ begin
       dscontroller.copyrecord(dno_append in options1);
      end;
     end;
-    else { cannot occur? }
-     Raise Exception.Create ('Unhandled case value, ordinal #'+ IntToStr (ord (abutton))) AT
-           get_caller_addr (get_frame), get_caller_frame (get_frame);
    end;
    if fdscontroller <> nil then begin
     if state = dsfilter then begin
@@ -3170,7 +3182,12 @@ begin
  for int1:= 0 to ord(high(dbnavigbuttonty)) do begin
   with buttons[int1] do begin
 ////   hint:= stockobjects.captions[stockcaptionty(int1+ord(sc_first))];
+{$ifdef mse_dynpo}
+if length(lang_stockcaption) > ord(sc_Delete_record_question) then
+    hint:= lang_stockcaption[ord(dbnavighints[dbnavigbuttonty(int1)])] ;
+{$else}
    hint:= stockobjects.captions[dbnavighints[dbnavigbuttonty(int1)]];
+{$endif}   
    if (dno_shortcuthint in foptions) then begin
     if dbnavigbuttonty(int1) = dbnb_dialog then begin
      sc1:= shortcut;
@@ -3186,11 +3203,23 @@ begin
  end;
  with buttons[ord(dbnb_insert)] do begin
   if dno_append in self.options then begin
+{$ifdef mse_dynpo}
+  if length(lang_stockcaption) > ord(sc_append) then
+   hint:= lang_stockcaption[ord(sc_append)] else
+     hint:= 'Append'; 
+  end
+  else begin
+    if length(lang_stockcaption) > ord(sc_insert) then
+   hint:= lang_stockcaption[ord(sc_insert)] else
+   hint:= 'Insert'; 
+  end;
+{$else}
    hint:= stockobjects.captions[sc_append];
   end
   else begin
    hint:= stockobjects.captions[sc_insert];
   end;
+{$endif}   
   
   if (dno_shortcuthint in foptions) and 
             (fshortcuts[dbnb_insert] <> 0) then begin

@@ -571,10 +571,9 @@ begin
  case akind of
   pbk_database: kind1:= ixpbbuilder.DPB;
   pbk_transaction: kind1:= ixpbbuilder.TPB;
-  // Warning: Unreachable code
-//  else begin
-//   raise exception.create('Internalerror 20160924A');
-//  end;
+  else begin
+   raise exception.create('Internalerror 20160924A');
+  end;
  end;
  result:= fapi.util.getxpbbuilder(fapi.status,kind1,nil,0);
 end;

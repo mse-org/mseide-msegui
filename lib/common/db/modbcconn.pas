@@ -185,7 +185,6 @@ type
 
 implementation
 uses
-  FieldTypeError,
   Math, {$ifdef FPC}DBConst{$else}dbconst_del{$endif},msedatabase;
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -1198,7 +1197,6 @@ begin
        memolen1:= memolen1 * sizeof(widechar);
       end;
       BlobBufferSize:= StrLenOrInd;
-      // Warning: Case statement does not handle all possible cases
       case datatype of
        ftmemo: begin
         blobbuffersize:= blobbuffersize + sizeof(char); //terminating 0
@@ -1206,8 +1204,6 @@ begin
        ftwidememo: begin
         blobbuffersize:= (blobbuffersize+1)*sizeof(widechar); //terminating 0
        end;
-       // Cover remaining cases by raising an exception:
-       else FieldError (datatype);
       end;
      end
      else begin
@@ -1234,15 +1230,12 @@ begin
        end;
        inc(int1,bytesread);              
       until Res = SQL_SUCCESS;
-      // Warning: Case statement does not handle all possible cases
       case datatype of
        ftmemo,ftwidestring: begin
         if memolen1 < int1 then begin
          int1:= memolen1; //remove terminating 0
         end;
        end;
-       // Cover remaining cases by raising an exception:
-       else FieldError (datatype);
       end;
       setlength(str1,int1);
      end;

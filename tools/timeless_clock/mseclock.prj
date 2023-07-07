@@ -741,7 +741,7 @@ editpos=2
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
- ${PROJECTDIR}/mseclock.pas
+ /home/fred/mseide-msegui/tools/timeless_clock/mseclock.pas
  ${PROJECTDIR}/main.pas
 relpaths=2
  mseclock.pas

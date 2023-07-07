@@ -32,7 +32,6 @@ uses
  mseapplication,mseinterfaces,
  sysutils,msebintree,mseact,msetimer,maskutils,mseifiglob,
  mseificompglob,mseeditglob,
- FieldTypeError,
  msevariants{$ifndef FPC},classes_del{$endif};
 
 const
@@ -1851,7 +1850,7 @@ uses
  rtlconsts,msefileutils,typinfo,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},
  msearrayutils,mseformatstr,msebits,msefloattostr,msebufdataset,
  msereal,variants,msedate,msesys,sysconst
- {,msedbgraphics}{$ifdef unix},{$ifdef openbsd} cwstring {$else} msecwstring {$endif}{$endif};
+ {,msedbgraphics}{$ifdef unix},msecwstring{$endif};
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -2733,7 +2732,6 @@ begin
                  (mstr1 <> tmsestringfield(field).asmsestring);
   end
   else begin
-   // Warning: Case statement does not handle all possible cases
    case field.datatype of
     ftString,ftFixedChar,ftmemo,ftblob,ftguid: begin
      str1:= field.asstring;
@@ -2779,8 +2777,7 @@ begin
  //    ftADT, ftArray, ftReference,
  //    ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
  //    ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
-    // Cover remaining cases by raising an exception:
-    else FieldError (field.datatype);
+ 
    end;
   end;
   ds1.restorestate(statebefore); 
@@ -2865,13 +2862,10 @@ begin
   try
    result:= msestring(sender.asstring);
   except
-   {$ifndef openbsd}
    on e: eiconv do begin
     //no crash by iconverror
    end
-   else 
-   {$endif}
-   begin
+   else begin
     raise;
    end;
   end;

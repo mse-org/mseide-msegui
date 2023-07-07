@@ -39,7 +39,6 @@ uses
  {$endif}
 {$endif}
   classes,mclasses,SysUtils,msqldb,mdb,{$ifdef FPC}dynlibs,{$endif}msestrings,
-  FieldTypeError,
   msedb,mysqldyn,msetypes,msectypes;
 
 Type
@@ -1073,7 +1072,6 @@ begin
        inputparambindings[int1].isnull:= true;
       end
       else begin
-       // Warning: Case statement does not handle all possible cases
        case datatype of
         ftinteger,ftsmallint,ftword: begin
          pinteger(inputparambindings[int1].buffer)^:= asinteger;
@@ -1098,8 +1096,6 @@ begin
                                   inputparambindings,pointer(strings[int1]),
                                   length(strings[int1]));
         end;
-        // Cover remaining cases by raising an exception:
-        else FieldError (datatype);
        end;
       end;
      end;
@@ -1641,7 +1637,6 @@ begin
   end;
   else begin
    Src:=StrPas(Source);
-   // Warning: Case statement does not handle all possible cases
    case AType of
     FIELD_TYPE_TINY, FIELD_TYPE_SHORT, FIELD_TYPE_LONG,
     FIELD_TYPE_INT24:
@@ -1721,10 +1716,6 @@ begin
      move(int1,dest^,sizeof(int1));
       //save id
     end;     
-    // Warning: Case statement does not handle all possible cases
-    else { cannot occur? }
-     Raise Exception.Create ('Unhandled case value, ordinal #'+ IntToStr (ord (AType))) AT
-           get_caller_addr (get_frame), get_caller_frame (get_frame);
    end;
   end;
  end;
