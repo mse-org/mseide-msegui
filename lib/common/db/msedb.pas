@@ -2862,10 +2862,13 @@ begin
   try
    result:= msestring(sender.asstring);
   except
+  {$ifndef openbsd}
    on e: eiconv do begin
     //no crash by iconverror
    end
-   else begin
+   else 
+   {$endif}
+   begin
     raise;
    end;
   end;
