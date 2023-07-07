@@ -19,8 +19,6 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/mseide-msegui/tools/timeless_clock
-projectfilename=/home/fred/mseide-msegui/tools/timeless_clock/mseclock.prj
 finddialog=8
  [finddialogfo.selectedonly]
  value=0
@@ -716,7 +714,6 @@ files=
  a=0,8228,6,Text Files
  )
 [componentstore]
-storedir=/home/fred/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -741,7 +738,7 @@ editpos=2
 bookmarks0=0
 bookmarks1=0
 sourcefiles=2
- /home/fred/mseide-msegui/tools/timeless_clock/mseclock.pas
+ ${PROJECTDIR}/mseclock.pas
  ${PROJECTDIR}/main.pas
 relpaths=2
  mseclock.pas
