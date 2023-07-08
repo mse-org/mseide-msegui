@@ -1,5 +1,9 @@
 MSEide+MSEgui changes version history
 **********************************************
+Version 5.8.2
+2023-06-08
+Fixes for db filters.
+-dglibc225 parameter to have "timeless" binaries.
 
 Version 5.8.0
 2023-05-28
