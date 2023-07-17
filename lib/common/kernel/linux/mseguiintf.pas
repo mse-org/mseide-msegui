@@ -6168,7 +6168,7 @@ begin
     with pollinf^ do begin
  
 {$ifdef linux} 
- {$ifdef glibc225}
+ {$if defined(glibc225) or defined(glibc20)}
   i1:= ppoll(@pollinfo[0],length(pollinfo),1000);
  {$else}
   i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
@@ -6914,7 +6914,7 @@ begin
   sys_mutexcreate(connectmutex1);
   sys_mutexcreate(connectmutex2);
 
-  {$ifdef glibc225}
+   {$if defined(glibc225) or defined(glibc20)}
    pipe(connectpipe);
    fcntl(connectpipe.ReadDes, F_SETFL, o_cloexec or o_nonblock); 
    fcntl(connectpipe.WriteDes, F_SETFL, o_cloexec or o_nonblock); 

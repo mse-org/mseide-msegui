@@ -132,7 +132,7 @@ options=114
  sorted=0
  col=-1073741823
  row=-1073741823
- rowheight=19
+ rowheight=22
  [projectoptionsfo.newfile]
  firsttab=1
  index=2
@@ -154,9 +154,9 @@ options=114
  sortdescend6=0
  [projectoptionsfo.macrosplitter]
  x=0
- y=198
+ y=196
  xprop=1
- yprop=0.35201401050788
+ yprop=0.35221238938053
  [projectoptionsfo.macrogrid]
  propcolwidthref=561
  sortdescend0=0
@@ -181,7 +181,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=5
+ index=2
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=779
  width0=47
@@ -929,7 +929,7 @@ nomenumodules=3
 firsttab=0
 index=0
 [layout]
-windowlayout=531
+windowlayout=549
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -949,7 +949,7 @@ windowlayout=531
  cy=621
  rcx=0
  rcy=0
- wsize=0
+ wsize=6
  active=1
  visible=1
  [findmessagefo.findtext]
@@ -1080,15 +1080,15 @@ windowlayout=531
  active=0
  visible=0
  [projecttreefo.grid]
- propcolwidthref=28
+ propcolwidthref=26
  width0=141
  sortdescend0=0
- width1=26
+ width1=24
  sortdescend1=0
  sorted=0
  col=1
  row=0
- rowheight=16
+ rowheight=19
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1166,10 +1166,10 @@ windowlayout=531
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=242
+ propcolwidthref=240
  width0=58
  sortdescend0=0
- width1=178
+ width1=176
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1192,7 +1192,25 @@ windowlayout=531
  visible=0
  [symbolfo.grid]
  propcolwidthref=207
- values0=0
+ values0=18
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
  width0=111
  sortdescend0=0
  width1=125
@@ -1244,8 +1262,8 @@ windowlayout=531
  ncx=0
  ncy=0
  x=0
- y=510
- cx=1219
+ y=719
+ cx=1586
  cy=88
  rcx=0
  rcy=0
@@ -1315,7 +1333,7 @@ windowlayout=531
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=objectinspectorfo
+ stackedunder=confdebuggerfo
  parent=
  mdistate=0
  nx=0
@@ -1345,8 +1363,8 @@ windowlayout=531
  ncy=0
  x=0
  y=0
- cx=1219
- cy=56
+ cx=1586
+ cy=89
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1357,12 +1375,12 @@ windowlayout=531
  mdistate=0
  nx=0
  ny=0
- ncx=1219
+ ncx=1217
  ncy=63
  x=0
  y=0
- cx=1219
- cy=63
+ cx=1586
+ cy=90
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1372,11 +1390,11 @@ windowlayout=531
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/main.pas
+ value=/home/fred/mseide-msegui/lib/common/kernel/msegui.pas
  history=7
+  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
   /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/mseide-msegui/apps/ide/sourceform.pas
-  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
   /home/fred/mseide-msegui/apps/ide/sourceform.mfm
   /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
   /home/fred/ideU/src/main.pas
@@ -1397,8 +1415,8 @@ windowlayout=531
  ncy=0
  x=0
  y=0
- cx=1219
- cy=448
+ cx=1586
+ cy=624
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1437,9 +1455,9 @@ windowlayout=531
  ncx=0
  ncy=0
  x=0
- y=59
- cx=1219
- cy=448
+ y=92
+ cx=1586
+ cy=624
  rcx=0
  rcy=0
  [_mse_actionsmo_mse_]
