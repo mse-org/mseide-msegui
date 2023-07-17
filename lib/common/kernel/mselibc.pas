@@ -3917,7 +3917,7 @@ function pthread_mutex_unlock(var Mutex: pthread_mutex_t): Integer; cdecl;
 {$ifdef linux}
 //function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
 //          __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
-function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir@GLIBC_2.0';          
+function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir64@GLIBC_2.2';          
 {$else}
 //function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
 //          __result:PPdirent64):integer;cdecl;external clib name 'readdir_r';
@@ -3985,9 +3985,13 @@ function pthread_mutex_unlock(var Mutex: pthread_mutex_t): Integer; cdecl;
             external threadslib name 'pthread_mutex_unlock';
 
 {$ifdef linux}
+{$if defined(cpu64)}
 //function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
 //          __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
-function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir';          
+function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir';        
+{$else}
+function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir64';        
+{$endif}
 {$else}
 //function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
 //          __result:PPdirent64):integer;cdecl;external clib name 'readdir_r';
