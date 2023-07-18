@@ -6168,7 +6168,7 @@ begin
     with pollinf^ do begin
  
 {$ifdef linux} 
- {$if defined(glibc225) or defined(glibc20)}
+ {$if (defined(glibc225) or defined(glibc20)) and (defined(i386) or defined(x86_64)) }
   i1:= ppoll(@pollinfo[0],length(pollinfo),1000);
  {$else}
   i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);

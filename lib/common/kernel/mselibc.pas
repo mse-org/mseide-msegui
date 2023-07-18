@@ -734,8 +734,9 @@ type
   udata: pointer;    //* opaque user data identifier */
  end;
  pkevent_t = ^kevent_t;
+ 
 
-{$ifdef glibc225} // 64 bit
+{$if defined(glibc225) and defined(x86_64)} // 64 bit
    function kqueue(): cint; cdecl; external clib name 'kqueue@GLIBC_2.2.5';
    function kevent(kq: cint; changelist: pkevent_t; nchanges: cint;
               eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint;
@@ -1752,10 +1753,10 @@ type
  Pnl_item = ^nl_item;
  nl_item = longint;
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function nl_langinfo(__item: nl_item):Pchar; cdecl; external clib name 'nl_langinfo@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function nl_langinfo(__item: nl_item):Pchar; cdecl; external clib name 'nl_langinfo@GLIBC_2.0';
 {$else}
 function nl_langinfo(__item: nl_item):Pchar; cdecl; external clib name 'nl_langinfo';
@@ -2019,7 +2020,7 @@ const
    S_IFLNK  = __S_IFLNK;
    S_IFSOCK = __S_IFSOCK;
    
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function sigaction(__sig:longint; Const act: _sigaction;
        Var oldact: _sigaction):longint;
                    cdecl;external clib name 'sigaction@GLIBC_2.2.5'; overload;
@@ -2028,7 +2029,7 @@ function sigaction(__sig: longint; Action: PSigAction;
                     cdecl;external clib name 'sigaction@GLIBC_2.2.5'; overload;
 
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function sigaction(__sig:longint; Const act: _sigaction;
        Var oldact: _sigaction):longint;
                    cdecl;external clib name 'sigaction@GLIBC_2.0'; overload;
@@ -2107,7 +2108,7 @@ type
  end;
  ppasswd = ^passwd;
  pppasswd = ^ppasswd;
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function getpid:__pid_t;cdecl;external clib name 'getpid@GLIBC_2.2.5';
 function getuid(): uid_t cdecl;external clib name 'getuid@GLIBC_2.2.5';
 function geteuid(): uid_t cdecl;external clib name 'geteuid@GLIBC_2.2.5';
@@ -2121,7 +2122,7 @@ function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;
 function __errno_location: PInteger; cdecl;external clib name '__errno_location@GLIBC_2.2.5';
 {$endif}
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function getpid:__pid_t;cdecl;external clib name 'getpid@GLIBC_2.0';
 function getuid(): uid_t cdecl;external clib name 'getuid@GLIBC_2.0';
 function geteuid(): uid_t cdecl;external clib name 'geteuid@GLIBC_2.0';
@@ -2252,7 +2253,7 @@ type
   TMutexAttribute = pthread_mutexattr_t;
   PMutexAttribute = ^TMutexAttribute;
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function pthread_mutexattr_init(var __attr: pthread_mutexattr_t):longint;cdecl; 
                  external threadslib  name 'pthread_mutexattr_init@GLIBC_2.2.5';
 function pthread_mutexattr_settype(var __attr: pthread_mutexattr_t; Kind: Integer): Integer; cdecl; 
@@ -2274,7 +2275,7 @@ function open(__file:Pchar; __oflag: cint): cint;
                     cdecl; varargs; external clib name 'open@GLIBC_2.2.5'; overload;
 function __close(Handle: cint): cint; cdecl;external clib name 'close@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function pthread_mutexattr_init(var __attr: pthread_mutexattr_t):longint;cdecl; 
                  external threadslib  name 'pthread_mutexattr_init@GLIBC_2.0';
 function pthread_mutexattr_settype(var __attr: pthread_mutexattr_t; Kind: Integer): Integer; cdecl; 
@@ -2320,11 +2321,11 @@ function __close(Handle: cint): cint; cdecl;external clib name 'close';
 {$endif}
 
 {$ifdef linux}
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function ftruncate64(handle: cint; size: cint64): cint; cdecl;
                                      external clib name 'ftruncate64@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function ftruncate64(handle: cint; size: cint64): cint; cdecl;
                                      external clib name 'ftruncate64@GLIBC_2.1';
 {$else}
@@ -2348,7 +2349,7 @@ const
 
 //* Test for access to NAME using the real UID and real GID.  */
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function access(__name: pchar; __type: cint): cint;
                                         cdecl; external clib name 'access@GLIBC_2.2.5';
 
@@ -2379,7 +2380,7 @@ function sem_trywait(var __sem: sem_t): cint;
                     cdecl; external threadslib name 'sem_trywait@GLIBC_2.2.5';
 function sem_getvalue(var __sem: sem_t; __sval:Plongint):longint;cdecl;external threadslib name 'sem_getvalue@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function access(__name: pchar; __type: cint): cint;
                                         cdecl; external clib name 'access@GLIBC_2.0';
 
@@ -2458,7 +2459,7 @@ Const
  {$else}
   RECURSIVE     = 2;
  {$endif}
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function pthread_setcanceltype(__type:longint; var __oldtype:longint):longint;
                           cdecl; external threadslib name 'pthread_setcanceltype@GLIBC_2.2.5'; overload;
 function pthread_setcanceltype(__type:longint; __oldtype:Plongint):longint;
@@ -2469,7 +2470,7 @@ function pthread_equal(__thread1:pthread_t; __thread2:pthread_t):longint;
                        cdecl;external threadslib name 'pthread_equal@GLIBC_2.2.5';
 function pthread_self:pthread_t;cdecl;external threadslib name 'pthread_self@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function pthread_setcanceltype(__type:longint; var __oldtype:longint):longint;
                           cdecl; external threadslib name 'pthread_setcanceltype@GLIBC_2.0'; overload;
 function pthread_setcanceltype(__type:longint; __oldtype:Plongint):longint;
@@ -2504,7 +2505,7 @@ const
  _STAT_VER = _STAT_VER_LINUX;
 
 {$ifdef linux}
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
                              cdecl;external clib name '__fxstat@GLIBC_2.2.5';
 function __xstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
@@ -2512,7 +2513,7 @@ function __xstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
 function __lxstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
                              cdecl;external clib name '__lxstat@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
                              cdecl;external clib name '__fxstat@GLIBC_2.0';
 function __xstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
@@ -2532,7 +2533,7 @@ function __lxstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
 
 
 {$ifndef CPU64}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function __fxstat64(__ver:longint; __fildes:longint; __stat_buf:Pstat64):longint;
                              cdecl;external clib name '__fxstat64@GLIBC_2.0';
 function __xstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
@@ -2560,7 +2561,7 @@ function fstat64(__fd:longint; __buf:Pstat64):longint;
 function lstat(__file:Pchar; __buf:Pstat):longint;
 function lstat64(__file:Pchar; __buf:Pstat64):longint;
 {$else} //linux
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
                                    external clib name 'stat@GLIBC_2.2.5';
 function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
@@ -2574,7 +2575,7 @@ function lstat(__file:Pchar; __buf:Pstat):longint; cdecl;
 function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
                                    external clib name 'lstat@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
                                    external clib name 'stat@GLIBC_2.0';
 function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
@@ -2606,7 +2607,7 @@ function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
 
 function S_ISDIR(mode : __mode_t) : boolean;
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function flock(fd: cint; operation: cint): cint; cdecl;
                                    external clib name 'flock@GLIBC_2.2.5';
 //function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
@@ -2624,7 +2625,7 @@ function __chdir(__path:Pchar):longint;cdecl;external clib name 'chdir@GLIBC_2.2
 function opendir(__name:Pchar):PDIR;cdecl;external clib name 'opendir@GLIBC_2.2.5';
 function closedir(__dirp:PDIR):longint;cdecl;external clib name 'closedir@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function flock(fd: cint; operation: cint): cint; cdecl;
                                    external clib name 'flock@GLIBC_2.0';
 //function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
@@ -2668,7 +2669,7 @@ type
   TUnixTime = tm;
   PUnixTime = ^TUnixTime;
   TTime_T = Time_t;
-{$ifdef glibc225}  
+{$if defined(glibc225) and defined(x86_64)}  
 function __time(var __timer : ttime_t):time_t;cdecl;
                                  external clib name 'time@GLIBC_2.2.5'; overload;
 function __time(__timer:Ptime_t):time_t;
@@ -2677,7 +2678,7 @@ function timelocal(var __tp: tm):time_t;cdecl;external clib name 'timelocal@GLIB
 function setlocale(__category:longint; __locale:Pchar):Pchar;cdecl;
                                                external clib name 'setlocale@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}  
+{$if defined(glibc20) and defined(i386)}  
 function __time(var __timer : ttime_t):time_t;cdecl;
                                  external clib name 'time@GLIBC_2.0'; overload;
 function __time(__timer:Ptime_t):time_t;
@@ -2825,11 +2826,11 @@ type
   P__itimer_which_t = ^__itimer_which_t;
   __itimer_which_t = __itimer_which;
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function setitimer(__which: __itimer_which_t; __new:Pitimerval;
              __old:Pitimerval):longint;cdecl;external clib name 'setitimer@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function setitimer(__which: __itimer_which_t; __new:Pitimerval;
              __old:Pitimerval):longint;cdecl;external clib name 'setitimer@GLIBC_2.0';
 {$else}
@@ -2847,10 +2848,10 @@ type
     end;
   mbstate_t = __mbstate_t;
  Pmbstate_t = ^mbstate_t;
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function mbsnrtowcs(__dst:Pwchar_t; __src:PPchar; __nmc:size_t; __len:size_t; __ps:Pmbstate_t):size_t;cdecl;external clib name 'mbsnrtowcs@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function mbsnrtowcs(__dst:Pwchar_t; __src:PPchar; __nmc:size_t; __len:size_t; __ps:Pmbstate_t):size_t;cdecl;external clib name 'mbsnrtowcs@GLIBC_2.0';
 {$else}
 function mbsnrtowcs(__dst:Pwchar_t; __src:PPchar; __nmc:size_t; __len:size_t; __ps:Pmbstate_t):size_t;cdecl;external clib name 'mbsnrtowcs';
@@ -2891,14 +2892,14 @@ function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               
 {$else}
 {$ifdef linux} 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll@GLIBC_2.2.5';
 
 function ppoll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                             cdecl; external clib name 'poll@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll@GLIBC_2.0';
 
@@ -2935,7 +2936,7 @@ const
    SIG_SETMASK =3;         //* set specified signal set */
 {$endif}
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function signal(__sig:longint; __handler:__sighandler_t):__sighandler_t;
                             cdecl; external clib name 'signal@GLIBC_2.2.5';
 function sigemptyset(var SigSet : TSigSet):longint;
@@ -2958,7 +2959,7 @@ function pthread_sigmask(__how: cint; __newmask: p__sigset_t;
 function kill(__pid:__pid_t; __sig:longint):longint;cdecl;
                                           external clib name 'kill@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function signal(__sig:longint; __handler:__sighandler_t):__sighandler_t;
                             cdecl; external clib name 'signal@GLIBC_2.0';
 function sigemptyset(var SigSet : TSigSet):longint;
@@ -3007,10 +3008,10 @@ function kill(__pid:__pid_t; __sig:longint):longint;cdecl;
 {$endif}
 
 {$ifdef linux}
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function getpt:longint;cdecl;external clib name 'getpt@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function getpt:longint;cdecl;external clib name 'getpt@GLIBC_2.0';
 {$else}
 function getpt:longint;cdecl;external clib name 'getpt';
@@ -3022,11 +3023,11 @@ function posix_openpt(oflag: cint):longint; cdecl;
 function getpt(): longint;
 {$endif}
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function grantpt(__fd:longint):longint;cdecl;external clib name 'grantpt@GLIBC_2.2.5';
 function unlockpt(__fd:longint):longint;cdecl;external clib name 'unlockpt@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function grantpt(__fd:longint):longint;cdecl;external clib name 'grantpt@GLIBC_2.0';
 function unlockpt(__fd:longint):longint;cdecl;external clib name 'unlockpt@GLIBC_2.0';
 {$else}
@@ -3036,10 +3037,10 @@ function unlockpt(__fd:longint):longint;cdecl;external clib name 'unlockpt';
 {$endif}
 
 {$ifdef linux}
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;external clib name 'ptsname_r@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;external clib name 'ptsname_r@GLIBC_2.0';
 {$else}
 function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;external clib name 'ptsname_r';
@@ -3209,11 +3210,11 @@ const
   SIGRTMIN = 65;
   SIGRTMAX = 126;
   {$else}
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function SIGRTMIN(): cint; cdecl; external clib name '__libc_current_sigrtmin@GLIBC_2.2.5';
 function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function SIGRTMIN(): cint; cdecl; external clib name '__libc_current_sigrtmin@GLIBC_2.0';
 function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax@GLIBC_2.0';
 {$else}
@@ -3224,7 +3225,7 @@ function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax';
 {$endif}
 
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function ioctl(__fd: cint; __request:dword; args: array of const): cint;
                                cdecl;external clib name 'ioctl@GLIBC_2.2.5'; overload;
 function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
@@ -3238,7 +3239,7 @@ function ttyname(__fd: cint): pchar; cdecl; external clib name 'ttyname@GLIBC_2.
 function ttyname_r(__fd: cint; buf: pchar; buflen: size_t): cint;
                                          cdecl; external clib name 'ttyname_r@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function ioctl(__fd: cint; __request:dword; args: array of const): cint;
                                cdecl;external clib name 'ioctl@GLIBC_2.0'; overload;
 function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
@@ -3295,7 +3296,7 @@ const
    N_HDLC = 13;
    N_SYNC_PPP = 14;
    N_HCI = 15;
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function gettimeofday(var __tv: timeval; var _tz: timezone):longint;
                           cdecl;external clib name 'gettimeofday@GLIBC_2.2.5'; overload;
 function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
@@ -3303,7 +3304,7 @@ function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
 function pthread_kill(__thread:pthread_t; __signo:longint):longint;
                           cdecl;external threadslib name 'pthread_kill@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function gettimeofday(var __tv: timeval; var _tz: timezone):longint;
                           cdecl;external clib name 'gettimeofday@GLIBC_2.0'; overload;
 function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
@@ -3326,7 +3327,7 @@ const
    __WALL = $40000000;
    __WCLONE = $80000000;
    
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function waitpid(__pid:__pid_t; __stat_loc:Plongint; __options:longint):__pid_t;
              cdecl;external clib name 'waitpid@GLIBC_2.2.5'; overload;
 function waitpid(__pid:__pid_t; var __stat_loc:longint;
@@ -3335,7 +3336,7 @@ function waitpid(__pid:__pid_t; var __stat_loc:longint;
 function __system(__command:Pchar):longint;cdecl;external clib name 'system@GLIBC_2.2.5';
 
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function waitpid(__pid:__pid_t; __stat_loc:Plongint; __options:longint):__pid_t;
              cdecl;external clib name 'waitpid@GLIBC_2.0'; overload;
 function waitpid(__pid:__pid_t; var __stat_loc:longint;
@@ -3370,7 +3371,7 @@ type
   TPipes = Array[0..1] of longint;
   PPipes = ^TPipes;
  
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 //function pipe2(var PipeDes: TPipeDescriptors; flags: cint): Integer; cdecl;
   //                           external clib name 'pipe2';    // to check for glibc_2.2.5                          
 function pipe(var __pipedes: TPipes):longint;
@@ -3385,7 +3386,7 @@ function setpgid(__pid:__pid_t; __pgid:__pid_t):longint; cdecl;
                                              external clib name 'setpgid@GLIBC_2.2.5';
 function getpgid(pid: __pid_t): __pid_t; cdecl; external clib name 'getpgid@GLIBC_2.2.5';
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 //function pipe2(var PipeDes: TPipeDescriptors; flags: cint): Integer; cdecl;
   //                           external clib name 'pipe2';    // to check for glibc_2.2.5                          
 function pipe(var __pipedes: TPipes):longint;
@@ -3420,7 +3421,7 @@ const
    EXIT_FAILURE = 1;
    EXIT_SUCCESS = 0;
 
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 procedure _exit (__status : longint); cdecl; external clib name '_exit@GLIBC_2.2.5';
 function execl(__path:Pchar; __arg:Pchar):longint;
                cdecl;varargs;external clib name 'execl@GLIBC_2.2.5'; overload;
@@ -3433,7 +3434,7 @@ function execve(__path: pcchar; __argv: ppchar; __envp:ppchar): cint;
 procedure free(__ptr:pointer);cdecl;external clib name 'free@GLIBC_2.2.5';
 
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 procedure _exit (__status : longint); cdecl; external clib name '_exit@GLIBC_2.0';
 function execl(__path:Pchar; __arg:Pchar):longint;
                cdecl;varargs;external clib name 'execl@GLIBC_2.0'; overload;
@@ -3684,7 +3685,7 @@ const
    SO_TIMESTAMP = 29;
    SCM_TIMESTAMP = SO_TIMESTAMP;
    SO_ACCEPTCONN = 30;
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function socket(__domain:longint; __type:longint; __protocol:longint):longint;
              cdecl;external clib name 'socket@GLIBC_2.2.5'; overload;
 function socket(__domain: Integer; __type: __socket_type;
@@ -3716,7 +3717,7 @@ function syscall(SysNo: Longint): Integer; cdecl; varargs;
                                     external clib name 'syscall@GLIBC_2.2.5';
 
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function socket(__domain:longint; __type:longint; __protocol:longint):longint;
              cdecl;external clib name 'socket@GLIBC_2.0'; overload;
 function socket(__domain: Integer; __type: __socket_type;
@@ -3787,7 +3788,7 @@ const
  __SIZEOF_PTHREAD_COND_T = {$ifdef CPU64}48{$else}48{$endif};
 type
  tcondvar = array[0..__SIZEOF_PTHREAD_COND_T-1] of byte;
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
                      external clib name 'gettimeofday@GLIBC_2.2.5'; overload;
 function  msetcgetattr(filedes: longint;
@@ -3858,7 +3859,7 @@ function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;
 
 
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
                      external clib name 'gettimeofday@GLIBC_2.0'; overload;
 function  msetcgetattr(filedes: longint;
@@ -4036,7 +4037,7 @@ function shm_open(name: pcchar; oflag: cint; mode: mode_t): cint; cdecl;
                                                 external shmlib name 'shm_open';
 function shm_unlink(name: pcchar): cint; cdecl;
                                               external shmlib name 'shm_unlink';
-{$ifdef glibc225}
+{$if defined(glibc225) and defined(x86_64)}
 function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
                                fd: cint; offset: off_t): pointer; cdecl;
                                                external clib name 'mmap@GLIBC_2.2.5';
@@ -4044,7 +4045,7 @@ function munmap(addr: pointer; length: size_t): cint; cdecl;
                                                external clib name 'munmap@GLIBC_2.2.5';
 
 {$else}
-{$ifdef glibc20}
+{$if defined(glibc20) and defined(i386)}
 function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
                                fd: cint; offset: off_t): pointer; cdecl;
                                                external clib name 'mmap@GLIBC_2.0';
