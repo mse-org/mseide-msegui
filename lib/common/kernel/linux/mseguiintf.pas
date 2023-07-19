@@ -14,6 +14,15 @@ unit mseguiintf; //X11
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
+
+{$if defined(linux) and defined(x86_64)}
+{$define glibc225}
+{$endif}
+
+{$if defined(linux) and defined(i386)}
+{$define glibc20}
+{$endif}
+
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

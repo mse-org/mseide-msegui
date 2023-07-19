@@ -2,11 +2,20 @@
 
 unit mselibc;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+
 interface
 uses
  {$ifndef win64}initc,{$endif}msectypes{$ifndef FPC},msetypes{$endif};
 
 //todo: remove not used definitions, use msectypes
+
+{$if defined(linux) and defined(x86_64)}
+{$define glibc225}
+{$endif}
+
+{$if defined(linux) and defined(i386)}
+{$define glibc20}
+{$endif}
 
 const
 {$ifdef FPC}
