@@ -1830,7 +1830,10 @@ begin
   end;
 {$ifdef mse_with_ifi}
   if fifiserverintf <> nil then begin
+  {$push}
+{$objectChecks off}
    iifidataserver(fifiserverintf).valuechanged(iifidatalink(self));
+  {$pop}
   end;
 {$endif}
  end;
@@ -1946,7 +1949,10 @@ begin
    sendchangeevent();
   end;
   if canassistive() and not quiet then begin
+  {$push}
+{$objectChecks off}
    assistiveserver.dodataentered(iassistiveclientdata(getiassistiveclient()));
+   {$pop}
   end;
  end;
 end;
@@ -2476,8 +2482,11 @@ end;
 procedure tgraphdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
+  {$push}
+{$objectChecks off}
   iifidataserver(fifiserverintf).setvalue(
                          iifidatalink(self),avalue,accept,gridrow);
+  {$pop}                       
  end;
 end;
 
@@ -4780,7 +4789,11 @@ begin
   else begin
    if (int1 <> -1) and (longword(int1) <> $80000000) then begin
    {$warnings off}
+   {$push}
+   {$objectChecks off}
     po1:= pintegeraty(tarrayprop1(fimagenums).getdatapo^);
+    
+    {$pop}
    {$warnings on}
     for int2:= 0 to fimagenums.count-1 do begin
      if int1 and bits[int2] <> 0 then begin

@@ -2412,7 +2412,10 @@ begin
  inherited create(nil,fmenucomp.menu,nil,aowner,fmenucomp);
  if csdesigning in componentstate then begin
 {$warnings off}
+  {$push}
+{$objectChecks off}
   tmsecomponent1(fmenucomp).setdesigning(true);
+  {$pop}
 {$warnings on}
  end;
  freeandnil(fframe);

@@ -2609,7 +2609,10 @@ begin
  fcaptiondist:= 1;
  inherited create(aintf);
  if ffont = nil then begin
+{$push}
+{$objectChecks off} 
   finfo.font:= icaptionframe(fintf).getframefont;
+{$pop} 
  end;
 end;
 
@@ -2717,13 +2720,20 @@ end;
 function tcustomcaptionframe.getfont: tframefont;
 begin
 // getoptionalobject(fintf.getcomponentstate,ffont,{$ifdef FPC}@{$endif}createfont);
+{$push}
+{$objectChecks off}
  icaptionframe(fintf).getwidget.getoptionalobject(ffont,
                                          {$ifdef FPC}@{$endif}createfont);
+ 
+ {$pop}
  if ffont <> nil then begin
   result:= ffont;
  end
  else begin
+{$push}
+{$objectChecks off} 
   result:= tframefont(icaptionframe(fintf).getframefont);
+  {$pop}
  end;
 end;
 
@@ -2735,7 +2745,10 @@ begin
    finfo.font:= ffont;
   end
   else begin
+{$push}
+{$objectChecks off}  
    finfo.font:= icaptionframe(fintf).getframefont;
+   {$pop}
   end;
   internalupdatestate();
  end;
@@ -2750,10 +2763,14 @@ procedure tcustomcaptionframe.parentfontchanged;
 begin
  inherited;
  if ffont = nil then begin
+{$push}
+{$objectChecks off} 
   finfo.font:= icaptionframe(fintf).getframefont;
+  
   if not (ws_loadedproc in icaptionframe(fintf).getwidget.widgetstate) then begin
    internalupdatestate;
-  end;
+  end
+{$pop};
  end;
 end;
 
@@ -2789,9 +2806,12 @@ begin
  if finfo.text.text <> '' then begin
   flagsbefore:= finfo.flags;
   finfo.flags:= updatetextflags(finfo.flags);
+{$push}
+{$objectChecks off}  
   canvas:= icaptionframe(fintf).getcanvas;
   canvas.font:= getfont;
   finfo.dest.size:= icaptionframe(fintf).getwidgetrect.size;
+{$pop}  
   rect1:= deflaterect(makerect(nullpoint,finfo.dest.size),fouterframe);
   textrect(canvas,finfo);
   finfo.flags:= flagsbefore;
@@ -2923,9 +2943,10 @@ begin
   finfo.dest:= nullrect;
  end;
  subframe1(fra1,fouterframe);
-
+{$push}
+{$objectChecks off}
  widget1:= twidget1(icaptionframe(fintf).getwidget);
-
+{$pop}
  if (cfo_autowidth in foptions) or
         (widget1.anchors * [an_left,an_right] = [an_left,an_right]) then begin
   if fcaptionpos in [cp_topleft,cp_bottomleft,
@@ -2956,7 +2977,10 @@ begin
    if fupdating < 16 then begin
     inc(fupdating);
     try
+{$push}
+{$objectChecks off}    
      rect1:= icaptionframe(fintf).getwidgetrect;
+{$pop}
      rect2:= deflaterect(rect1,fra1);
      if cfo_fixleft in foptions then begin
       rect2.x:= rect1.x;
@@ -2980,6 +3004,8 @@ begin
        rect2.y:= rect1.y+rect1.cy-rect2.cy;
       end;
      end;
+{$push}
+{$objectChecks off}        
      if (fupdating = 1) and
            rectisequal(icaptionframe(fintf).getwidgetrect,rect2) then begin
       if widget1.fparentwidget <> nil then begin
@@ -2989,6 +3015,7 @@ begin
      else begin
       icaptionframe(fintf).setwidgetrect(rect2);
      end;
+{$pop}     
     finally
      dec(fupdating);
     end;
@@ -3124,8 +3151,12 @@ begin
      (fintf.getcomponentstate * [csdesigning,csloading] = [csdesigning]) and
      (caption <> '') then begin
    size1.cy:= font.glyphheight + 2 * captionmargin;
+{$push}
+{$objectChecks off}   
    size1.cx:= icaptionframe(fintf).getcanvas.getstringwidth(caption,getfont) +
                         2 * captionmargin;
+
+{$pop}
    case captionpos of
     cp_center: begin
     end;
@@ -3489,6 +3520,8 @@ end;
 
 procedure tcustomscrollframe.mouseevent(var info: mouseeventinfoty);
 begin
+{$push}
+{$objectChecks off}   
  if not (ws_clientmousecaptured in iscrollframe(fintf).widgetstate) then begin
   if fs_sbhorzon in fstate then begin
    fhorz.mouseevent(info);
@@ -3497,6 +3530,7 @@ begin
    fvert.mouseevent(info);
   end;
  end;
+{$pop}
 end;
 
 procedure tcustomscrollframe.domousewheelevent(var info: mousewheeleventinfoty;
@@ -3722,7 +3756,10 @@ begin
  if ({$ifdef FPC}longword{$else}longword{$endif}(statebefore) xor
      {$ifdef FPC}longword{$else}longword{$endif}(fstate)) and
      {$ifdef FPC}longword{$else}longword{$endif}(scrollbarframestates) <> 0 then begin
-  iscrollframe(fintf).getwidget.invalidatewidget;
+{$push}
+{$objectChecks off}   
+ iscrollframe(fintf).getwidget.invalidatewidget;
+{$pop}
  end;
 end;
 {
@@ -3836,11 +3873,14 @@ procedure tcustomstepframe.layoutchanged;
 var
  widget: twidget;
 begin
+{$push}
+{$objectChecks off}   
  widget:= icaptionframe(fintf).getwidget;
  if not (csloading in widget.ComponentState) then begin
   updatestate;
   widget.invalidaterect(fdim,org_widget);
  end;
+{$pop}
 end;
 
 procedure tcustomstepframe.dorepeat(const sender: tobject);
@@ -3863,8 +3903,12 @@ begin
  clickedbutton:= -1;
  for int1:= 0 to high(fbuttons) do begin
   if updatemouseshapestate(fbuttons[int1],info,nil,nil) then begin
+  {$push}
+{$objectChecks off}   
    icaptionframe(fintf).getwidget.invalidaterect(
                                  fbuttons[int1].ca.dim,org_widget);
+ 
+{$pop}
    if info.eventkind in [ek_buttonpress,ek_buttonrelease] then begin
     include(info.eventstate,es_processed);
    end;
@@ -4017,7 +4061,11 @@ begin
  if fcolorbutton <> avalue then begin
   fcolorbutton:= avalue;
   updatelayout;
-  icaptionframe(fintf).getwidget.invalidaterect(fdim,org_widget);
+{$push}
+{$objectChecks off}   
+  icaptionframe(fintf).getwidget.invalidaterect(fdim,org_widget);  
+{$pop}
+
  end;
 end;
 
@@ -4026,7 +4074,10 @@ begin
  if fcolorglyph <> avalue then begin
   fcolorglyph:= avalue;
   updatelayout;
+{$push}
+{$objectChecks off}   
   icaptionframe(fintf).getwidget.invalidaterect(fdim,org_widget);
+{$pop}
  end;
 end;
 
@@ -4226,7 +4277,12 @@ begin             //updatelayout
   end;
   color1:= fcolorbutton;
   if (color1 = cl_parent) or (color1 = cl_default) then begin
+{$push}
+{$objectChecks off}   
+  
    color1:= icaptionframe(fintf).getwidget.actualcolor;
+
+{$pop}
   end;
   for int1:= 0 to high(fbuttons) do begin
    with fbuttons[int1] do begin
@@ -5142,7 +5198,12 @@ begin
      if bo1 then begin
       setzoom1(co1);
       pt1:= fclientrect.pos;
+{$push}
+{$objectChecks off}   
+      
       fra1:= iscrollframe(fintf).getzoomrefframe;
+
+{$pop}
       with fra1 do begin
        size1.cx:= size1.cx - left - right;
        size1.cy:= size1.cy - top - bottom;

@@ -1913,10 +1913,16 @@ begin
   {$endif}
  {$else}
 {$warnings off}
+{$push}
+{$objectChecks off}
    tmemorystreamcracker(fmemorystream).setpointer(info.data,info.size);
+ {$pop}  
 {$warnings on}
 {$warnings off}
+{$push}
+{$objectChecks off}
    tmemorystreamcracker(fmemorystream).fcapacity:= info.size;
+ {$pop} 
 {$warnings on}
  {$endif}
   end
@@ -1952,7 +1958,10 @@ begin
 {$else}
    data:= fmemorystream.memory;
 {$warnings off}
+{$push}
+{$objectChecks off}
    tmemorystreamcracker(fmemorystream).setpointer(nil,0);
+ {$pop}  
 {$warnings on}
    reallocmem(data,size);
 {$endif}

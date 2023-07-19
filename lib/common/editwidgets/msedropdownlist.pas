@@ -1692,7 +1692,10 @@ begin
  if fdropdownwidget = nil then begin
   widget1:= nil;
   try
-   idropdownwidget(fintf).createdropdownwidget(fintf.geteditor.text,widget1);
+{$push}
+{$objectChecks off}
+    idropdownwidget(fintf).createdropdownwidget(fintf.geteditor.text,widget1);
+{$pop}  
    setlinkedvar(widget1,tmsecomponent(fdropdownwidget));
    if (deo_colsizing in options) and (fdropdownwidth > 0) then begin
     bounds_cx:= fdropdownwidth;
@@ -1745,8 +1748,11 @@ begin
     end;
     if fdropdownwidget.show(true,fintf.getwidget.window) = mr_ok then begin
      fintf.geteditor.forcecaret:= false;
+     {$push}
+     {$objectChecks off}
      setdropdowntext(idropdownwidget(fintf).getdropdowntext(fdropdownwidget),
                                      true,false,fselectkey);
+     {$pop}                                
     end;
    finally
     fintf.geteditor.forcecaret:= false;
@@ -1928,7 +1934,10 @@ begin
  inherited;
  if event.kind = ek_dropdown then begin
   if fdropdownlist = nil then begin
+  {$push}
+  {$objectChecks off}
    items1:= idropdownlist(fintf).getdropdownitems;
+  {$pop}
    if items1 <> nil then begin  //tselector
     if fcols.count < items1.count then begin
      fcols.count:= items1.count;
@@ -2218,7 +2227,10 @@ end;
 
 procedure tcustomdropdownlistcontroller.imagelistchanged;
 begin
+{$push}
+  {$objectChecks off}
  idropdownlist(fintf).imagelistchanged;
+ {$pop}
 end;
 
 procedure tcustomdropdownlistcontroller.setimageframe(const avalue: framety);

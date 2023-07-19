@@ -11619,8 +11619,11 @@ begin
    datacols[info.cell.col].docellevent(info);
   end;
   if canassistive() and not (gs1_nocellassistive in fstate1) then begin
+  {$push}
+{$objectChecks off}
    assistiveserver.docellevent(iassistiveclientgrid(getiassistiveclient()),
                                                                         info);
+ {$pop} 
   end;
  {$ifdef mse_with_ifi}
   if fifilink <> nil then begin
@@ -13775,8 +13778,11 @@ checkwidgetexit:
   else begin
    if canassistive() and ((gd1 in [gd_left,gd_right]) or
            not (gs_isdb in fstate) or (gs1_scrolllimit in fstate1)) then begin
+    {$push}
+{$objectChecks off}       
     assistiveserver.dogridbordertouched(
               iassistiveclientgrid(getiassistiveclient),gd1);
+   {$pop}
    end;
    exclude(fstate1,gs1_scrolllimit);
   end;
@@ -15151,7 +15157,10 @@ begin
  {$ifdef mse_with_ifi}
   if bo1 and (fifiserverintf <> nil) and not(ws_loadedproc in fwidgetstate) and
          not (gs_emptyrowremoved in fstate) and not isautoappend then begin
+   {$push}
+{$objectChecks off}      
    iifidataserver(fifiserverintf).valuechanged(iifigridlink(self));
+  {$pop}
   end;
  {$endif}
   if (gs1_showcellinvalid in fstate1) then begin
@@ -16677,7 +16686,10 @@ procedure tcustomgrid.ifirowchange;
 begin
  if (fupdating = 0) and (fifiserverintf <> nil) and
                               not(ws_loadedproc in fwidgetstate) then begin
+  {$push}
+{$objectChecks off}
   iifidataserver(fifiserverintf).valuechanged(iifigridlink(self));
+ {$pop}
  end;
 end;
 

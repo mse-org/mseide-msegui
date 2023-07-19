@@ -337,7 +337,10 @@ begin
   writer:= twritermse.Create(stream,1024,false);
   writer.WriteListBegin;
 {$warnings off}
+ {$push}
+{$objectChecks off}
   twriter1(writer).WriteProperties(source);
+ {$pop} 
 {$warnings on}
   writer.WriteListEnd;
   freeandnil(writer);

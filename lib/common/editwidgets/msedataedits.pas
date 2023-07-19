@@ -1621,8 +1621,11 @@ begin
      end;
      if canassistive() and not quiet and
                           not (des_statreading in fstate) then begin
+     {$push}
+    {$objectChecks off}                     
       assistiveserver.dodataentered(
                        iassistiveclientdata(getiassistiveclient()));
+     {$pop}
      end;
     end;
    end;
@@ -1651,26 +1654,38 @@ begin
      if fgridintf <> nil then begin
       with fgridintf.getcol do begin
   {$warnings off}
+  {$push}
+  {$objectChecks off}
        tcustomgrid1(grid).beginnullchecking;
+   {$pop}    
   {$warnings on}
        try
         grid.col:= index;
         grid.show;
         if not focused then begin
   {$warnings off}
+  {$push}
+  {$objectChecks off}
          tcustomgrid1(grid).beginnonullcheck;
+  {$pop}       
   {$warnings on}
          try
           grid.setfocus;
          finally
   {$warnings off}
+  {$push}
+  {$objectChecks off}
           tcustomgrid1(grid).endnonullcheck;
+   {$pop}       
   {$warnings on}
          end;
         end;
        finally
   {$warnings off}
+  {$push}
+  {$objectChecks off}
         tcustomgrid1(grid).endnullchecking;
+  {$pop}
   {$warnings on}
        end;
       end;
@@ -2611,12 +2626,18 @@ begin
          textclipped(info.cell.row) and
          ((info.grid.row <> info.cell.row) or (info.grid.col <> info.cell.col)) and
   {$warnings off}
+  {$push}
+  {$objectChecks off}
          twidget1(info.grid).getshowhint then begin
+  {$pop}
   {$warnings on}
    application.inithintinfo(hintinfo,info.grid);
   {$warnings off}
+  {$push}
+  {$objectChecks off}
    hintinfo.caption:=
             datatotext(twidgetcol1(fgridintf.getcol).getdatapo(info.cell.row)^);
+  {$pop}
   {$warnings on}
    application.showhint(info.grid,hintinfo);
   end;
@@ -3003,8 +3024,11 @@ end;
 procedure tcustomdataedit.ifisetvalue(var avalue; var accept: boolean);
 begin
  if accept and (fifiserverintf <> nil) then begin
+ {$push}
+{$objectChecks off}
   iifidataserver(fifiserverintf).setvalue(
                                    getifidatalinkintf,avalue,accept,gridrow);
+ {$pop}
  end;
 end;
 
@@ -3028,7 +3052,10 @@ begin
  inherited;
  if not (ws_loadedproc in fwidgetstate) then begin
   if fifiserverintf <> nil then begin
+  {$push}
+  {$objectChecks off}
    iifidataserver(fifiserverintf).valuechanged(getifidatalinkintf);
+  {$pop}
   end;
  end;
 end;

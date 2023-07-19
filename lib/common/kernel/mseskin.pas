@@ -116,6 +116,7 @@ type
  tabsskininfoty = record
   svcolor: colorty;
   svcoloractive: colorty;
+  svfont: toptionalfont;
   svframe: tframecomp;
   svface: tfacecomp;
   svfaceactive: tfacecomp;
@@ -177,6 +178,7 @@ type
  end;
  editskininfoty = record
   svwidget: widgetskininfoty;
+  svfont: toptionalfont;
   svempty_text: msestring;
   svempty_textflags: textflagsty;
   svempty_textcolor: colorty;
@@ -193,6 +195,7 @@ type
  booleaneditskininfoty = record
   svgraphdataedit: graphdataeditskininfoty;
   svoptionsadd: buttonoptionsty;
+  svfont: toptionalfont;
   svoptionsremove: buttonoptionsty;
  end;
  splitterskininfoty = record

@@ -1458,8 +1458,11 @@ begin
                         not (csloading in alinkcomp.componentstate) and
     (vco_datalist in
              tifivaluelinkcomp(alinkcomp).controller.optionsvalue) then begin
+   {$push}
+   {$objectChecks off}
    iifidatalink(alink).updateifigriddata(alinkcomp,
         tifivaluelinkcomp(alinkcomp).controller.fdatalist);
+  {$pop}
   end;
   dest.fcontroller.linkset(alink);
 //  dest.fcontroller.change(alink);
@@ -5326,7 +5329,10 @@ end;
 function tgridclientcontroller.checkcomponent(const aintf: iifilink): pointer;
 begin
  result:= inherited checkcomponent(aintf);
+{$push}
+{$objectChecks off}
  iifigridlink(aintf).getrowstate.linkclient(idatalistclient(self));
+{$pop}
 end;
 
 procedure tgridclientcontroller.itemchanged(const sender: tdatalist;
