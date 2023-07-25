@@ -15,13 +15,14 @@ unit mseguiintf; //X11
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
 
-{$if defined(linux) and defined(x86_64)}
-{$define glibc225}
+{$if defined(linux) and defined(CPUX86_64)}
+{$define glibc-table}
 {$endif}
 
-{$if defined(linux) and defined(i386)}
-{$define glibc20}
+{$if defined(linux) and defined(CPUI386)}
+{$define glibc-table}
 {$endif}
+
 
 interface
 {$ifndef mse_allwarnings}
@@ -6177,7 +6178,7 @@ begin
     with pollinf^ do begin
  
 {$ifdef linux} 
- {$if (defined(glibc225) or defined(glibc20)) and (defined(i386) or defined(x86_64)) }
+ {$ifdef glibc-table} 
   i1:= ppoll(@pollinfo[0],length(pollinfo),1000);
  {$else}
   i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
@@ -6923,7 +6924,7 @@ begin
   sys_mutexcreate(connectmutex1);
   sys_mutexcreate(connectmutex2);
 
-   {$if defined(glibc225) or defined(glibc20)}
+  {$ifdef glibc-table} 
    pipe(connectpipe);
    fcntl(connectpipe.ReadDes, F_SETFL, o_cloexec or o_nonblock); 
    fcntl(connectpipe.WriteDes, F_SETFL, o_cloexec or o_nonblock); 
