@@ -2161,7 +2161,10 @@ begin
        fcolorbackground:= fmaskcolorbackground;
       end;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
       tsimplebitmap1(self.fmask).assign1(fmask,docopy);
+  {$pop}
 {$warnings on}
       include(self.fstate,pms_maskvalid);
       include(self.foptions,bmo_masked);

@@ -2568,7 +2568,10 @@ var
  i1,i2: int32;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  setpopupmenuskin(tpopupmenu(instance),ainfo.svmain);
+ {$pop}
 {$warnings on}
  with instance,ainfo do begin
   if (svpopup.svface <> nil) and (popupfacetemplate = nil) then begin

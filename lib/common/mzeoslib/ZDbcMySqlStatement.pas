@@ -1342,7 +1342,10 @@ begin
       CheckMySQLError(FPlainDriver, fMySQL, lcExecute, ASQL, ConSettings);
     end;
     FActiveResultset := FResultSets.Count-1;
+  {$push}
+    {$objectChecks off}          
     Result := IZResultSet(FResultSets[FActiveResultset]);
+ {$pop}
   end
   else
     CheckMySQLError(FPlainDriver, fMySQL, lcExecute, ASQL, ConSettings);
@@ -1385,7 +1388,10 @@ begin
       else
         Result := LastUpdateCount;
       FActiveResultset := FResultSets.Count-1;
+       {$push}
+    {$objectChecks off}          
       LastResultSet := IZResultSet(FResultSets[FActiveResultset]);
+   {$pop}
     end
     else { Process regular query }
       Result := FPlainDriver.GetAffectedRows(fMySQL);
@@ -1514,13 +1520,19 @@ begin
   if ( FActiveResultset < FResultSets.Count-1) and ( FResultSets.Count > 1) then
   begin
     Inc(FActiveResultset);
+  {$push}
+    {$objectChecks off}          
     Result := IZResultSet(FResultSets[FActiveResultset]);
+  {$pop}
   end
   else
     if FResultSets.Count = 0 then
       Result := nil
     else
+    {$push}
+    {$objectChecks off}          
       Result := IZResultSet(FResultSets[FActiveResultset]);
+    {$pop}
 end;
 
 {**
@@ -1532,13 +1544,19 @@ begin
   if ( FActiveResultset > 0) and ( FResultSets.Count > 0) then
   begin
     Dec(FActiveResultset);
+     {$push}
+    {$objectChecks off}          
     Result := IZResultSet(FResultSets[FActiveResultset]);
-  end
+   {$pop}
+   end
   else
     if FResultSets.Count = 0 then
       Result := nil
     else
+ {$push}
+    {$objectChecks off}          
       Result := IZResultSet(FResultSets[FActiveResultset]);
+ {$pop}
 end;
 
 {**
@@ -1552,7 +1570,10 @@ begin
   else
   begin
     FActiveResultset := 0;
+ {$push}
+    {$objectChecks off}          
     Result := IZResultSet(FResultSets[0]);
+{$pop}
   end;
 end;
 
@@ -1567,7 +1588,10 @@ begin
   else
   begin
     FActiveResultset := FResultSets.Count -1;
+    {$push}
+    {$objectChecks off}          
     Result := IZResultSet(FResultSets[FResultSets.Count -1]);
+    {$pop}
   end;
 end;
 
@@ -1620,8 +1644,11 @@ begin
   if ( Index < 0 ) or ( Index > FResultSets.Count -1 ) then
     raise Exception.Create(Format(SListIndexError, [Index]))
   else
+  {$push}
+    {$objectChecks off}          
     Result := IZResultSet(FResultSets[Index]);
-end;
+   {$pop}
+    end;
 
 {**
   Returns the Count of retrived ResultSets.

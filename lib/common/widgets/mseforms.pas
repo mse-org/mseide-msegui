@@ -829,7 +829,10 @@ function createmainform(const aclass: tclass;
 begin
  result:= tmsecomponent(aclass.newinstance);
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  tcomponent1(result).setdesigning(true); //used for wo_groupleader
+  {$pop}
 {$warnings on}
  tcustommseform(result).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;
@@ -1233,16 +1236,22 @@ begin
    if floaded.IndexOf(fscrollbox) < 0 then begin
     floaded.add(fscrollbox);
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
     tcomponent1(fscrollbox).FComponentState:=
      tcomponent1(fscrollbox).FComponentState + [csloading];
+ {$pop}
 {$warnings on}
    end;
   end;
   bo1:= not (csreading in fscrollbox.componentstate);
   if bo1 then begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
    tcomponent1(fscrollbox).FComponentState:=
              tcomponent1(fscrollbox).FComponentState + [csreading];
+ {$pop}
 {$warnings on}
   end;
  end;
@@ -1250,7 +1259,10 @@ begin
  ttaborderoverride1(ftaborderoverride).endread(reader);
  if bo1 then begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   exclude(tcomponent1(fscrollbox).FComponentState,csreading);
+  {$pop}
 {$warnings on}
  end;
  if not (acs_dooncreatecalled in factstate) then begin
@@ -1538,7 +1550,10 @@ begin
   if value <> nil then begin
    fmainmenuwidget:= createmainmenuwidget;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
    twidget1(fmainmenuwidget).setdesigning(csdesigning in componentstate);
+  {$pop}
 {$warnings on}
    updatemainmenutemplates;
   end

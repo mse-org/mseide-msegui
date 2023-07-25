@@ -5299,14 +5299,20 @@ end;
 function tcustomtabwidget.gettab_font: ttab_font;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= ttab_font(ftabs.font);
+ {$pop}
 {$warnings on}
 end;
 
 procedure tcustomtabwidget.settab_font(const avalue: ttab_font);
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  ftabs.font:= twidgetfont(avalue);
+ {$pop}
 {$warnings on}
 end;
 
@@ -5318,14 +5324,20 @@ end;
 function tcustomtabwidget.gettab_fonttab: ttab_fonttab;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= ttab_fonttab(ftabs.tabs.font);
+ {$pop}
 {$warnings on}
 end;
 
 procedure tcustomtabwidget.settab_fonttab(const avalue: ttab_fonttab);
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  ftabs.tabs.font:= ttabsfont(avalue);
+  {$pop}
 {$warnings on}
 end;
 
@@ -5337,14 +5349,20 @@ end;
 function tcustomtabwidget.gettab_fontactivetab: ttab_fontactivetab;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= ttab_fontactivetab(ftabs.tabs.fontactive);
+  {$pop}
 {$warnings on}
 end;
 
 procedure tcustomtabwidget.set_tabfontactivetab(const avalue: ttab_fontactivetab);
 begin
 {$warnings off}
+  {$push}
+    {$objectChecks off}          
  ftabs.tabs.fontactive:= ttabsfontactive(avalue);
+ {$pop}
 {$warnings on}
 end;
 

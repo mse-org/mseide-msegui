@@ -604,7 +604,10 @@ var
 begin
  rect1:= getdialrect;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  with tcustomdialcontroller1(xdials[adial]) do begin
+  {$pop}
 {$warnings on}
   if do_log in options then begin
    result:= rect1.x +
@@ -623,7 +626,10 @@ var
 begin
  rect1:= getdialrect;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  with tcustomdialcontroller1(ydials[adial]) do begin
+  {$pop}
 {$warnings on}
   if do_log in options then begin
    result:= rect1.y + rect1.cy -
@@ -642,7 +648,10 @@ var
 begin
  rect1:= getdialrect;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  with tcustomdialcontroller1(xdials[adial]) do begin
+ {$pop}
 {$warnings on}
   if do_log in options then begin
    result:= exp(((apos - rect1.x) / rect1.cx)*flnrange+flnsstart);
@@ -660,7 +669,10 @@ var
 begin
  rect1:= getdialrect;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  with tcustomdialcontroller1(ydials[adial]) do begin
+ {$pop}
 {$warnings on}
   if do_log in options then begin
    result:= exp(
@@ -1778,7 +1790,10 @@ begin
  result:= false;
  for int3:= 0 to xdials.count -1 do begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   with tcustomdialcontroller1(xdials[int3]) do begin
+ {$pop}
 {$warnings on}
    checklayout;
    for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin
@@ -1797,7 +1812,10 @@ begin
  end;
  for int3:= 0 to ydials.count -1 do begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   with tcustomdialcontroller1(ydials[int3]) do begin
+ {$pop}
 {$warnings on}
    checklayout;
    for int1:= 0 to high(tdialmarkers1(markers).fitems) do begin

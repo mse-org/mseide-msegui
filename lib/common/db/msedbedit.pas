@@ -7311,7 +7311,10 @@ begin
   cols.clear;
   fbookmarks:= nil;
  end;
+  {$push}
+    {$objectChecks off}          
  idbdropdownlist(fintf).recordselected(index,akey);
+  {$pop}
 end;
 
 procedure tcustomdbdropdownlistcontroller.getfieldtypes(out propertynames: stringarty; 
@@ -7394,7 +7397,10 @@ end;
 function tdbenumeditdb.getdropdown: tdbdropdownlistcontroller;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= tdbdropdownlistcontroller(inherited dropdown);
+  {$pop}
 {$warnings on}
 end;
 
@@ -7454,7 +7460,10 @@ end;
 function tdbdropdownlisteditdb.getdropdown: tdropdownlistcontrollerdb;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= tdropdownlistcontrollerdb(inherited dropdown);
+ {$pop}
 {$warnings on}
 end;
 
@@ -7502,7 +7511,10 @@ end;
 function tdropdownlisteditdb.getdropdown: tdropdownlistcontrollerdb;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= tdropdownlistcontrollerdb(inherited dropdown);
+  {$pop}
 {$warnings on}
 end;
 
@@ -7550,7 +7562,10 @@ end;
 function tdbdropdownlisteditlb.getdropdown: tdropdownlistcontrollerlb;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= tdropdownlistcontrollerlb(inherited dropdown);
+ {$pop}
 {$warnings on}
 end;
 
@@ -7604,7 +7619,10 @@ end;
 function tdropdownlisteditlb.getdropdown: tdropdownlistcontrollerlb;
 begin
 {$warnings off}
- result:= tdropdownlistcontrollerlb(inherited dropdown);
+ {$push}
+    {$objectChecks off}          
+result:= tdropdownlistcontrollerlb(inherited dropdown);
+  {$pop}
 {$warnings on}
 end;
 
@@ -7658,7 +7676,10 @@ end;
 function tenumeditdb.getdropdown: tdbdropdownlistcontroller;
 begin
 {$warnings off}
+  {$push}
+    {$objectChecks off}          
  result:= tdbdropdownlistcontroller(inherited dropdown);
+  {$pop}
 {$warnings on}
 end;
 
@@ -7715,7 +7736,10 @@ end;
 function tdbkeystringeditdb.getdropdown: tdbdropdownlistcontroller;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= tdbdropdownlistcontroller(inherited dropdown);
+  {$pop}
 {$warnings on}
 end;
 
@@ -7774,7 +7798,10 @@ end;
 function tkeystringeditdb.getdropdown: tdbdropdownlistcontroller;
 begin
 {$warnings off}
+  {$push}
+    {$objectChecks off}          
  result:= tdbdropdownlistcontroller(inherited dropdown);
+ {$pop}
 {$warnings on}
 end;
 
@@ -11102,8 +11129,11 @@ end;
 procedure tcustomenum64edit.setvalue(const avalue: int64);
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64:= 
                          avalue;
+ {$pop}
 {$warnings on}
  fvalue1:= avalue;
  valuechanged;
@@ -11124,7 +11154,10 @@ begin
  end
  else begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   lint1:= tdropdowncols1(tlbdropdownlistcontroller(fdropdown).cols).fkeyvalue64;
+  {$pop}
 {$warnings on}
  end;
    //no checktext call
@@ -12514,7 +12547,10 @@ begin
   end;
   tdropdowncols1(fcols).fitemindex:= int1;
  end;
+  {$push}
+    {$objectChecks off}          
  ilbdropdownlist(fintf).recordselected(int1,akey);
+{$pop}
  if olb_copyitems in foptionslb then begin
   cols.clear;
   fedrecnums:= nil;
@@ -12558,7 +12594,10 @@ end;
 
 function tcustomlbdropdownlistcontroller.getlbdatakind(const apropname: string): lbdatakindty;
 begin
+ {$push}
+    {$objectChecks off}          
  result:= ilbdropdownlist(fintf).getlbkeydatakind;
+  {$pop}
 end;
 
 function tcustomlbdropdownlistcontroller.getlookupbuffer: tcustomlookupbuffer;

@@ -1525,7 +1525,10 @@ begin
  if (widget1 <> nil) and
         (widget1.ComponentState * [csloading,csdesigning] = []) then begin
   banded:= od_banded in foptionsdock;
-  fplacementrect:= idockcontroller(fintf).getplacementrect;
+ {$push}
+    {$objectChecks off}          
+ fplacementrect:= idockcontroller(fintf).getplacementrect;
+  {$pop}
   fbandstart:= fr^.opos(fplacementrect);
   if fsplitdir in [sd_vert,sd_horz] then begin
    ar1:= nil; //compiler warning
@@ -2237,7 +2240,10 @@ begin
   else begin
    ar1:= fintf.getwidget.getsortychildren(true);
   end;
+   {$push}
+    {$objectChecks off}          
   rect1:= idockcontroller(fintf).getplacementrect();
+ {$pop}
   placementlength:= fr^.size(rect1);
 //  placementsize:= fr^.osize(rect1);
   bandlength:= 0;
@@ -2390,7 +2396,10 @@ var
    if fasplitdir = sd_none then begin
     fasplitdir:= fsplitdir;
    end;
+    {$push}
+    {$objectChecks off}          
    if not widget.checkdescendent(widget1) and
+      
       idockcontroller(fintf).checkdock(info) and
                 docheckdock(info) then begin
     accept:= true;
@@ -2398,6 +2407,8 @@ var
     addpoint1(rect1.pos,widget1.clientwidgetpos);
     addpoint1(rect1.pos,widget1.screenpos);
     subpoint1(rect1.pos,addpoint(pickpos,widget.clientwidgetpos));
+    
+ {$pop}
     if not nofit then begin
 //     size1:= widget1.clientsize;
 //     pt1:= addpoint(info.pos,container1.clientpos); //paint origin
@@ -2571,6 +2582,8 @@ begin
  result:= false;
  ischild1:= false;
  if not(csdesigning in widget1.ComponentState) then begin
+  {$push}
+    {$objectChecks off}          
   with info do begin
    if fdockhandle <> nil then begin
     mouseinhandle:= (fdockhandle <> nil) and
@@ -2582,11 +2595,13 @@ begin
         pointinrect({widget1.clientpostowidgetpos(}info.pos{)},
                            idockcontroller(fintf).getbuttonrects(dbr_handle));
    end;
+   {$pop}
 //   mouseinhandle:= (fdockhandle <> nil) and pointinrect(
 //     translateclientpoint(info.pos,idockcontroller(fintf).getwidget,fdockhandle),
 //       fdockhandle.gethandlerect) or
 //      pointinrect({widget1.clientpostowidgetpos(}info.pos{)},
 //                            idockcontroller(fintf).getbuttonrects(dbr_handle));
+
    case eventkind of
     dek_begin: begin
      if mouseinhandle then begin
@@ -2910,7 +2925,11 @@ end;
 
 procedure tdockcontroller.statread;
 begin
+ {$push}
+    {$objectChecks off}          
  fsize:= idockcontroller(fintf).getplacementrect.size;
+  {$pop}
+
  endplacement();
 // exclude(fdockstate,dos_updating4);
 // calclayout(nil,true);
@@ -2919,7 +2938,10 @@ end;
 function tdockcontroller.getdockcaption: msestring;
 begin
  if fcaption = '' then begin
+  {$push}
+    {$objectChecks off}          
   result:= idockcontroller(fintf).getcaption;
+  {$pop}
  end
  else begin
   result:= fcaption
@@ -2928,7 +2950,10 @@ end;
 
 function tdockcontroller.getfloatcaption: msestring;
 begin
+  {$push}
+    {$objectChecks off}          
  result:= idockcontroller(fintf).getcaption;
+ {$pop}
  if result = '' then begin
   result:= fcaption
  end;
@@ -3253,11 +3278,14 @@ var
 begin
  result:= dbr_none;
  for dbr1:= dbr_firstbutton to dbr_lastbutton do begin
+  {$push}
+    {$objectChecks off}          
   if pointinrect(apos,idockcontroller(fintf).getbuttonrects(dbr1)) then begin
    result:= dbr1;
    break;
   end;
  end;
+  {$pop}
  if (result = dbr_none) then begin
   if fdockhandle <> nil then begin
    if pointinrect(apos,fdockhandle.paintparentrect) then begin
@@ -3265,10 +3293,13 @@ begin
    end;
   end
   else begin
+   {$push}
+    {$objectChecks off}          
    if pointinrect(apos,
                  idockcontroller(fintf).getbuttonrects(dbr_handle)) then begin
     result:= dbr_handle; //handle rect can include buttons
    end;
+ {$pop}
   end;
  end;
 end;
@@ -4073,7 +4104,10 @@ begin
        nextfocus;
        with rect1 do begin
         pos:= fnormalrect.pos;
+ {$push}
+    {$objectChecks off}          
         size:= idockcontroller(fintf).getminimizedsize(pos1);
+  {$pop}
         if cx = 0 then begin
          cx:= fnormalrect.cx;
         end;
@@ -4116,7 +4150,10 @@ var
  contr1: tdockcontroller;
 begin
  if getparentcontroller(contr1) then begin
+  {$push}
+    {$objectChecks off}          
   result:= idockcontroller(contr1.fintf).getplacementrect;
+  {$pop}
  end
  else begin
   result:= nullrect;
@@ -4147,7 +4184,10 @@ begin
     fnormalrect:= widget1.widgetrect;
    end;
    mds_minimized: begin
+    {$push}
+    {$objectChecks off}          
     idockcontroller(fintf).getminimizedsize(pos1);
+    {$pop}
     with widget1 do begin
      case pos1 of
       cp_left,cp_top: begin
@@ -4370,7 +4410,10 @@ var
  widget1: twidget;
  intf1: idocktarget;
 begin
+ {$push}
+    {$objectChecks off}          
  idockcontroller(fintf).dolayoutchanged(self);
+ {$pop}
  widget1:= fintf.getwidget;
  if widget1.canevent(tmethod(fonlayoutchanged)) then begin
   fonlayoutchanged(self);
@@ -4402,7 +4445,10 @@ var
  widget1: twidget;
  intf1: idocktarget;
 begin
+ {$push}
+    {$objectChecks off}          
  idockcontroller(fintf).dodockcaptionchanged(self);
+ {$pop}
  widget1:= fintf.getwidget;
  if widget1.canevent(tmethod(foncaptionchanged)) then begin
   foncaptionchanged(self);
@@ -4544,7 +4590,10 @@ begin
   translatewidgetpoint1(result.pos,w1,getwidget().container);
  end
  else begin
+  {$push}
+    {$objectChecks off}          
   result:= idockcontroller(fintf).getplacementrect(); //origin container.pos
+ {$pop}
  end;
 end;
 

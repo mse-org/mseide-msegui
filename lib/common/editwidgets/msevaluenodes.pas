@@ -450,14 +450,20 @@ end;
 procedure trecordfieldvalueitem.getvalueinfo(out avalues: recvaluearty;
                                                     const aindex: int32 = -1);
 begin
+ {$push}
+    {$objectChecks off}          
  irecordvaluefield(fintf).getvalueinfo(avalues,fieldindex);
+ {$pop}
 end;
 
 procedure trecordfieldvalueitem.setvalue(const atype: listdatatypety;
                const aindex: int32; const getvaluemethod: getvaluemethodty);
 begin
+ {$push}
+    {$objectChecks off}          
  irecordvaluefield(fintf).setvalue(atype,aindex,getvaluemethod);
-end;
+ {$pop}
+ end;
 
 function trecordfieldvalueitem.getfieldtext(
               const afieldindex: integer): msestring;

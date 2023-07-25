@@ -850,7 +850,10 @@ procedure tdbcontroller.setowneractive(const avalue: boolean);
 //var
 // bo1: boolean;
 begin
+ {$push}
+    {$objectChecks off}          
  idbcontroller(fintf).setinheritedconnected(avalue);
+ {$pop}
  {
  if avalue then begin
   with tmdatabase(fowner) do begin

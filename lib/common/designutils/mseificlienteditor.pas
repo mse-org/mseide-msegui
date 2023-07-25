@@ -67,8 +67,11 @@ begin
  edfo:= tmseificlienteditorfo.create(nil);
  try
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   ar1:= tmsecomponent1(acomponent).getobjectlinker.linkedobjects(
                                                      acomponent.controller);
+  {$pop}
 {$warnings on}
   edfo.po.gridvalues:= pointerarty(ar1);
   edfo.fcomp:= acomponent;

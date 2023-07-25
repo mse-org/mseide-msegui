@@ -1335,9 +1335,12 @@ begin
   end
   else begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
    tlistitem.calcitemlayout(subsize(makesize(cellwidth,cellheight),
                                        fcellframe.paintframedim),
                            tframe1(fcellframe).fi.innerframe,self,flayoutinfo);
+  {$pop}
 {$warnings on}
   end;
   layoutchanged;
@@ -3399,7 +3402,10 @@ begin
  end;
  if (fgridintf <> nil) then begin
  {$warnings off}
+  {$push}
+    {$objectChecks off}          
   with tcustomgrid1(fgridintf.getcol.grid) do begin
+   {$pop}
  {$warnings on}
 //    sortinvalid(invalidaxis,invalidaxis);
    rowdatachanged(makegridcoord(invalidaxis,index),count);
@@ -5221,7 +5227,10 @@ var
  int1: integer;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  with ttreelistitem1(root) do begin
+ {$pop}
 {$warnings on}
   if fcount > 0 then begin
    setlength(ar1,fcount);
@@ -5549,7 +5558,10 @@ begin
  else begin
   if ainfo.action in [na_expand,na_collapse] then begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
    with tcustomgrid1(self.fowner.fgridintf.getcol.grid) do begin
+ {$pop}
 {$warnings on}
     if not(docheckcellvalue and container.canclose) then begin
      ainfo.action:= na_none;
@@ -5585,7 +5597,10 @@ begin
         if int2 > 0 then begin
          include(self.fitemstate,ils_freelock);
         {$warnings off}
+         {$push}
+    {$objectChecks off}          
          with tcustomgrid1(self.fowner.fgridintf.getcol.grid) do begin
+ {$pop}
         {$warnings on}
           try
            bo1:= gs1_autoappendlock in fstate1;
@@ -5656,7 +5671,10 @@ begin
      fintf.updateitemvalues(int2,ind1-int2);
      if newrow >= 0 then begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
      with tcustomgrid1(fowner.fgridintf.getcol.grid) do begin
+  {$pop}
 {$warnings on}
        ffocusedcell.row:= newrow;
        layoutchanged;
@@ -6010,9 +6028,12 @@ var
 begin
  if source <> dest then begin
  {$warnings off}
+ {$push}
+    {$objectChecks off}          
   so:= ttreelistitem1(items[source]);
   de:= ttreelistitem1(items[dest]);
   si:= ttreelistitem1(de.findsibling(so));
+ {$pop}
  {$warnings on}
   if si <> nil then begin
    int1:= source;
@@ -6024,7 +6045,10 @@ begin
      end;
      if int3 < fcount then begin
      {$warnings off}
+ {$push}
+    {$objectChecks off}          
       si:= ttreelistitem1(items[int3]); //next equal or higher level
+  {$pop}   
      {$warnings on}
       if si.parent <> so.parent then begin
        si:= so; //invalid

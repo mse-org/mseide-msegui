@@ -3278,7 +3278,10 @@ begin
  with fitems.findpending(pending)^ do begin
   if link <> 0 then begin
    p1:= fitems.getdatapo(link);
+  {$push}
+    {$objectChecks off}          
    idbusresponse(p1^.data.data.link.link).replied(serial,m1{,user_data});
+  {$pop}
 //   fitems.delete(link);
   end;
   fitems.delete(pending);

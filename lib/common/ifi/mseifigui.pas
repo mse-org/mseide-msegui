@@ -439,7 +439,10 @@ begin
    end;
   end;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   int2:= int2 + datalisttoifidata(tdatacols1(datacols).frowstate);
+  {$pop}
 {$warnings on}
   inititemheader(result,ik_griddata,asequence,int2,po1);
   with pgriddatadataty(po1)^ do begin
@@ -459,7 +462,10 @@ begin
     end;
    end;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
    datalisttoifidata(tdatacols1(datacols).frowstate,po1);
+ {$pop}
 {$warnings on}
   end;
  end;
@@ -508,9 +514,12 @@ begin
         end;
        end;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
+
        inc(po1,ifidatatodatalist(dl_rowstate,rows1,po1,
                                     tdatacols1(datacols).frowstate));
-{$warnings on}
+ {$warnings on}
        include(fistate,rws_datareceived);
       finally
        endupdate;

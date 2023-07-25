@@ -2048,13 +2048,19 @@ begin
             ((info.grid.row <> info.cell.row) or
             (info.grid.col <> info.cell.col)) and
      {$warnings off}
-            twidget1(info.grid).getshowhint then begin
+      {$push}
+    {$objectChecks off}          
+     twidget1(info.grid).getshowhint then begin
+  {$pop}
      {$warnings on}
       application.inithintinfo(hintinfo,info.grid);
      {$warnings off}
+      {$push}
+    {$objectChecks off}          
       hintinfo.caption:=
          richstringty(
                  twidgetcol1(fgridintf.getcol).getdatapo(info.cell.row)^).text;
+   {$pop}
      {$warnings on}
       application.showhint(info.grid,hintinfo);
      end;

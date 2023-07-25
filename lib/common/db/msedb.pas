@@ -7512,14 +7512,19 @@ begin
    end;
   end;
  end;
+ {$push}
+    {$objectChecks off}   
  if not fmovebylock or (event <> dedatasetchange) then begin
-  with tdataset(fowner) do begin
+     with tdataset(fowner) do begin
+         
    if (event = deupdaterecord) and not modified and (state = dsinsert) then begin
+   
     idscontroller(fintf).inheriteddataevent(event,info); //for second notnull check
    end;
   end;
   idscontroller(fintf).inheriteddataevent(event,info);
  end;
+ {$pop}
  state1:= tdataset(fowner).state;
  if (state1 <> fstatebefore) then begin
   state2:= fstatebefore;
@@ -7541,6 +7546,8 @@ begin
    if bo1 then begin
     dobeforescroll;
    end;
+   {$push}
+    {$objectChecks off}   
    if fcancelresync and (state = dsinsert) and not modified then begin
     idscontroller(fintf).inheritedcancel;
     try
@@ -7554,6 +7561,7 @@ begin
    else begin
     idscontroller(fintf).inheritedcancel;
    end;
+    {$pop}
    if bo1 then begin
     doafterscroll;
    end;
@@ -7589,7 +7597,10 @@ begin
     fmovebylock:= true;
    end;
    try
+  {$push}
+    {$objectChecks off}          
     result:= idscontroller(fintf).inheritedmoveby(distance);
+  {$pop}
     if fmovebylock then begin
      fmovebylock:= false;
      dataevent(dedatasetscroll,0);
@@ -7604,12 +7615,18 @@ end;
 procedure tdscontroller.internalinsert;
 begin
  finsertbm:= tdataset(fowner).bookmark;
+  {$push}
+    {$objectChecks off}          
  idscontroller(fintf).inheritedinternalinsert;
+ {$pop}
 end;
 
 procedure tdscontroller.internaldelete;
 begin
+ {$push}
+    {$objectChecks off}          
  idscontroller(fintf).inheritedinternaldelete;
+ {$pop}
  modified;
  tdataset1(fowner).dataevent(tdataevent(de_afterdelete),0);
 end;
@@ -7653,7 +7670,11 @@ begin
 //    idscontroller(fintf).openlocal;
 //   end
 //   else begin
+ {$push}
+    {$objectChecks off}          
     idscontroller(fintf).inheritedinternalopen;
+ 
+ {$pop}
 //   end;
   finally
    if bo1 then begin
@@ -7710,7 +7731,10 @@ var
  field1: tfield;
 begin
 // unregisteronidle;
+  {$push}
+    {$objectChecks off}          
  idscontroller(fintf).inheritedinternalclose;
+ {$pop}
  with tdataset(fowner) do begin
   for int1:= 0 to fields.count - 1 do begin
    field1:= fields[int1];
@@ -7728,7 +7752,10 @@ end;
 
 function tdscontroller.assql(const avalue: boolean): msestring;
 begin
+ {$push}
+    {$objectChecks off}          
  if idscontroller(fintf).getnumboolean then begin
+  {$pop}
   if avalue then begin
    result:= '1';
   end
@@ -7797,7 +7824,10 @@ end;
 
 function tdscontroller.assql(const avalue: currency): msestring;
 begin
+ {$push}
+    {$objectChecks off}          
  if idscontroller(fintf).getint64currency then begin
+ {$pop}
  {$ifdef FPC}
   result:= inttostrmse(int64(avalue));
  {$else}
@@ -7815,7 +7845,10 @@ begin
   result:= 'NULL';
  end
  else begin
+  {$push}
+    {$objectChecks off}          
   if idscontroller(fintf).getfloatdate then begin
+ {$pop}
    result:= encodesqlfloat(avalue);
   end
   else begin
@@ -7830,7 +7863,10 @@ begin
   result:= 'NULL';
  end
  else begin
+  {$push}
+    {$objectChecks off}          
   if idscontroller(fintf).getfloatdate then begin
+{$pop}
    result:= inttostrmse(trunc(avalue));
   end
   else begin
@@ -7845,7 +7881,10 @@ begin
   result:= 'NULL';
  end
  else begin
+  {$push}
+    {$objectChecks off}          
   if idscontroller(fintf).getfloatdate then begin
+  {$pop}
    result:= encodesqlfloat(frac(avalue));
   end
   else begin
@@ -7905,7 +7944,10 @@ begin
     end;
    end;
    try
+    {$push}
+    {$objectChecks off}          
     savepointoptions:= idscontroller(fintf).getsavepointoptions;
+    {$pop}
     case akind of
      opk_post: begin
       bo1:= spo_postsavepoint in savepointoptions;
@@ -7925,6 +7967,8 @@ begin
      include(fstate,dscs_posting);
      try    
       try
+    {$push}
+    {$objectChecks off}          
        case akind of
         opk_post: begin
          idscontroller(fintf).inheritedpost();
@@ -7936,6 +7980,7 @@ begin
          idscontroller(fintf).inheritedinsert();
         end;
        end;
+   {$pop}   
       except
        on epostcancel do begin
         if bo1 then begin
@@ -8169,7 +8214,10 @@ end;
 
 function tdscontroller.filtereditkind: filtereditkindty;
 begin
+ {$push}
+    {$objectChecks off}          
  result:= idscontroller(fintf).getfiltereditkind;
+ {$pop}
 end;
 
 procedure tdscontroller.beginupdate; //calls diablecontrols, stores bookmark
@@ -8194,6 +8242,8 @@ begin
  end;
 end;
 
+ {$push}
+    {$objectChecks off}          
 procedure tdscontroller.beginfilteredit(const akind: filtereditkindty);
 begin
  idscontroller(fintf).beginfilteredit(akind);
@@ -8208,6 +8258,7 @@ procedure tdscontroller.endfilteredit;
 begin
  idscontroller(fintf).endfilteredit;
 end;
+ {$pop}
 
 function tdscontroller.getfieldar(
                    const afieldkinds: tfieldkinds = allfieldkinds): fieldarty;
@@ -8345,6 +8396,8 @@ begin
     tdataset(fowner).open;
    end
    else begin
+     {$push}
+    {$objectChecks off}          
     if dscs_restorerecno in fstate then begin
      exclude(fstate,dscs_restorerecno);
      bo1:= idscontroller(fintf).restorerecno;
@@ -8355,6 +8408,7 @@ begin
       if not bo1 then begin
        idscontroller(fintf).restorerecno:= false;
       end;
+  {$pop}   
      end;
     end
     else begin
@@ -8419,7 +8473,10 @@ begin
     end;
    end
    else begin
+   {$push}
+    {$objectChecks off}          
     result:= idscontroller(fintf).islastrecord;
+  {$pop}
    end;
   end;
  end;
@@ -8455,7 +8512,10 @@ begin
  if alink <> nil then begin
   field1:= alink.sortfield;
  end;
+ {$push}
+    {$objectChecks off}          
  result:= idscontroller(fintf).updatesortfield(field1,adescend);
+ {$pop}
 end;
 
 function tdscontroller.getasmsestring(const afieldname: string): msestring;
@@ -8504,7 +8564,8 @@ begin
   end;
  end;
 end;
-
+ {$push}
+    {$objectChecks off}          
 procedure tdscontroller.begindisplaydata;
 begin
  idscontroller(fintf).begindisplaydata;
@@ -8514,6 +8575,7 @@ procedure tdscontroller.enddisplaydata;
 begin
  idscontroller(fintf).enddisplaydata;
 end;
+ {$pop}
 
 procedure tdscontroller.copyrecord(const aappend: boolean = false);
 var
@@ -8783,7 +8845,10 @@ constructor tmseparams.create(aowner: tpersistent);
 begin
  inherited create(aowner);
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  tcollection1(self).fitemclass:= tmseparam;
+ {$pop}
 {$warnings on}
 end;
 
@@ -9259,7 +9324,10 @@ procedure tmseparam.setasvariant(const avalue: variant);
 begin
  inherited setasvariant(avalue);
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  tparam1(self).fbound:= not varisclear(avalue);
+  {$pop}
 {$warnings on}
 end;
 //{$endif mse_withpublishedparamvalue}

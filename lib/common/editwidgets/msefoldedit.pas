@@ -432,7 +432,10 @@ begin
   with ainfo do begin
    if isleftbuttondown(ainfo,[]) then begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
     with fgridintf.getcol.grid,tdatacols1(datacols).frowstate do begin
+  {$pop}
 {$warnings on}
      row1:= row;
      if row1 >= 0 then begin //no csdesigning

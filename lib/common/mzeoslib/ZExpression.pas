@@ -646,7 +646,10 @@ begin
           end;
           if Current.Value.VType = vtInterface then
           begin
+           {$push}
+         {$objectChecks off}          
             Value1 := IZFunction(Current.Value.VInterface).Execute(Stack, FVariantManager);
+         {$pop}
             ParamsCount := FVariantManager.GetAsInteger(Stack.Pop);
             Stack.DecStackPointer(ParamsCount);
             Stack.Push(Value1);

@@ -863,8 +863,11 @@ begin
  result:= nil;
  if itemframetemplate <> nil then begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   result:= tmenufont(itemframetemplate.template.font);
-{$warnings on}
+  {$pop}
+ {$warnings on}
  end;
 {
  if result = nil then begin
@@ -2399,7 +2402,10 @@ begin
   result:= nil;
   if popupitemframetemplate <> nil then begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
    result:= tmenufont(popupitemframetemplate.template.font);
+  {$pop}
 {$warnings on}
   end;
 (*

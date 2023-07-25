@@ -892,12 +892,15 @@ function TZHashMap.Clone: IZInterface;
 var
   HashMap: TZHashMap;
 begin
+ {$push}
+    {$objectChecks off}          
   HashMap := TZHashMap.Create;
   HashMap.FKeys := IZCollection(FKeys.Clone);
   HashMap.FReadOnlyKeys := IZCollection(FReadOnlyKeys.Clone);
   HashMap.FValues := IZCollection(FValues.Clone);
   HashMap.FReadOnlyValues := IZCollection(FReadOnlyValues.Clone);
   Result := HashMap;
+ {$pop}
 end;
 
 {**
@@ -1019,7 +1022,10 @@ var
   Stack: TZStack;
 begin
   Stack := TZStack.Create;
+ {$push}
+    {$objectChecks off}          
   Stack.FValues := IZCollection(FValues.Clone);
+  {$pop}
   Result := Stack;
 end;
 

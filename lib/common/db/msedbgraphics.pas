@@ -183,7 +183,10 @@ begin
  fdatalink:= tgraphicdatalink.create(idbgraphicfieldlink(self));
  inherited;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  include(tsimplebitmap1(bitmap).fstate,pms_nosave);
+ {$pop}
 {$warnings on}
 end;
 
@@ -484,7 +487,10 @@ end;
 procedure tgraphicdatalink.setfield(const value: tfield);
 begin
  if value is tmsegraphicfield then begin
+ {$push}
+    {$objectChecks off}          
   idbgraphicfieldlink(fintf).setformat(tmsegraphicfield(value).format);
+  {$pop}
  end;
  inherited;
 end;

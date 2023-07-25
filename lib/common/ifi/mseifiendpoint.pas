@@ -215,7 +215,10 @@ begin
   fonchange(self);
  end;
  if fifiserverintf <> nil then begin
+  {$push}
+    {$objectChecks off}          
   iifidataserver(fifiserverintf).valuechanged(iifidatalink(self));
+ {$pop}
  end;
 end;
 

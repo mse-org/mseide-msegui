@@ -819,8 +819,11 @@ procedure tlookupdispfielddatalink.lookupchange;
 begin
  if not (csloading in fowner.componentstate) and active and 
                                             (field <> nil) then begin
+  {$push}
+    {$objectChecks off}          
   idblookupdispfieldlink(fintf).formatchanged;
   idblookupdispfieldlink(fintf).fieldtovalue;
+  {$pop}
  end;
 end;
 
@@ -2226,7 +2229,10 @@ begin
  apropertynames[2]:= 'lookupvaluefield';
  setlength(afieldtypes,3);
  afieldtypes[1]:= afieldtypes[0]; //same as datafield
+ {$push}
+    {$objectChecks off}          
  afieldtypes[2]:= idblookupdbdispfieldlink(fintf).getlookupvaluefieldtypes;
+ {$pop}
 end;
 
 { tdblookup32db }
@@ -2283,7 +2289,10 @@ function tlookup32dbdispfielddatalink.datatotext(const data): msestring;
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
                          find([akey],[],bm1,false,false,true) then begin
-    result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
+  {$push}
+    {$objectChecks off}          
+   result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
+ {$pop}
    end;
   end;
  end; //lookup
@@ -2315,7 +2324,10 @@ begin
    end;
   end;
  end;
+  {$push}
+    {$objectChecks off}          
  idblookupdbdispfieldlink(fintf).setlookupvalue(bm1);
+  {$pop}
 end;
 
 function tlookup32dbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
@@ -2343,7 +2355,10 @@ function tlookup64dbdispfielddatalink.datatotext(const data): msestring;
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
                             find([akey],[],bm1,false,false,true) then begin
+   {$push}
+    {$objectChecks off}          
     result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
+ {$pop}
    end;
   end;
  end; //lookup
@@ -2375,7 +2390,10 @@ begin
    end;
   end;
  end;
+ {$push}
+    {$objectChecks off}          
  idblookupdbdispfieldlink(fintf).setlookupvalue(bm1);
+  {$pop}
 end;
 
 function tlookup64dbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
@@ -2403,8 +2421,11 @@ function tlookupstrdbdispfielddatalink.datatotext(const data): msestring;
    if fcanlookup and (field <> nil) and
      tmsebufdataset(dataset).indexlocal[flookupindexnum].
                            find([akey],[],bm1,false,false,true) then begin
-    result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
-   end;
+  {$push}
+    {$objectChecks off}          
+      result:= idblookupdbdispfieldlink(fintf).lookuptext(bm1);
+ {$pop}
+  end;
   end;
  end; //lookup
   
@@ -2435,7 +2456,10 @@ begin
    end;
   end;
  end;
+ {$push}
+    {$objectChecks off}          
  idblookupdbdispfieldlink(fintf).setlookupvalue(bm1);
+ {$pop}
 end;
 
 function tlookupstrdbdispfielddatalink.getrowdatapo(const alink: tgriddatalink; 
@@ -2473,7 +2497,10 @@ begin
   result:= getkeylbdatakind;
  end
  else begin
+ {$push}
+    {$objectChecks off}          
   result:= idblookuplbdispfieldlink(fintf).getdatalbdatakind;
+ {$pop}
  end;
 end;
 
@@ -2550,7 +2577,10 @@ begin
  if not fisnull and (flookupbuffer <> nil) then begin
   flookupbuffer.findphys(flookupkeyfieldno,fkey,int1);
  end;
+ {$push}
+    {$objectChecks off}          
  idblookuplbdispfieldlink(fintf).setlookupvalue(int1);
+ {$pop}
 end;
 
 function tlookup32lbdispfielddatalink.datatotext(const data): msestring;
@@ -2562,7 +2592,10 @@ function tlookup32lbdispfielddatalink.datatotext(const data): msestring;
   result:= '';
   if flookupbuffer <> nil then begin
    if flookupbuffer.findphys(flookupkeyfieldno,akey,int1) then begin
+ {$push}
+    {$objectChecks off}          
     result:= idblookuplbdispfieldlink(fintf).lookuptext(int1);
+ {$pop}
    end;
   end;
  end; //lookup
@@ -2608,7 +2641,10 @@ begin
  if not fisnull and (flookupbuffer <> nil) then begin
   flookupbuffer.findphys(flookupkeyfieldno,fkey,int1);
  end;
+ {$push}
+    {$objectChecks off}          
  idblookuplbdispfieldlink(fintf).setlookupvalue(int1);
+{$pop}
 end;
 
 function tlookup64lbdispfielddatalink.datatotext(const data): msestring;
@@ -2620,7 +2656,10 @@ function tlookup64lbdispfielddatalink.datatotext(const data): msestring;
   result:= '';
   if flookupbuffer <> nil then begin
    if flookupbuffer.findphys(flookupkeyfieldno,akey,int1) then begin
+  {$push}
+    {$objectChecks off}          
     result:= idblookuplbdispfieldlink(fintf).lookuptext(int1);
+ {$pop}
    end;
   end;
  end; //lookup
@@ -2666,7 +2705,10 @@ begin
  if not fisnull and (flookupbuffer <> nil) then begin
   flookupbuffer.findphys(flookupkeyfieldno,fkey,int1,false);
  end;
+ {$push}
+    {$objectChecks off}          
  idblookuplbdispfieldlink(fintf).setlookupvalue(int1);
+ {$pop}
 end;
 
 function tlookupstrlbdispfielddatalink.datatotext(const data): msestring;
@@ -2678,7 +2720,10 @@ function tlookupstrlbdispfielddatalink.datatotext(const data): msestring;
   result:= '';
   if flookupbuffer <> nil then begin
    if flookupbuffer.findphys(flookupkeyfieldno,akey,int1,true) then begin
+  {$push}
+    {$objectChecks off}          
     result:= idblookuplbdispfieldlink(fintf).lookuptext(int1);
+ {$pop}
    end;
   end;
  end; //lookup

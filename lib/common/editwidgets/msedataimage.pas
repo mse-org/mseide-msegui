@@ -306,7 +306,10 @@ begin
  fcache:= timagecache.create();
  inherited;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  include(tsimplebitmap1(bitmap).fstate,pms_nosave);
+  {$pop}
 {$warnings on}
 end;
 

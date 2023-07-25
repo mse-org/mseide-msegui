@@ -3393,7 +3393,11 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
+  {$push}
+    {$objectChecks off}          
  with tfield1(sender) do begin
+{$pop}
+
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
@@ -3418,7 +3422,10 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
+  {$push}
+    {$objectChecks off}          
  with tfield1(sender) do begin
+{$pop}
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
@@ -3537,7 +3544,10 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
+ {$push}
+    {$objectChecks off}          
  with tfield1(sender) do begin
+ {$pop}
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    checkvaluebuffer(sender,sizeof(msestring));
@@ -3573,7 +3583,10 @@ var
  int1: integer;
 begin
  {$ifdef FPC}{$warnings off}{$endif}
+ {$push}
+    {$objectChecks off}          
  with tfield1(sender) do begin
+ {$pop}
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    checkvaluebuffer(sender,sizeof(variant));

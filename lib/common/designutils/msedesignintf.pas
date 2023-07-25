@@ -1647,7 +1647,10 @@ begin
  stream1:= tmemorystream.create;
  writer1:= twritermse.create(stream1,256,false);
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  twriter1(writer1).writeproperties(comp1);
+  {$pop}
 {$warnings on}
  writer1.free;
  stream1.position:= 0;

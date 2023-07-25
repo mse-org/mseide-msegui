@@ -233,7 +233,10 @@ function createdockpanelform(const aclass: tclass;
 begin
  result:= tmsecomponent(aclass.newinstance);
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  tcomponent1(result).setdesigning(true); //used for wo_groupleader
+  {$pop}
 {$warnings on}
  tdockpanelform(result).create(nil,false);
  tmsecomponent1(result).factualclassname:= aclassname;

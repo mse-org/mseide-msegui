@@ -717,8 +717,10 @@ begin
   result:= fli.font;
  end
  else begin
-{$warnings off}
+{$warnings off} {$push}
+    {$objectChecks off}          
   result:= tdialpropfont(tcustomdialcontroller(fowner).getfont);
+ {$pop}
 {$warnings on}
  end;
 end;
@@ -2542,7 +2544,10 @@ begin
  end
  else begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   result:= tdialfont(twidget1(fintf.getwidget).getfont);
+  {$pop}
 {$warnings on}
  end;
 end;

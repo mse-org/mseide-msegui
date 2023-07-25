@@ -312,7 +312,10 @@ function tdbfilenameedit.nullcheckneeded(const newfocus: twidget): boolean;
 begin
  result:= inherited nullcheckneeded(newfocus);
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  teditwidgetdatalink1(fdatalink).nullcheckneeded(result);
+ {$pop}
 {$warnings on}
 end;
 
@@ -342,7 +345,10 @@ end;
 procedure tdbfilenameedit.recchanged;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  teditwidgetdatalink1(fdatalink).recordchanged(nil);
+ {$pop}
 {$warnings on}
 end;
 
@@ -453,7 +459,10 @@ function tdbremotefilenameedit.nullcheckneeded(const newfocus: twidget): boolean
 begin
  result:= inherited nullcheckneeded(newfocus);
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  teditwidgetdatalink1(fdatalink).nullcheckneeded(result);
+{$pop}
 {$warnings on}
 end;
 
@@ -483,7 +492,10 @@ end;
 procedure tdbremotefilenameedit.recchanged;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  teditwidgetdatalink1(fdatalink).recordchanged(nil);
+ {$pop}
 {$warnings on}
 end;
 

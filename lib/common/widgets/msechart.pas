@@ -2595,7 +2595,10 @@ begin
  end
  else begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   result:= ttracefont(ftraces.getfont);
+ {$pop}
 {$warnings on}
  end;
 end;
@@ -3160,7 +3163,10 @@ begin
  end
  else begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   result:= ttracesfont(tcustomchart(fowner).getfont);
+  {$pop}
 {$warnings on}
  end;
 end;
@@ -3760,16 +3766,22 @@ begin
  shift2:= 0;
  for int1:= 0 to fxdials.count-1 do begin
  {$warnings off}
+  {$push}
+    {$objectChecks off}          
   handle(tcustomdialcontroller1(fxdials[int1]),
                              rs_bottom in asides,rs_top in asides,true);
+  {$pop}
  {$warnings on}
  end;
  shift1:= 0;
  shift2:= 0;
  for int1:= 0 to fydials.count-1 do begin
  {$warnings off}
+  {$push}
+    {$objectChecks off}          
   handle(tcustomdialcontroller1(fydials[int1]),
                              rs_right in asides,rs_left in asides,false);
+ {$pop}
  {$warnings on}
  end;
  extendfit(asides,ext1);
@@ -3903,7 +3915,10 @@ begin
  if fframechart = nil then begin
   fframechart:= tframe(tframe.newinstance);
  {$warnings off}
+ {$push}
+    {$objectChecks off}          
   include(tcustomframe1(fframechart).fstate,fs_nosetinstance);
+ {$pop}
  {$warnings on}
   fframechart.create(iframe(self));
  end;
@@ -4490,8 +4505,11 @@ procedure tchartdialshorz.createitem(const index: integer;
 begin
  inherited;
  with tchartdialhorz(item) do begin
+  {$push}
+    {$objectChecks off}          
   start:= ichartdialcontroller(fintf).getxstart;
   range:= ichartdialcontroller(fintf).getxrange;
+ {$pop}
  end;
 end;
 
@@ -4523,8 +4541,11 @@ procedure tchartdialsvert.createitem(const index: integer;
 begin
  inherited;
  with tchartdialvert(item) do begin
+ {$push}
+    {$objectChecks off}          
   start:= ichartdialcontroller(fintf).getystart;
   range:= ichartdialcontroller(fintf).getyrange;
+ {$pop}
  end;
 end;
 

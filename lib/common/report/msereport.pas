@@ -2067,7 +2067,10 @@ begin
  end
  else begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
   result:= treptabfont(treptabulators(fowner).fband.getfont);
+ {$pop}
 {$warnings on}
  end;
 end;
@@ -6409,7 +6412,10 @@ begin
  visible:= false;
  color:= cl_transparent;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  ffont:= twidgetfont(trepfont.create);
+ {$pop}
 {$warnings on}
  ffont.height:= round(defaultrepfontheight * (fppmm/defaultrepppmm));
  ffont.onchange:= {$ifdef FPC}@{$endif}dofontchanged;
@@ -7101,7 +7107,10 @@ end;
 function tcustomreport.getfont: trepfont;
 begin
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= trepfont(ffont);      //has no parent font
+ {$pop}
 {$warnings on}
 end;
 

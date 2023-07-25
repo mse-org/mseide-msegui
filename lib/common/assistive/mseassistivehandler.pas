@@ -1271,11 +1271,14 @@ begin
   if b1 and not(aso_textfirst in foptions)  then begin
    speaktext(sc_selection,fvoicefixed);
   end;
+  {$push}
+    {$objectChecks off}          
   with iassistiveclientgrid(sender) do begin
    speaktext(getassistivecellcaption(mgc(getassistivefocusedcell().col,-1)),
                                                                  fvoicecaption);
    speaktext(getassistivecelltext(getassistivefocusedcell(),fla1),i1);
   end;
+  {$pop}
   if b1 and (aso_textfirst in foptions)  then begin
    speaktext(sc_selection,fvoicefixed);
   end;
@@ -1301,7 +1304,10 @@ begin
 // speaktext(s1,fvoicefixed);
  s1:= '';
  if (spo_columncaption in aoptions) and (asf_gridwidget in fla1) then begin
+  {$push}
+    {$objectChecks off}          
   s1:= s1+iassistiveclientgridwidget(sender).getassistivecolumncaption();
+ {$pop}
  end;
  s3:= getcaptiontext(sender);
  if (spo_maincaption in aoptions) and (maincaption <> '') then begin
@@ -1799,8 +1805,11 @@ begin
        if not (aso_textfirst in foptions) then begin
         speaktext(sc_selection,fvoicefixed);
        end;
+  {$push}
+    {$objectChecks off}          
        speakgridcell(iassistiveclientgrid(sender),
                     tcustomgrid(sender.getassistivewidget()).focusedcell,true);
+  {$pop}
        if aso_textfirst in foptions then begin
         speaktext(sc_selection,fvoicefixed);
        end;
