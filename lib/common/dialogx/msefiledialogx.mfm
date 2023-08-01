@@ -991,7 +991,7 @@ object filedialogxfo: Tfiledialogxfo
   object iconslist: timagelist
     width = 18
     height = 18
-    options = [bmo_masked]
+    options = [bmo_masked, bmo_graymask]
     transparentcolor = -2147483647
     count = 20
     left = 240

@@ -14,7 +14,6 @@ unit mseguiintf; //X11
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 
-
 {$if defined(linux) and defined(CPUX86_64)}
 {$define glibc-table}
 {$endif}
@@ -22,7 +21,6 @@ unit mseguiintf; //X11
 {$if defined(linux) and defined(CPUI386)}
 {$define glibc-table}
 {$endif}
-
 
 interface
 {$ifndef mse_allwarnings}
