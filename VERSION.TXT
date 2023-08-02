@@ -1,5 +1,11 @@
 MSEide+MSEgui changes version history
 **********************************************
+Version 5.8.4
+2023-07-03
+Fixes of version 5.8.2.
+Signed Symbol Tables in mselibc.pas for Linux i386 and x86_64.
+NetBSD x86_64 and OpenBSD x86_64 compatible.
+
 Version 5.8.2
 2023-06-08
 Fixes for db filters.

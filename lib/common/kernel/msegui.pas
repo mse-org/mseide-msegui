@@ -38,7 +38,7 @@ uses
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
                    {$ifdef mse_with_ifi},mseifiglob,mseificompglob{$endif};
  const
- mseguiversiontext = '5.8.2';
+ mseguiversiontext = '5.8.4';
  copyrighttext = 'Copyright 1999-2023';
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
@@ -15253,7 +15253,10 @@ begin
   widget1:= widget1.fparentwidget;
  until widget1 = nil;
 {$warnings off}
+ {$push}
+    {$objectChecks off}          
  result:= twidgetfontempty(stockobjects.fonts[stf_empty]);
+ {$pop}
 {$warnings on}
 end;
 

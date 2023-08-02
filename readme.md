@@ -1,6 +1,6 @@
 # MSEide+MSEgui Pascal Cross Platform GUI Development System
 
-2023-06-08 Version 5.8.2.
+2023-07-02 Version 5.8.4.
 Copyright (c) 1999-2023 by Martin Schreiber and friends.
 
 MSEgui is a complete independent Free Pascal widgetset.
@@ -16,6 +16,7 @@ And because it is developed in Pascal, you have full control on the widgetset.
 - Compiles with FPC-LLVM 3.3.1.
 - For FreeBSD-x86_64, Linux-i386, Linux-x86_64,
   Linux-arm32 and aarch64(Raspberry Pi),
+  NetBSD x86_64 and OpenBSD x86_64,
   Windows-i386, Windows-x86_64.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is utf-16.
