@@ -55,7 +55,7 @@ type
  tdockpanelformscrollbox = class(tdockformscrollbox)
   protected
    fdockingareacaption: msestring;
-   procedure dopaintbackground(const canvas: tcanvas) override;
+   procedure dopaintbackground(const acanvas: tcanvas) override;
  end;
 
  tdockpanelform = class(tdockformwidget)
@@ -827,11 +827,11 @@ end;
 
 { tdockpanelformscrollbox }
 
-procedure tdockpanelformscrollbox.dopaintbackground(const canvas: tcanvas);
+procedure tdockpanelformscrollbox.dopaintbackground(const acanvas: tcanvas);
 begin
  inherited;
  if fdockingareacaption <> '' then begin
-  paintdockingareacaption(canvas,self,fdockingareacaption);
+  paintdockingareacaption(acanvas,self,fdockingareacaption);
  end;
 end;
 

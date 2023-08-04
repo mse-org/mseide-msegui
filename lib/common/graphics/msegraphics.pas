@@ -2112,15 +2112,12 @@ function isvalidmapcolor(index: colorty): boolean;
 var
  map: colormapsty;
 begin
- result:= true;
  application.initialize; //colormap must be valid
  map:= colormapsty((longword(index) shr speccolorshift));
  index:= colorty(longword(index) and not speccolormask);
  dec(map,7);
- if (map <= cm_rgb) or (map > high(map)) or
-       (longword(index) >= longword(mapcolorcounts[map])) then begin
-  result:= false;
- end;
+ result := (map > cm_rgb) and (map <= high(map)) and
+     (longword(index) < longword(mapcolorcounts[map]));
 end;
 
 procedure setcolormapvalue(index: colorty; const red,green,blue: integer);

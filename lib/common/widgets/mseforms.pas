@@ -264,6 +264,7 @@ type
 
    procedure docreate(aowner: tcomponent); virtual;
   public
+   // canvas: tcanvas;
    constructor create(aowner: tcomponent); overload; override;
    constructor create(aowner: tcomponent; load: boolean); reintroduce; overload;  virtual;
    destructor destroy; override;
@@ -271,7 +272,6 @@ type
    procedure freeinstance override;
    procedure reload(const callafterload: boolean = false);
    procedure writestate(writer: twriter); override;
-
    procedure insertwidget(const widget: twidget; const apos: pointty); override;
    procedure dolayout(const sender: twidget); override;
    function childrencount: integer; override;
@@ -460,11 +460,12 @@ type
    class function hasresource: boolean; override;
    procedure aftercreate; override;
   public
-  published
+   published
    property options default defaultmainformoptions;
    property optionswindow default defaultmainformoptionswindow;
  end;
 
+ 
  mainformclassty = class of tmainform;
  tcustomdockform = class;
 
@@ -638,7 +639,7 @@ type
    procedure dopaintforeground(const acanvas: tcanvas); override;
    function getdockcontroller: tdockcontroller;
    procedure mouseevent(var info: mouseeventinfoty); override;
-   procedure dopaintbackground(const canvas: tcanvas); override;
+   procedure dopaintbackground(const acanvas: tcanvas); override;
   public
    constructor create(aowner: tcustomdockform); reintroduce;
  end;
@@ -1021,12 +1022,12 @@ begin
  getdockcontroller.checkmouseactivate(self,info);
 end;
 
-procedure tdockformscrollbox.dopaintbackground(const canvas: tcanvas);
+procedure tdockformscrollbox.dopaintbackground(const acanvas: tcanvas);
 begin
  inherited;
  with tcustomdockform(owner) do begin
   if fdockingareacaption <> '' then begin
-   paintdockingareacaption(canvas,self,fdockingareacaption);
+   paintdockingareacaption(acanvas,self,fdockingareacaption);
   end;
  end;
 end;
