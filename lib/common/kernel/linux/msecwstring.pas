@@ -77,6 +77,21 @@ Uses
  {$endif}
 {$endif}
 
+const
+  /// allow to assign proper signed symbol table name for a libc.so.6 method
+  {$if defined(linux) and defined(cpux86_64)}
+  LIBC_SUFFIX = '@GLIBC_2.2.5';
+  LIBC_SUFFIX2 = '@GLIBC_2.2.5';
+  {$else}
+  {$if defined(linux) and defined(cpui386)}
+  LIBC_SUFFIX = '@GLIBC_2.0';
+  LIBC_SUFFIX2 = '@GLIBC_2.1';
+  {$else}
+  LIBC_SUFFIX = '';
+  LIBC_SUFFIX2 = '';
+  {$endif}
+  {$endif}  
+
 Const
 {$ifdef useiconv}
  libiconvname='iconv';
@@ -100,10 +115,10 @@ Const
 { the following declarations are from the libc unit for linux so they
   might be very linux centric
   maybe this needs to be splitted in an os depend way later }
-function towlower(__wc:wint_t):wint_t;cdecl;external libiconvname name 'towlower';
-function towupper(__wc:wint_t):wint_t;cdecl;external libiconvname name 'towupper';
-function wcscoll (__s1:pwchar_t; __s2:pwchar_t):cint;cdecl;external libiconvname name 'wcscoll';
-function strcoll (__s1:pchar; __s2:pchar):cint;cdecl;external libiconvname name 'strcoll';
+function towlower(__wc:wint_t):wint_t;cdecl;external libiconvname name 'towlower' + LIBC_SUFFIX ;
+function towupper(__wc:wint_t):wint_t;cdecl;external libiconvname name 'towupper' + LIBC_SUFFIX ;
+function wcscoll (__s1:pwchar_t; __s2:pwchar_t):cint;cdecl;external libiconvname name 'wcscoll' + LIBC_SUFFIX ;
+function strcoll (__s1:pchar; __s2:pchar):cint;cdecl;external libiconvname name 'strcoll' + LIBC_SUFFIX ;
 
 const
 //{$ifdef linux}
@@ -142,14 +157,14 @@ type
   nl_item = cint;
 
 function nl_langinfo(__item:nl_item):pchar cdecl
-                                external libiconvname name 'nl_langinfo';
+                                external libiconvname name 'nl_langinfo' + LIBC_SUFFIX ;
 function iconv_open(__tocode: pchar; __fromcode: pchar): iconv_t cdecl
-                                external libiconvname name prefix+'iconv_open';
+                                external libiconvname name prefix+'iconv_open' + LIBC_SUFFIX2 ;
 function iconv(__cd: iconv_t; __inbuf: ppchar; __inbytesleft: psize_t;
               __outbuf: ppchar; __outbytesleft: psize_t): size_t cdecl
-                                external libiconvname name prefix+'iconv';
+                                external libiconvname name prefix+'iconv' + LIBC_SUFFIX2 ;
 function iconv_close(__cd: iconv_t): cint cdecl
-                                external libiconvname name prefix+'iconv_close';
+                                external libiconvname name prefix+'iconv_close' + LIBC_SUFFIX2 ;
 
 var
 //  iconv_ansi2ucs4,
