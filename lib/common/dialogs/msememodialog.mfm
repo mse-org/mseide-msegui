@@ -1,7 +1,7 @@
 object msememodialogfo: tmsememodialogfo
   visible = False
-  bounds_x = 110
-  bounds_y = 237
+  bounds_x = 225
+  bounds_y = 223
   bounds_cx = 409
   bounds_cy = 297
   container.frame.localprops = []
@@ -12,9 +12,13 @@ object msememodialogfo: tmsememodialogfo
     409
     297
   )
+  font.color = -1610612734
+  font.name = 'stf_default'
+  font.localprops = [flp_color]
   options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   statfile = tstatfile1
   caption = 'Enter Memo Text'
+  windowopacity = -Inf
   moduleclassname = 'tmseform'
   object memo: tmemoedit
     frame.localprops = [frl_colorclient]
@@ -24,19 +28,21 @@ object msememodialogfo: tmsememodialogfo
     bounds_x = 0
     bounds_y = 0
     bounds_cx = 409
-    bounds_cy = 268
+    bounds_cy = 265
     anchors = [an_top, an_bottom]
     optionsedit1 = [oe1_multiline, oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate]
     optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_shiftreturn, oe_resetselectonexit, oe_nofirstarrownavig, oe_caretonreadonly]
-    reffontheight = 14
+    font.color = -1610612734
+    font.name = 'stf_default'
+    font.localprops = [flp_color]
+    reffontheight = 17
   end
   object tlayouter1: tlayouter
-    optionswidget = [ow_tabfocus, ow_parenttabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_subfocus, ow_destroywidgets]
     taborder = 1
     bounds_x = 72
-    bounds_y = 272
+    bounds_y = 269
     bounds_cx = 330
-    bounds_cy = 20
+    bounds_cy = 23
     anchors = [an_left, an_right, an_bottom]
     optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     optionslayout = [lao_placex, lao_aligny]
@@ -49,30 +55,34 @@ object msememodialogfo: tmsememodialogfo
     options = [spao_gluebottom]
     object tbutton2: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
-      bounds_x = 278
+      bounds_x = 280
       bounds_y = 0
-      bounds_cx = 52
-      bounds_cy = 20
+      bounds_cx = 50
+      bounds_cy = 23
       bounds_cxmin = 50
       state = [as_localcaption]
       caption = '&Cancel'
+      font.color = -1610612734
       font.name = 'stf_default'
-      font.localprops = []
+      font.localprops = [flp_color]
       modalresult = mr_cancel
-      reffontheight = 14
+      reffontheight = 17
     end
     object tbutton1: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
       taborder = 1
-      bounds_x = 220
+      bounds_x = 222
       bounds_y = 0
       bounds_cx = 50
-      bounds_cy = 20
+      bounds_cy = 23
       bounds_cxmin = 50
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
+      font.color = -1610612734
+      font.name = 'stf_default'
+      font.localprops = [flp_color]
       modalresult = mr_ok
-      reffontheight = 14
+      reffontheight = 17
     end
   end
   object tstatfile1: tstatfile
