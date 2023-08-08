@@ -34,6 +34,7 @@ type
 
  tmsememodialogfo = class(tmseform)
    memo: tmemoedit;
+   tstatfile1: tstatfile;
    tlayouter1: tlayouter;
    tbutton2: tbutton;
    tbutton1: tbutton;
