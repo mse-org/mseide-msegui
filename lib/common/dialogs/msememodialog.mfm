@@ -16,7 +16,6 @@ object msememodialogfo: tmsememodialogfo
   font.name = 'stf_default'
   font.localprops = [flp_color]
   options = [fo_screencentered, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
-  statfile = tstatfile1
   caption = 'Enter Memo Text'
   windowopacity = -Inf
   moduleclassname = 'tmseform'
@@ -84,11 +83,5 @@ object msememodialogfo: tmsememodialogfo
       modalresult = mr_ok
       reffontheight = 17
     end
-  end
-  object tstatfile1: tstatfile
-    filename = 'memodialog.sta'
-    options = [sfo_memory, sfo_activatorread, sfo_activatorwrite]
-    left = 64
-    top = 104
   end
 end

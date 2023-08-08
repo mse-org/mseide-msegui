@@ -757,7 +757,7 @@ type
               eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint;
                                            cdecl; external clib name 'kevent@GLIBC_2.0';
  {$else}
-   function kqueue(): cint; cdecl; external clib name 'kqueue'
+   function kqueue(): cint; cdecl; external clib name 'kqueue';
    function kevent(kq: cint; changelist: pkevent_t; nchanges: cint;
               eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint;
                                            cdecl; external clib name 'kevent';
