@@ -1244,7 +1244,9 @@ begin
  sys_mutexcreate(feventlock);
  classes.wakemainthread:= {$ifdef FPC}@{$endif}dowakeup;
  fonapplicationeventlist:= tonapplicationeventlist.create;
+ {$if not defined(openbsd) and not defined(netbsd)}
  lock;
+ {$endif}
  initialize;
 end;
 
