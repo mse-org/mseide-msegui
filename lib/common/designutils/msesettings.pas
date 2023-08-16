@@ -39,12 +39,13 @@ type
                    sma_syntaxdefdir,sma_templatedir,sma_compstoredir,
                    sma_compiler,sma_debugger,
                    sma_exeext,sma_target,sma_targetosdir);
-const
-  
+ 
   {$ifndef netbsd}
+  const
   statdirname = '^/.mseide';
     {$else}
-   statdirname = '^/';
+   var  
+   statdirname : string;
     {$endif}
 
  settingsmacronames: array[settingsmacroty] of msestring = (

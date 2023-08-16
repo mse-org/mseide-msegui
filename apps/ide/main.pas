@@ -1831,6 +1831,8 @@ label
  endlab;
 begin
  try
+ 
+  {$ifndef netbsd}
   if guitemplatesmo.sysenv.defined[ord(env_globstatfile)] then begin
    wstr1:= guitemplatesmo.sysenv.value[ord(env_globstatfile)];
    if wstr1 <> '' then begin
@@ -1838,16 +1840,22 @@ begin
     goto endlab;
    end;
   end;
+    
   wstr1:= filepath(statdirname);
   if not finddir(wstr1) then begin
    createdir(wstr1);
   end;
+  {$endif}
   
-    {$ifdef linux}
-           if not fileexists(wstr1 + '/mseideli.sta') then
-           Filecreate(wstr1 + '/mseideli.sta') ;
-    {$endif}
+ {$ifdef linux}
+    if not fileexists(wstr1 + '/mseideli.sta') then
+    Filecreate(wstr1 + '/mseideli.sta') ;
+  {$endif}
   
+  {$ifdef netbsd}
+  statdirname := extractfilepath(paramstr(0);
+  mainstatfile.filedir:= statdirname;
+  {$endif} 
   
   {$ifdef mswindows}
   mainstatfile.filename:= statname+'wi.sta';
