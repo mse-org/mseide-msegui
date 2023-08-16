@@ -1853,7 +1853,7 @@ begin
   {$endif}
   
   {$ifdef netbsd}
-  statdirname := extractfilepath(paramstr(0);
+  statdirname := extractfilepath(paramstr(0));
   mainstatfile.filedir:= statdirname;
   {$endif} 
   
