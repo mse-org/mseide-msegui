@@ -186,10 +186,17 @@ type
   intmax_t = Int64;
   uintmax_t = QWord;
 
+ {$if defined(CPU32) and defined(openbsd)}
  timespec = record
+  tv_sec: int64;
+  tv_nsec: clong;
+ end;
+  {$else}
+  timespec = record
   tv_sec: __time_t;
   tv_nsec: clong;
  end;
+ {$endif} 
 
  TTimeSpec = timespec;
  PTimeSpec = ^TTimeSpec;
@@ -956,7 +963,7 @@ type
   st_birthtim: cint64;    //* time of file creation */
    {$endif}
     
- {$ifndef cpu64}
+ {$if not defined(cpu64)}
   pad: array[0..15-sizeof(timespec)] of byte;
  {$endif}
   (*
@@ -1035,7 +1042,7 @@ type
   end;
  {$else}       //bsd
  ino_t = cuint32;
- mode_t = cuint16;
+ mode_t = cuint32;
  n_link_t = cuint16;
  uid_t = cuint32;
  gid_t = cuint32;
@@ -1043,7 +1050,8 @@ type
  blkcnt_t = cint64;
  blksize_t = cuint32;
  fflags_t = cuint32;
-
+ 
+ {$if not defined(openbsd)} 
  _stat = packed record
   st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
@@ -1065,9 +1073,32 @@ type
   st_gen: cuint32;          //* file generation number */
   st_lspare: cint32;
   st_birthtim: timespec;    //* time of file creation */
-  {$ifndef cpu64}
   pad: array[0..15-sizeof(timespec)] of byte;
   {$endif}
+
+ {$if defined(openbsd)} 
+ _stat = packed record       // bsd 32
+  st_dev: __dev_t;          //* inode's device */
+  st_ino: ino_t;            //* inode's number */
+  st_mode: cint64;          //* inode protection mode */
+  st_nlink: n_link_t;       //* number of hard links */
+  st_uid: uid_t;            //* user ID of the file's owner */
+  st_gid: gid_t;            //* group ID of the file's group */
+  st_rdev: __dev_t;         //* device type */
+  st_atime: cint64;         //* time of last access */
+  st_atime_nsec: cint64;
+  st_mtime: cint64;         //* time of last data modification */
+  st_mtime_nsec: cint64;
+  st_ctime: cint64;         //* time of last file status change */
+  st_ctime_nsec: cint64;
+  st_size: off_t;           //* file size, in bytes */
+  st_blocks: blkcnt_t;      //* blocks allocated for file */
+  st_blksize: blksize_t;    //* optimal blocksize for I/O */
+  st_flags: fflags_t;       //* user defined flags for file */
+  st_gen: cuint32;          //* file generation number */
+  st_lspare: cint32;
+  st_birthtim: timespec;    //* time of file creation */
+   {$endif}
   (*
         /*
          * Explicitly pad st_birthtim to 16 bytes so that the size of
@@ -2089,9 +2120,18 @@ type
 
    Ptimeval = ^timeval;
    timeval = record
-        tv_sec : __time_t;
-        tv_usec : __suseconds_t;
-     end;
+   
+     {$if not defined(openbsd) and not defined(cpu32)}   
+      tv_sec : __time_t;
+      tv_usec : __suseconds_t;
+     {$endif}
+     
+     {$if defined(openbsd) and defined(cpu32)}   
+      tv_sec: int64;
+      tv_usec: clong;
+     {$endif}
+   
+    end;
   TTimeVal = timeval;
   timezone = record
     tz_minuteswest: Integer;
@@ -2227,8 +2267,19 @@ type
         d_namlen: cuint8;             //* length of string in d_name */
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
-        {$if defined(openbsd)}
+
+        {$if defined(openbsd) and defined(cpu64)}
         d_fileno: cuint32;          //* file number of entry */
+        d_off : __off64_t;
+        d_reclen: cuint16;            //* length of this record */
+        d_type:  cuint8;               //* file type, see below */
+        d_namlen: cuint8;             //* length of string in d_name */
+        d_padding: array[0..3] of cuint8;
+        d_name: array[0..256] of char;        //* name must be no longer than this */
+        {$endif}
+        
+        {$if defined(openbsd) and defined(cpu32)}
+        d_fileno: cuint64;          //* file number of entry */
         d_off : __off64_t;
         d_reclen: cuint16;            //* length of this record */
         d_type:  cuint8;               //* file type, see below */

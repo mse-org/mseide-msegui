@@ -2218,7 +2218,9 @@ begin
   terminate:= false;
  end
  else begin
+ {$if not defined(openbsd) and not defined(cpu32)}
   sourcefo.filechangenotifyer.clear;
+ {$endif}
   mainstatfile.writestat;
  end;
  {
