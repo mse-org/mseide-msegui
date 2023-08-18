@@ -2121,14 +2121,12 @@ type
    Ptimeval = ^timeval;
    timeval = record
    
-     {$if not defined(openbsd) and not defined(cpu32)}   
-      tv_sec : __time_t;
-      tv_usec : __suseconds_t;
-     {$endif}
-     
      {$if defined(openbsd) and defined(cpu32)}   
       tv_sec: int64;
       tv_usec: clong;
+     {$else}
+      tv_sec : __time_t;
+      tv_usec : __suseconds_t;
      {$endif}
    
     end;
