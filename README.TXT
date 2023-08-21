@@ -5,9 +5,12 @@ Copyright (c) 1999-2023 by Martin Schreiber and friends.
 
 - Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2 or 3.3.1.
 - Compiles with FPC-LLVM 3.3.1.
-- For FreeBSD-x86_64, Linux-i386, Linux-x86_64, Linux-Rpi-arm32,
-  NetBSD x86_64 and OpenBSD x86_64,
-  Linux-Rpi-aarch64,  Windows-i386, Windows-x86_64.
+- For FreeBSD-x86_64, FreeBSD-i386,
+  Linux-x86_64, Linux-i386,
+  Linux-Rpi-arm32, Linux-Rpi-aarch64,
+  NetBSD-x86_64, NetBSD-i386,
+  OpenBSD x86_64, OpenBSD-i386, 
+  Windows-i386, Windows-x86_64.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is utf-16.
 - Uses anti aliased fonts on Linux (Xft).
