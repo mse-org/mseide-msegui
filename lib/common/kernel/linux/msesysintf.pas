@@ -699,17 +699,24 @@ case openmode of  // fm_none-,fm_read+,fm_write+,fm_readwrite+,fm_create-,fm_app
   else { cannot occur, keep passed value };
 end;
 
-if openmode = fm_create then
-handle:= Filecreate(str1) else
-handle:= Fileopen(str1,aMode);
+   if openmode = fm_create then
+   handle:= Filecreate(str1) else
+   handle:= Fileopen(str1,aMode);
 
 //handle:= longint(mselibc.open(PChar(str1), openmodes[openmode] or defaultopenflags,[getfilerights(rights)]));
 //writeln('handle =' + inttostr(handle));
 //writeln('fstat ' + inttostr(fpfstat(handle,stat1)));
  
- fpfstat(handle,stat1);
- setcloexec(handle);
- result:= sye_ok;
+  IF handle < 0 THEN BEGIN   // AN ERROR HAS OCCURRED!
+    if openmode = fm_create
+    then result:= sye_write
+    else result:= sye_read;
+  END
+  ELSE BEGIN
+    fpfstat(handle,stat1);
+    setcloexec(handle);
+    result:= sye_ok;
+  END;
 
 end;
 
