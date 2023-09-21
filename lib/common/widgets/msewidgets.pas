@@ -982,7 +982,7 @@ type
    property popupmenu;
    property onpopup;
    property onshowhint;
-   //property onmouseevent;  // should we not enable it ?
+   property onmouseevent;  
    property onenter;
    property onexit;
    property onfocus;
