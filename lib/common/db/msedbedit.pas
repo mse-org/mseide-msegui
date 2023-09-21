@@ -234,6 +234,7 @@ type
                                         //call onreadonlychange
 //   property nonavig: boolean read getnonavig write setnonavig;
   published
+   property datalink: tnavigdatalink read fdatalink;
    property statfile;
    property datasource: tdatasource read getdatasource write setdatasource;
    property visiblebuttons: dbnavigbuttonsty read fvisiblebuttons 
