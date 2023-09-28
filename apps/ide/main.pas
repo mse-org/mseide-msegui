@@ -2046,8 +2046,8 @@ var
  ancestorclass,ancestorunit: msestring;
 
 begin
-// if formkindty(tmenuitem(sender).tag) = fok_inherited then begin
- if projectoptions.p.newinheritedforms[tmenuitem(sender).tag] then begin
+// if projectoptions.p.newinheritedforms[tmenuitem(sender).tag] then begin
+if (system.Pos('inherited',lowercase(tmenuitem(sender).caption)) <> 0) then begin
   po1:= selectinheritedmodule(nil,c[ord(selectancestor)]);
   if po1 = nil then begin
    exit;

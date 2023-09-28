@@ -1618,7 +1618,7 @@ begin
 
     item1:= mainfo.mainmenu1.menu.itembynames(['file','new','form']);
     item1.submenu.count:= 0;
-    item1.submenu.count:= length(newfonames)+1;
+    item1.submenu.count:= length(newfonames);
     int2:= 0;
     for int1:= 0 to high(newfonames) do begin
      if not p.newinheritedforms[int1] then begin
@@ -1630,8 +1630,8 @@ begin
       inc(int2);
      end;
     end;
-    item1.submenu[int2].options:= [mao_separator];
-    inc(int2);
+    //item1.submenu[int2].options:= [mao_separator];
+    //inc(int2);
     for int1:= 0 to high(newfonames) do begin
      if p.newinheritedforms[int1] then begin
       with item1.submenu[int2] do begin

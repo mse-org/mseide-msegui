@@ -21,9 +21,9 @@ object mainfo: tmainfo
   container.onlayout = onscale
   container.bounds = (
     0
-    16
+    19
     449
-    133
+    130
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint]
   dragdock.optionsdockform = [odf_main, odf_childicons]
@@ -48,7 +48,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 19
     bounds_cx = 449
-    bounds_cy = 114
+    bounds_cy = 111
     anchors = [an_top, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background, od_captionhint]
     statfile = projectstatfile
@@ -62,13 +62,13 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 449
-    bounds_cy = 18
+    bounds_cy = 21
     anchors = [an_top]
     font.name = 'stf_default'
     font.xscale = 1
     font.localprops = [flp_xscale]
     options = [dwo_hintclippedtext]
-    reffontheight = 14
+    reffontheight = 17
   end
   object gdb: tgdbmi
     guiintf = True
