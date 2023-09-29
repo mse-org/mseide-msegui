@@ -1620,8 +1620,9 @@ begin
     item1.submenu.count:= 0;
     item1.submenu.count:= length(newfonames);
     int2:= 0;
-    for int1:= 0 to high(newfonames) do begin
-     if not p.newinheritedforms[int1] then begin
+    for int1:= 0 to high(newfonames) do
+     //if not p.newinheritedforms[int1] then
+      begin
       with item1.submenu[int2] do begin
        caption:= newfonames[int1];
        tag:= int1;
@@ -1629,20 +1630,24 @@ begin
       end;
       inc(int2);
      end;
-    end;
-    //item1.submenu[int2].options:= [mao_separator];
-    //inc(int2);
+   
+   {
+   item1.submenu[int2].options:= [mao_separator];
+   inc(int2);
     for int1:= 0 to high(newfonames) do begin
      if p.newinheritedforms[int1] then begin
       with item1.submenu[int2] do begin
        caption:= newfonames[int1];
        tag:= int1;
-       onexecute:= {$ifdef FPC}@{$endif}mainfo.newformonexecute;
+       onexecute:= @mainfo.newformonexecute;
       end;
       inc(int2);
      end;
     end;
+    }
+    
    end;
+  
    with mainfo.mainmenu1.menu.submenu do begin
     item1:= itembyname('tools');
     with projectoptions.t,texp do begin

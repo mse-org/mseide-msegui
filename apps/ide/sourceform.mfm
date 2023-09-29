@@ -113,8 +113,8 @@ object sourcefo: tsourcefo
     tab_frame.localprops = [frl_optionsskin]
     tab_frame.localprops1 = []
     tab_textflags = [tf_ycentered]
-    tab_sizemin = 60
-    tab_size = 60
+    tab_sizemin = 80
+    tab_size = 80
     tab_optionswidget1 = []
     object tstockglyphbutton1: tstockglyphbutton
       optionswidget = [ow_destroywidgets, ow_disabledhint, ow_timedhint]
@@ -124,7 +124,7 @@ object sourcefo: tsourcefo
       bounds_x = 383
       bounds_y = 0
       bounds_cx = 20
-      bounds_cy = 20
+      bounds_cy = 26
       anchors = [an_top, an_right]
       state = [as_disabled, as_localimagelist, as_localimagenr, as_localcolorglyph, as_localhint, as_localonexecute]
       glyph = stg_arrowleft
@@ -140,7 +140,7 @@ object sourcefo: tsourcefo
       bounds_x = 403
       bounds_y = 0
       bounds_cx = 20
-      bounds_cy = 20
+      bounds_cy = 26
       anchors = [an_top, an_right]
       state = [as_disabled, as_localimagelist, as_localimagenr, as_localcolorglyph, as_localhint]
       glyph = stg_arrowright
