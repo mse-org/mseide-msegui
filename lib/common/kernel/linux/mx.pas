@@ -5,7 +5,11 @@ uses
 
 {$ifndef os2}
   {$LinkLib c}
-  {$LinkLib libX11.so.6}
+   {$ifdef darwin}
+  {$LinkLib libX11.dylib}
+ {$else}
+   {$LinkLib libX11.so.6}
+ {$endif}
 {$endif}
 
 {

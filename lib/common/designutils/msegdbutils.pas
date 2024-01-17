@@ -872,7 +872,7 @@ begin
  fsourcefiles:= tmsestringhashdatalist.create();
 // fsourcefiles:= thashedmsestrings.create;
  fstoptime:= emptydatetime;
- {$ifdef UNIX}
+ {$if defined(UNIX) and not defined(darwin)}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
  ftargetconsole:= tcustommseprocess.create(nil);
@@ -880,6 +880,7 @@ begin
 // ftargetconsole.filename:= 'xterm';
  ftargetconsole.output.oninputavailable:= {$ifdef FPC}@{$endif}xtermfrom;
  {$endif}
+ 
  foverloadsleepus:= -1;
  inherited;
 end;
@@ -889,7 +890,7 @@ begin
  closegdb;
  inherited;
  fsourcefiles.free;
- {$ifdef UNIX}
+ {$if defined(UNIX) and not defined(darwin)}
  ftargetconsole.free;
  ftargetterminal.free;
  {$endif}
@@ -4889,7 +4890,7 @@ begin
  end;
 }
 {$ifdef UNIX}
- ftargetterminal.input.overloadsleepus:= avalue;
+ // ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
 end;
 
@@ -4932,6 +4933,7 @@ var
  ios: termios{ty};
 
 begin
+ {$if not defined(darwin)}
  fpty:= invalidfilehandle;
  fpty:= getpt;
  if fpty < 0 then error;
@@ -4949,10 +4951,12 @@ begin
  foutput:= tpipewriter.create;
 // finput.handle:= pty;
  foutput.handle:= fpty;
+{$endif}
 end;
 
 destructor tpseudoterminal.destroy;
 begin
+{$if not defined(darwin)}
  closeinp;
  foutput.releasehandle;
  finput.releasehandle;
@@ -4961,13 +4965,15 @@ begin
  if fpty <> invalidfilehandle then begin
   sys_closefile(fpty);
  end;
+{$endif}
 end;
 
 procedure tpseudoterminal.closeinp;
 var
  ios: termios{ty};
 begin
- finput.terminate(true);
+{$if not defined(darwin)} 
+finput.terminate(true);
  if finput.active then begin
   msetcgetattr(foutput.handle,ios);
   ios.c_lflag:= (ios.c_lflag and not (icanon)) or echo;
@@ -4976,6 +4982,7 @@ begin
   msetcsetattr(foutput.handle,tcsanow,ios);
   foutput.writeln('');
  end;
+{$endif}
 end;
 
 procedure tpseudoterminal.restart;

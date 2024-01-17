@@ -1251,7 +1251,7 @@ begin
           else statbuffer.st_mode := 16384; // dir
        {$endif}
       
-       {$if defined(netbsd)}
+       {$if defined(netbsd) or defined(darwin)}
        if statbuffer.st_mode = 33188 then statbuffer.st_mode := 32768
           else statbuffer.st_mode := 16384; // dir
        {$endif}

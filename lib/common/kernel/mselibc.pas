@@ -900,7 +900,7 @@ type
  {$endif} // arm64
 
  {$else} //bsd
-{$if defined(freebsd) or defined(dragonfly) or defined(netbsd)}
+{$if defined(freebsd) or defined(dragonfly) or defined(netbsd) or defined(darwin)}
  ino_t = cuint32;
  mode_t = cuint16;
  {$endif}
@@ -917,7 +917,7 @@ type
  fflags_t = cuint32;
 
  _stat = packed record
-{$if defined(freebsd) or defined(dragonfly) or defined(netbsd)}
+{$if defined(freebsd) or defined(dragonfly) or defined(netbsd) or defined(darwin) }
    st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
   st_mode: mode_t;          //* inode protection mode */
@@ -1690,7 +1690,7 @@ const
 {$if defined(freebsd) or defined(dragonfly)}
  CODESET = 0; //* codeset name */
 {$endif}
-{$if defined(openbsd) or defined(netbsd)}
+{$if defined(openbsd) or defined(netbsd) or defined(darwin)}
  CODESET = 51; //* codeset name */
 {$endif}
  D_T_FMT = 1; //* string for formatting date and time */
@@ -1858,7 +1858,7 @@ type
   end;
   Ppthread_mutexattr_t = ^pthread_mutexattr_t;
  
-  {$ifndef netbsd}
+  {$if not defined(netbsd) and not defined(darwin)}
   pthread_mutexattr_t = record
    case integer of
     0:( __mutexkind : longint);
@@ -2095,7 +2095,7 @@ const
 type
   Ppthread_mutex_t = ^pthread_mutex_t;
 
-{$ifndef netbsd}  
+ {$if not defined(netbsd)}  
   pthread_mutex_t = array[0..__SIZEOF_PTHREAD_MUTEX_T-1] of byte;
 {$else}
   pthread_mutex_t = record
@@ -2199,7 +2199,7 @@ function __errno_location: PInteger; cdecl;external clib name '__errno_location'
 {$endif}
 
 
-{$if defined(freebsd) or defined(dragonfly)}
+{$if defined(freebsd) or defined(dragonfly) or defined(darwin)}
 function __errno_location: PInteger; cdecl;external clib name '__error';
 {$endif}
 {$if defined(openbsd) or defined(netbsd)}
@@ -2258,7 +2258,7 @@ type
        end;
 {$else}
  dirent64 = record
-        {$if defined(freebsd) or defined(dragonfly) or defined(netbsd)}
+        {$if defined(freebsd) or defined(dragonfly) or defined(netbsd) or defined(darwin)}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
         d_type: cuint8;               //* file type, see below */
@@ -2941,7 +2941,7 @@ type
       revents : smallint;
    end;
 
-{$ifdef netbsd} 
+{$if defined(netbsd)} 
 function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                                 __ss: p__sigset_t): cint
                                               cdecl; external clib name 'pollts';
@@ -2973,12 +2973,23 @@ function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
 {$endif}
 {$endif}
 {$else}
+
+{$ifndef darwin} 
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll';
 
 function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                              __ss: p__sigset_t): cint
                                            cdecl; external clib name 'ppoll';
+{$else}
+function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
+                                              cdecl; external clib name 'poll';
+
+function ppoll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
+                                            cdecl; external clib name 'poll';
+
+{$endif}
+
 {$endif}
 
 {$endif} 
@@ -3105,8 +3116,14 @@ function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;ext
 {$endif}
 {$endif}
 {$else}
+
+{$ifdef darwin}
+function ptsname(fildes: cint): pchar; cdecl; external clib name 'ptsname_r';
+function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;
+{$else}
 function ptsname(fildes: cint): pchar; cdecl; external clib name 'ptsname';
 function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;
+{$endif}
 {$endif}
 
 const
@@ -3887,7 +3904,8 @@ function pthread_cond_broadcast(var Cond: TCondVar): Integer; cdecl;
            external threadslib name 'pthread_cond_broadcast@GLIBC_2.2.5';
 function pthread_cond_signal(var Cond: TCondVar): Integer; cdecl;
            external threadslib name 'pthread_cond_signal@GLIBC_2.2.5';
-function sem_timedwait(var __sem: TSemaphore; __abstime: ptimespec): Integer; cdecl;
+           
+ function sem_timedwait(var __sem: TSemaphore; __abstime: ptimespec): Integer; cdecl;
             external threadslib name 'sem_timedwait@GLIBC_2.2.5';
 
 function pthread_mutex_init(__mutex: Ppthread_mutex_t;
@@ -4027,9 +4045,11 @@ function pthread_cond_broadcast(var Cond: TCondVar): Integer; cdecl;
            external threadslib name 'pthread_cond_broadcast';
 function pthread_cond_signal(var Cond: TCondVar): Integer; cdecl;
            external threadslib name 'pthread_cond_signal';
+
+  {$ifndef darwin}  
 function sem_timedwait(var __sem: TSemaphore; __abstime: ptimespec): Integer; cdecl;
             external threadslib name 'sem_timedwait';
-
+   {$endif}
 
 function pthread_mutex_init(__mutex: Ppthread_mutex_t;
                __mutex_attr: Ppthread_mutexattr_t): longint; cdecl;

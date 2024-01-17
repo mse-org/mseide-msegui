@@ -18,6 +18,10 @@ unit mseguiintf; //X11
 {$define glibc-table}
 {$endif}
 
+{$if defined(darwin) and defined(CPUX86_64)}
+{$define glibc-table}
+{$endif}
+
 {$if defined(linux) and defined(CPUI386)}
 {$define glibc-table}
 {$endif}
@@ -331,10 +335,12 @@ const
  XC_watch =              150;
  XC_xterm =              152;
 
- {$ifdef FPC}
-// threadslib = 'pthread';
- Xlibmodulename = 'libX11.so.6';
+ {$ifdef darwin}
+ Xlibmodulename = 'libX11.dylib';
+ {$else}
+  Xlibmodulename = 'libX11.so.6';
  {$endif}
+ 
  sXlib = Xlibmodulename;
  pixel0 = $000000;
  pixel1 = $ffffff;
@@ -6176,13 +6182,18 @@ begin
     with pollinf^ do begin
  
 {$ifdef linux} 
- {$ifdef glibc-table} 
+  {$ifdef glibc-table} 
   i1:= ppoll(@pollinfo[0],length(pollinfo),1000);
  {$else}
   i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
  {$endif}
 {$else} 
+ {$ifdef darwin} 
+  i1:= ppoll(@pollinfo[0],length(pollinfo),1000);
+ {$else}
   i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
+ {$endif}
+ 
 {$endif}     
     
      if pollinfo[1].revents <> 0 then begin

@@ -266,7 +266,11 @@ end;
 
 function tpipewriter.gethandle: integer;
 begin
- result:= inherited handle;
+{$if not defined(darwin)}
+result:= inherited handle;
+ {$else}
+result := 0;
+ {$endif}
 end;
 
 {$ifdef FPC}
@@ -330,8 +334,11 @@ procedure tpipereader.terminate(const noclosehandle: boolean = false);
 var
  by1: byte;
 begin
+{$if not defined(darwin)}
+
  if fthread <> nil then begin
   fthread.terminate;
+
   if fthread.running then begin
    fthread.sempost;
    if fwritehandle <> invalidfilehandle then begin
@@ -339,18 +346,22 @@ begin
     sys_write(fwritehandle,@by1,1); //wake up thread
    end
    else begin
-//    inherited sethandle(invalidfilehandle);
+    inherited sethandle(invalidfilehandle);
     {$ifdef unix}
     pthread_kill(fthread.id,sigio);
     {$endif}
    end;
    writehandle:= invalidfilehandle;
+
   end;
+
  end;
+
  if not noclosehandle then begin
   inherited sethandle(invalidfilehandle);
  end;
  include(fstate,tss_notopen);
+{$endif}
 end;
 
 procedure tpipereader.terminateandwait(const noclosehandle: boolean = false);
@@ -766,7 +777,11 @@ end;
 
 function tpipereader.getresponseflag: boolean;
 begin
+{$if not defined(darwin)}
  result:= tss_response in fstate;
+ {$else}
+result := true;
+ {$endif}
 end;
 
 procedure tpipereader.setresponseflag(const Value: boolean);
@@ -776,8 +791,13 @@ end;
 
 function tpipereader.active: boolean;
 begin
- result:= (handle <> invalidfilehandle) and (fstate * [tss_error,tss_eof] = []);
+{$if not defined(darwin)}
+ result:= (handle <> invalidfilehandle) and (fstate * [tss_error,tss_eof] = []); 
+ {$else}
+result := true;
+ {$endif}
 end;
+
 
 procedure tpipereader.dochange;
 begin

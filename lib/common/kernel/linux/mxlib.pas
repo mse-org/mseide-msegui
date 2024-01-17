@@ -7,9 +7,15 @@ uses
 
 {$ifndef os2}
   {$LinkLib c}
-  {$LinkLib libX11.so.6}
-const
-  libX11='libX11.so.6';
+ {$ifdef darwin}
+  {$LinkLib libX11.dylib}
+   const
+   libX11='libX11.dylib';
+  {$else}
+   {$LinkLib libX11.so.6}
+   const
+   libX11='libX11.so.6';
+  {$endif}
 {$else}
 const
   libX11='X11';
