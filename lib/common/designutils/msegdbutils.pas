@@ -4889,8 +4889,8 @@ begin
   fgdberror.overloadsleepus:= avalue;
  end;
 }
-{$ifdef UNIX}
- // ftargetterminal.input.overloadsleepus:= avalue;
+{$if defined(UNIX) and not defined(darwin)}
+  ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
 end;
 
