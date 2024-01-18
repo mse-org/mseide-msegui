@@ -49,6 +49,9 @@ const
 {$endif}
 
 const
+{$ifdef darwin}
+  platformtext = 'x86_64-darwin';
+{$else}
 {$ifdef linux}
  {$ifdef CPU64} 
   {$ifdef CPUAARCH64}
@@ -85,6 +88,7 @@ const
    {$endif}
   {$endif}
  {$endif}
+{$endif}
 {$endif}
 
  moduleclassnamename = 'moduleclassname';

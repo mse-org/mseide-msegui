@@ -19,8 +19,8 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/mseide-msegui/apps/demo
-projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
+projectdir=/Z:/home/fred/mseide-msegui/apps/demo
+projectfilename=Z:\home\fred\mseide-msegui\apps\demo\demo.prj
 options=133
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
@@ -689,7 +689,7 @@ files=
  a=0,8229,6,Text Files
  )
 [componentstore]
-storedir=/home/fred/mseide-msegui/apps/ide/compstore/
+storedir=/Z:/home/fred/mseide-msegui/apps/mse/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -708,8 +708,9 @@ hintheight=0
 finddtext=
 findhistory=0
 findoptions=1
-editpos=4
+editpos=5
  13,10
+ 0,-1073741823
  0,-1073741823
  0,-1073741823
  0,0
@@ -717,17 +718,21 @@ bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
-sourcefiles=4
+bookmarks4=0
+sourcefiles=5
  /home/fred/mseide-msegui/apps/demo/main.pas
  ${PROJECTDIR}/demo.pas
  ${PROJECTDIR}/demo.pas
  /home/fred/mseide-msegui/apps/demo/demo.pas
-relpaths=4
- main.pas
+ /Z:/home/fred/mseide-msegui/apps/demo/demo.pas
+relpaths=5
+ ../../../../../home/fred/mseide-msegui/apps/demo/main.pas
  demo.pas
  demo.pas
  demo.pas
-ismoduletexts=4
+ demo.pas
+ismoduletexts=5
+ 0
  0
  0
  0
@@ -741,15 +746,16 @@ visiblemodules=1
 nomenumodules=1
  0
 [sourcefo.files_tab]
-order=4
+order=5
  0
+ 4
+ 2
  3
  1
- 2
 firsttab=0
 index=0
 [layout]
-windowlayout=577
+windowlayout=578
  [mainfo.basedock]
  splitdir=2
  useroptions=268582016
@@ -766,7 +772,7 @@ windowlayout=577
  x=76
  y=29
  cx=1209
- cy=80
+ cy=133
  rcx=0
  rcy=0
  wsize=0
@@ -981,10 +987,10 @@ windowlayout=577
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=497
- width0=183
+ propcolwidthref=240
+ width0=88
  sortdescend0=0
- width1=308
+ width1=146
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1048,7 +1054,7 @@ windowlayout=577
  rcx=0
  rcy=0
  [watchfo.grid]
- propcolwidthref=114
+ propcolwidthref=104
  values0=0
  values0_ci=-1
  sortdescend0=0
@@ -1179,7 +1185,7 @@ windowlayout=577
  x=0
  y=0
  cx=1195
- cy=54
+ cy=111
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1189,13 +1195,13 @@ windowlayout=577
  visible=1
  mdistate=0
  nx=0
- ny=0
- ncx=1190
- ncy=64
+ ny=15
+ ncx=1195
+ ncy=71
  x=0
  y=15
- cx=1180
- cy=71
+ cx=1195
+ cy=128
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1241,11 +1247,12 @@ windowlayout=577
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=4
+ order=5
   0
+  4
+  2
   3
   1
-  2
  firsttab=0
  index=0
  [confideufo.usedefaulteditoroptions]
