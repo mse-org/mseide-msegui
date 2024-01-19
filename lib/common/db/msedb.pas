@@ -1850,7 +1850,7 @@ uses
  rtlconsts,msefileutils,typinfo,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},
  msearrayutils,mseformatstr,msebits,msefloattostr,msebufdataset,
  msereal,variants,msedate,msesys,sysconst
- {,msedbgraphics}{$ifdef unix},{$ifdef openbsd} cwstring {$else} msecwstring {$endif}{$endif};
+ {,msedbgraphics}{$ifdef unix},{$if defined(openbsd) or defined(darwin)} cwstring {$else} msecwstring {$endif}{$endif};
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
