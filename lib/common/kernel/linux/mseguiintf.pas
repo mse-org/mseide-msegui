@@ -18,7 +18,7 @@ unit mseguiintf; //X11
 {$define glibc-table}
 {$endif}
 
-{$if defined(darwin) and defined(CPUX86_64)}
+{$if defined(darwin)}
 {$define glibc-table}
 {$endif}
 
