@@ -49,8 +49,11 @@ const
 {$endif}
 
 const
-{$ifdef darwin}
+{$if defined(darwin) and defined(CPUX86_64)}
   platformtext = 'x86_64-darwin';
+{$else}
+{$if defined(darwin) and defined(CPUAARCH64)}
+  platformtext = 'aarch64-darwin';
 {$else}
 {$ifdef linux}
  {$ifdef CPU64} 
@@ -88,6 +91,7 @@ const
    {$endif}
   {$endif}
  {$endif}
+{$endif}
 {$endif}
 {$endif}
 
