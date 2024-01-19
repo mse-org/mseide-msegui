@@ -245,7 +245,13 @@ begin
   {$else}
    splitfilepath(aname,fdir,fname);
 //   aname:= 'lib'+aname+'.so';
-   aname:= fdir+'lib'+fname+'.so';
+
+   {$ifdef darwin}
+    aname:= fdir+'lib'+fname+'.dylib';
+   {$else}
+    aname:= fdir+'lib'+fname+'.so';
+   {$endif} 
+
   {$endif}
    langlibhandle:= loadlibrary(
                   {$ifndef FPC}pchar({$endif}aname{$ifndef FPC}){$endif});

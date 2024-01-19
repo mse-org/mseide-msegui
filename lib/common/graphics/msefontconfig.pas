@@ -18,8 +18,14 @@ const
  fontconfiglib: array[0..1] of filenamety =
                          ('libfontconfig-1.dll','fontconfig1.dll');
  {$else}
+ {$ifdef darwin}
  fontconfiglib: array[0..1] of filenamety =
+                         ('libfontconfig.dylib','libfontconfig.1.dylib');
+ {$else}
+  fontconfiglib: array[0..1] of filenamety =
                          ('libfontconfig.so.1','libfontconfig.so');
+
+ {$endif}                         
  {$endif}
  FC_FAMILY =          'family';	//* String */
  FC_STYLE =           'style';		//* String */

@@ -37,8 +37,14 @@ type           //from fontconfig.h, XftCompat.h
     XftTypeFTFace,
     XftTypeLangSet
  );
-    const
-      External_library='libXft.so';
+
+const
+ {$ifdef darwin}
+ External_library='libXft.dylib';
+ {$else}
+ External_library='libXft.so';
+ {$endif}  
+         
 //      fclib = 'libfontconfig.so';
     Type
 

@@ -20,7 +20,12 @@ const
  {$define wincall}  //depends on compiler?
  dbuslib: array[0..0] of filenamety = ('libdbus.dll');
 {$else}
- dbuslib: array[0..1] of filenamety = ('libdbus-1.so','libdbus-1.so.3');
+ {$ifdef darwin}
+ dbuslib: array[0..1] of filenamety = ('libdbus-1.3.dylib','libdbus-1.dylib');
+ {$else}
+ dbuslib: array[0..1] of filenamety = ('libdbus-1.so.3','libdbus-1.so');
+ {$endif}   
+ 
 {$endif}
 
 type

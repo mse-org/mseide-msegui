@@ -882,8 +882,8 @@ editpos=5
  0,2
  0,-1073741823
  0,-1073741823
+ 0,0
  0,-1073741823
- 23,1626
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -893,7 +893,7 @@ sourcefiles=5
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
  ${PROJECTDIR}/main.pas
  ${PROJECTDIR}/sourceform.pas
- ${PROJECTDIR}/actionsmodule.pas
+ /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
  ${PROJECTDIR}/projectoptionsform.pas
 relpaths=5
  ../lib/common/kernel/msegui.pas
@@ -930,14 +930,14 @@ nomenumodules=4
 [sourcefo.files_tab]
 order=5
  0
+ 3
  4
  1
  2
- 3
 firsttab=0
-index=1
+index=0
 [layout]
-windowlayout=578
+windowlayout=579
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -951,8 +951,8 @@ windowlayout=578
  ny=0
  ncx=0
  ncy=0
- x=102
- y=69
+ x=266
+ y=56
  cx=1190
  cy=724
  rcx=0
@@ -1071,7 +1071,7 @@ windowlayout=578
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=objectinspectorfo
+ stackedunder=_mse_mainfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1270,7 +1270,7 @@ windowlayout=578
  ncx=0
  ncy=0
  x=0
- y=610
+ y=613
  cx=1176
  cy=88
  rcx=0
@@ -1398,8 +1398,9 @@ windowlayout=578
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/projectoptionsform.pas
- history=11
+ value=/home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+ history=12
+  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
   /home/fred/wayland-pascal/src/WaylandClient_2_globalobjects.pas
   /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
   /home/fred/mseide-msegui/lib/common/regcomponents/regdialogs.pas
@@ -1428,18 +1429,18 @@ windowlayout=578
  x=0
  y=0
  cx=1176
- cy=541
+ cy=544
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  order=5
   0
+  3
   4
   1
   2
-  3
  firsttab=0
- index=1
+ index=0
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1475,7 +1476,7 @@ windowlayout=578
  x=0
  y=66
  cx=1176
- cy=541
+ cy=544
  rcx=0
  rcy=0
  [_mse_mainfo_mse_]

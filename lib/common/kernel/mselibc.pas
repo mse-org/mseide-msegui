@@ -4277,8 +4277,15 @@ const
    );
 begin
  try
-  initializedynlib(rtlibinfo,['librt.so.1','librt.so','libc.so.6'],[],
+ 
+ {$ifdef darwin}
+ initializedynlib(rtlibinfo,['librt.1.dylib','librt.dylib','libc.6.dylib'],[],
                                  [],funcs);
+ {$else}
+ initializedynlib(rtlibinfo,['librt.so.1','librt.so','libc.so.6'],[],
+                                 [],funcs);
+ {$endif} 
+  
  except
  end;
 end;

@@ -64,7 +64,11 @@ const
 {$ifdef mswindows}
  opengllib: array[0..0] of filenamety = ('opengl32.dll');
 {$else}
+ {$ifdef darwin}
+ opengllib: array[0..1] of filenamety = ('libGL.1.dylib','libGL.dylib');
+ {$else}
  opengllib: array[0..1] of filenamety = ('libGL.so.1','libGL.so');
+ {$endif}  
 {$endif}
 
 type

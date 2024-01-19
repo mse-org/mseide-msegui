@@ -31,7 +31,13 @@ const
 {$ifdef mswindows}
  fftwlib: array[0..1] of filenamety = ('fftw3.dll','libfftw3-3.dll');
 {$else}
+
+ {$ifdef darwin}
+ fftwlib: array[0..1] of filenamety = ('libfftw3.3.dylib','libfftw3.dylib');
+ {$else}
  fftwlib: array[0..1] of filenamety = ('libfftw3.so.3','libfftw3.so');
+ {$endif}  
+
 {$endif}
 
 {$IFDEF Unix}

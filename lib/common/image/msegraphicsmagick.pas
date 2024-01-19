@@ -18,10 +18,22 @@ const
  graphicsmagiclib: array[0..0] of filenamety = ('CORE_RL_magick_.dll');  
  graphicsmagicwandlib: array[0..0] of filenamety = ('CORE_RL_wand_.dll');  
 {$else}
+
+   {$ifdef darwin}
+ graphicsmagicwandlib: array[0..1] of filenamety = 
+           ('libGraphicsMagickWand.2.dylib','libGraphicsMagickWand.dylib'); 
+ graphicsmagiclib: array[0..1] of filenamety = 
+           ('libGraphicsMagick.3.dylib','libGraphicsMagick.dylib'); 
+   {$else}
  graphicsmagicwandlib: array[0..1] of filenamety = 
            ('libGraphicsMagickWand.so.2','libGraphicsMagickWand.so'); 
  graphicsmagiclib: array[0..1] of filenamety = 
            ('libGraphicsMagick.so.3','libGraphicsMagick.so'); 
+   {$endif} 
+
+
+
+
 {$endif}
 
 {$packrecords c}

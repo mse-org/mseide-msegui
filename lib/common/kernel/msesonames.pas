@@ -23,11 +23,20 @@ uses
 // fbcgdslib: array[0..1] of filenamety = ('fbclient.dll','gds32.dll');
 {$else}
 const
+
+ {$ifdef darwin}
+ xrendernames: array[0..1] of filenamety = ('libXrender.1.dylib','libXrender.dylib');
+ xrandrnames: array[0..1] of filenamety = ('libXrandr.2.dylib','libXrandr.dylib');
+ xftnames: array[0..1] of filenamety = ('libXft.2.dylib','libXft.dylib');
+ icenames: array[0..1] of filenamety = ('libICE.2.dylib','libICE.dylib');
+ smnames: array[0..1] of filenamety = ('libSM.6.dylib','libSM.dylib');
+ {$else}
  xrendernames: array[0..1] of filenamety = ('libXrender.so.1','libXrender.so');
  xrandrnames: array[0..1] of filenamety = ('libXrandr.so.2','libXrandr.so');
  xftnames: array[0..1] of filenamety = ('libXft.so.2','libXft.so');
  icenames: array[0..1] of filenamety = ('libICE.so.6','libICE.so');
  smnames: array[0..1] of filenamety = ('libSM.so.6','libSM.so');
+ {$endif}
 
 // sqlite3lib: array[0..1] of filenamety = ('libsqlite3.so.0','libsqlite3.so');
 // postgreslib: array[0..2] of filenamety = ('libpq.so.5.1','libpq.so.5','libpq.so');

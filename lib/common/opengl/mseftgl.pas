@@ -50,6 +50,9 @@ const
  ftgllib: array[0..0] of filenamety = ('FTGL.dll');
 {$else}
  ftgllib: array[0..1] of filenamety = ('libftgl.so.2','libftgl.so');
+ 
+ 
+ 
 {$endif}
 
 type

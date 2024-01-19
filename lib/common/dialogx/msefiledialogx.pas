@@ -2323,6 +2323,7 @@ begin
       (lowercase(list_log[1][cellinfo.cell.row]) = '.dll') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.pyc') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.res') or
+      (lowercase(list_log[1][cellinfo.cell.row]) = '.dylib') or
       (lowercase(list_log[1][cellinfo.cell.row]) = '.so') then
       aicon := 5
     else if (lowercase(list_log[1][cellinfo.cell.row]) = '.zip') or

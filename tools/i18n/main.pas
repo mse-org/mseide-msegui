@@ -1001,7 +1001,13 @@ begin
          {$ifdef mswindows}
          mstr1:= mstr1+'.dll';
          {$else}
-         mstr1:= 'lib'+mstr1+'.so';
+
+          {$ifdef darwin}
+           mstr1:= 'lib'+mstr1+'.dylib';
+          {$else}
+           mstr1:= 'lib'+mstr1+'.so';
+          {$endif}  
+         
          {$endif}
          copyfile(mstr1,'../'+mstr1,true);
         end;
