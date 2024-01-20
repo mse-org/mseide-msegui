@@ -22,9 +22,6 @@ interface
  {$endif}
 {$endif}
 uses
-{$ifdef mse_dynpo}
- captionideu,
-{$endif}
  msestockobjects,
  mseconsts,
  msestream,mseclasses,classes,mclasses,msetypes,mseevent,msehash,msepipestream,
