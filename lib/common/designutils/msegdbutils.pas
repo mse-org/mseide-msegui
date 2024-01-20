@@ -2305,7 +2305,7 @@ var
  frames1: frameinfoarty;
  ev: tgdbstartupevent;
 begin
- {$if defined(UNIX}}
+ {$if defined(UNIX)}
  killtargetconsole;
  if fnewconsole then begin
   if not createtargetconsole then begin
