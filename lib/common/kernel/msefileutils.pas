@@ -575,6 +575,7 @@ function setcurrentdirmse(const path: filenamety): filenamety;
 var
  error: syserrorty;
 begin
+//writeln('mynameis ' + path);
  result:= sys_getcurrentdir;
  error:= sys_setcurrentdir(path);
  if error <> sye_ok then begin

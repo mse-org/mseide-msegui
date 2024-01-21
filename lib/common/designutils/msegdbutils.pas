@@ -245,8 +245,8 @@ type
   stackframe: string;
  end;
  threadinfoarty = array of threadinfoty;
- 
-  {$if defined(UNIX)}
+
+{$ifdef UNIX}
  tpseudoterminal = class
   private
    fdevicename: string;
@@ -278,7 +278,7 @@ type
   private
    fgdbto: tpipewriter;
    fgdbfrom{,fgdberror}: tpipereader;
-    {$if defined(UNIX)}
+   {$ifdef UNIX}
    ftargetterminal: tpseudoterminal;
    ftargetconsole: tcustommseprocess;
    {$endif}
@@ -354,7 +354,7 @@ type
   protected
    fpointersize: integer;
    fpointerhexdigits: integer;
-    {$if defined(UNIX)}
+   {$ifdef UNIX}
    procedure targetfrom(const sender: tpipereader);
    procedure killtargetconsole;
    function createtargetconsole: boolean;
@@ -872,7 +872,7 @@ begin
  fsourcefiles:= tmsestringhashdatalist.create();
 // fsourcefiles:= thashedmsestrings.create;
  fstoptime:= emptydatetime;
-  {$if defined(UNIX)}
+ {$if defined(UNIX) and not defined(darwin)}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
  ftargetconsole:= tcustommseprocess.create(nil);
@@ -880,6 +880,7 @@ begin
 // ftargetconsole.filename:= 'xterm';
  ftargetconsole.output.oninputavailable:= {$ifdef FPC}@{$endif}xtermfrom;
  {$endif}
+ 
  foverloadsleepus:= -1;
  inherited;
 end;
@@ -889,7 +890,7 @@ begin
  closegdb;
  inherited;
  fsourcefiles.free;
- {$if defined(UNIX)}
+ {$if defined(UNIX) and not defined(darwin)}
  ftargetconsole.free;
  ftargetterminal.free;
  {$endif}
@@ -1009,7 +1010,7 @@ begin
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
   clicommand('set width 0');
-   {$if defined(UNIX)}
+  {$ifdef UNIX}
   {
   bo1:= true;
   if synccommand('-gdb-show inferior-tty') = gdb_ok then begin
@@ -1448,7 +1449,7 @@ begin
         end;
         fprocid:= 0;
         getprocid(fprocid);
-         {$if defined(UNIX)}
+        {$ifdef UNIX}
         if not fnewconsole then begin
          ftargetterminal.restart;
         end;
@@ -1872,7 +1873,7 @@ begin
  until not b2; //all data read
 end;
 
- {$if defined(UNIX)}
+{$ifdef UNIX}
 procedure tgdbmi.targetfrom(const sender: tpipereader);
 begin
  if not sender.eof then begin
@@ -2305,7 +2306,7 @@ var
  frames1: frameinfoarty;
  ev: tgdbstartupevent;
 begin
- {$if defined(UNIX)}
+{$ifdef unix}
  killtargetconsole;
  if fnewconsole then begin
   if not createtargetconsole then begin
@@ -2561,7 +2562,7 @@ begin
    internalcommand('-exec-interrupt'); //runs in async mode
   end
   else begin
-   {$if defined(UNIX)}    //how to do on windows?
+  {$ifdef unix}     //how to do on windows?
    kill(fgdb,sigint);
   {$else}
    internalcommand('-exec-interrupt'); //probably no success because
@@ -4833,7 +4834,7 @@ end;
 procedure tgdbmi.targetwriteln(const avalue: string);
 begin
  if running then begin
-  {$if defined(UNIX)}
+  {$ifdef UNIX}
   ftargetterminal.output.writeln(avalue);
   {$else}
   fgdbto.writeln(avalue);
@@ -4888,8 +4889,8 @@ begin
   fgdberror.overloadsleepus:= avalue;
  end;
 }
- {$if defined(UNIX)}
- ftargetterminal.input.overloadsleepus:= avalue;
+{$if defined(UNIX) and not defined(darwin)}
+  ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
 end;
 
@@ -4913,8 +4914,7 @@ begin
  getsourcename(fna1,fcurrentlanguage);
 end;
 
-
- {$if defined(UNIX)}
+{$ifdef UNIX}
 { tpseudoterminal }
 
 constructor tpseudoterminal.create;
@@ -4933,6 +4933,7 @@ var
  ios: termios{ty};
 
 begin
+ {$if not defined(darwin)}
  fpty:= invalidfilehandle;
  fpty:= getpt;
  if fpty < 0 then error;
@@ -4950,10 +4951,12 @@ begin
  foutput:= tpipewriter.create;
 // finput.handle:= pty;
  foutput.handle:= fpty;
+{$endif}
 end;
 
 destructor tpseudoterminal.destroy;
 begin
+{$if not defined(darwin)}
  closeinp;
  foutput.releasehandle;
  finput.releasehandle;
@@ -4962,13 +4965,15 @@ begin
  if fpty <> invalidfilehandle then begin
   sys_closefile(fpty);
  end;
+{$endif}
 end;
 
 procedure tpseudoterminal.closeinp;
 var
  ios: termios{ty};
 begin
- finput.terminate(true);
+{$if not defined(darwin)} 
+finput.terminate(true);
  if finput.active then begin
   msetcgetattr(foutput.handle,ios);
   ios.c_lflag:= (ios.c_lflag and not (icanon)) or echo;
@@ -4977,6 +4982,7 @@ begin
   msetcsetattr(foutput.handle,tcsanow,ios);
   foutput.writeln('');
  end;
+{$endif}
 end;
 
 procedure tpseudoterminal.restart;
