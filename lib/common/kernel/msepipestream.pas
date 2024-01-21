@@ -266,7 +266,7 @@ end;
 
 function tpipewriter.gethandle: integer;
 begin
-result:= inherited handle;
+ result:= inherited handle;
 end;
 
 {$ifdef FPC}
@@ -332,7 +332,6 @@ var
 begin
  if fthread <> nil then begin
   fthread.terminate;
-
   if fthread.running then begin
    fthread.sempost;
    if fwritehandle <> invalidfilehandle then begin
@@ -340,22 +339,18 @@ begin
     sys_write(fwritehandle,@by1,1); //wake up thread
    end
    else begin
-    // inherited sethandle(invalidfilehandle);
+//    inherited sethandle(invalidfilehandle);
     {$ifdef unix}
     pthread_kill(fthread.id,sigio);
-
+    {$endif}
    end;
    writehandle:= invalidfilehandle;
-
   end;
-
  end;
-
  if not noclosehandle then begin
   inherited sethandle(invalidfilehandle);
  end;
  include(fstate,tss_notopen);
-{$endif}
 end;
 
 procedure tpipereader.terminateandwait(const noclosehandle: boolean = false);
@@ -781,9 +776,8 @@ end;
 
 function tpipereader.active: boolean;
 begin
- result:= (handle <> invalidfilehandle) and (fstate * [tss_error,tss_eof] = []); 
+ result:= (handle <> invalidfilehandle) and (fstate * [tss_error,tss_eof] = []);
 end;
-
 
 procedure tpipereader.dochange;
 begin
