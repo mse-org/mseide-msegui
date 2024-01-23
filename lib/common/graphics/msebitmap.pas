@@ -1871,7 +1871,7 @@ end;
 procedure tmaskedbitmap.setcolormask(const avalue: boolean);
 begin
  if avalue then begin
-  options:= foptions + [bmo_colormask];
+  options:= foptions {$if not defined(darwin) and not defined(netbsd)}  + [bmo_colormask] {$endif};
  end
  else begin
   options:= foptions - [bmo_colormask];
@@ -1886,7 +1886,7 @@ end;
 procedure tmaskedbitmap.setgraymask(const avalue: boolean);
 begin
  if avalue then begin
-  options:= foptions + [bmo_graymask];
+  options:= foptions {$if not defined(darwin) and not defined(netbsd)} + [bmo_graymask] {$endif};
  end
  else begin
   options:= foptions - [bmo_graymask];
@@ -2005,6 +2005,7 @@ var
  opt1: bitmapoptionsty;
 begin
  opt1:= foptions - bmomaskkindoptions;
+ {$if not defined(darwin) and not defined(netbsd)}
  case avalue of
   bmk_gray: begin
    include(opt1,bmo_graymask);
@@ -2014,6 +2015,7 @@ begin
   end;
   else;
  end;
+ {$endif}
  options:= opt1;
 end;
 
@@ -2704,6 +2706,7 @@ begin
   createmask(aimage.mask.kind);
   fmask.loadfromimage(aimage.mask);
   foptions:= foptions - bmomaskkindoptions;
+  {$if not defined(darwin) and not defined(netbsd)}
   case aimage.mask.kind of
    bmk_rgb: begin
     include(foptions,bmo_colormask);
@@ -2713,6 +2716,8 @@ begin
    end;
    else;
   end;
+  {$endif}
+
 {
   if abuffer.mask.monochrome then begin
    exclude(foptions,bmo_colormask);

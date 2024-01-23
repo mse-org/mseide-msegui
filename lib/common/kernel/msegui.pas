@@ -7239,7 +7239,7 @@ var
    falphabuffer:= tmaskedbitmap.create(bmk_rgb);
   end;
   if amasked then begin
-   falphabuffer.options:= [bmo_masked,bmo_colormask];
+   falphabuffer.options:= [bmo_masked {$if not defined(darwin) and not defined(netbsd)} ,bmo_colormask{$endif}];
   end;
   falphabuffer.size:= rect1.size;
   falphabufferdest:= rect1.pos;
