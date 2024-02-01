@@ -3155,7 +3155,7 @@ end;
 
 procedure tmainfo.oncreated(const sender: TObject);
 begin
-{$if defined(netbsd) or defined(darwin)}
+{$if defined(netbsd) or defined(darwin) or defined(nomask)}
  mainmenu1.menu.itembynames(['target','continue']).imagelist := actionsmo.buttonicons_nomask;
  mainmenu1.menu.itembynames(['target','reset']).imagelist := actionsmo.buttonicons_nomask;
  mainmenu1.menu.itembynames(['target','interrupt']).imagelist := actionsmo.buttonicons_nomask;

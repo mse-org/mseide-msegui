@@ -36,7 +36,7 @@ actionsmodule, debuggerform_mfm;
 
 procedure tdebuggerfo.oncreat(const sender: TObject);
 begin
-{$if defined(netbsd) or defined(darwin)}
+{$if defined(netbsd) or defined(darwin) or defined(nomask)}
 gdbtoolbar.buttons[1].imagelist := actionsmo.buttonicons_nomask;
 gdbtoolbar.buttons[2].imagelist := actionsmo.buttonicons_nomask;
 gdbtoolbar.buttons[3].imagelist := actionsmo.buttonicons_nomask;

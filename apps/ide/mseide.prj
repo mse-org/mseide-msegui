@@ -213,7 +213,7 @@ settings=8
  [settings_form]
  x=457
  y=29
- cx=446
+ cx=518
  cy=724
  wsize=0
  active=1
@@ -518,20 +518,11 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=4
- DEBUGGERFO
- GUITEMPLATESMO
- MAINFO
+modulenames=1
  PROJECTOPTIONSFO
-moduletypes=4
- TDEBUGGERFO
- TGUITEMPLATESMO
- TMAINFO
+moduletypes=1
  TPROJECTOPTIONSFO
-modulefiles=4
- /home/fred/mseide-msegui/apps/ide/debuggerform.mfm
- /home/fred/mseide-msegui/apps/ide/guitemplates.mfm
- /home/fred/mseide-msegui/apps/ide/main.mfm
+modulefiles=1
  /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
 befcommandon=0
 makeoptionson=10
@@ -855,8 +846,9 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=buttonicons_nomask
+finddtext=darwin
 findhistory=20
+ darwin
  buttonicons_nomask
  newinheritedforms
  inherited
@@ -876,16 +868,15 @@ findhistory=20
  gettext
  selang
  setnew
- set
 findoptions=1
 editpos=7
- 0,2
- 0,3167
- 0,28
- 0,117
- 0,142
- 0,32
- 0,80
+ 0,0
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,-1073741823
+ 0,0
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -917,47 +908,19 @@ ismoduletexts=7
  0
  0
  0
-modules=6
+modules=1
  /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
- /home/fred/mseide-msegui/apps/ide/main.mfm
- /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
- /home/fred/mseide-msegui/apps/ide/sourceform.mfm
- /home/fred/mseide-msegui/apps/ide/debuggerform.mfm
- /home/fred/mseide-msegui/apps/ide/guitemplates.mfm
-moduleoptions=6
+moduleoptions=1
  0
- 0
- 0
- 0
- 0
- 0
-visiblemodules=6
+visiblemodules=1
  -1
- -1
- 0
- 0
- -1
- -1
-nomenumodules=6
- 0
- 0
- -1
- -1
- 0
+nomenumodules=1
  0
 [sourcefo.files_tab]
-order=7
- 0
- 1
- 2
- 6
- 3
- 4
- 5
 firsttab=0
-index=6
+index=0
 [layout]
-windowlayout=608
+windowlayout=527
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -971,9 +934,9 @@ windowlayout=608
  ny=0
  ncx=0
  ncy=0
- x=150
- y=73
- cx=1190
+ x=88
+ y=80
+ cx=1436
  cy=724
  rcx=0
  rcy=0
@@ -1007,7 +970,7 @@ windowlayout=608
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -1075,7 +1038,7 @@ windowlayout=608
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=confideufo
+ stackedunder=
  parent=
  mdistate=0
  nx=0
@@ -1084,7 +1047,7 @@ windowlayout=608
  ncy=0
  x=239
  y=115
- cx=1190
+ cx=678
  cy=414
  rcx=0
  rcy=0
@@ -1154,14 +1117,14 @@ windowlayout=608
  active=0
  visible=0
  [watchpointsfo.grid]
- propcolwidthref=332
+ propcolwidthref=352
  sortdescend0=0
  values1=0
  values1_ci=-1
  width1=33
  sortdescend1=0
  values2=0
- width2=149
+ width2=158
  sortdescend2=0
  width4=34
  sortdescend4=0
@@ -1170,7 +1133,7 @@ windowlayout=608
  width5=38
  sortdescend5=0
  values6=0
- width6=172
+ width6=184
  sortdescend6=0
  [breakpointsfo]
  splitdir=0
@@ -1194,10 +1157,10 @@ windowlayout=608
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=614
- width0=199
+ propcolwidthref=240
+ width0=57
  sortdescend0=0
- width1=409
+ width1=177
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1220,25 +1183,7 @@ windowlayout=608
  visible=0
  [symbolfo.grid]
  propcolwidthref=207
- values0=18
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+ values0=0
  width0=111
  sortdescend0=0
  width1=125
@@ -1291,7 +1236,7 @@ windowlayout=608
  ncy=0
  x=0
  y=613
- cx=1176
+ cx=1422
  cy=88
  rcx=0
  rcy=0
@@ -1391,8 +1336,8 @@ windowlayout=608
  ncy=0
  x=0
  y=0
- cx=1176
- cy=61
+ cx=1422
+ cy=60
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1402,13 +1347,13 @@ windowlayout=608
  visible=1
  mdistate=0
  nx=0
- ny=6
- ncx=1190
- ncy=105
+ ny=0
+ ncx=1422
+ ncy=66
  x=0
- y=6
- cx=1176
- cy=112
+ y=0
+ cx=1422
+ cy=65
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1418,11 +1363,13 @@ windowlayout=608
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/debuggerform.pas
- history=1
-  /home/fred/mseide-msegui/apps/ide/debuggerform.pas
+ value=/home/fred/mseide-msegui/apps/ide/main.mfm
+ history=3
+  /home/fred/mseide-msegui/apps/ide/main.mfm
+  /home/fred/ideU/src/main.pas
+  ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
- value=1
+ value=M
  [debuggerfo.hints]
  value=1
  [sourcefo]
@@ -1437,21 +1384,13 @@ windowlayout=608
  ncy=0
  x=0
  y=0
- cx=1176
- cy=546
+ cx=1422
+ cy=547
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=7
-  0
-  1
-  2
-  6
-  3
-  4
-  5
  firsttab=0
- index=6
+ index=0
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1485,15 +1424,15 @@ windowlayout=608
  ncx=0
  ncy=0
  x=0
- y=64
- cx=1176
- cy=546
+ y=63
+ cx=1422
+ cy=547
  rcx=0
  rcy=0
  [_mse_projectoptionsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=_mse_debuggerfo_mse_
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -1504,63 +1443,6 @@ windowlayout=608
  y=177
  cx=842
  cy=581
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
- [_mse_mainfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=objectinspectorfo
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=349
- y=283
- cx=469
- cy=149
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
- [_mse_debuggerfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=_mse_mainfo_mse_
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=546
- y=359
- cx=451
- cy=100
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
- [_mse_guitemplatesmo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=targetconsolefo
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=99
- y=135
- cx=493
- cy=132
  rcx=0
  rcy=0
  wsize=0
