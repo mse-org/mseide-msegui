@@ -21,9 +21,9 @@ object mainfo: tmainfo
   container.onlayout = onscale
   container.bounds = (
     0
-    19
+    17
     449
-    130
+    132
   )
   dragdock.optionsdock = [od_savepos, od_savezorder, od_canmove, od_cansize, od_canfloat, od_candock, od_captionhint]
   dragdock.optionsdockform = [odf_main, odf_childicons]
@@ -34,6 +34,7 @@ object mainfo: tmainfo
   caption = 'MSEide'
   windowopacity = -Inf
   oncreate = mainfooncreate
+  oncreated = oncreated
   oneventloopstart = mainonloaded
   ondestroy = mainfoondestroy
   onterminatequery = mainfoonterminate
@@ -48,7 +49,7 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 19
     bounds_cx = 449
-    bounds_cy = 111
+    bounds_cy = 113
     anchors = [an_top, an_bottom]
     dragdock.optionsdock = [od_acceptsdock, od_splitvert, od_splithorz, od_tabed, od_proportional, od_background, od_captionhint]
     statfile = projectstatfile
@@ -62,13 +63,13 @@ object mainfo: tmainfo
     bounds_x = 0
     bounds_y = 1
     bounds_cx = 449
-    bounds_cy = 21
+    bounds_cy = 19
     anchors = [an_top]
     font.name = 'stf_default'
     font.xscale = 1
     font.localprops = [flp_xscale]
     options = [dwo_hintclippedtext]
-    reffontheight = 17
+    reffontheight = 15
   end
   object gdb: tgdbmi
     guiintf = True
@@ -327,35 +328,61 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.continue
+            name = 'continue'
+            state = [as_localimagelist]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.reset
+            name = 'reset'
+            state = [as_localimagelist]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.interrupt
+            name = 'interrupt'
+            state = [as_localimagelist]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.step
+            name = 'step'
+            state = [as_localimagelist]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.stepi
+            name = 'stepi'
+            state = [as_localimagelist]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.next
+            name = 'next'
+            state = [as_localimagelist]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.nexti
+            name = 'nexti'
+            state = [as_localimagelist]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.finish
+            name = 'finish'
+            state = [as_localimagelist]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             options = [mao_separator, mao_shortcutcaption]
           end        
           item
             action = actionsmo.bkptsonact
-            state = [as_checked]
+            name = 'breakpoint'
+            state = [as_checked, as_localimagelist]
             options = [mao_checkbox, mao_shortcutcaption]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.togglebkpt
@@ -372,13 +399,17 @@ object mainfo: tmainfo
           end        
           item
             action = actionsmo.watchesonact
-            state = [as_checked]
+            name = 'watches'
+            state = [as_checked, as_localimagelist]
             options = [mao_checkbox, mao_shortcutcaption]
+            imagelist = actionsmo.buttonicons_colormasked
           end        
           item
             action = actionsmo.bluedotsonact
-            state = [as_checked]
+            name = 'execline'
+            state = [as_checked, as_localimagelist]
             options = [mao_checkbox, mao_shortcutcaption]
+            imagelist = actionsmo.buttonicons_colormasked
           end>
         caption = '&Target'
         name = 'target'

@@ -20,14 +20,34 @@ unit debuggerform;
 
 interface
 uses
- msegui,mseclasses,mseforms;
+msetoolbar, msegui,mseclasses,mseforms;
 
 type
  tdebuggerfo = class(tdockform)
- end;
+  gdbtoolbar : ttoolbar;
+   procedure oncreat(const sender: TObject);
+  end;
+
 var
  debuggerfo: tdebuggerfo;
 implementation
 uses
- debuggerform_mfm;
+actionsmodule, debuggerform_mfm; 
+
+procedure tdebuggerfo.oncreat(const sender: TObject);
+begin
+{$if defined(netbsd) or defined(darwin)}
+gdbtoolbar.buttons[1].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[2].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[3].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[4].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[5].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[7].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[8].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[10].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[11].imagelist := actionsmo.buttonicons_nomask;
+gdbtoolbar.buttons[12].imagelist := actionsmo.buttonicons_nomask;
+{$endif} 
+end;
+
 end.

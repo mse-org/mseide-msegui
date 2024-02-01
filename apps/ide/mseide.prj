@@ -31,9 +31,9 @@ findinfiledialog=63
  [findinfileadialogfo.wholeword]
  value=0
  [findinfileadialogfo.indirectories]
- value=1
- [findinfileadialogfo.inprojectdir]
  value=0
+ [findinfileadialogfo.inprojectdir]
+ value=1
  [findinfileadialogfo.casesensitive]
  value=0
  [findinfileadialogfo.mask]
@@ -57,8 +57,11 @@ findinfiledialog=63
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=writeln
+ value=if defined
  history=20
+  if defined
+  mainmenu1
+  ttoolbar
   writeln
   mse_debug
   syntaxdeffile
@@ -76,15 +79,12 @@ findinfiledialog=63
   addrow([s
   ac_stoperror
   mseconsts
-  msestockobjects
-  msesyntaxpainter
-  mse_with_zeoslib
  [findinfileadialogfo]
  stackedunder=
  x=594
  y=195
  cx=339
- cy=308
+ cy=334
 finddialog=8
  [finddialogfo.selectedonly]
  value=0
@@ -93,7 +93,7 @@ finddialog=8
  x=852
  y=209
  cx=300
- cy=324
+ cy=291
 options=114
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
@@ -130,9 +130,9 @@ options=114
  width4=372
  sortdescend4=0
  sorted=0
- col=0
- row=0
- rowheight=22
+ col=-1073741823
+ row=-1073741823
+ rowheight=19
  [projectoptionsfo.newfile]
  firsttab=1
  index=2
@@ -154,9 +154,9 @@ options=114
  sortdescend6=0
  [projectoptionsfo.macrosplitter]
  x=0
- y=196
+ y=198
  xprop=1
- yprop=0.35221238938053
+ yprop=0.35201401050788
  [projectoptionsfo.macrogrid]
  propcolwidthref=703
  sortdescend0=0
@@ -519,20 +519,20 @@ settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
 modulenames=4
- ACTIONSMO
+ DEBUGGERFO
+ GUITEMPLATESMO
  MAINFO
  PROJECTOPTIONSFO
- SOURCEFO
 moduletypes=4
- TACTIONSMO
+ TDEBUGGERFO
+ TGUITEMPLATESMO
  TMAINFO
  TPROJECTOPTIONSFO
- TSOURCEFO
 modulefiles=4
- /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
+ /home/fred/mseide-msegui/apps/ide/debuggerform.mfm
+ /home/fred/mseide-msegui/apps/ide/guitemplates.mfm
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
- /home/fred/mseide-msegui/apps/ide/sourceform.mfm
 befcommandon=0
 makeoptionson=10
  255
@@ -855,8 +855,9 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=newinheritedforms
+finddtext=buttonicons_nomask
 findhistory=20
+ buttonicons_nomask
  newinheritedforms
  inherited
  dir.value
@@ -876,68 +877,87 @@ findhistory=20
  selang
  setnew
  set
- stockcaption
 findoptions=1
-editpos=5
+editpos=7
  0,2
- 0,-1073741823
- 0,-1073741823
- 0,0
- 0,-1073741823
+ 0,3167
+ 0,28
+ 0,117
+ 0,142
+ 0,32
+ 0,80
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
-sourcefiles=5
+bookmarks5=0
+bookmarks6=0
+sourcefiles=7
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
  ${PROJECTDIR}/main.pas
  ${PROJECTDIR}/sourceform.pas
- /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
+ ${PROJECTDIR}/actionsmodule.pas
  ${PROJECTDIR}/projectoptionsform.pas
-relpaths=5
+ ${PROJECTDIR}/debuggerform.pas
+ ${PROJECTDIR}/guitemplates.pas
+relpaths=7
  ../lib/common/kernel/msegui.pas
  main.pas
  sourceform.pas
  actionsmodule.pas
  projectoptionsform.pas
-ismoduletexts=5
+ debuggerform.pas
+ guitemplates.pas
+ismoduletexts=7
  0
  0
  0
  0
  0
-modules=4
+ 0
+ 0
+modules=6
+ /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
  /home/fred/mseide-msegui/apps/ide/main.mfm
  /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
  /home/fred/mseide-msegui/apps/ide/sourceform.mfm
- /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
-moduleoptions=4
+ /home/fred/mseide-msegui/apps/ide/debuggerform.mfm
+ /home/fred/mseide-msegui/apps/ide/guitemplates.mfm
+moduleoptions=6
  0
  0
  0
  0
-visiblemodules=4
+ 0
+ 0
+visiblemodules=6
  -1
  -1
- -1
- -1
-nomenumodules=4
  0
  0
+ -1
+ -1
+nomenumodules=6
+ 0
+ 0
+ -1
+ -1
  0
  0
 [sourcefo.files_tab]
-order=5
+order=7
  0
- 3
- 4
  1
  2
+ 6
+ 3
+ 4
+ 5
 firsttab=0
-index=0
+index=6
 [layout]
-windowlayout=579
+windowlayout=608
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -951,8 +971,8 @@ windowlayout=579
  ny=0
  ncx=0
  ncy=0
- x=266
- y=56
+ x=150
+ y=73
  cx=1190
  cy=724
  rcx=0
@@ -1055,7 +1075,7 @@ windowlayout=579
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=confideufo
  parent=
  mdistate=0
  nx=0
@@ -1064,14 +1084,14 @@ windowlayout=579
  ncy=0
  x=239
  y=115
- cx=678
+ cx=1190
  cy=414
  rcx=0
  rcy=0
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=_mse_mainfo_mse_
+ stackedunder=conflangfo
  parent=
  mdistate=3
  nx=0
@@ -1155,7 +1175,7 @@ windowlayout=579
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=conflangfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -1174,10 +1194,10 @@ windowlayout=579
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=440
- width0=104
+ propcolwidthref=614
+ width0=199
  sortdescend0=0
- width1=330
+ width1=409
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1372,7 +1392,7 @@ windowlayout=579
  x=0
  y=0
  cx=1176
- cy=63
+ cy=61
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1383,12 +1403,12 @@ windowlayout=579
  mdistate=0
  nx=0
  ny=6
- ncx=1176
+ ncx=1190
  ncy=105
  x=0
  y=6
  cx=1176
- cy=105
+ cy=112
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1398,20 +1418,9 @@ windowlayout=579
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/kernel/msegui.pas
- history=12
-  /home/fred/mseide-msegui/apps/ide/actionsmodule.pas
-  /home/fred/wayland-pascal/src/WaylandClient_2_globalobjects.pas
-  /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
-  /home/fred/mseide-msegui/lib/common/regcomponents/regdialogs.pas
-  /home/fred/mseide-msegui/lib/common/regcomponents/regdesignutils.pas
-  /home/fred/mseide-msegui/lib/common/regcomponents/regexperimental.pas
-  /home/fred/mseide-msegui/lib/common/regcomponents/regunitgroups.pas
-  /home/fred/mseide-msegui/lib/common/regcomponents/regzeoslib.pas
-  /home/fred/mseide-msegui/lib/common/dialogs/msecolordialog.pas
-  /home/fred/mseide-msegui/lib/common/dialogs/msefontformatdialog.pas
-  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
-  /home/fred/strumpract-main/src/aboutform.pas
+ value=/home/fred/mseide-msegui/apps/ide/debuggerform.pas
+ history=1
+  /home/fred/mseide-msegui/apps/ide/debuggerform.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1429,18 +1438,20 @@ windowlayout=579
  x=0
  y=0
  cx=1176
- cy=544
+ cy=546
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=5
+ order=7
   0
-  3
-  4
   1
   2
+  6
+  3
+  4
+  5
  firsttab=0
- index=0
+ index=6
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1474,15 +1485,34 @@ windowlayout=579
  ncx=0
  ncy=0
  x=0
- y=66
+ y=64
  cx=1176
- cy=544
+ cy=546
  rcx=0
  rcy=0
+ [_mse_projectoptionsfo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=_mse_debuggerfo_mse_
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=205
+ y=177
+ cx=842
+ cy=581
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=_mse_actionsmo_mse_
+ stackedunder=objectinspectorfo
  parent=
  mdistate=3
  nx=0
@@ -1498,7 +1528,26 @@ windowlayout=579
  wsize=0
  active=0
  visible=1
- [_mse_projectoptionsfo_mse_]
+ [_mse_debuggerfo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=_mse_mainfo_mse_
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=546
+ y=359
+ cx=451
+ cy=100
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [_mse_guitemplatesmo_mse_]
  splitdir=0
  useroptions=268451963
  stackedunder=targetconsolefo
@@ -1508,10 +1557,10 @@ windowlayout=579
  ny=0
  ncx=0
  ncy=0
- x=205
- y=177
- cx=842
- cy=581
+ x=99
+ y=135
+ cx=493
+ cy=132
  rcx=0
  rcy=0
  wsize=0

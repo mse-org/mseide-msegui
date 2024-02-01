@@ -115,7 +115,7 @@ type
 
 type
  tactionsmo = class(tmsedatamodule)
-   buttonicons: timagelist;
+   buttonicons_nomask: timagelist;
 
    opensource: taction;
    saveall: taction;
@@ -227,6 +227,7 @@ type
    selectall: taction;
    tabtospace: taction;
    findback: taction;
+   buttonicons_colormasked: timagelist;
    procedure findinfileonexecute(const sender: tobject);
 
    //file

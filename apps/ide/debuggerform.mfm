@@ -4,8 +4,8 @@ object debuggerfo: tdebuggerfo
   frame.grip_size = 10
   frame.grip_options = [go_closebutton, go_fixsizebutton, go_floatbutton, go_topbutton, go_backgroundbutton, go_nolockbutton, go_buttonhints]
   visible = False
-  bounds_x = 116
-  bounds_y = 131
+  bounds_x = 546
+  bounds_y = 359
   bounds_cx = 441
   bounds_cy = 100
   container.frame.localprops = []
@@ -95,6 +95,8 @@ object debuggerfo: tdebuggerfo
     D9D9D901D8D8D801D7D7D701D6D6D601D5D5D501D4D4D401D3D3D301D2D2D201
     D1D1D101D0D0D001
   }
+  windowopacity = -Inf
+  oncreated = oncreat
   moduleclassname = 'tdockform'
   object gdbtoolbar: ttoolbar
     optionswidget = [ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets, ow_timedhint]
@@ -109,54 +111,69 @@ object debuggerfo: tdebuggerfo
     buttons.count = 13
     buttons.width = 24
     buttons.height = 24
-    buttons.items = <
+    buttons.items = <    
       item
         action = actionsmo.reset
-      end
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         action = actionsmo.interrupt
-      end
+        state = [as_localimagelist]
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         action = actionsmo.continue
-      end
+        state = [as_localimagelist]
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         action = actionsmo.next
-      end
+        state = [as_localimagelist]
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         action = actionsmo.step
-      end
+        state = [as_localimagelist]
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         action = actionsmo.finish
-      end
+        state = [as_localimagelist]
+      end    
       item
         options = [mao_separator]
-      end
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         hint = 'Next instruction'
         action = actionsmo.nexti
-        state = [as_localhint]
-      end
+        state = [as_localimagelist, as_localhint]
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         hint = 'Step instruction'
         action = actionsmo.stepi
-        state = [as_localhint]
-      end
+        state = [as_localimagelist, as_localhint]
+      end    
       item
         options = [mao_separator]
-      end
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         action = actionsmo.bkptsonact
-        state = [as_checked]
+        state = [as_checked, as_localimagelist]
         options = [mao_checkbox]
-      end
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         action = actionsmo.watchesonact
-        state = [as_checked]
+        state = [as_checked, as_localimagelist]
         options = [mao_checkbox]
-      end
+      end    
       item
+        imagelist = actionsmo.buttonicons_colormasked
         action = actionsmo.bluedotsonact
-        state = [as_checked]
+        state = [as_checked, as_localimagelist]
         options = [mao_checkbox]
       end>
     options = [tbo_dragsourceenabledonly, tbo_dragdestenabledonly]

@@ -210,6 +210,7 @@ type
    procedure mainstatbeforewriteexe(const sender: TObject);
    procedure statafterread(const sender: TObject);
    procedure basedockpaintexe(const sender: twidget; const acanvas: tcanvas);
+   procedure oncreated(const sender: TObject);
   private
    fstartcommand: startcommandty;
    fnoremakecheck: boolean;
@@ -469,6 +470,7 @@ begin
 {$ifndef mse_with_pascalscript}
  mainmenu1.menu.deleteitembynames(['file','new','form','pascform']);
 {$endif}
+
 end;
 
 procedure tmainfo.mainfoondestroy(const sender: tobject);
@@ -3149,6 +3151,21 @@ procedure tmainfo.basedockpaintexe(const sender: twidget;
                const acanvas: tcanvas);
 begin
  paintdockingareacaption(acanvas,sender,mainfo.c[ord(dockingarea)]);
+end;
+
+procedure tmainfo.oncreated(const sender: TObject);
+begin
+{$if defined(netbsd) or defined(darwin)}
+ mainmenu1.menu.itembynames(['target','continue']).imagelist := actionsmo.buttonicons_nomask;
+ mainmenu1.menu.itembynames(['target','reset']).imagelist := actionsmo.buttonicons_nomask;
+ mainmenu1.menu.itembynames(['target','interrupt']).imagelist := actionsmo.buttonicons_nomask;
+ mainmenu1.menu.itembynames(['target','step']).imagelist := actionsmo.buttonicons_nomask;
+ mainmenu1.menu.itembynames(['target','stepi']).imagelist := actionsmo.buttonicons_nomask;
+ mainmenu1.menu.itembynames(['target','next']).imagelist := actionsmo.buttonicons_nomask;
+ mainmenu1.menu.itembynames(['target','nexti']).imagelist := actionsmo.buttonicons_nomask;
+ mainmenu1.menu.itembynames(['target','finish']).imagelist := actionsmo.buttonicons_nomask;
+ mainmenu1.menu.itembynames(['target','watches']).imagelist := actionsmo.buttonicons_nomask;
+{$endif} 
 end;
 
 end.
