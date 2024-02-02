@@ -876,7 +876,7 @@ editpos=7
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,0
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -920,7 +920,7 @@ nomenumodules=1
 firsttab=0
 index=0
 [layout]
-windowlayout=527
+windowlayout=546
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1157,10 +1157,10 @@ windowlayout=527
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=240
- width0=57
+ propcolwidthref=413
+ width0=98
  sortdescend0=0
- width1=177
+ width1=309
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1183,7 +1183,25 @@ windowlayout=527
  visible=0
  [symbolfo.grid]
  propcolwidthref=207
- values0=0
+ values0=18
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
  width0=111
  sortdescend0=0
  width1=125
@@ -1349,7 +1367,7 @@ windowlayout=527
  nx=0
  ny=0
  ncx=1422
- ncy=66
+ ncy=65
  x=0
  y=0
  cx=1422
@@ -1363,13 +1381,14 @@ windowlayout=527
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/main.mfm
- history=3
+ value=/home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+ history=4
+  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
   /home/fred/mseide-msegui/apps/ide/main.mfm
   /home/fred/ideU/src/main.pas
   ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
- value=M
+ value=1
  [debuggerfo.hints]
  value=1
  [sourcefo]

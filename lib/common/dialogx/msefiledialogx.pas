@@ -2416,6 +2416,9 @@ end;
 
 procedure tfiledialogxfo.oncreat(const Sender: TObject);
 begin
+  {$if defined(netbsd) or defined(darwin)}
+  iconslist.options := [bmo_masked]; 
+  {$endif}
   theimagelist    := iconslist;
   fsplitterpanpos := tsplitter1.left;
   fisfixedrow     := False;
