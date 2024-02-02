@@ -880,7 +880,7 @@ editpos=8
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 60,2418
+ 0,2403
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -931,17 +931,17 @@ nomenumodules=2
 [sourcefo.files_tab]
 order=8
  0
+ 4
+ 5
+ 6
  7
  1
  2
  3
- 4
- 5
- 6
 firsttab=0
-index=1
+index=0
 [layout]
-windowlayout=578
+windowlayout=579
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1402,10 +1402,11 @@ windowlayout=578
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
- history=8
-  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
+ value=/home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+ history=9
+  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
   /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
+  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
   /home/fred/ideu/src/ideusettings.pas
   /home/fred/uos/examples/uos.pas
   /home/fred/uos/examples/consolesynth.pas
@@ -1435,15 +1436,15 @@ windowlayout=578
  [sourcefo.files_tab]
  order=8
   0
+  4
+  5
+  6
   7
   1
   2
   3
-  4
-  5
-  6
  firsttab=0
- index=1
+ index=0
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
