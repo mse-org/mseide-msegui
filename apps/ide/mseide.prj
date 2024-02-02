@@ -518,11 +518,14 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=1
+modulenames=2
+ FILEDIALOGXFO
  PROJECTOPTIONSFO
-moduletypes=1
+moduletypes=2
+ TFILEDIALOGXFO
  TPROJECTOPTIONSFO
-modulefiles=1
+modulefiles=2
+ /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.mfm
  /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
 befcommandon=0
 makeoptionson=10
@@ -846,8 +849,9 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=darwin
+finddtext=oncrea
 findhistory=20
+ oncrea
  darwin
  buttonicons_nomask
  newinheritedforms
@@ -867,16 +871,16 @@ findhistory=20
  newl
  gettext
  selang
- setnew
 findoptions=1
-editpos=7
- 0,0
+editpos=8
+ 0,16
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
  0,-1073741823
+ 60,2418
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -884,7 +888,8 @@ bookmarks3=0
 bookmarks4=0
 bookmarks5=0
 bookmarks6=0
-sourcefiles=7
+bookmarks7=0
+sourcefiles=8
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
  ${PROJECTDIR}/main.pas
  ${PROJECTDIR}/sourceform.pas
@@ -892,7 +897,8 @@ sourcefiles=7
  ${PROJECTDIR}/projectoptionsform.pas
  ${PROJECTDIR}/debuggerform.pas
  ${PROJECTDIR}/guitemplates.pas
-relpaths=7
+ /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
+relpaths=8
  ../lib/common/kernel/msegui.pas
  main.pas
  sourceform.pas
@@ -900,7 +906,8 @@ relpaths=7
  projectoptionsform.pas
  debuggerform.pas
  guitemplates.pas
-ismoduletexts=7
+ ../lib/common/dialogx/msefiledialogx.pas
+ismoduletexts=8
  0
  0
  0
@@ -908,19 +915,33 @@ ismoduletexts=7
  0
  0
  0
-modules=1
+ 0
+modules=2
  /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
-moduleoptions=1
+ /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.mfm
+moduleoptions=2
  0
-visiblemodules=1
+ 0
+visiblemodules=2
  -1
-nomenumodules=1
+ -1
+nomenumodules=2
+ 0
  0
 [sourcefo.files_tab]
+order=8
+ 0
+ 7
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
 firsttab=0
-index=0
+index=1
 [layout]
-windowlayout=546
+windowlayout=578
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1381,12 +1402,16 @@ windowlayout=546
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/kernel/msegui.pas
- history=4
-  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
-  /home/fred/mseide-msegui/apps/ide/main.mfm
-  /home/fred/ideU/src/main.pas
-  ${PROJECTDIR}/main.pas
+ value=/home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
+ history=8
+  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
+  /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
+  /home/fred/ideu/src/ideusettings.pas
+  /home/fred/uos/examples/uos.pas
+  /home/fred/uos/examples/consolesynth.pas
+  /home/fred/uos/examples/consoleplay.pas
+  /home/fred/mseide-msegui/lib/common/designutils/msegdbutils.pas
+  /home/fred/ideu/src/msegdbutils.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1408,8 +1433,17 @@ windowlayout=546
  rcx=0
  rcy=0
  [sourcefo.files_tab]
+ order=8
+  0
+  7
+  1
+  2
+  3
+  4
+  5
+  6
  firsttab=0
- index=0
+ index=1
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1451,7 +1485,7 @@ windowlayout=546
  [_mse_projectoptionsfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=mainfo
+ stackedunder=_mse_filedialogxfo_mse_
  parent=
  mdistate=3
  nx=0
@@ -1462,6 +1496,25 @@ windowlayout=546
  y=177
  cx=842
  cy=581
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
+ [_mse_filedialogxfo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=mainfo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=545
+ y=112
+ cx=618
+ cy=484
  rcx=0
  rcy=0
  wsize=0
