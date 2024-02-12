@@ -3851,7 +3851,7 @@ function connect(__fd:longint; const __addr: sockaddr;
 function connect(__fd:longint; __addr:Psockaddr;
                  __len:socklen_t):longint;cdecl;external clib name 'connect@GLIBC_2.0'; overload;
 {$ifdef linux}
-function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len@GLIBC_2.0';
+function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len';
 {$else}
   //use len field of FreeBSD struct
 {$endif}
@@ -3866,7 +3866,7 @@ function htons(__hostshort:uint16_t):uint16_t;cdecl;external clib name 'htons@GL
 procedure freeaddrinfo(__ai:Paddrinfo);cdecl;external clib name 'freeaddrinfo@GLIBC_2.0';
 function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs@GLIBC_2.0';
 
-function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror@GLIBC_2.0';
+function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror';
 function syscall(SysNo: Longint): Integer; cdecl; varargs;
                                     external clib name 'syscall@GLIBC_2.0';
 
