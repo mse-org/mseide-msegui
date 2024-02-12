@@ -872,7 +872,7 @@ begin
  fsourcefiles:= tmsestringhashdatalist.create();
 // fsourcefiles:= thashedmsestrings.create;
  fstoptime:= emptydatetime;
- {$if defined(UNIX) and not defined(darwin)}
+ {$if defined(UNIX)}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
  ftargetconsole:= tcustommseprocess.create(nil);
@@ -890,7 +890,7 @@ begin
  closegdb;
  inherited;
  fsourcefiles.free;
- {$if defined(UNIX) and not defined(darwin)}
+ {$if defined(UNIX)}
  ftargetconsole.free;
  ftargetterminal.free;
  {$endif}
@@ -4889,7 +4889,7 @@ begin
   fgdberror.overloadsleepus:= avalue;
  end;
 }
-{$if defined(UNIX) and not defined(darwin)}
+ {$if defined(UNIX)}
   ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
 end;
@@ -4933,7 +4933,7 @@ var
  ios: termios{ty};
 
 begin
- {$if not defined(darwin)}
+
  fpty:= invalidfilehandle;
  fpty:= getpt;
  if fpty < 0 then error;
@@ -4942,21 +4942,23 @@ begin
  if ptsname_r(fpty,@fdevicename[1],buflen) < 0 then error;
  setlength(fdevicename,length(pchar(fdevicename)));
  fillchar(ios,sizeof(ios),0);
- if msetcgetattr(fpty,ios) <> 0 then error;
+ {$if not defined(darwin)}  // TODO
+  if msetcgetattr(fpty,ios) <> 0 then error;
+ {$endif}
  ios.c_lflag:= ios.c_lflag and not (icanon or echo);
  ios.c_cc[vmin]:= #1;
  ios.c_cc[vtime]:= #0;
+ {$if not defined(darwin)}  // TODO
  if msetcsetattr(fpty,tcsanow,ios) <> 0 then error;
+ {$endif}
  finput:= tpipereader.create;
  foutput:= tpipewriter.create;
 // finput.handle:= pty;
  foutput.handle:= fpty;
-{$endif}
 end;
 
 destructor tpseudoterminal.destroy;
 begin
-{$if not defined(darwin)}
  closeinp;
  foutput.releasehandle;
  finput.releasehandle;
@@ -4965,14 +4967,12 @@ begin
  if fpty <> invalidfilehandle then begin
   sys_closefile(fpty);
  end;
-{$endif}
 end;
 
 procedure tpseudoterminal.closeinp;
 var
  ios: termios{ty};
 begin
-{$if not defined(darwin)} 
 finput.terminate(true);
  if finput.active then begin
   msetcgetattr(foutput.handle,ios);
@@ -4982,7 +4982,6 @@ finput.terminate(true);
   msetcsetattr(foutput.handle,tcsanow,ios);
   foutput.writeln('');
  end;
-{$endif}
 end;
 
 procedure tpseudoterminal.restart;

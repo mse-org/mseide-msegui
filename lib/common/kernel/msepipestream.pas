@@ -280,11 +280,14 @@ end;
 
 constructor tpipereader.create;
 begin
+
+// writeln('tpipereader.create');
  sys_condcreate(finputcond);
  fwritehandle:= invalidfilehandle;
  foverloadsleepus:= -1;
  inherited;
  include(fstate,tss_notopen);
+// writeln('tpipereader.create');
 end;
 
 destructor tpipereader.destroy;
@@ -329,7 +332,8 @@ end;
 procedure tpipereader.terminate(const noclosehandle: boolean = false);
 var
  by1: byte;
-begin
+ begin
+  
  if fthread <> nil then begin
   fthread.terminate;
   if fthread.running then begin
@@ -341,9 +345,9 @@ begin
    else begin
 //    inherited sethandle(invalidfilehandle);
     {$ifdef unix}
-    pthread_kill(fthread.id,sigio);
+     pthread_kill(fthread.id,sigio); 
     {$endif}
-   end;
+    end;
    writehandle:= invalidfilehandle;
   end;
  end;

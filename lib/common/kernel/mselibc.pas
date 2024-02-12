@@ -1865,14 +1865,27 @@ type
     1:(buffer: pointer);
   end;
   {$else}
+   {$if defined(darwin)}
+   pthread_mutexattr_t = record
+   sig: {$ifdef cpu64}int64{$else}longint{$endif}; 
+   opaque: array[0..{$ifdef cpu64}56{$else}40{$endif}-1] of byte;
+   end;
+   {$else}  // netbsd
    pthread_mutexattr_t = record
    ptma_magic : cint;
    ptma_private: pointer;
   end;
   {$endif}
-
+  {$endif}
+ 
   Ppthread_t = ^pthread_t;
+  
+  {$if not defined(darwin)}
   pthread_t = culong;
+  {$else}
+  pthread_t = ptruint;
+  {$endif}
+    
   P_pthread_descr = ^_pthread_descr;
   _pthread_descr = pointer; // Opaque type.
 
@@ -1888,7 +1901,16 @@ type
        __stackaddr : pointer;
        __stacksize : size_t;
     end;
+ 
+  {$if not defined(darwin)}
   pthread_attr_t = __pthread_attr_s;
+  {$else}
+    pthread_attr_t = record 
+    sig: clong;
+    opaque: array[0..{$ifdef cpu64}56{$else}36{$endif}-1] of byte;
+    end;   
+  {$endif}
+
   Ppthread_attr_t = ^pthread_attr_t;
 
 const
@@ -1898,21 +1920,37 @@ type
    Psem_t = ^sem_t;
    //sem_t = array[0..__SIZEOF_SEM_T-1] of byte;
    //{
+   {$if not defined(darwin)}
    sem_t = record
         __sem_lock : _pthread_fastlock;
         __sem_value : longint;
         __sem_waiting : _pthread_descr;
      end;
+   {$else}
+   sem_t                = cint;   
+   {$endif}
+       
  //    }
   TSemaphore = sem_t;
   PSemaphore = ^TSemaphore;
 
   Psigval = ^sigval;
+  
+  {$if not defined(darwin)}
   sigval = record
       case longint of
          0 : ( sival_int : cint );
          1 : ( sival_ptr : pointer );
       end;
+  {$else}    
+   Sigval = Record
+            Case Boolean OF
+        { Members as suggested by Annex C of POSIX 1003.1b. }
+                false : (sigval_int : cint);
+                True  : (sigval_ptr : Pointer);
+            End;
+ {$endif}  
+      
   sigval_t = sigval;
   Psigval_t = ^sigval_t;
 
@@ -1957,6 +1995,8 @@ type
    si_sigval: sigval_t;
  end;
  Psiginfo = ^_siginfo;
+ 
+ {$ifndef darwin}
  _siginfo = record
       si_signo : cint;
       si_errno : cint;
@@ -1970,6 +2010,27 @@ type
         5: (_sigfault: _si_sigfault);
         6: (_sigpoll: _si_sigpoll);
    end;
+  {$else}
+     _siginfo = record
+                si_signo,                       { signal number }
+                si_errno,                       { errno association }
+        {
+         * Cause of signal, one of the SI_ macros or signal-specific
+         * values, i.e. one of the FPE_... values for SIGFPE. This
+         * value is equivalent to the second argument to an old-style
+         * FreeBSD signal handler.
+         }
+                si_code,                        { signal code }
+                si_pid          : cint;         { sending process }
+                si_uid          : cuint;        { sender's ruid }
+                si_status       : cint;         { exit value }
+                si_addr         : Pointer;      { faulting instruction }
+                si_value        : SigVal;       { signal value }
+                si_band         : cuint;        { band event for SIGPOLL }
+                pad             : array[0..6] of cint; { Reserved for Future Use }
+               end;
+ {$endif}  
+   
  siginfo_t = _siginfo;
  Psiginfo_t = ^siginfo_t;
  Tsiginfo_t = siginfo_t;
@@ -2008,9 +2069,15 @@ const
 
 type
    P__sigset_t = ^__sigset_t;
+
+{$ifndef darwin}
    __sigset_t = record
         __val : array[0..(_SIGSET_NWORDS)-1] of dword;
      end;
+{$else}     
+   __sigset_t = array[0..0] of cuint;
+{$endif}   
+     
   sigset_t = __sigset_t;
   Psigset_t = ^sigset_t;
   TSigset = __sigset_t;
@@ -2095,8 +2162,14 @@ const
 type
   Ppthread_mutex_t = ^pthread_mutex_t;
 
- {$if not defined(netbsd)}  
+ {$if not defined(netbsd) and not defined(darwin)}  
   pthread_mutex_t = array[0..__SIZEOF_PTHREAD_MUTEX_T-1] of byte;
+{$else}
+ {$if defined(darwin)}  
+  pthread_mutex_t = record
+     sig: {$ifdef cpu64}int64{$else}longint{$endif};
+     opaque: array[0..{$ifdef cpu64}56{$else}40{$endif}-1] of byte;
+ end;
 {$else}
   pthread_mutex_t = record
          ptm_magic : dword;
@@ -2109,6 +2182,7 @@ type
          ptm_recursed: dword;
          ptm_spare2: pointer;
       end;
+{$endif}
 {$endif}
 
   DIR = record end;
@@ -3116,14 +3190,8 @@ function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;ext
 {$endif}
 {$endif}
 {$else}
-
-{$ifdef darwin}
-function ptsname(fildes: cint): pchar; cdecl; external clib name 'ptsname_r';
-function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;
-{$else}
 function ptsname(fildes: cint): pchar; cdecl; external clib name 'ptsname';
 function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;
-{$endif}
 {$endif}
 
 const
