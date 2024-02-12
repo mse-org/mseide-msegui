@@ -1996,8 +1996,7 @@ type
  end;
  Psiginfo = ^_siginfo;
  
- {$ifndef darwin}
- _siginfo = record
+  _siginfo = record
       si_signo : cint;
       si_errno : cint;
       si_code : cint;
@@ -2010,27 +2009,7 @@ type
         5: (_sigfault: _si_sigfault);
         6: (_sigpoll: _si_sigpoll);
    end;
-  {$else}
-     _siginfo = record
-                si_signo,                       { signal number }
-                si_errno,                       { errno association }
-        {
-         * Cause of signal, one of the SI_ macros or signal-specific
-         * values, i.e. one of the FPE_... values for SIGFPE. This
-         * value is equivalent to the second argument to an old-style
-         * FreeBSD signal handler.
-         }
-                si_code,                        { signal code }
-                si_pid          : cint;         { sending process }
-                si_uid          : cuint;        { sender's ruid }
-                si_status       : cint;         { exit value }
-                si_addr         : Pointer;      { faulting instruction }
-                si_value        : SigVal;       { signal value }
-                si_band         : cuint;        { band event for SIGPOLL }
-                pad             : array[0..6] of cint; { Reserved for Future Use }
-               end;
- {$endif}  
-   
+    
  siginfo_t = _siginfo;
  Psiginfo_t = ^siginfo_t;
  Tsiginfo_t = siginfo_t;
@@ -4075,12 +4054,23 @@ function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;
 {$else}
 function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
                      external clib name 'gettimeofday'; overload;
+                     
+{$ifndef darwin}                     
 function  msetcgetattr(filedes: longint;
          var msetermios: termios{ty}): longint;
                                     cdecl;external clib name 'tcgetattr';
 function  msetcsetattr(filedes: longint; when: longint;
          var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcsetattr';
+                                    cdecl;external clib name 'tcsetattr';   
+{$else}  
+function  msetcgetattr(filedes: longint;
+         var msetermios: termios{ty}): longint;
+                                    cdecl;external clib name 'tcgetattr';
+function  msetcsetattr(filedes: longint; when: longint;
+         var msetermios: termios{ty}): longint;
+                                    cdecl;external clib name 'tcsetattr';     
+{$endif}          
+                                    
 function  tcdrain(filedes: longint): longint;cdecl;external clib name 'tcdrain';
 function  tcflush(filedes: longint; queue_selector: longint): longint;
                                     cdecl;external clib name 'tcflush';
