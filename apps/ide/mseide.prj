@@ -181,7 +181,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=1
+ index=2
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=921
  width0=47
@@ -202,10 +202,10 @@ options=114
  index=1
  [projectoptionsfo.setting_tab]
  firsttab=0
- index=8
+ index=2
  [projectoptionsfo]
  stackedunder=
- x=255
+ x=53
  y=82
  cx=981
  cy=634
@@ -283,7 +283,7 @@ objpref=-Fo
 targpref=-o
 befcommand=0
 aftcommand=0
-makeoptions=10
+makeoptions=14
  -Xg -l -Sh -Fcutf8
  -gl
  -dmse_with_zeoslib
@@ -294,7 +294,15 @@ makeoptions=10
  -FUunits
  -dmse_dynpo
  -dclass_bridge
-makeoptpurpose=10
+ -Tdarwin -Fl/home/fred/fpcupdeluxe/cross/lib/all-darwin/
+ -Tfreebsd
+ -Topenbsd
+ -Tnetbsd
+makeoptpurpose=14
+ 
+ 
+ 
+ 
  
  
  
@@ -518,36 +526,34 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=2
- FILEDIALOGXFO
- PROJECTOPTIONSFO
-moduletypes=2
- TFILEDIALOGXFO
- TPROJECTOPTIONSFO
-modulefiles=2
- /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.mfm
- /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
+modulenames=0
+moduletypes=0
+modulefiles=0
 befcommandon=0
-makeoptionson=10
- 255
+makeoptionson=14
+ 1023
  3
- 255
- 255
- 255
- 252
- 255
- 255
+ 1023
+ 1023
+ 767
+ 1020
+ 1023
+ 1023
+ 0
+ 0
+ 512
+ 0
  0
  0
 compilerusedon=29
- 4095
+ 3635
  0
  0
  0
  0
- 0
- 0
- 0
+ 64
+ 128
+ 264
  0
  0
  0
@@ -613,11 +619,11 @@ project_date=22:09:21 28/05/23
 project_comment=
 aftcommandon=0
 unitdirson=5
- 196863
+ 197631
  196800
- 65599
- 196863
- 65791
+ 66367
+ 197631
+ 66559
 macroon=0
 macronames=0
 macrovalues=0
@@ -872,76 +878,29 @@ findhistory=20
  gettext
  selang
 findoptions=1
-editpos=8
- 0,16
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,2403
+editpos=2
+ 0,12
+ 0,33
 bookmarks0=0
 bookmarks1=0
-bookmarks2=0
-bookmarks3=0
-bookmarks4=0
-bookmarks5=0
-bookmarks6=0
-bookmarks7=0
-sourcefiles=8
+sourcefiles=2
  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
- ${PROJECTDIR}/main.pas
- ${PROJECTDIR}/sourceform.pas
- ${PROJECTDIR}/actionsmodule.pas
- ${PROJECTDIR}/projectoptionsform.pas
- ${PROJECTDIR}/debuggerform.pas
- ${PROJECTDIR}/guitemplates.pas
- /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
-relpaths=8
+ ${PROJECTDIR}/mseide.pas
+relpaths=2
  ../lib/common/kernel/msegui.pas
- main.pas
- sourceform.pas
- actionsmodule.pas
- projectoptionsform.pas
- debuggerform.pas
- guitemplates.pas
- ../lib/common/dialogx/msefiledialogx.pas
-ismoduletexts=8
+ mseide.pas
+ismoduletexts=2
  0
  0
- 0
- 0
- 0
- 0
- 0
- 0
-modules=2
- /home/fred/mseide-msegui/apps/ide/projectoptionsform.mfm
- /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.mfm
-moduleoptions=2
- 0
- 0
-visiblemodules=2
- -1
- -1
-nomenumodules=2
- 0
- 0
+modules=0
+moduleoptions=0
+visiblemodules=0
+nomenumodules=0
 [sourcefo.files_tab]
-order=8
- 0
- 4
- 5
- 6
- 7
- 1
- 2
- 3
 firsttab=0
 index=0
 [layout]
-windowlayout=579
+windowlayout=533
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -991,7 +950,7 @@ windowlayout=579
  rcy=0
  wsize=0
  active=0
- visible=0
+ visible=1
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -1178,10 +1137,10 @@ windowlayout=579
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=413
- width0=98
+ propcolwidthref=566
+ width0=134
  sortdescend0=0
- width1=309
+ width1=426
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1402,8 +1361,9 @@ windowlayout=579
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/kernel/msegui.pas
- history=9
+ value=/home/fred/mseide-msegui/apps/ide/mseide.pas
+ history=10
+  /home/fred/mseide-msegui/apps/ide/mseide.pas
   /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
   /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
   /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
@@ -1414,7 +1374,7 @@ windowlayout=579
   /home/fred/mseide-msegui/lib/common/designutils/msegdbutils.pas
   /home/fred/ideu/src/msegdbutils.pas
  [debuggerfo.project_options]
- value=1
+ value=7
  [debuggerfo.hints]
  value=1
  [sourcefo]
@@ -1434,15 +1394,6 @@ windowlayout=579
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=8
-  0
-  4
-  5
-  6
-  7
-  1
-  2
-  3
  firsttab=0
  index=0
  [confideufo.usedefaulteditoroptions]
@@ -1483,44 +1434,6 @@ windowlayout=579
  cy=547
  rcx=0
  rcy=0
- [_mse_projectoptionsfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=_mse_filedialogxfo_mse_
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=205
- y=177
- cx=842
- cy=581
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
- [_mse_filedialogxfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=mainfo
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=545
- y=112
- cx=618
- cy=484
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
 [targetconsole]
 finddtext=
 findhistory=0

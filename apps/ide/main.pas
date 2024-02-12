@@ -46,7 +46,7 @@ uses
  mselistbrowser,projecttreeform,msepipestream,msestringcontainer,msesys,
  msewidgets;
 const
- versiontext = '5.8.0';
+ versiontext = '5.10.0';
  idecaption = 'MSEide';
 
  {$ifndef netbsd}

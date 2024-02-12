@@ -1,4 +1,4 @@
-{ MSEgui Copyright (c) 1999-2023 by Martin Schreiber
+{ MSEgui Copyright (c) 1999-2024 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
@@ -38,8 +38,8 @@ uses
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
                    {$ifdef mse_with_ifi},mseifiglob,mseificompglob{$endif};
  const
- mseguiversiontext = '5.8.8';
- copyrighttext = 'Copyright 1999-2023';
+ mseguiversiontext = '5.10.0';
+ copyrighttext = 'Copyright 1999-2024';
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;
  defaultfadecolor = cl_ltgray;

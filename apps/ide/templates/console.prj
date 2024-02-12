@@ -714,7 +714,7 @@ windowlayout=555
  [disassfo]
  splitdir=0
  useroptions=268451947
- stackedunder=mainfo.panel1
+ stackedunder=mainfo.panel2
  parent=
  mdistate=0
  nx=0
@@ -901,7 +901,7 @@ windowlayout=555
  active=0
  visible=0
  [symbolfo.grid]
- propcolwidthref=222
+ propcolwidthref=207
  values0=18
   
   
@@ -923,7 +923,7 @@ windowlayout=555
   
  width0=111
  sortdescend0=0
- width1=135
+ width1=125
  sortdescend1=0
  [symbolfo.symbol]
  [watchfo]
@@ -1001,7 +1001,7 @@ windowlayout=555
  width0=111
  sortdescend0=0
  sortdescend1=0
- width2=112
+ width2=103
  sortdescend2=0
  width3=185
  sortdescend3=0
@@ -1120,7 +1120,7 @@ windowlayout=555
  [mainfo.panel1]
  splitdir=2
  useroptions=302022123
- stackedunder=mainfo.panel2
+ stackedunder=targetconsolefo
  parent=
  mdistate=0
  nx=0
@@ -1139,7 +1139,7 @@ windowlayout=555
  [mainfo.panel2]
  splitdir=2
  useroptions=302022123
- stackedunder=targetconsolefo
+ stackedunder=mainfo.panel1
  parent=
  mdistate=0
  nx=0
