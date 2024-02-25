@@ -10,7 +10,9 @@
 unit msegraphicstream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
-{.$define class_bridge} // uncomment to use bridge for BGRABitmap
+{$if defined(BGRABITMAP_USE_MSEGUI)}
+ {$define class_bridge}
+{$endif} 
 
 interface
 uses

@@ -26,9 +26,9 @@ interface
  {$endif}
 {$endif}
 
-{$ifdef openbsd}
-{$define class_bridge} 
-{$endif}
+{$if defined(BGRABITMAP_USE_MSEGUI)}
+ {$define class_bridge}
+{$endif} 
 
 uses
  classes,mclasses,sysutils,msegraphics,msetypes,mseact,

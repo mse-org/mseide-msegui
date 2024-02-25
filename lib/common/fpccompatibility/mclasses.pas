@@ -22,12 +22,13 @@ unit mclasses;
  { determine the type of the resource/form file }
  {$define Win16Res}
  {$define classesinline}
-
  {$INLINE ON}
 {$endif}
 
- {.$define class_bridge} // uncomment to use bridge for BGRABitmap
-
+{$if defined(BGRABITMAP_USE_MSEGUI)}
+ {$define class_bridge}
+{$endif} 
+ 
 {$if defined(FPC) and (fpc_fullversion >= 020601)}
  {$define mse_fpc_2_6_2}
 {$ifend}
