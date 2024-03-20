@@ -6183,13 +6183,13 @@ begin
  
 {$ifdef linux} 
   {$ifdef glibc-table} 
-  i1:= ppoll(@pollinfo[0],length(pollinfo),1000);
+  i1:= ppoll(@pollinfo[0],length(pollinfo),timeout1.tv_sec);
  {$else}
   i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
  {$endif}
 {$else} 
  {$ifdef darwin} 
-  i1:= ppoll(@pollinfo[0],length(pollinfo),1000);
+  i1:= ppoll(@pollinfo[0],length(pollinfo),timeout1.tv_sec);
  {$else}
   i1:= ppoll(@pollinfo[0],length(pollinfo),@timeout1,@sig1);
  {$endif}
