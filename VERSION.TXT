@@ -1,5 +1,9 @@
 MSEide+MSEgui changes version history
 **********************************************
+Version 5.10.2
+2024-03-21
+Fixes for msetimer and mselibc.pas for Linux i386.
+
 Version 5.10.0
 2024-02-12
 Added Darwin MacOs compatible.
