@@ -229,7 +229,7 @@ a "units" tag is required, and a "descriptions" tag as well
 <unit file="../../lib/common/kernel/msebits.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msebucketlist.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/mseclasses.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
-<unit file="../../lib/common/kernel/mseconsts.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../../lib/common/lang_consts/mseconsts.pas" options="-Fu../lib/common/* -Fu../lib/common/lang_consts -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msectypes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msedatamodules.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msedate.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
@@ -260,10 +260,10 @@ a "units" tag is required, and a "descriptions" tag as well
 <unit file="../../lib/common/kernel/msescrollbar.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/mseshapes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/mseskin.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
-<unit file="../../lib/common/kernel/msesonames.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../../lib/common/kernel/msesonames.pas" options="-Fu../lib/common/* -Fu../lib/common/lang_consts -Fi../lib/common/lang_consts"/>
 <unit file="../../lib/common/kernel/msestatfile.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msestat.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
-<unit file="../../lib/common/kernel/msestockobjects.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
+<unit file="../../lib/common/lang_consts/msestockobjects.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msestreaming.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msestream.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msestrings.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
