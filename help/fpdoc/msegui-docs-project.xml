@@ -260,7 +260,7 @@ a "units" tag is required, and a "descriptions" tag as well
 <unit file="../../lib/common/kernel/msescrollbar.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/mseshapes.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/mseskin.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
-<unit file="../../lib/common/kernel/msesonames.pas" options="-Fu../lib/common/* -Fu../lib/common/lang_consts -Fi../lib/common/lang_consts"/>
+<unit file="../../lib/common/kernel/msesonames.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msestatfile.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/kernel/msestat.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
 <unit file="../../lib/common/lang_consts/msestockobjects.pas" options="-Fu../lib/common/* -Fu../lib/common/kernel/linux -Fi../lib/common/kernel"/>
