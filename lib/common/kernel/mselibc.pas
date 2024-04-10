@@ -2646,11 +2646,11 @@ function __lxstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
 {$ifndef CPU64}
 {$if defined(glibc20) }
 function __fxstat64(__ver:longint; __fildes:longint; __stat_buf:Pstat64):longint;
-                             cdecl;external clib name '__fxstat64@GLIBC_2.0';
+                             cdecl;external clib name '__fxstat64@GLIBC_2.2';
 function __xstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
                              cdecl;external clib name '__xstat64@GLIBC_2.2';
 function __lxstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
-                             cdecl;external clib name '__lxstat64@GLIBC_2.0';
+                             cdecl;external clib name '__lxstat64@GLIBC_2.2';
 
 {$else}
 function __fxstat64(__ver:longint; __fildes:longint; __stat_buf:Pstat64):longint;
