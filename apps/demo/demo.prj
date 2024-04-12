@@ -19,8 +19,8 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/Z:/home/fred/mseide-msegui/apps/demo
-projectfilename=Z:\home\fred\mseide-msegui\apps\demo\demo.prj
+projectdir=/home/fred/mseide-msegui/apps/demo
+projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
 options=133
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
@@ -689,7 +689,7 @@ files=
  a=0,8229,6,Text Files
  )
 [componentstore]
-storedir=/Z:/home/fred/mseide-msegui/apps/mse/compstore/
+storedir=/home/fred/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -709,11 +709,11 @@ finddtext=
 findhistory=0
 findoptions=1
 editpos=5
- 13,10
+ 9,4
  0,-1073741823
  0,-1073741823
  0,-1073741823
- 0,0
+ 0,-1073741823
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -723,10 +723,10 @@ sourcefiles=5
  /home/fred/mseide-msegui/apps/demo/main.pas
  ${PROJECTDIR}/demo.pas
  ${PROJECTDIR}/demo.pas
- /home/fred/mseide-msegui/apps/demo/demo.pas
- /Z:/home/fred/mseide-msegui/apps/demo/demo.pas
+ ${PROJECTDIR}/demo.pas
+ ${PROJECTDIR}/demo.pas
 relpaths=5
- ../../../../../home/fred/mseide-msegui/apps/demo/main.pas
+ main.pas
  demo.pas
  demo.pas
  demo.pas
@@ -746,16 +746,10 @@ visiblemodules=1
 nomenumodules=1
  0
 [sourcefo.files_tab]
-order=5
- 0
- 4
- 2
- 3
- 1
 firsttab=0
 index=0
 [layout]
-windowlayout=578
+windowlayout=572
  [mainfo.basedock]
  splitdir=2
  useroptions=268582016
@@ -987,10 +981,10 @@ windowlayout=578
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=240
- width0=88
+ propcolwidthref=355
+ width0=130
  sortdescend0=0
- width1=146
+ width1=219
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1054,7 +1048,7 @@ windowlayout=578
  rcx=0
  rcy=0
  [watchfo.grid]
- propcolwidthref=104
+ propcolwidthref=114
  values0=0
  values0_ci=-1
  sortdescend0=0
@@ -1185,7 +1179,7 @@ windowlayout=578
  x=0
  y=0
  cx=1195
- cy=111
+ cy=110
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1197,11 +1191,11 @@ windowlayout=578
  nx=0
  ny=15
  ncx=1195
- ncy=71
+ ncy=127
  x=0
  y=15
  cx=1195
- cy=128
+ cy=127
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1247,12 +1241,6 @@ windowlayout=578
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=5
-  0
-  4
-  2
-  3
-  1
  firsttab=0
  index=0
  [confideufo.usedefaulteditoroptions]
