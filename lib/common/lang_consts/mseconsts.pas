@@ -88,7 +88,7 @@ const
   {$define make_extendedtext:= en_extendedtext: extendedaty =}
   {$include mseconsts_strings.inc}
 ///////////////////
-  en_langnamestext: array[0..5] of msestring = (
+  en_langnamestext: array {$if fpc_fullversion <= 030100} [0..5] {$endif} of msestring = (
     'English [en]',
     'Russian [ru]',
     'French [fr]',
