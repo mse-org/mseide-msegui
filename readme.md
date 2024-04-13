@@ -1,6 +1,6 @@
 # MSEide+MSEgui Pascal Cross Platform GUI Development System
 
-2024-03-21 Version 5.10.2.
+2024-04-13 Version 5.10.4.
 Copyright (c) 1999-2024 by Martin Schreiber and friends.
 
 MSEgui is a complete independent Free Pascal widgetset.

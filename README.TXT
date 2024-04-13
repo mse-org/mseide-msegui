@@ -1,6 +1,6 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2024-03-21 MSEgui Version 5.10.2.
+2024-04-13 MSEgui Version 5.10.4.
 Copyright (c) 1999-2024 by Martin Schreiber and friends.
 
 - Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2 or 3.3.1.
@@ -21,6 +21,7 @@ Copyright (c) 1999-2024 by Martin Schreiber and friends.
 - Has sophisticated database access components and data edit widgets.
 - Internationalization functionality with resource modules.
 - Report generator.
+- BGRABitmap graphic library compatible.
 
 IDE:
 - Integrated debugging.
