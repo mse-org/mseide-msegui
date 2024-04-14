@@ -19,140 +19,6 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
- options=133
- [projectoptionsfo.toolshortcuts]
- dropdowncolwidths=3
-  70
-  70
-  70
- [projectoptionsfo.twidgetgrid3]
- propcolwidthref=782
- sortdescend0=0
- sortdescend1=0
- sortdescend2=0
- sortdescend3=0
- width4=106
- sortdescend4=0
- width5=94
- sortdescend5=0
- width6=88
- sortdescend6=0
- width7=79
- sortdescend7=0
- width8=69
- sortdescend8=0
- width9=292
- sortdescend9=0
- [projectoptionsfo.twidgetgrid4]
- propcolwidthref=539
- width_newfonames=96
- sortdescend_newfonames=0
- sortdescend_newinheritedforms=0
- width_newfonamebases=73
- sortdescend_newfonamebases=0
- width_newfoformsuffix=69
- sortdescend_newfoformsuffix=0
- width_newfosources=284
- sortdescend_newfosources=0
- width_mewfoforms=244
- sortdescend_mewfoforms=0
- sorted=0
- col=-1073741823
- row=-1073741823
- rowheight=17
- [projectoptionsfo.newfile]
- firsttab=0
- index=0
- [projectoptionsfo.fontaliasgrid]
- propcolwidthref=315
- width0=143
- sortdescend0=0
- width1=304
- sortdescend1=0
- width2=66
- sortdescend2=0
- width3=54
- sortdescend3=0
- width4=62
- sortdescend4=0
- width5=70
- sortdescend5=0
- width6=103
- sortdescend6=0
- [projectoptionsfo.macrosplitter]
- x=0
- y=203
- xprop=1
- yprop=0.37251356238698
- [projectoptionsfo.macrogrid]
- propcolwidthref=589
- sortdescend0=0
- sortdescend1=0
- sortdescend2=0
- sortdescend3=0
- sortdescend4=0
- sortdescend5=0
- width6=146
- sortdescend6=0
- width7=577
- sortdescend7=0
- [projectoptionsfo.makeoptionsgrid]
- propcolwidthref=722
- values0=5
-  
-  
-  
-  
-  
- width0=57
- sortdescend0=0
- sortdescend1=0
- sortdescend2=0
- sortdescend3=0
- sortdescend4=0
- sortdescend5=0
- sortdescend6=0
- sortdescend7=0
- values8=5
-  -Xg -l -Mobjfpc -Sh -Fcutf8
-  -gl -O-
-  -B
-  -O2 -XX -Xs -CX
-  -FUunits
- sortdescend8=0
- [projectoptionsfo.makegroupbox]
- firsttab=0
- index=1
- [projectoptionsfo.exceptionsgrid]
- propcolwidthref=736
- width0=77
- sortdescend0=0
- width1=730
- sortdescend1=0
- [projectoptionsfo.ttabwidget1]
- firsttab=0
- index=0
- [projectoptionsfo.filefiltergrid]
- propcolwidthref=600
- width0=186
- sortdescend0=0
- width1=593
- sortdescend1=0
- [projectoptionsfo.ttabwidget2]
- firsttab=0
- index=0
- [projectoptionsfo.ttabwidget3]
- firsttab=0
- index=0
- [projectoptionsfo.tabwidget]
- firsttab=0
- index=2
- [projectoptionsfo]
- stackedunder=
- x=212
- y=56
- cx=815
- cy=606
 mainfile=demo.pas
 targetfile=demo${EXEEXT}
 messageoutputfile=
@@ -398,9 +264,9 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=1
- MAINFO
-moduletypes=1
+modulenames=0
+moduletypes=0
+modulefiles=0
 befcommandon=0
 makeoptionson=5
  63
@@ -702,39 +568,24 @@ hintheight=0
 finddtext=
 findhistory=0
 findoptions=1
-editpos=5
+editpos=1
  9,4
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
- 0,-1073741823
 bookmarks0=0
-bookmarks1=0
-bookmarks2=0
-bookmarks3=0
-bookmarks4=0
 sourcefiles=1
- ${PROJECTDIR}/demo.pas
-relpaths=2
+ ${PROJECTDIR}/main.pas
+relpaths=1
  main.pas
- demo.pas
-ismoduletexts=5
+ismoduletexts=1
  0
- 0
- 0
- 0
- 0
-moduleoptions=1
- 0
-visiblemodules=1
- -1
-nomenumodules=1
- 0
+modules=0
+moduleoptions=0
+visiblemodules=0
+nomenumodules=0
 [sourcefo.files_tab]
 firsttab=0
 index=0
 [layout]
-windowlayout=572
+windowlayout=541
  [mainfo.basedock]
  splitdir=2
  useroptions=268582016
@@ -1190,8 +1041,11 @@ windowlayout=572
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
+ value=
+ history=1
+  
  [debuggerfo.project_options]
- value=3
+ value=1
  [debuggerfo.hints]
  value=1
  [sourcefo]
@@ -1273,25 +1127,6 @@ windowlayout=572
  wsize=0
  active=0
  visible=0
- [_mse_mainfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=componentpalettefo
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=129
- y=271
- cx=351
- cy=166
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
 [targetconsole]
 finddtext=
 findhistory=0

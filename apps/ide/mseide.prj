@@ -19,7 +19,7 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
- finddialog=8
+finddialog=8
  [finddialogfo.selectedonly]
  value=0
  [finddialogfo]
@@ -115,7 +115,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=0
+ index=2
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=921
  width0=47
@@ -156,7 +156,7 @@ imagelisteditor=40
  [imagelisteditorfo.statfile1]
  currentversion=0
  [imagelisteditorfo.filedialog]
-  filenamescust=0
+ filenamescust=0
  filecolwidth=174
  x=365
  y=390
@@ -228,10 +228,10 @@ makeoptions=14
  -FUunits
  -dmse_dynpo
  -dclass_bridge
+ -Tdarwin 
  -Tfreebsd
  -Topenbsd
  -Tnetbsd
- 
 makeoptpurpose=14
  
  
@@ -737,25 +737,13 @@ sigsettings=27
  30,30,T,F
 defaultmake=1
 [breakpoints]
-on=2
- -1
- -1
+on=0
 path=0
-line=2
- 1618
- 1626
-address=2
- 4688601
- 4688688
-addbkpt=2
- 0
- 0
-ignore=2
- 0
- 0
-condition=2
- 
- 
+line=0
+address=0
+addbkpt=0
+ignore=0
+condition=0
 panels=1
  panel1
 units=
@@ -810,7 +798,7 @@ findhistory=20
  selang
 findoptions=1
 editpos=1
- 0,12
+ 0,33
 bookmarks0=0
 sourcefiles=1
  ${PROJECTDIR}/mseide.pas
@@ -826,7 +814,7 @@ nomenumodules=0
 firsttab=0
 index=0
 [layout]
-windowlayout=524
+windowlayout=525
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -840,9 +828,9 @@ windowlayout=524
  ny=0
  ncx=0
  ncy=0
- x=88
- y=80
- cx=1436
+ x=34
+ y=45
+ cx=1174
  cy=724
  rcx=0
  rcy=0
@@ -876,7 +864,7 @@ windowlayout=524
  rcy=0
  wsize=0
  active=0
- visible=1
+ visible=0
  [threadsfo]
  splitdir=0
  useroptions=268451945
@@ -1064,9 +1052,9 @@ windowlayout=524
  value=1
  [objectinspectorfo.grid]
  propcolwidthref=355
- width0=84
+ width0=85
  sortdescend0=0
- width1=265
+ width1=264
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1160,7 +1148,7 @@ windowlayout=524
  ncy=0
  x=0
  y=613
- cx=1422
+ cx=1160
  cy=88
  rcx=0
  rcy=0
@@ -1193,7 +1181,7 @@ windowlayout=524
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
-  filecolwidth=0
+ filecolwidth=0
  x=0
  y=0
  cx=0
@@ -1202,7 +1190,7 @@ windowlayout=524
  filefilterindex=0
  filefilter=
  [componentstorefo.groupfiledialog]
-filecolwidth=0
+ filecolwidth=0
  x=0
  y=0
  cx=0
@@ -1254,7 +1242,7 @@ filecolwidth=0
  ncy=0
  x=0
  y=0
- cx=1422
+ cx=1160
  cy=60
  rcx=0
  rcy=0
@@ -1267,11 +1255,11 @@ filecolwidth=0
  nx=0
  ny=0
  ncx=1422
- ncy=65
+ ncy=64
  x=0
  y=0
- cx=1422
- cy=65
+ cx=1160
+ cy=63
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1281,9 +1269,10 @@ filecolwidth=0
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=
- history=1
-  
+ value=mseide.pas
+ history=2
+  mseide.pas
+  ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1300,7 +1289,7 @@ filecolwidth=0
  ncy=0
  x=0
  y=0
- cx=1422
+ cx=1160
  cy=547
  rcx=0
  rcy=0
@@ -1341,7 +1330,7 @@ filecolwidth=0
  ncy=0
  x=0
  y=63
- cx=1422
+ cx=1160
  cy=547
  rcx=0
  rcy=0
