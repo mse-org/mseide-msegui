@@ -57,8 +57,8 @@ Package maintainers may delete the files "apps/ide/COPYING.GPL",
 3. Extract them to a directory of your choice. For example "/home/myself/mseide-msegui".
 4. Download and unzip mseide binary according your OS from here:
    https://github.com/mse-org/mseide-msegui/releases/
-5. Run '/direcory-of-unzipped/mseide_linxx/mseide' on Linux or FreeBSD
-   or 'direcory-of-unzipped\mseide_winxx\mseide.exe' on Windows.
+5. Run '/directory-of-unzipped/mseide_linxx/mseide' on Linux or FreeBSD
+   or 'directory-of-unzipped\mseide_winxx\mseide.exe' on Windows.
 6. In 'Settings'-'Configure MSEide'-'${MSEDIR}' select the root directory of MSEgui source. 
    For example "/home/myself/mseide-msegui"
 7. In 'Project'-'Open' select '/home/myself/mseide-msegui/apps/demo/demo.prj'.
