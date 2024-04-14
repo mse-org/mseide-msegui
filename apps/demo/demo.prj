@@ -19,9 +19,7 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/mseide-msegui/apps/demo
-projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
-options=133
+ options=133
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
   70
@@ -403,9 +401,6 @@ settingsautosave=0
 modulenames=1
  MAINFO
 moduletypes=1
- TMAINFO
-modulefiles=1
- /home/fred/mseide-msegui/apps/demo/main.mfm
 befcommandon=0
 makeoptionson=5
  63
@@ -689,7 +684,6 @@ files=
  a=0,8229,6,Text Files
  )
 [componentstore]
-storedir=/home/fred/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -719,17 +713,10 @@ bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
-sourcefiles=5
- /home/fred/mseide-msegui/apps/demo/main.pas
+sourcefiles=1
  ${PROJECTDIR}/demo.pas
- ${PROJECTDIR}/demo.pas
- ${PROJECTDIR}/demo.pas
- ${PROJECTDIR}/demo.pas
-relpaths=5
+relpaths=2
  main.pas
- demo.pas
- demo.pas
- demo.pas
  demo.pas
 ismoduletexts=5
  0
@@ -737,8 +724,6 @@ ismoduletexts=5
  0
  0
  0
-modules=1
- /home/fred/mseide-msegui/apps/demo/main.mfm
 moduleoptions=1
  0
 visiblemodules=1
@@ -1205,21 +1190,6 @@ windowlayout=572
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/demo/main.pas
- history=13
-  /home/fred/mseide-msegui/apps/demo/main.pas
-  /home/fred/mseide-msegui/lib/common/sysutils/msefilechange.pas
-  /home/fred/mseide-msegui-main/apps/ide/mseide.pas
-  /home/fred/freepascal-ootb-main/rtl/bsd/ostypes.inc
-  /home/fred/mseide-msegui/lib/common/kernel/mselibc.pas
-  /home/fred/ideU-main/src/ideU.pas
-  /home/fred/mseide-msegui/apps/ide/main.pas
-  /home/fred/mseide-msegui/lib/common/kernel/mseclasses.pas
-  /home/fred/mseide-msegui/apps/ide/main.mfm
-  /home/fred/ideU-main/src/projecttreeform.pas
-  /home/fred/ideU-main/src/sak_mse.pas
-  /home/fred/ideU-main/src/msefiledialogx.pas
-  /home/fred/mseide-msegui/lib/common/kernel/mseapplication.pas
  [debuggerfo.project_options]
  value=3
  [debuggerfo.hints]

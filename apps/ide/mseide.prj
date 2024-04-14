@@ -19,73 +19,7 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/mseide-msegui/apps/ide
-projectfilename=/home/fred/mseide-msegui/apps/ide/mseide.prj
-findinfiledialog=63
- [findinfileadialogfo.subdirs]
- value=1
- [findinfileadialogfo.incurrentfile]
- value=0
- [findinfileadialogfo.inopenfiles]
- value=0
- [findinfileadialogfo.wholeword]
- value=0
- [findinfileadialogfo.indirectories]
- value=0
- [findinfileadialogfo.inprojectdir]
- value=1
- [findinfileadialogfo.casesensitive]
- value=0
- [findinfileadialogfo.mask]
- value="*.pas" "*.pp" "*.inc"
- history=3
-  "*.pas" "*.pp" "*.inc"
-  "*.pas" "*.pp" "*.inc" "*.mfm"
-  "*.pas" "*.pp" "*.inc" "*.*"
- [findinfileadialogfo.dir]
- filenames=1
-  /home/fred/mseide-msegui/
- filecolwidth=150
- x=0
- y=0
- cx=0
- cy=0
- filehistory=3
-  /home/fred/mseide-msegui/
-  /home/fred/svnfpc32/
-  /usr/local/codetyphon/fpcsrc/
- filefilterindex=0
- filefilter="*.pas" "*.pp" "*.inc"
- [findinfileadialogfo.findtext]
- value=if defined
- history=20
-  if defined
-  mainmenu1
-  ttoolbar
-  writeln
-  mse_debug
-  syntaxdeffile
-  Path not found
-  unableopen
-  Unable to open file
-  str_notfound
-  syntaxdeffile:
-  '5.6
-  dialogx
-  msefiledialogx
-  copyrighttext
-  versiontext
-  ifndef
-  addrow([s
-  ac_stoperror
-  mseconsts
- [findinfileadialogfo]
- stackedunder=
- x=594
- y=195
- cx=339
- cy=334
-finddialog=8
+ finddialog=8
  [finddialogfo.selectedonly]
  value=0
  [finddialogfo]
@@ -181,7 +115,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=2
+ index=0
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=921
  width0=47
@@ -222,9 +156,7 @@ imagelisteditor=40
  [imagelisteditorfo.statfile1]
  currentversion=0
  [imagelisteditorfo.filedialog]
- filenames=1
-  /home/fred/Pictures/imagesideu/bluepoint2.png
- filenamescust=0
+  filenamescust=0
  filecolwidth=174
  x=365
  y=390
@@ -242,9 +174,6 @@ imagelisteditor=40
  coldatewidth=0
  splitterplaces=0
  splitterlateral=0
- lastdir=/home/fred/Pictures/imagesideu/
- filehistory=1
-  /home/fred/Pictures/imagesideu/bluepoint2.png
  filefilterindex=0
  filefilter="*.jpg" "*.jpeg" "*.bmp" "*.ico" "*.png" "*.pnm" "*.pgm" "*.pbm" "*.tga" "*.tif" "*.tiff" "*.xpm"
  [imagelisteditorfo.transparentcolor]
@@ -259,6 +188,11 @@ imagelisteditor=40
  wsize=0
  active=1
  visible=1
+ 
+ 
+ 
+ 
+ 
 colordialog=5
  [colordialogfo]
  x=140
@@ -294,10 +228,10 @@ makeoptions=14
  -FUunits
  -dmse_dynpo
  -dclass_bridge
- -Tdarwin -Fl/home/fred/fpcupdeluxe/cross/lib/all-darwin/
  -Tfreebsd
  -Topenbsd
  -Tnetbsd
+ 
 makeoptpurpose=14
  
  
@@ -806,9 +740,7 @@ defaultmake=1
 on=2
  -1
  -1
-path=2
- /home/fred/mseide-msegui/apps/ide/sourceform.pas
- /home/fred/mseide-msegui/apps/ide/sourceform.pas
+path=0
 line=2
  1618
  1626
@@ -839,7 +771,6 @@ files=
  a=0,8228,6,Text Files
  )
 [componentstore]
-storedir=/home/fred/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -878,19 +809,14 @@ findhistory=20
  gettext
  selang
 findoptions=1
-editpos=2
+editpos=1
  0,12
- 0,33
 bookmarks0=0
-bookmarks1=0
-sourcefiles=2
- /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
+sourcefiles=1
  ${PROJECTDIR}/mseide.pas
-relpaths=2
- ../lib/common/kernel/msegui.pas
+relpaths=1
  mseide.pas
-ismoduletexts=2
- 0
+ismoduletexts=1
  0
 modules=0
 moduleoptions=0
@@ -900,7 +826,7 @@ nomenumodules=0
 firsttab=0
 index=0
 [layout]
-windowlayout=533
+windowlayout=524
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1137,10 +1063,10 @@ windowlayout=533
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=566
- width0=134
+ propcolwidthref=355
+ width0=84
  sortdescend0=0
- width1=426
+ width1=265
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1267,26 +1193,20 @@ windowlayout=533
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
- filenames=1
-  /home/fred/mseide-msegui/apps/ide/compstore/
- filecolwidth=0
+  filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
- lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
  [componentstorefo.groupfiledialog]
- filenames=1
-  /home/fred/mseide-msegui/apps/ide/compstore/
- filecolwidth=0
+filecolwidth=0
  x=0
  y=0
  cx=0
  cy=0
- lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
@@ -1361,20 +1281,11 @@ windowlayout=533
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/mseide.pas
- history=10
-  /home/fred/mseide-msegui/apps/ide/mseide.pas
-  /home/fred/mseide-msegui/lib/common/kernel/msegui.pas
-  /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
-  /home/fred/mseide-msegui/lib/common/dialogs/msefiledialog.pas
-  /home/fred/ideu/src/ideusettings.pas
-  /home/fred/uos/examples/uos.pas
-  /home/fred/uos/examples/consolesynth.pas
-  /home/fred/uos/examples/consoleplay.pas
-  /home/fred/mseide-msegui/lib/common/designutils/msegdbutils.pas
-  /home/fred/ideu/src/msegdbutils.pas
+ value=
+ history=1
+  
  [debuggerfo.project_options]
- value=7
+ value=1
  [debuggerfo.hints]
  value=1
  [sourcefo]
