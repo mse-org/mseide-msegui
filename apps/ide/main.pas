@@ -908,8 +908,8 @@ begin
   value:= removelinebreaks(atext);
   case akind of
    mtk_finished: color:= cl_ltgreen;
-   mtk_error: color:= cl_ltyellow;
-   mtk_signal: color:= cl_ltred;
+   mtk_error: color:= cl_ltred;
+   mtk_signal: color:= cl_ltyellow;
    else color:= cl_parent;
   end;
   case akind of
@@ -929,12 +929,14 @@ end;
 
 procedure tmainfo.resetdebugdisp;
 begin
+ {$ifndef darwin}
  setstattext('',mtk_info);
  if sourcefo.gdbpage <> nil then begin
   sourcefo.gdbpage.hidehint;
  end;
  sourcefo.resetactiverow;
  disassfo.resetactiverow;
+ {$endif}
 end;
 
 procedure tmainfo.programfinished;
@@ -1295,10 +1297,12 @@ end;
 
 procedure tmainfo.startconsole();
 begin
+  {$ifndef darwin}
  targetconsolefo.clear;
  if projectoptions.d.showconsole then begin
-  targetconsolefo.activate;
+ targetconsolefo.activate;
  end;
+ {$endif} 
 end;
 
 function tmainfo.loadexec(isattach: boolean;
@@ -1306,7 +1310,9 @@ function tmainfo.loadexec(isattach: boolean;
 var
  str1: filenamety;
 begin
- setstattext('');
+  {$ifndef darwin}
+  setstattext('');
+  {$endif}
  result:= false;
  if isattach then begin
   inc(fexecstamp);
@@ -1486,25 +1492,48 @@ begin
                ((uploadcommand <> '') or d.gdbdownload);
   attachprocess.enabled:= not (gdb.execloaded or gdb.attached);
   attachtarget.enabled:= attachprocess.enabled;
-  run.enabled:= not gdb.running and not gdb.downloading;
-  bo1:= candebug;
+  
+  {$ifdef darwin}
+  bo1:= false;
+  run.Enabled       := true;
+  step.enabled:= false;
+  stepi.enabled:= false;
+  next.enabled:= false;
+  nexti.enabled:= false;
+  finish.enabled:= false;
+  continue.enabled:= true;
+  interrupt.enabled:= false;
+  reset.enabled:= false;
+   makeact.Enabled      := true;
+   abortmakeact.Enabled := false;
+   makeact.enabled:=true;
+  buildact.enabled:= true;
+  make1act.enabled:= true;
+  make2act.enabled:= true;
+  make3act.enabled:= true;
+  make4act.enabled:= true; 
+  {$else}
+  bo1:= candebug; 
+   run.Enabled := not gdb.running and not gdb.downloading;
   step.enabled:= not gdb.running and not gdb.downloading and bo1;
   stepi.enabled:= not gdb.running and not gdb.downloading and bo1;
   next.enabled:= not gdb.running and not gdb.downloading and bo1;
   nexti.enabled:= not gdb.running and not gdb.downloading and bo1;
   finish.enabled:= not gdb.running and gdb.started and bo1;
-  continue.enabled:= not gdb.running and not gdb.downloading and
+   continue.enabled:= not gdb.running and not gdb.downloading and
                       (bo1 or (frunningprocess = invalidprochandle));
   interrupt.enabled:= gdb.running and not gdb.downloading and bo1;
   reset.enabled:= (gdb.started or gdb.attached or gdb.downloading) or
                     not bo1 and (frunningprocess <> invalidprochandle);
+   abortmakeact.Enabled := making; ç
   makeact.enabled:= not making;
   buildact.enabled:= not making;
   make1act.enabled:= not making;
   make2act.enabled:= not making;
   make3act.enabled:= not making;
-  make4act.enabled:= not making;
-  abortmakeact.enabled:= making;
+  make4act.enabled:= not making;                
+   {$endif}
+ 
   saveall.enabled:= sourcefo.modified or designer.modified or
                                                   projectoptions.modified;
   actionsmo.toggleformunit.enabled:= (flastform <> nil) or

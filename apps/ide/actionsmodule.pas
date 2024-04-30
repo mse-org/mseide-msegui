@@ -652,6 +652,7 @@ end;
 
 procedure tactionsmo.resetactonexecute(const sender: tobject);
 begin
+{$ifndef darwin}
  with mainfo do begin
   gdb.abort;
   killtarget; //if running
@@ -659,6 +660,7 @@ begin
   setstattext('');
   startgdb(false);
  end;
+{$endif} 
 end;
 
 procedure tactionsmo.interruptactonexecute(const sender: tobject);
@@ -670,12 +672,24 @@ end;
 
 procedure tactionsmo.continueactonexecute(const sender: tobject);
 begin
+ {$ifndef darwin}
  with mainfo do begin
   if checkremake(sc_continue) then begin
    cpufo.beforecontinue;
    gdb.continue;
   end;
  end;
+ {$else}
+    if fileexists(gettargetfile) then
+    begin
+    mainfo.setstattext('Running ' + gettargetfile + '...' ,mtk_running);
+    RunWithoutDebugMac(gettargetfile, '')
+    end else 
+    begin
+    mainfo.setstattext('Compiling ' + gettargetfile + '...' ,mtk_running);
+    RunWithoutDebugMac(buildmakecommandline(1), '');
+    end;
+ {$endif} 
 end;
 
 procedure tactionsmo.stepactonexecute(const sender: tobject);

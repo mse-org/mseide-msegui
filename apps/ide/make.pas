@@ -20,6 +20,7 @@ unit make;
 
 interface
 uses
+
  msetypes,msestrings,msepipestream,msesystypes;
 
 procedure domake(atag: integer);
@@ -35,9 +36,16 @@ function downloading: boolean;
 function downloadresult: integer;
 function runscript(const script: filenamety;
                              const clearscreen,setmakedir: boolean): boolean;
+{$ifdef darwin}
+procedure RunWithoutDebugMac(Const AFilename: String; Aparam: String);
+{$endif}                             
 
 implementation
 uses
+  {$IFDEF darwin}
+   Process,
+   debuggerform,
+  {$ENDIF}
  mseprocutils,main,projectoptionsform,sysutils,msegrids,
  sourceform,mseeditglob,msefileutils,msesys,
  msesysutils,msegraphics,messageform,msedesignintf,msedesigner,
@@ -110,6 +118,72 @@ type
 var
  maker: tmaker;
  loader: tloader;
+ 
+{$ifdef darwin}
+procedure RunWithoutDebugMac(Const AFilename: String; Aparam: String);
+
+var 
+  AProcess: TProcess;
+  thecommand: string;
+  AStringList: TStringList;
+  BytesRead    : longint;
+  Buffer       : array[1..2048] of byte;
+  OutputStream, OutputStream2 : TStream;
+
+begin
+
+  AProcess := TProcess.Create(Nil);
+
+        {$WARN SYMBOL_DEPRECATED OFF}
+  AProcess.CommandLine := ansistring(tosysfilepath(filepath(UTF8Decode(AFilename), fk_file, True))) + ' ' + Aparam;
+       {$WARN SYMBOL_DEPRECATED ON}
+
+  AProcess.Options := [poUsePipes];
+
+  messagefo.messages.clear;
+
+  application.processmessages;
+
+  AProcess.Execute;
+
+  AStringList := TStringList.Create;
+
+  OutputStream := TMemoryStream.Create;
+
+  repeat
+    BytesRead := AProcess.Output.Read(Buffer, 2048);
+
+    OutputStream.write(Buffer, BytesRead);
+
+    OutputStream2 := OutputStream;
+
+    OutputStream2.Position := 0;
+
+    AStringList.LoadFromStream(OutputStream2);
+
+    messagefo.addtext(AStringList.text);
+
+    application.processmessages;
+
+  until BytesRead = 0;
+ 
+  messagefo.messages.clear;
+
+  OutputStream.Position := 0;
+  
+  AStringList.LoadFromStream(OutputStream);
+
+  messagefo.addtext(AStringList.text);
+
+  mainfo.setstattext('Process done', mtk_finished);
+
+  // debuggerfo.project_make.Enabled := True;
+
+  AStringList.Free;
+  AProcess.Free;
+  OutputStream.Free;
+end;
+{$endif} 
 
 function making: boolean;
 begin
@@ -328,13 +402,26 @@ begin
  fmessagefinished:= false;
  ffinished:= false;
  procid:= invalidprochandle;
+ 
+ {$ifdef darwin}
+ procid:= 0;
+ {$else}
+  procid:= invalidprochandle; 
+ {$endif} 
+ 
  with projectoptions,k.texp do begin
   if fsetmakedir and (makedir <> '') then begin
    wdbefore:= setcurrentdirmse(makedir);
   end;
   try
-   procid:= execmse2(msestring(acommandline),nil,messagepipe,messagepipe,-1,
-                                                   [exo_inactive,exo_tty]);
+
+ {$ifdef darwin}
+  mainfo.setstattext('Compiling ' + gettargetfile + '...' , mtk_signal);
+  RunWithoutDebugMac(ansistring(acommandline), '');
+ {$else}
+   procid:= execmse2(UTF8Decode(acommandline),nil,messagepipe,messagepipe,-1,[exo_inactive,exo_tty]);
+ {$endif} 
+    
   except
    on e1: exception do begin
     fcanceled:= true;
@@ -419,7 +506,11 @@ begin
  fcurrentdir:= getcurrentdirmse;
  inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
+  
+  {$ifndef darwin}
   mainfo.setstattext(actionsmo.c[ord(ac_making)],mtk_running);
+ {$endif} 
+  
   messagefo.messages.font.options:= messagefo.messages.font.options +
                                                       [foo_nonantialiased];
  end

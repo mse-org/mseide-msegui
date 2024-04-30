@@ -342,7 +342,9 @@ begin
   updatestatvalues;
  except
   on e: exception do begin
-   handleerror(e,ansistring(sourcefo.c[ord(syntaxdeffile)]));
+  {$ifndef darwin} 
+  handleerror(e,ansistring(sourcefo.c[ord(syntaxdeffile)]));
+ {$endif}  
   end;
  end;
 end;

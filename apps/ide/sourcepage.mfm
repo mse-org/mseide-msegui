@@ -16,6 +16,7 @@ object sourcepage: tsourcepage
     228
   )
   icon.transparentcolor = -2147483648
+  windowopacity = -Inf
   oncreate = sourcefooncreate
   oneventloopstart = sourcefoonloaded
   ondestroy = sourcefoondestroy
@@ -34,7 +35,7 @@ object sourcepage: tsourcepage
     anchors = [an_top, an_bottom]
     optionsgrid = [og_focuscellonenter, og_autofirstrow, og_wrapcol, og_visiblerowpagestep]
     fixcols.count = 1
-    fixcols.items = <
+    fixcols.items = <    
       item
         color = -1610612731
         linewidth = 0
@@ -55,7 +56,7 @@ object sourcepage: tsourcepage
       -2147483646
     )
     datacols.count = 2
-    datacols.items = <
+    datacols.items = <    
       item[dataicon]
         linecolor = -1610612732
         width = 15
@@ -63,7 +64,7 @@ object sourcepage: tsourcepage
         oncellevent = icononcellevent
         widgetname = 'dataicon'
         dataclass = tgridintegerdatalist
-      end
+      end    
       item[edit]
         width = 2000
         options = [co_leftbuttonfocusonly, co_middlebuttonfocus, co_savestate, co_mousescrollrow]
@@ -72,11 +73,11 @@ object sourcepage: tsourcepage
         dataclass = tgridrichstringdatalist
       end>
     datarowlinewidth = 0
-    datarowheight = 18
+    datarowheight = 19
     onrowsinserted = gridonrowsinserted
     onrowsdeleted = gridonrowsdeleted
     oncellevent = gridoncellevent
-    reffontheight = 16
+    reffontheight = 15
     object edit: tsyntaxedit
       optionsskin = [osk_framebuttononly]
       taborder = 1
@@ -84,14 +85,13 @@ object sourcepage: tsourcepage
       bounds_x = 0
       bounds_y = 0
       bounds_cx = 2000
-      bounds_cy = 18
+      bounds_cy = 19
       font.name = 'mseide_source'
       font.xscale = 1
       font.localprops = [flp_xscale]
       optionsedit1 = [oe1_noselectall, oe1_savestate]
       optionsedit = [oe_closequery, oe_checkmrcancel, oe_linebreak, oe_eatreturn, oe_exitoncursor, oe_nofirstarrownavig]
       tabulators.ppmm = 3
-      tabulators.defaultdist = 0
       onkeydown = editonkeydown
       onfontchanged = editonfontchanged
       onmodifiedchanged = editonmodifiedchanged
@@ -99,21 +99,21 @@ object sourcepage: tsourcepage
       oneditnotifcation = editoneditnotification
       oncellevent = editoncellevent
       maxundocount = 10000
-      reffontheight = 18
+      reffontheight = 19
     end
     object dataicon: tdataicon
       optionsskin = [osk_framebuttononly]
       bounds_x = 50
       bounds_y = 0
       bounds_cx = 15
-      bounds_cy = 18
+      bounds_cy = 19
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_autoselect, oe_autoselectonfirstclick]
       optionsedit1 = [oe1_autopopupmenu, oe1_keyexecute, oe1_savestate]
       options = [bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey]
       visible = False
       valuedefault = -2147483648
-      min = -1
-      max = 2
+      valuemin = -1
+      valuemax = 2
       imagenums.count = 14
       imagenums.items = (
         0
@@ -142,13 +142,14 @@ object sourcepage: tsourcepage
     frame.localprops1 = []
     taborder = 2
     bounds_x = 0
-    bounds_y = 207
+    bounds_y = 208
     bounds_cx = 68
+    bounds_cy = 19
     anchors = [an_left, an_bottom]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
     textflags = [tf_xcentered, tf_ycentered]
     textflagsactive = [tf_xcentered, tf_ycentered]
-    reffontheight = 16
+    reffontheight = 15
   end
   object pathdisp: tstringedit
     optionsskin = [osk_framebuttononly]
@@ -159,11 +160,12 @@ object sourcepage: tsourcepage
     frame.localprops1 = []
     taborder = 1
     bounds_x = 68
-    bounds_y = 207
+    bounds_y = 208
     bounds_cx = 243
+    bounds_cy = 19
     anchors = [an_left, an_right, an_bottom]
     optionsedit = [oe_readonly, oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_caretonreadonly, oe_focusrectonreadonly, oe_hintclippedtext]
     textflags = [tf_ycentered, tf_ellipseleft]
-    reffontheight = 16
+    reffontheight = 15
   end
 end
