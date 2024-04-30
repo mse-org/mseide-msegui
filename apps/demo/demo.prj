@@ -21,7 +21,7 @@ order18=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/apps/demo
 projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
-mainfile=demo.pas
+mainfile=
 targetfile=demo${EXEEXT}
 messageoutputfile=
 makecommand=${COMPILER}
@@ -266,12 +266,9 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=1
- MAINFO
-moduletypes=1
- TMAINFO
-modulefiles=1
- /home/fred/mseide-msegui/apps/demo/main.mfm
+modulenames=0
+moduletypes=0
+modulefiles=0
 befcommandon=0
 makeoptionson=5
  63
@@ -574,27 +571,23 @@ finddtext=
 findhistory=0
 findoptions=1
 editpos=1
- 0,4
+ 0,2
 bookmarks0=0
 sourcefiles=1
- /home/fred/mseide-msegui/apps/demo/main.pas
+ /home/fred/mseide-msegui/apps/demo/demo.pas
 relpaths=1
- main.pas
+ demo.pas
 ismoduletexts=1
  0
-modules=1
- /home/fred/mseide-msegui/apps/demo/main.mfm
-moduleoptions=1
- 0
-visiblemodules=1
- -1
-nomenumodules=1
- 0
+modules=0
+moduleoptions=0
+visiblemodules=0
+nomenumodules=0
 [sourcefo.files_tab]
 firsttab=0
 index=0
 [layout]
-windowlayout=545
+windowlayout=525
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -608,8 +601,8 @@ windowlayout=545
  ny=0
  ncx=0
  ncy=0
- x=34
- y=45
+ x=78
+ y=96
  cx=1436
  cy=724
  rcx=0
@@ -1041,7 +1034,7 @@ windowlayout=545
  nx=0
  ny=0
  ncx=1422
- ncy=63
+ ncy=64
  x=0
  y=0
  cx=1422
@@ -1055,10 +1048,9 @@ windowlayout=545
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/demo/main.pas
- history=3
-  /home/fred/mseide-msegui/apps/demo/main.pas
-  /home/fred/ideU/src/main.pas
+ value=${PROJECTDIR}/demo.pas
+ history=2
+  ${PROJECTDIR}/demo.pas
   ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
@@ -1121,25 +1113,6 @@ windowlayout=545
  cy=547
  rcx=0
  rcy=0
- [_mse_mainfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=mainfo
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=129
- y=271
- cx=351
- cy=166
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
 [targetconsole]
 finddtext=
 findhistory=0
