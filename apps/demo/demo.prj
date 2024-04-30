@@ -19,9 +19,7 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/mseide-msegui/apps/demo
-projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
-mainfile=
+mainfile=demo.pas
 targetfile=demo${EXEEXT}
 messageoutputfile=
 makecommand=${COMPILER}
@@ -551,7 +549,6 @@ files=
  a=0,8229,6,Text Files
  )
 [componentstore]
-storedir=/home/fred/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -574,7 +571,7 @@ editpos=1
  0,2
 bookmarks0=0
 sourcefiles=1
- /home/fred/mseide-msegui/apps/demo/demo.pas
+ ${PROJECTDIR}demo.pas
 relpaths=1
  demo.pas
 ismoduletexts=1
