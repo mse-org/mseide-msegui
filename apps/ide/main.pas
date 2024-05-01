@@ -1525,7 +1525,7 @@ begin
   interrupt.enabled:= gdb.running and not gdb.downloading and bo1;
   reset.enabled:= (gdb.started or gdb.attached or gdb.downloading) or
                     not bo1 and (frunningprocess <> invalidprochandle);
-   abortmakeact.Enabled := making; ç
+   abortmakeact.Enabled := making; 
   makeact.enabled:= not making;
   buildact.enabled:= not making;
   make1act.enabled:= not making;

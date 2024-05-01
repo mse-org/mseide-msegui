@@ -74,5 +74,8 @@ begin
  application.createform(ttargetconsolefo,targetconsolefo);
  application.createform(tmainfo, mainfo);
  createcpufo;
+ {$ifdef darwin}
+ nozorderhandling:= true;
+ {$endif}
  application.run;
 end.
