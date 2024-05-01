@@ -14,28 +14,73 @@ unit msedialog;
 interface
 
 uses
- mseclasses,msegui,mseglob,mseguiglob,
- mseforms,msedataedits,mseedit,classes,mclasses,mseevent,
- msemenus,msestrings,mseeditglob,msetypes,msegraphics;
 
+ classes,mclasses,mseclasses,msegui,mseglob,mseguiglob,mseforms,
+ msedataedits,mseedit,mseevent,msestat,msestatfile,msemenus,msestrings,
+ mseeditglob,msetypes,msegraphutils,msegraphics, TypInfo, vectors;
+
+////////////////////////////////////////////
+const
+ acceptingResults: modalresultsty = [mr_ok,mr_none,mr_canclose,mr_f10,mr_yes,mr_yesall];
+ assertingResults: modalresultsty = [mr_ok,mr_f10,mr_yes,mr_yesall];
+////////////////////////////////////////////
 type
- tdialogform = class(tmseform)
+ mseDialogEventty =    PROCEDURE (CONST Sender: tmsecomponent) OF Object;
+ mseDialogResEventty = PROCEDURE (CONST Sender: tmsecomponent;
+                                  VAR res: modalresultty) OF Object;
+////////////////////////////////////////////
+// ATTENTION: On dynamic dialogs, "dp_mousepos" needs form option "fo_defaultpos" set!
+ dialogposty = (dp_none, dp_mousepos = ord (fo_windowclosecancel),
+                dp_defaultpos, dp_screencentered, dp_screencenteredvirt,
+                dp_transientforcentered, dp_mainwindowcentered);
+////////////////////////////////////////////
+
+ tdialogform = class (tmseform)
   protected
+////////////////////////////////////////////
+   doPrepareDialog:  mseDialogEventty;
+   doEvaluateDialog: mseDialogResEventty;
+////////////////////////////////////////////
    procedure updatewindowinfo(var info: windowinfoty); override;
    class function hasresource: boolean; override;
+////////////////////////////////////////////
+  private
+////////////////////////////////////////////
+   StatFileName: msestring;
+////////////////////////////////////////////
+  public
+////////////////////////////////////////////
+   CONSTRUCTOR Create (Sender: TComponent; CONST StatName: msestring;
+                       where: dialogposty = dp_none); OVERLOAD;
+
+   CONSTRUCTOR Create (Sender: TComponent; where: dialogposty = dp_none); OVERLOAD;
+////////////////////////////////////////////
+//    PROCEDURE DialogPrepare; VIRTUAL;
+//    PROCEDURE DialogEvaluate (VAR what: modalresultty); VIRTUAL;
+   FUNCTION  Execute: modalresultty; VIRTUAL;
+////////////////////////////////////////////
+   PROCEDURE showat (Position: PointTy);       VIRTUAL;  // show at specified position
+   PROCEDURE showatmouse;                      VIRTUAL;  // show at mouse pos
+   PROCEDURE setPosition (where: dialogposty); VIRTUAL;  // set selected position option
+////////////////////////////////////////////
+  published
+   PROPERTY PrepareDialog:  mseDialogEventty    READ doPrepareDialog  WRITE doPrepareDialog;
+   PROPERTY EvaluateDialog: mseDialogResEventty READ doEvaluateDialog WRITE doEvaluateDialog;
+////////////////////////////////////////////
  end;
 
- tdialog = class(tmsecomponent)
-  public
-   function execute: modalresultty; virtual; abstract;
- end;
+///////////// ??????????????? //////////////
+tdialog = class (tmsecomponent)
+ public
+  function execute: modalresultty; virtual; abstract;
+end;
 
  tellipsebuttonframe = class(tmultibuttonframe)
   private
    function getbutton: tstockglyphframebutton;
-   procedure setbutton(const avalue: tstockglyphframebutton);
+   procedure setbutton (const avalue: tstockglyphframebutton);
   public
-   constructor create(const aintf: icaptionframe;
+   constructor create (const aintf: icaptionframe;
                        const buttonintf: ibutton); reintroduce;
   published
    property button: tstockglyphframebutton read getbutton write setbutton;
@@ -44,7 +89,7 @@ type
  tdataeditcontroller = class(teventpersistent)
  end;
 
- tdialogcontroller = class(tdataeditcontroller,ibutton,idataeditcontroller)
+ tdialogcontroller = class (tdataeditcontroller, ibutton, idataeditcontroller)
   protected
    fowner: tcustomdataedit;
    procedure internalexecute; virtual; abstract;
@@ -212,11 +257,14 @@ type
                                                         write setonexecute;
  end;
 
+////////////////////////////////////////////
+FUNCTION keepOnScreen (CONST Sender: tcustommseform{twidget}; shift: PointTy): PointTy;
+//// Calulate MODIFIED "shift" vector to keep window on screen
+////////////////////////////////////////////
 
 implementation
 uses
- msestockobjects,
- msekeyboard,mseformatstr,msereal,sysutils;
+ sysutils,msestockobjects,msekeyboard,mseformatstr,msereal;
 
 type
  tcustomdataedit1 = class(tcustomdataedit);
@@ -224,6 +272,29 @@ type
  tcustomdatetimeedit1 = class(tcustomdatetimeedit);
  tcustomintegeredit1 = class(tcustomintegeredit);
  tcustomstringedit1 = class(tcustomstringedit);
+
+
+////////////////////////////////////////////
+FUNCTION keepOnScreen (CONST Sender: tcustommseform{twidget}; shift: PointTy): PointTy;
+//// Calulate MODIFIED "shift" vector to keep window on screen
+ VAR
+   Screenrect: RectTy;
+ BEGIN
+   Screenrect:= Application.Screenrect (NIL);
+   Result:= Sender.Window.{decoratedPos}screenPos+ shift;
+
+   WITH Result DO BEGIN
+     IF x < Screenrect.x THEN x:= Screenrect.x;
+     IF y < Screenrect.y THEN y:= Screenrect.y;
+
+     Screenrect.Pos:= Screenrect.Pos+ PointTy (Screenrect.Size);                // calculate other limits
+     Screenrect.Size:= SizeTy (Result+ PointTy (Sender.Window.decoratedSize));  // find lower right corner
+     IF Screenrect.cx > Screenrect.x THEN x:= Screenrect.x- Sender.Window.decoratedSize.cx;
+     IF Screenrect.cy > Screenrect.y THEN y:= Screenrect.y- Sender.Window.decoratedSize.cy;
+   END;
+   Result:= Result- Sender.Window.{decoratedPos}screenPos;
+ END;
+////////////////////////////////////////////
 
 { tdialogform }
 
@@ -234,9 +305,137 @@ begin
 end;
 
 class function tdialogform.hasresource: boolean;
-begin
- result:= false;
-end;
+ begin
+   result:= self <> tdialogform;
+ end;
+
+////////////////////////////////////////////
+CONSTRUCTOR tdialogform.Create (Sender: TComponent; CONST StatName: msestring; where: dialogposty);
+ VAR
+   StatHost:    TComponent;
+   RefStatfile: TStatfile;
+ BEGIN
+   StatFileName:= StatName; Name:= StatFilename;
+   StatHost:= Sender.findcomponent (StatFileName);
+
+   IF (StatHost IS tstatfile) AND (StatHost.Name = StatFileName)
+   THEN statfile:= StatHost AS TStatfile
+   ELSE BEGIN
+     statfile.free; statfile:= NIL;
+   END;
+   IF Self.statvarname = '' THEN Self.statvarname:= StatFilename;
+
+   IF statfile = NIL THEN BEGIN
+     statfile:= TStatfile.create (Self);
+
+     WITH statfile DO BEGIN
+       IF StatFilename = '' THEN StatFilename:= StatHost.Name;
+       Name:= StatFilename;
+       filename:= uppercase (StatFilename+ StatExt);
+       options:= options+ [sfo_memory, sfo_autoreadstat, sfo_autowritestat];
+     END;
+   END;
+   Create (Sender, where);
+
+   IF (Sender <> NIL) AND (getPropInfo (Sender, 'statfile') <> NIL)
+   THEN BEGIN
+     RefStatfile:= GetObjectProp (Sender, 'statfile') AS TStatfile;
+     registerNewMemoryFile (RefStatFile, statfile.filename);
+     statfile.statfile:= RefStatFile;
+   END;
+ END;
+
+CONSTRUCTOR tdialogform.Create (Sender: TComponent; where: dialogposty);
+ BEGIN
+   INHERITED Create (Sender);
+   IF (Sender <> NIL) OR
+      NOT (where IN [dp_transientforcentered, dp_mainwindowcentered])
+     THEN setPosition (where)
+     ELSE setPosition (dp_screencentered);   //// would crash otherwise!?
+{$ifdef listMemoryStreams}
+   IF statfile <> NIL THEN listmemorystreams (statfile.name{statname});
+{$endif}
+ END;
+////////////////////////////////////////////
+FUNCTION tdialogform.Execute: modalresultty;
+// main part copied from dialog function definition
+ BEGIN
+   Application.lock;
+   TRY
+     IF assigned (doPrepareDialog) THEN doPrepareDialog (Self);
+     Result:= Show (TRUE, NIL);
+     IF Result IN acceptingResults THEN BEGIN
+      Result:= mr_Ok;
+      IF assigned (doEvaluateDialog) THEN doEvaluateDialog (self, Result);
+     END;
+   FINALLY
+     Application.unlock;
+   end;
+ END;
+////////////////////////////////////////////
+PROCEDURE tdialogform.showat (Position: PointTy);  // show at specified position
+ VAR
+   shift: PointTy;
+ BEGIN
+   WITH Window DO BEGIN
+     shift:= keepOnScreen (Self, Position- {decorated}{Self.}Pos{screenPos});
+     decoratedPos:= screenPos+ shift; // 
+   END;
+   screenPos:= screenPos+ shift;
+ END;
+
+PROCEDURE tdialogform.showatmouse;
+ BEGIN
+   showat (Application.Mouse.Pos- (PointTy (Self.Size) DIV 2));
+ END;
+
+////////////////////////////////////////////
+////////////////////////////////////////////
+//
+// FROM msegui.pas:
+//
+// procedure translateclientpoint1(var point: pointty; const source,dest: twidget);
+//     //translates from source client to dest client, to screen if dest = nil
+//     //source = nil -> screen
+//
+// function translateclientpoint(const point: pointty; const source,dest: twidget): pointty;
+//
+// procedure translatewidgetpoint1(var point: pointty; const source,dest: twidget);
+//     //translates from source widget to dest widget, to screen if dest = nil
+//     //source = nil -> screen
+//
+// function translatewidgetpoint(const point: pointty; const source,dest: twidget): pointty;
+//
+////////////////////////////////////////////
+////////////////////////////////////////////
+
+PROCEDURE tdialogform.setPosition (where: dialogposty);
+ BEGIN
+   Options:= Options+ [formoptionty (ord (where))];
+
+   CASE where OF
+     dp_mousepos:                 // MUST RELOCATE WINDOW itself too!
+       showatmouse;    // ATTENTION: Needs form option "fo_defaultpos" set!
+
+     dp_defaultpos:
+       showat (Pos);
+
+     dp_screencentered,
+     dp_screencenteredvirt:       // NOT TESTED, may need modification for multi monitor set up!
+       showat ((PointTy (Application.Screenrect (NIL).Size)- PointTy (Size)) DIV 2);
+
+     dp_mainwindowcentered,
+     dp_transientforcentered:     // NOT TESTED, may need modification for correct function!
+       WITH Application.MainWindow DO
+         showat (PointTy (Application.MainWindow.decoratedPos)+
+                 ((PointTy (Application.MainWindow.decoratedSize)-
+                   PointTy (Size))
+                    DIV 2));
+
+     ELSE { do nothing };
+   END;
+ END;
+////////////////////////////////////////////
 
 { tellipsebuttonframe }
 

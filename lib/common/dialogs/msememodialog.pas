@@ -11,6 +11,7 @@ unit msememodialog;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
+ SysUtils,
  mseglob,mseguiglob,mseapplication,msestat,msemenus,msegui,msegraphics,
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msestrings,
  msetypes,msestatfile,msesimplewidgets,msewidgets,msedialog,classes,mclasses,
@@ -32,15 +33,20 @@ type
    property textflagsactive default defaulttextflagsactivenoycentered;
  end;
 
- tmsememodialogfo = class(tmseform)
+////////////////////////////////////////////
+ tmsememodialogfo = class (tdialogform)  // tmseform)
+////////////////////////////////////////////
    memo: tmemoedit;
-   tstatfile1: tstatfile;
    tlayouter1: tlayouter;
    tbutton2: tbutton;
    tbutton1: tbutton;
   public
-   constructor create(const aowner: tcomponent; const readonly: boolean);
+   constructor create(const aowner: tcomponent; const readonly: boolean; where: dialogposty = dp_none);
                                                                   reintroduce;
+////////////////////////////////////////////
+   CONSTRUCTOR Create (CONST Sender: TComponent; CONST StatName: msestring;
+                       readonly: boolean = false; where: dialogposty = dp_none); OVERLOAD; REINTRODUCE;
+////////////////////////////////////////////
  end;
 
  tdialogdropdownbuttonframe = class(tdropdownmultibuttonframe)
@@ -83,17 +89,29 @@ type
 //   property frame: tellipsebuttonframe read getframe write setframe;
  end;
 
-function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
+// function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
+////////////////////////////////////////////
+function memodialog(var avalue: msestring; const readonly: boolean;
+                    providedform: tmsememodialogfo = nil): modalresultty;
+////////////////////////////////////////////
 
 implementation
 uses
- msestockobjects,
- msememodialog_mfm,mseeditglob,msekeyboard;
+ msememodialog_mfm,mseeditglob,msekeyboard,msestockobjects;
 
-function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
+// function memodialog(var avalue: msestring; const readonly: boolean): modalresultty;
+////////////////////////////////////////////
+function memodialog(var avalue: msestring; const readonly: boolean;
+                    providedform: tmsememodialogfo = nil): modalresultty;
+////////////////////////////////////////////
 var
  dia1: tmsememodialogfo;
 begin
+////////////////////////////////////////////
+ if assigned (providedform)
+  then dia1:= providedform
+  else
+////////////////////////////////////////////
  dia1:= tmsememodialogfo.create(nil,readonly);
  try
   dia1.memo.value:= avalue;
@@ -102,6 +120,9 @@ begin
    avalue:= dia1.memo.value;
   end;
  finally
+////////////////////////////////////////////
+  if not assigned (providedform) then
+////////////////////////////////////////////
   dia1.free;
  end;
 end;
@@ -221,13 +242,26 @@ end;
 { tmsememodialogfo }
 
 constructor tmsememodialogfo.create(const aowner: tcomponent;
-               const readonly: boolean);
+               const readonly: boolean; where: dialogposty = dp_none);
 begin
- inherited create(aowner);
+ inherited create(aowner, where);
  if readonly then begin
   caption:= 'Memo text';
  end;
  memo.readonly:= readonly;
 end;
 
+////////////////////////////////////////////
+CONSTRUCTOR tmsememodialogfo.Create (CONST Sender: TComponent; CONST StatName: msestring;
+                                     readonly: boolean; where: dialogposty = dp_none);
+ BEGIN
+   Self.Options:= Options+ [fo_freeonclose];
+   INHERITED Create (Sender, StatName, where);
+
+   if readonly then begin
+    caption:= 'Memo text';
+   end;
+   memo.readonly:= readonly;
+ END;
+////////////////////////////////////////////
 end.

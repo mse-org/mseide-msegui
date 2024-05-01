@@ -1,0 +1,59 @@
+Fp field datatypes:
+
+TFieldType = (ftUnknown, ftString, ftSmallint, ftInteger, ftWord, ftBoolean,
+              ftFloat, ftCurrency, ftBCD, ftDate, ftTime, ftDateTime, ftBytes,
+              ftVarBytes, ftAutoInc, ftBlob, ftMemo, ftGraphic, ftFmtMemo,
+              ftParadoxOle, ftDBaseOle, ftTypedBinary, ftCursor,
+              ftFixedChar, ftWideString, ftLargeint, ftADT, ftArray,
+              ftReference, ftDataSet, ftOraBlob, ftOraClob, ftVariant,
+              ftInterface, ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd,
+              ftFixedWideChar, ftWideMemo)
+
+
+                 Table 11.9: Enumeration values for type TFieldType
+
+Value            Explanation
+ftADT            ADT value
+ftArray          Array data
+ftAutoInc        Auto-increment integer value (4 bytes)
+ftBCD            Binary Coded Decimal value (DECIMAL and NUMERIC SQL types)
+ftBlob           Binary data value (no type, no size)
+ftBoolean        Boolean value
+ftBytes          Array of bytes value, ﬁxed size (unytped)
+ftCurrency       Currency value (4 decimal points)
+ftCursor         Cursor data value (no size)
+ftDataSet        Dataset data (blob)
+ftDate           Date value
+ftDateTime       Date/Time (timestamp) value
+ftDBaseOle       Paradox OLE ﬁeld data
+ftFixedChar      Fixed character array (string)
+ftFixedWideChar  Fixed wide character date (2 bytes per character)
+ftFloat          Floating point value (double)
+ftFMTBcd         Formatted BCD (Binary Coded Decimal) value.
+ftFmtMemo        Formatted memo data value (no size)
+ftGraphic        Graphical data value (no size)
+ftGuid           GUID data value
+ftIDispatch      Dispatch data value
+ftInteger        Regular integer value (4 bytes, signed)
+ftInterface      interface data value
+ftLargeint       Large integer value (8-byte)
+ftMemo           Binary text data (no size)
+ftOraBlob        Oracle BLOB data
+ftOraClob        Oracle CLOB data
+ftParadoxOle     Paradox OLE ﬁeld data (no size)
+ftReference      Reference data
+ftSmallint       Small integer value(1 byte, signed)
+ftString         String data value (ansistring)
+ftTime           Time value
+ftTimeStamp      Timestamp data value
+ftTypedBinary    Binary typed data (no size)
+ftUnknown        Unknown data type
+ftVarBytes       Array of bytes value, variable size (untyped)
+ftVariant        Variant data value
+ftWideMemo       Widestring memo data
+ftWideString     Widestring (2 bytes per character)
+ftWord           Word-sized value(2 bytes, unsigned)
+
+
+postgresql fiel data types:
+

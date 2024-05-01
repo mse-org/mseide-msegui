@@ -254,6 +254,12 @@ const
  oid_numeric_ar   = 1231;
  oid_uuid         = 2950;
  oid_uuid_ar      = 2951;
+//////////////////////////////////////////////
+ // Added for recent postgresql versions (28. Mar 2024 22:54:58):
+ Oid_interval     = 1186;
+ Oid_Money        = 790;
+//////////////////////////////////////////////
+
  pg_diag_sqlstate = 'C';
  
  inv_read =  $40000;
@@ -620,6 +626,16 @@ begin
   Oid_Unknown: begin
    Result:= ftUnknown;
   end;
+//////////////////////////////////////////////
+ // Added for recent postgresql versions (28. Mar 2024 22:54:58):
+  Oid_Interval: begin
+   Result:= ftDateTime;
+  end;
+  Oid_Money: begin
+   Result:= ftCurrency;  // ftBCD;  // ftLargeInt; // ??
+  end;
+//////////////////////////////////////////////
+
   else begin
     Result:= ftUnknown;
   end;
@@ -937,6 +953,7 @@ begin
    end
    else begin
     size:= PQfsize(Res,i);
+    // Warning: Case statement does not handle all possible cases
     case fieldtype of
      ftstring: begin
       if size = -1 then begin
@@ -972,6 +989,7 @@ begin
        end;
       end;
      end;
+     else { Cover remaining cases by ignorance ... };
     end;
    end;
    str1:= PQfname(Res,i);
@@ -1130,7 +1148,11 @@ var
       inc(buffer,sizeof(int64));
       inc(currbuff,asize);
      end;
-     ftfloat,ftcurrency: begin
+//////////////////////////////////////////////
+ // Changed for recent postgresql versions (28. Mar 2024 22:54:58):
+////     ftfloat,ftcurrency: begin
+//////////////////////////////////////////////
+     ftfloat: begin
       if atype = oid_numeric then begin
        if getnumeric(numericrecord) then begin
         do1:= 0;
@@ -1210,18 +1232,48 @@ var
       if FIntegerDatetimes then begin
        do1:= do1/1000000;
       end;
+
+//////////////////////////////////////////////
+ // Added for recent postgresql versions (28. Mar 2024 22:54:58):
+      if atype = oid_Interval then begin   // Intervals are 16 bytes! We loose some resolution here...
+      {$ifdef FPC}
+        lint1:= integer (BEtoN (pinteger (CurrBuff+ 8)^))+ ((integer (BEtoN (pinteger (CurrBuff+ 12)^))) SHL 16);
+      {$else}
+        lint1:= integer (ar8ty (BEtoN8 (pint64 (CurrBuff+ 8)^)))+ ((integer (ar8ty (BEtoN8 (pinteger (CurrBuff+ 12)^)))) SHL 16);
+      {$endif}
+       do1:= do1+ (lint1- 693595)* 86400{sec/day};   // '1900-01-01'- '0001-01-01' :=: 693595 days --- ???
+       inc (currbuff, asize);    // Intervals use 16 bytes!
+      end;
+//////////////////////////////////////////////
+
       do1:= (do1+3.1558464E+009)/86400;  // postgres counts seconds elapsed since 1-1-2000
       // Now convert the mathematically-correct datetime to the
       // illogical windows/delphi/fpc TDateTime:
       if (do1 <= 0) and (frac(do1)<0) then begin
        do1:= trunc(do1)-2-frac(do1);
       end;
+
       move(do1,buffer^,sizeof(do1));
       inc(buffer,sizeof(do1));
       inc(currbuff,asize);
      end;
+//////////////////////////////////////////////
+ // Added for recent postgresql versions (28. Mar 2024 22:54:58):
+     ftCurrency: begin
+{$ifdef FPC}
+        int64 (cur):= beton (pint64 (currbuff)^);
+{$else}
+        int64(ar8ty (cur)):= beton8 (pint64 (currbuff)^);
+{$endif}
+        do1:= cur* 100.0;
+
+      Move (do1, Buffer^, sizeof (do1));
+      inc (buffer, sizeof (cur));
+      inc (currbuff, asize);
+     end;
+//////////////////////////////////////////////
+
      ftBCD: begin
-      
       case atype of
        oid_float4: begin
         cur:= getfloat4;
@@ -1230,6 +1282,7 @@ var
         cur:= getfloat8;
        end;
        else begin
+
         cur := 0;
         result:= getnumeric(numericrecord);
         if result then begin

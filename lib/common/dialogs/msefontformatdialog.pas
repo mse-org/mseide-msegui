@@ -12,12 +12,14 @@ unit msefontformatdialog;
 interface
 uses
  msetypes,mseglob,mseguiglob,mseguiintf,mseapplication,msestat,msemenus,msegui,
- msegraphics,msegraphutils,mseevent,mseclasses,msewidgets,mseforms,
+ msegraphics,msegraphutils,mseevent,mseclasses,msewidgets,mseforms,msedialog,
  mserichstring,msesplitter,msesimplewidgets,msestatfile,mseact,msecolordialog,
  msedataedits,mseedit,mseificomp,mseificompglob,mseifiglob,msestream,msestrings,
  sysutils,msegraphedits,msescrollbar;
 type
- tfontformatdialogfo = class(tmseform)
+////////////////////////////////////////////
+ tfontformatdialogfo = class (tdialogform)  // tmseform)
+////////////////////////////////////////////
    tlayouter1: tlayouter;
    tbutton2: tbutton;
    tbutton1: tbutton;
@@ -34,20 +36,39 @@ type
    fontcolored: tcoloredit;
  end;
 
-function editfontformat(const avalue: formatinfoarty;
-                                    const start,count: int32): formatinfoarty;
+// function editfontformat(const avalue: formatinfoarty;
+//                                    const start,count: int32): formatinfoarty;
+////////////////////////////////////////////
+function editfontformat (const avalue: formatinfoarty; const start,count: int32;
+                         providedform: tfontformatdialogfo = nil): formatinfoarty;
+////////////////////////////////////////////
 
 implementation
 uses
  msefontformatdialog_mfm;
 
-function editfontformat(const avalue: formatinfoarty;
-                                    const start,count: int32): formatinfoarty;
+// function editfontformat(const avalue: formatinfoarty;
+//                                    const start,count: int32): formatinfoarty;
+////////////////////////////////////////////
+function editfontformat (const avalue: formatinfoarty; const start,count: int32;
+                         providedform: tfontformatdialogfo = nil): formatinfoarty;
+////////////////////////////////////////////
 var
  style1: charstylety;
+////////////////////////////////////////////
+ fo: tfontformatdialogfo;
+////////////////////////////////////////////
 begin
  result:= copy(avalue);
- with tfontformatdialogfo.create(nil) do begin
+
+// with tfontformatdialogfo.create(nil) do begin
+////////////////////////////////////////////
+ if assigned (providedform)
+  then fo:= providedform
+  else fo:= tfontformatdialogfo.create (nil);
+
+ with fo do begin
+////////////////////////////////////////////
   style1:= getcharstyle(avalue,start);
   fontcolored.value:= charstyletocolor(style1.fontcolor);
   backgroundcolored.value:= charstyletocolor(style1.colorbackground);
@@ -85,6 +106,10 @@ begin
    setcharstyle1(result,start,count,style1);
   end;
  end;
+////////////////////////////////////////////
+  if not assigned (providedform) then fo.free;
+  // THIS WAS MISSING IN THE ORIGINAL UNIT! "Might" have caused a memory leak.
+////////////////////////////////////////////
 end;
 
 end.

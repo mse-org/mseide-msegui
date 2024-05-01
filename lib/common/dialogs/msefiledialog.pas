@@ -21,16 +21,16 @@ interface
  {$endif}
 {$endif}
 uses
- mseglob,mseguiglob,mseforms,classes,mclasses,mseclasses,msewidgets,msegrids,
- mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,msetypes,
- msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,msestatfile,
- msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,msegraphedits,
- mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,msegraphutils,
- msedirtree,msewidgetgrid,mseact,mseapplication,msegui,mseificomp,
- mseificompglob,mseifiglob,msestream,sysutils,msemenuwidgets,msescrollbar;
+ SysUtils,Classes,mclasses,mseclasses,mseglob,mseguiglob,mseforms,msewidgets,
+ msegrids,mselistbrowser,mseedit,msesimplewidgets,msedataedits,msedialog,
+ msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,msestat,
+ msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
+ msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
+ msegraphutils,msedirtree,msewidgetgrid,mseact,mseapplication,msegui,mseificomp,
+ mseificompglob,mseifiglob,msestream,msemenuwidgets,msescrollbar;
 
 const
- defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly];
+  defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly];
 
 type
  tfilelistitem = class(tlistitem)
@@ -129,6 +129,7 @@ const
 type
  filedialogkindty = (fdk_none,fdk_open,fdk_save,fdk_new);
 
+ tfiledialogfo = class;
  tfiledialogcontroller = class;
 
  filedialogbeforeexecuteeventty = procedure(const sender: tfiledialogcontroller;
@@ -146,7 +147,9 @@ type
    ffilter: filenamety;
    ffilterindex: integer;
    fcolwidth: integer;
-   fwindowrect: rectty;
+////////////////////////////////////
+//   fwindowrect: rectty;
+////////////////////////////////////
    fhistorymaxcount: integer;
    fhistory: msestringarty;
    fcaptionopen: msestring;
@@ -177,6 +180,11 @@ type
    fbasedir: filenamety;
    fdefaultext: filenamety;
    foptions: filedialogoptionsty;
+////////////////////////////////////
+   fwindowrect: rectty;
+////////////////////////////////////
+   fDialogPlacement: dialogposty;
+////////////////////////////////////
   public
    constructor create(const aowner: tmsecomponent = nil;
                     const onchange: proceventty = nil); reintroduce;
@@ -188,21 +196,58 @@ type
    procedure writestatstate(const writer: tstatwriter);
    procedure writestatoptions(const writer: tstatwriter);
    function actcaption(const dialogkind: filedialogkindty): msestring;
-   function execute(dialogkind: filedialogkindty = fdk_none): modalresultty; overload;
-                           //fdk_none -> use options fdo_save
+
+//   function execute(dialogkind: filedialogkindty = fdk_none): modalresultty; overload;
+//                           //fdk_none -> use options fdo_save
+////////////////////////////////////
+   function execute(dialogkind: filedialogkindty = fdk_none;
+                    providedform: tfiledialogfo = nil): modalresultty; overload;
+////////////////////////////////////
+//   function execute(dialogkind: filedialogkindty; const acaption: msestring;
+//              aoptions: filedialogoptionsty): modalresultty; overload;
+////////////////////////////////////
    function execute(dialogkind: filedialogkindty; const acaption: msestring;
-              aoptions: filedialogoptionsty): modalresultty; overload;
+                aoptions: filedialogoptionsty;
+                providedform: tfiledialogfo = nil): modalresultty; overload;
+////////////////////////////////////
+//   function execute(const dialogkind: filedialogkindty;
+//                         const acaption: msestring): modalresultty; overload;
+////////////////////////////////////
    function execute(const dialogkind: filedialogkindty;
-                         const acaption: msestring): modalresultty; overload;
+                         const acaption: msestring;
+                         providedform: tfiledialogfo = nil): modalresultty; overload;
+////////////////////////////////////
+//   function execute(const dialogkind: filedialogkindty;
+//                         const aoptions: filedialogoptionsty): modalresultty; overload;
+////////////////////////////////////
    function execute(const dialogkind: filedialogkindty;
-                         const aoptions: filedialogoptionsty): modalresultty; overload;
+                         const aoptions: filedialogoptionsty;
+                         providedform: tfiledialogfo = nil): modalresultty; overload;
+////////////////////////////////////
+//   function execute(var avalue: filenamety;
+//                  dialogkind: filedialogkindty = fdk_none): boolean; overload;
+////////////////////////////////////
    function execute(var avalue: filenamety;
-                  dialogkind: filedialogkindty = fdk_none): boolean; overload;
+                  dialogkind: filedialogkindty = fdk_none;
+                  providedform: tfiledialogfo = nil): boolean; overload;
+////////////////////////////////////
+//   function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
+//                  const acaption: msestring): boolean; overload;
+////////////////////////////////////
    function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
-                  const acaption: msestring): boolean; overload;
+                  const acaption: msestring;
+                  providedform: tfiledialogfo = nil): boolean; overload;
+////////////////////////////////////
+//   function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
+//                           const acaption: msestring;
+//                           aoptions: filedialogoptionsty): boolean; overload;
+////////////////////////////////////
    function execute(var avalue: filenamety; const  dialogkind: filedialogkindty;
                            const acaption: msestring;
-                            aoptions: filedialogoptionsty): boolean; overload;
+                           aoptions: filedialogoptionsty;
+                           providedform: tfiledialogfo = nil): boolean; overload;
+////////////////////////////////////
+
    function canoverwrite(): boolean;
                          //true if current filename is allowed to write
    procedure clear;
@@ -214,6 +259,9 @@ type
    property syscommandline: filenamety read getsysfilename; deprecated;
    property sysfilename: filenamety read getsysfilename;
    property params: msestring read fparams;
+////////////////////////////////////////////
+   PROPERTY DialogPlacement: dialogposty READ fDialogPlacement WRITE fDialogPlacement;
+////////////////////////////////////////////
   published
    property filename: filenamety read getfilename write setfilename;
    property lastdir: filenamety read flastdir write setlastdir;
@@ -242,7 +290,10 @@ type
                   read fonbeforeexecute write fonbeforeexecute;
    property onafterexecute: filedialogafterexecuteeventty
                   read fonafterexecute write fonafterexecute;
- end;
+////////////////////////////////////////////
+   PROPERTY onchange: proceventty READ fonchange WRITE fonchange;
+////////////////////////////////////////////
+end;
 
 const
  defaultfiledialogoptionsedit1 = defaultoptionsedit1+
@@ -481,24 +532,27 @@ type
    property optionswidget default defaultoptionswidgetsubfocus;
  end;
 
- tfiledialogfo = class(tmseform)
-   listview: tfilelistview;
+ tfiledialogfo = class (tdialogform)  // tmseform)
+   listview:   tfilelistview;
    tlayouter2: tlayouter;
-   bucont: tspacer;
+   bucont:     tspacer;
    showhidden: tbooleanedit;
-   tspacer4: tspacer;
-   cancel: tbutton;
-   ok: tbutton;
+   tspacer4:   tspacer;
+   cancel:     tbutton;
+   ok:         tbutton;
    tlayouter1: tlayouter;
-   filter: tdropdownlistedit;
-   filename: thistoryedit;
+   filter:     tdropdownlistedit;
+   filename:   thistoryedit;
    tlayouter3: tlayouter;
-   createdir: tbutton;
-   home: tbutton;
-   forward: tstockglyphbutton;
-   back: tstockglyphbutton;
-   up: tstockglyphbutton;
-   dir: tdirdropdownedit;
+   createdir:  tbutton;
+   home:       tbutton;
+   forward:    tstockglyphbutton;
+   back:       tstockglyphbutton;
+   up:         tstockglyphbutton;
+   dir:        tdirdropdownedit;
+////////////////////////////////////////////
+   fController: tfiledialogcontroller;
+////////////////////////////////////////////
    procedure createdironexecute(const sender: TObject);
    procedure listviewselectionchanged(const sender: tcustomlistview);
    procedure listviewitemevent(const sender: tcustomlistview;
@@ -526,24 +580,62 @@ type
    procedure forwardexe(const sender: TObject);
    procedure buttonshowhint(const sender: TObject; var ainfo: hintinfoty);
    procedure afterclosedrop(const sender: TObject);
+
+////////////////////////////////////////////
+   procedure StateRead  (const sender: TObject; const reader: tStatReader);
+   procedure StateWrite (const sender: TObject; const writer: tStatWriter);
+////////////////////////////////////////////
+//   procedure resized    (const sender: TObject);
+////////////////////////////////////////////
+//   procedure componentevent(const event: tcomponentevent); override;
+////////////////////////////////////////////
+
   private
    fselectednames: filenamearty;
-   finit: boolean;
-   fcourse: filenamearty;
-   fcourseid: int32;
-   fcourselock: boolean;
+   finit:          boolean;
+   fcourse:        filenamearty;
+   fcourseid:      int32;
+
+   fcourselock:    boolean;
+////////////////////////////////////////////
+   ffCaption:      msestring;
+////////////////////////////////////////////
+
    procedure updatefiltertext;
-   function tryreadlist(const adir: filenamety;
-                                     const errormessage: boolean): boolean;
-                  //restores old dir on error
-   function changedir(const adir: filenamety): boolean;
-   procedure checkcoursebuttons();
-   procedure course(const adir: filenamety);
-   procedure doup();
+   function  tryreadlist (const adir: filenamety; const errormessage: boolean): boolean;
+             //restores old dir on error
+   function  changedir (const adir: filenamety): boolean;
+   procedure checkcoursebuttons ();
+   procedure course (const adir: filenamety);
+   procedure doup ();
+////////////////////////////////////////////
+   FUNCTION  getDialogOptions: filedialogoptionsty;
+   PROCEDURE setDialogOptions (FileOptions: filedialogoptionsty);
+
+   FUNCTION  getFilenames: filenamearty;
+   PROCEDURE setFilenames (Files: filenamearty);
+////////////////////////////////////////////
+
   public
-   dialogoptions: filedialogoptionsty;
-   defaultext: filenamety;
-   filenames: filenamearty;
+////////////////////////////////////////////
+   CONSTRUCTOR Create (CONST Sender: TComponent; CONST StatName: msestring;
+                       where: dialogposty = dp_none); OVERLOAD; REINTRODUCE;
+   CONSTRUCTOR Create (CONST Sender: TComponent; where: dialogposty); OVERLOAD; REINTRODUCE;
+   CONSTRUCTOR Create (CONST Sender: TComponent); OVERLOAD; REINTRODUCE;
+   DESTRUCTOR  Destroy; OVERRIDE;
+////////////////////////////////////////////
+   FUNCTION Execute (dialogkind: filedialogkindty = fdk_none): modalresultty; REINTRODUCE;  // ??
+////////////////////////////////////////////
+
+   PROPERTY Controller:    tfiledialogcontroller READ fController; // NO WRITE HERE!
+   PROPERTY DialogCaption: msestring             READ ffCaption        WRITE ffCaption;
+   PROPERTY DialogOptions: filedialogoptionsty   READ getDialogOptions WRITE setDialogOptions;
+
+
+//   PROPERTY Filenames: filenamearty READ getFilenames WRITE setFilenames;
+//   PROPERTY DefaultExt: filenamety READ fController.getdefaultext WRITE fController.setdefaultext;
+
+////////////////////////////////////////////
  end;
 
 function filedialog(var afilenames: filenamearty;
@@ -588,10 +680,16 @@ procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
 procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
                    const withicon: boolean);
 
+////////////////////////////////////////////
+// VAR
+//   defaultDialogPlacement: dialogposty = dp_none;
+////////////////////////////////////////////
+
 implementation
+
 uses
- msefiledialog_mfm,msebits,mseactions,
- msestringenter,msefiledialogres,msekeyboard,
+ msefiledialog_mfm,
+ msebits,mseactions,msestringenter,msefiledialogres,msekeyboard,
  msestockobjects,
  msesysintf,msearrayutils;
 {$ifndef mse_allwarnings}
@@ -654,23 +752,23 @@ begin
  end;
 end;
 
-function filedialog1(dialog: tfiledialogfo; var afilenames: filenamearty;
-           const filterdesc: array of msestring;
-           const filtermask: array of msestring;
-           const filterindex: pinteger;
-           const afilter: pfilenamety;      //nil -> unused
-           const colwidth: pinteger;        //nil -> default
-           const includeattrib: fileattributesty;
-           const excludeattrib: fileattributesty;
-           const history: pmsestringarty;
-           const historymaxcount: integer;
-           const acaption: msestring;
-           const aoptions: filedialogoptionsty;
-           const adefaultext: filenamety;
-           const imagelist: timagelist;
-           const ongetfileicon: getfileiconeventty;
-           const oncheckfile: checkfileeventty
-           ): modalresultty;
+function filedialog1 (dialog: tfiledialogfo; var afilenames: filenamearty;
+                      const filterdesc: array of msestring;
+                      const filtermask: array of msestring;
+                      const filterindex: pinteger;
+                      const afilter: pfilenamety;      //nil -> unused
+                      const colwidth: pinteger;        //nil -> default
+                      const includeattrib: fileattributesty;
+                      const excludeattrib: fileattributesty;
+                      const history: pmsestringarty;
+                      const historymaxcount: integer;
+                      const acaption: msestring;
+                      const aoptions: filedialogoptionsty;
+                      const adefaultext: filenamety;
+                      const imagelist: timagelist;
+                      const ongetfileicon: getfileiconeventty;
+                      const oncheckfile: checkfileeventty
+                      ): modalresultty;
 var
  i1: integer;
 begin
@@ -687,7 +785,7 @@ begin
   if fdo_single in aoptions then begin
    listview.options:= listview.options - [lvo_multiselect];
   end;
-  defaultext:= adefaultext;
+  fController.defaultext:= adefaultext;
   caption:= acaption;
   listview.includeattrib:= includeattrib;
   listview.excludeattrib:= excludeattrib;
@@ -745,8 +843,9 @@ begin
    finit:= false;
   end;
   showhidden.value:= not (fa_hidden in excludeattrib);
-  show(true);
-  result:= window.modalresult;
+//  show (true);
+  result:= show (true, window);
+//  result:= window.modalresult;
   if result <> mr_ok then begin
    result:= mr_cancel;
   end;
@@ -754,7 +853,7 @@ begin
    colwidth^:= listview.cellwidth;
   end;
   if result = mr_ok then begin
-   afilenames:= filenames;
+   afilenames:= fController.filenames;
    if fdo_sysfilename in aoptions then begin
     for i1:= 0 to high(afilenames) do begin
      tosysfilepath1(afilenames[i1]);
@@ -1220,6 +1319,130 @@ end;
 
  { tfiledialogfo }
 
+////////////////////////////////////////////
+CONSTRUCTOR tfiledialogfo.Create (CONST Sender: TComponent; CONST StatName: msestring;
+                                  where: dialogposty);
+ BEGIN
+   INHERITED Create (Sender, StatName, where);
+   fcontroller:= tfiledialogcontroller.create (Self);
+   fcontroller.DialogPlacement:= where;
+ END;
+
+CONSTRUCTOR tfiledialogfo.Create (CONST Sender: TComponent; where: dialogposty);
+ BEGIN
+   INHERITED Create (Sender, where);
+   fcontroller:= tfiledialogcontroller.create (Self);
+ END;
+
+CONSTRUCTOR tfiledialogfo.Create (CONST Sender: TComponent);
+ BEGIN
+   INHERITED Create (Sender);
+   fcontroller:= tfiledialogcontroller.create (Self);
+ END;
+
+DESTRUCTOR tfiledialogfo.Destroy;
+ BEGIN
+   fcontroller.free;
+   INHERITED;
+ END;
+
+FUNCTION  tfiledialogfo.getDialogOptions: filedialogoptionsty;
+ BEGIN
+   Result:= fController.fOptions;
+ END;
+
+PROCEDURE tfiledialogfo.setDialogOptions (FileOptions: filedialogoptionsty);
+ BEGIN
+   fController.Options:= FileOptions;
+ END;
+
+
+FUNCTION tfiledialogfo.getFilenames: filenamearty;
+ BEGIN
+   Result:= fController.fFilenames;
+ END;
+
+PROCEDURE tfiledialogfo.setFilenames (Files: filenamearty);
+ BEGIN
+   fController.fFilenames:= Files;
+ END;
+
+
+//procedure tfiledialogfo.resized (const sender: TObject);
+// begin
+//   IF assigned (fController) THEN
+//     fController.fwindowrect:= fwidgetrect;
+////   INHERITED;
+//
+//writeln ('resized');
+//
+// end;
+////////////////////////////////////////////
+//procedure tfiledialogfo.componentevent (const event: tcomponentevent);
+// begin
+//  fcontroller.componentevent (event);
+//  inherited;
+// end;
+////////////////////////////////////////////
+FUNCTION tfiledialogfo.Execute (dialogkind: filedialogkindty = fdk_none): modalresultty;
+// main part copied from dialog function definition
+ BEGIN
+   Application.lock;
+   TRY
+//     DialogPrepare;
+     IF assigned (doPrepareDialog) THEN doPrepareDialog (Self);
+     WITH fController DO
+       Result:= Execute (dialogkind, ffCaption, fOptions, Self);
+
+     IF Result IN acceptingResults THEN BEGIN
+      Result:= mr_Ok;
+//      DialogEvaluate (Result);
+      IF assigned (doEvaluateDialog) THEN doEvaluateDialog (self, Result);
+     END;
+   FINALLY
+     Application.unlock;
+   end;
+ END;
+////////////////////////////////////////////
+procedure tfiledialogfo.StateRead (const sender: TObject; const reader: tStatReader);
+ VAR
+   HasDir: string;
+ begin
+   IF assigned (fController) AND assigned (StatFile) THEN
+     WITH fController DO BEGIN
+       HasDir:= LastDir; //?? fDialogForm:= Self;
+       ReadStatOptions (Reader);  // LastDir, FileHistory
+       ReadStatValue   (Reader);  // Filenames, Params (??)
+       ReadStatState   (Reader);  // Position, Size, FileColWidth, Filter
+
+       IF HasDir <> '' THEN BEGIN
+         Self.Dir.Value:= LastDir;
+         Self.ListView.Directory:= LastDir;
+       END (* HasDir <> '' *);
+
+       IF (Filename = HasDir{''}) AND (FilterIndex >= 0) AND assigned (Filterlist) AND
+          (Filterlist.Count > 0) AND (FilterIndex < Filterlist.Count) THEN
+         Filename:= HasDir+ Filterlist [FilterIndex].b;
+
+       IF Filename = '' THEN Filename:= HasDir+ '*';
+     END (* WITH FController *);
+
+     WITH Filename.dropdown DO
+       IF dropdownrowcount > 0
+         THEN itemindex:= 0;
+ end;
+
+procedure tfiledialogfo.StateWrite (const sender: TObject; const writer: tStatWriter);
+ begin
+   IF assigned (fController) AND assigned (StatFile) THEN
+     WITH fController DO BEGIN
+       WriteStatOptions (Writer);  // LastDir, FileHistory, Filter
+       WriteStatValue (Writer);    // Filenames, Params (??)
+       WriteStatState (Writer);    // Position, Size, FileColWidth
+     END (* WITH FController *);
+ end;
+////////////////////////////////////////////
+
 procedure Tfiledialogfo.createdironexecute(const sender: TObject);
 var
  mstr1: msestring;
@@ -1249,14 +1472,13 @@ end;
 {$else}
   if stringenter(mstr1,sc(sc_name),
                sc(sc_create_new_directory))
-               = mr_ok then begin
+                = mr_ok then begin
    mstr1:= filepath(listview.directory,mstr1,fk_file);
    msefileutils.createdir(mstr1);
    changedir(mstr1);
    filename.setfocus;
-  end;             
+  end;
 {$endif}
-       
 end;
 
 procedure tfiledialogfo.listviewselectionchanged(const sender: tcustomlistview);
@@ -1555,29 +1777,28 @@ begin
    else begin
     str1:= quotefilename(listview.directory,filename.value);
    end;
-   unquotefilename(str1,filenames);
-   if (defaultext <> '') then begin
-    for int1:= 0 to high(filenames) do begin
-     if not hasfileext(filenames[int1]) then begin
-      filenames[int1]:= filenames[int1] + '.'+defaultext;
+//   unquotefilename(str1, filenames);
+   unquotefilename(str1, Controller.ffilenames);
+   if (fController.defaultext <> '') then begin
+    for int1:= 0 to high(fController.filenames) do begin
+     if not hasfileext(fController.filenames[int1]) then begin
+      fController.filenames[int1]:= fController.filenames[int1] + '.'+ fController.defaultext;
      end;
     end;
    end;
    if (fdo_checkexist in dialogoptions) and
        not ((filename.value = '') and (fdo_acceptempty in dialogoptions)) then begin
     if fdo_directory in dialogoptions then begin
-     bo1:= finddir(filenames[0]);
+     bo1:= finddir(fController.filenames[0]);
     end
     else begin
-     bo1:= findfile(filenames[0]);
+     bo1:= findfile(fController.filenames[0]);
     end;
     if fdo_save in dialogoptions then begin
      if bo1 then begin
-     
-       if not askok(sc(sc_file) +' "'+filenames[0]+
+       if not askok(sc(sc_file) +' "'+fController.filenames[0]+
             '" '+ sc(sc_exists_overwrite),
             sc(sc_warningupper))
-
             then begin
 //      if not askok('File "'+filenames[0]+
 //            '" exists, do you want to overwrite?','WARNING') then begin
@@ -1588,7 +1809,7 @@ begin
      end
     else begin
      if not bo1 then begin
-       showerror(sc(sc_file)+' "'+filenames[0]+'" '+
+       showerror(sc(sc_file)+' "'+fController.filenames[0]+'" '+
                                         sc(sc_does_not_exist)+'.',
                   uppercase(sc(sc_error)));
 //      showerror('File "'+filenames[0]+'" does not exist.');
@@ -1770,8 +1991,8 @@ end;
 
 { tfiledialogcontroller }
 
-constructor tfiledialogcontroller.create(const aowner: tmsecomponent = nil;
-                                       const onchange: proceventty = nil);
+constructor tfiledialogcontroller.create (const aowner: tmsecomponent = nil;
+                                          const onchange: proceventty = nil);
 begin
  foptions:= defaultfiledialogoptions;
  fhistorymaxcount:= defaulthistorymaxcount;
@@ -1792,6 +2013,11 @@ end;
 procedure tfiledialogcontroller.readstatvalue(const reader: tstatreader);
 begin
  ffilenames:= reader.readarray('filenames',ffilenames);
+////////////////////////////////////
+ // If multiple files, but single selection only cut off all beyond first
+ IF (fdo_single IN fOptions) AND (high (ffilenames) > 0)
+   THEN setLength (ffilenames, 1);
+////////////////////////////////////
  if fdo_params in foptions then begin
   fparams:= reader.readmsestring('params',fparams);
  end;
@@ -1799,19 +2025,19 @@ end;
 
 procedure tfiledialogcontroller.readstatstate(const reader: tstatreader);
 begin
- ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
- ffilter:= reader.readmsestring('filefilter',ffilter);
+// ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
+// ffilter:= reader.readmsestring('filefilter',ffilter);
  fwindowrect.x:= reader.readinteger('x',fwindowrect.x);
  fwindowrect.y:= reader.readinteger('y',fwindowrect.y);
  fwindowrect.cx:= reader.readinteger('cx',fwindowrect.cx);
  fwindowrect.cy:= reader.readinteger('cy',fwindowrect.cy);
  fcolwidth:= reader.readinteger('filecolwidth',fcolwidth);
- if fdo_chdir in foptions then begin
-//  try
-   trysetcurrentdirmse(flastdir);
-//  except
-//  end;
- end;
+// if fdo_chdir in foptions then begin
+////  try
+//   trysetcurrentdirmse(flastdir);
+////  except
+////  end;
+// end;
 end;
 
 procedure tfiledialogcontroller.readstatoptions(const reader: tstatreader);
@@ -1821,6 +2047,15 @@ begin
  end;
  if fhistorymaxcount > 0 then begin
   fhistory:= reader.readarray('filehistory',fhistory);
+ end;
+ // formerly in "readstatstate", inconsistent to write function
+ ffilterindex:= reader.readinteger('filefilterindex',ffilterindex);
+ ffilter:= reader.readmsestring('filefilter',ffilter);
+ if fdo_chdir in foptions then begin
+//  try
+   trysetcurrentdirmse(flastdir);
+//  except
+//  end;
  end;
 end;
 
@@ -1872,13 +2107,17 @@ begin
  end;
 end;
 
-function tfiledialogcontroller.execute(dialogkind: filedialogkindty;
-                         const acaption: msestring;
-                         aoptions: filedialogoptionsty): modalresultty;
+function tfiledialogcontroller.execute (dialogkind: filedialogkindty;
+                                        const acaption: msestring;
+//                                      aoptions: filedialogoptionsty): modalresultty;
+////////////////////////////////////
+                                        aoptions: filedialogoptionsty;
+                                        providedform: tfiledialogfo): modalresultty;
+////////////////////////////////////
 var
- po1: pmsestringarty;
- fo: tfiledialogfo;
- ara,arb: msestringarty;
+ po1:        pmsestringarty;
+ fo:         tfiledialogfo;
+ ara, arb:   msestringarty;
  rectbefore: rectty;
 begin
  ara:= nil; //compiler warning
@@ -1890,15 +2129,23 @@ begin
    exit;
   end;
  end;
- if fhistorymaxcount > 0 then begin
+ if assigned (history) AND (fhistorymaxcount > 0) then begin
   po1:= @fhistory;
  end
  else begin
   po1:= nil;
  end;
- fo:= tfiledialogfo.create(nil);
+////////////////////////////////////
+ if assigned (providedform)
+   then fo:= providedform
+   else fo:= tfiledialogfo.create ({?nil?}fowner, fDialogPlacement);
+
+ fwindowrect:= fo.widgetrect;
+////////////////////////////////////
+// fo:= tfiledialogfo.create(nil);
+
  try
- {$ifdef FPC} {$checkpointer off} {$endif}    //todo!!!!! bug 3348
+ {.$ifdef FPC} {.$checkpointer off} {.$endif}    //todo!!!!! bug 3348 -- seems to be solved by fpc
   ara:= ffilterlist.asarraya;
   arb:= ffilterlist.asarrayb;
   if dialogkind <> fdk_none then begin
@@ -1915,15 +2162,30 @@ begin
   else begin
    fo.listview.directory:= flastdir;
   end;
+
+////????  IF assigned (providedform) THEN fo.widgetrect:= fwindowrect;
+
   if (fwindowrect.cx > 0) and (fwindowrect.cy > 0) then begin
    fo.widgetrect:= clipinrect(fwindowrect,application.screenrect(fo.window));
   end;
+
   rectbefore:= fo.widgetrect;
-  result:= filedialog1(fo,ffilenames,ara,arb,
-        @ffilterindex,@ffilter,@fcolwidth,finclude,
-            fexclude,po1,fhistorymaxcount,acaption,
-                                aoptions-[fdo_sysfilename],fdefaultext,
-            fimagelist,fongetfileicon,foncheckfile);
+  result:= filedialog1 (fo,
+                        ffilenames,
+                        ara, arb,
+                        @ffilterindex,
+                        @ffilter,
+                        @fcolwidth,
+                        finclude, fexclude,
+                        po1,
+                        fhistorymaxcount,
+                        acaption,
+                        aoptions- [fdo_sysfilename],
+                        fdefaultext,
+                        fimagelist,
+                        fongetfileicon,
+                        foncheckfile);
+
   if not rectisequal(fo.widgetrect,rectbefore) then begin
    fwindowrect:= fo.widgetrect;
   end;
@@ -1940,18 +2202,24 @@ begin
    end;
   end;
  finally
+////////////////////////////////////////////
+   if not assigned (providedform) then
+////////////////////////////////////////////
   fo.Free;
  end;
 end;
 
-function tfiledialogcontroller.execute(const dialogkind: filedialogkindty;
-                         const acaption: msestring): modalresultty;
+// function tfiledialogcontroller.execute (const dialogkind: filedialogkindty;
+//                                         const acaption: msestring): modalresultty;
+////////////////////////////////////
+function tfiledialogcontroller.execute (const dialogkind: filedialogkindty;
+                                        const acaption: msestring;
+                                        providedform: tfiledialogfo = nil): modalresultty;
 begin
- result:= execute(dialogkind,acaption,foptions);
+ result:= execute (dialogkind, acaption, foptions, providedform);
 end;
 
-function tfiledialogcontroller.actcaption(
-                            const dialogkind: filedialogkindty): msestring;
+function tfiledialogcontroller.actcaption (const dialogkind: filedialogkindty): msestring;
 begin
  case dialogkind of
   fdk_save: begin
@@ -1966,28 +2234,20 @@ begin
  end;
 end;
 
-function tfiledialogcontroller.execute(const dialogkind: filedialogkindty;
-                         const aoptions: filedialogoptionsty): modalresultty;
+// function tfiledialogcontroller.execute (const dialogkind: filedialogkindty;
+//                                         const aoptions: filedialogoptionsty): modalresultty;
+////////////////////////////////////
+function tfiledialogcontroller.execute (const dialogkind: filedialogkindty;
+                                        const aoptions: filedialogoptionsty;
+                                        providedform: tfiledialogfo = nil): modalresultty;
 begin
- result:= execute(dialogkind,actcaption(dialogkind),aoptions);
+ result:= execute (dialogkind, actcaption (dialogkind), aoptions, providedform);
 end;
 
-function tfiledialogcontroller.execute(
-                dialogkind: filedialogkindty = fdk_none): modalresultty;
-begin
- if dialogkind = fdk_none then begin
-  if fdo_save in foptions then begin
-   dialogkind:= fdk_save;
-  end
-  else begin
-   dialogkind:= fdk_open;
-  end;
- end;
- result:= execute(dialogkind,actcaption(dialogkind));
-end;
-
-function tfiledialogcontroller.execute(var avalue: filenamety;
-                   dialogkind: filedialogkindty = fdk_none): boolean;
+// function tfiledialogcontroller.execute (dialogkind: filedialogkindty = fdk_none): modalresultty;
+////////////////////////////////////
+function tfiledialogcontroller.execute (dialogkind: filedialogkindty = fdk_none;
+                                        providedform: tfiledialogfo = nil): modalresultty; overload;
 begin
  if dialogkind = fdk_none then begin
   if fdo_save in foptions then begin
@@ -1997,12 +2257,37 @@ begin
    dialogkind:= fdk_open;
   end;
  end;
- result:= execute(avalue,dialogkind,actcaption(dialogkind));
+ result:= execute (dialogkind, actcaption (dialogkind), providedform);
 end;
 
-function tfiledialogcontroller.execute(var avalue: filenamety;
-       const  dialogkind: filedialogkindty; const acaption: msestring;
-                            aoptions: filedialogoptionsty): boolean;
+// function tfiledialogcontroller.execute (var avalue: filenamety;
+//                                         dialogkind: filedialogkindty = fdk_none): boolean;
+////////////////////////////////////
+function tfiledialogcontroller.execute (var avalue: filenamety;
+                                        dialogkind: filedialogkindty = fdk_none;
+                                        providedform: tfiledialogfo = nil): boolean;
+begin
+ if dialogkind = fdk_none then begin
+  if fdo_save in foptions then begin
+   dialogkind:= fdk_save;
+  end
+  else begin
+   dialogkind:= fdk_open;
+  end;
+ end;
+ result:= execute (avalue, dialogkind, actcaption (dialogkind), providedform);
+end;
+
+// function tfiledialogcontroller.execute (var avalue: filenamety;
+//                                         const dialogkind: filedialogkindty;
+//                                         const acaption: msestring;
+//                                         aoptions: filedialogoptionsty): boolean;
+////////////////////////////////////
+function tfiledialogcontroller.execute (var avalue: filenamety;
+                                        const dialogkind: filedialogkindty;
+                                        const acaption: msestring;
+                                        aoptions: filedialogoptionsty;
+                                        providedform: tfiledialogfo = nil): boolean;
 var
  wstr1: filenamety;
 begin
@@ -2015,7 +2300,7 @@ begin
   end;
  end;
  filename:= avalue;
- result:= execute(dialogkind,acaption,aoptions) = mr_ok;
+ result:= execute(dialogkind,acaption,aoptions, providedform) = mr_ok;
  if result then begin
   avalue:= filename;
   checklink;
@@ -2027,7 +2312,6 @@ end;
 
 function tfiledialogcontroller.canoverwrite(): boolean;
 begin
-
 {$ifdef mse_dynpo}
 if length(lang_stockcaption) > ord(sc_confirmation) then
   result:= not findfile(filename) or
@@ -2041,15 +2325,20 @@ if length(lang_stockcaption) > ord(sc_confirmation) then
   result:= not findfile(filename) or
        askok(sc(sc_file)+' "'+filename+
             '" '+ sc(sc_exists_overwrite),
-            sc(sc_warningupper));
+           sc(sc_warningupper));
 {$endif}
 end;
 
-function tfiledialogcontroller.execute(var avalue: filenamety;
-                  const dialogkind: filedialogkindty;
-                  const acaption: msestring): boolean;
+// function tfiledialogcontroller.execute (var avalue: filenamety;
+//                                         const dialogkind: filedialogkindty;
+//                                         const acaption: msestring): boolean;
+////////////////////////////////////
+function tfiledialogcontroller.execute (var avalue: filenamety;
+                                        const  dialogkind: filedialogkindty;
+                                        const acaption: msestring;
+                                        providedform: tfiledialogfo = nil): boolean;
 begin
- result:= execute(avalue,dialogkind,acaption,foptions);
+ result:= execute (avalue, dialogkind, acaption, foptions, providedform);
 end;
 
 function tfiledialogcontroller.getfilename: filenamety;
@@ -2257,7 +2546,7 @@ constructor tfiledialog.create(aowner: tcomponent);
 begin
 // foptionsedit:= defaultfiledialogoptionsedit;
  foptionsedit1:= defaultfiledialogoptionsedit1;
- fcontroller:= tfiledialogcontroller.create(nil);
+ fcontroller:= tfiledialogcontroller.create({?nil?}aowner AS tmsecomponent);
  inherited;
 end;
 

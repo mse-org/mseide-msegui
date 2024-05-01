@@ -24,20 +24,35 @@ type
    value: tintegeredit;
  end;
 
+// function integerenter(var avalue: integer; const amin,amax: integer;
+//         const text: msestring = ''; const acaption: msestring = ''): modalresultty;
+////////////////////////////////////////////
 function integerenter(var avalue: integer; const amin,amax: integer;
-         const text: msestring = ''; const acaption: msestring = ''): modalresultty;
+         const text: msestring = ''; const acaption: msestring = '';
+         providedform: tintegerenterfo = nil): modalresultty;
+////////////////////////////////////////////
 //threadsave
 implementation
 uses
  mseintegerenter_mfm;
 
+// function integerenter(var avalue: integer; const amin,amax: integer; const text: msestring = '';
+//                               const acaption: msestring = ''): modalresultty;
+////////////////////////////////////////////
 function integerenter(var avalue: integer; const amin,amax: integer; const text: msestring = '';
-                               const acaption: msestring = ''): modalresultty;
+                      const acaption: msestring = '';
+                      providedform: tintegerenterfo = nil): modalresultty;
+////////////////////////////////////////////
 var
  fo: tintegerenterfo;
 begin
  application.lock;
  try
+////////////////////////////////////////////
+  if assigned (providedform)
+   then fo:= providedform
+   else
+////////////////////////////////////////////
   fo:= tintegerenterfo.create(nil);
   try
    with fo do begin
@@ -52,6 +67,9 @@ begin
     end;
    end;
   finally
+////////////////////////////////////////////
+   if not assigned (providedform) then
+////////////////////////////////////////////
    fo.Free;
   end;
  finally

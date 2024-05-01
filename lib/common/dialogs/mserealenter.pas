@@ -24,20 +24,35 @@ type
    cancel: tbutton;
  end;
 
+// function realenter(var avalue: realty; const amin,amax: realty; const text: msestring = '';
+//                               const acaption: msestring = ''): modalresultty;
+////////////////////////////////////////////
 function realenter(var avalue: realty; const amin,amax: realty; const text: msestring = '';
-                     const acaption: msestring = ''): modalresultty;
+                   const acaption: msestring = '';
+                   providedform: tintegerenterfo = nil): modalresultty;
+////////////////////////////////////////////
 //threadsave
 implementation
 uses
  mserealenter_mfm;
 
+// function realenter(var avalue: realty; const amin,amax: realty; const text: msestring = '';
+//                               const acaption: msestring = ''): modalresultty;
+////////////////////////////////////////////
 function realenter(var avalue: realty; const amin,amax: realty; const text: msestring = '';
-                               const acaption: msestring = ''): modalresultty;
+                   const acaption: msestring = '';
+                   providedform: tintegerenterfo = nil): modalresultty;
+////////////////////////////////////////////
 var
  fo: trealenterfo;
 begin
  application.lock;
  try
+////////////////////////////////////////////
+  if assigned (providedform)
+   then fo:= providedform
+   else
+////////////////////////////////////////////
   fo:= trealenterfo.create(nil);
   try
    with fo do begin
@@ -52,6 +67,9 @@ begin
     end;
    end;
   finally
+////////////////////////////////////////////
+   if not assigned (providedform) then
+////////////////////////////////////////////
    fo.Free;
   end;
  finally

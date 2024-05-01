@@ -26,26 +26,59 @@ type
    ok: tbutton;
    value: tstringedit;
    procedure layoutexe(const sender: TObject);
+////////////////////////////////////////////
+   FUNCTION  getvalue: string;
+   PROCEDURE setvalue (text: string);
+   FUNCTION  gettagname: string;
+   PROCEDURE settagname (text: string);
+////////////////////////////////////////////
+  published
+   property text:    string read getvalue   write setvalue;
+   property tagname: string read gettagname write settagname;
+////////////////////////////////////////////
  end;
 
 //functions below are threadsave
+// function stringenter(var avalue: msestring; const text: msestring = '';
+//                               const acaption: msestring = ''): modalresultty;
+////////////////////////////////////////////
 function stringenter(var avalue: msestring; const text: msestring = '';
-                               const acaption: msestring = ''): modalresultty;
+                               const acaption: msestring = '';
+                               providedform: tstringenterfo = nil): modalresultty;
+////////////////////////////////////////////
 
-function checkpassword(const password: msestring): boolean; overload;
-function checkpassword(const password: msestring; var modalresult: modalresultty): boolean; overload;
+// function checkpassword(const password: msestring): boolean; overload;
+////////////////////////////////////////////
+function checkpassword(const password: msestring;
+                       providedform: tstringenterfo = nil): boolean; overload;
+////////////////////////////////////////////
+// function checkpassword(const password: msestring; var modalresult: modalresultty): boolean;
+////////////////////////////////////////////
+function checkpassword(const password: msestring; var modalresult: modalresultty;
+                       providedform: tstringenterfo = nil): boolean;
+////////////////////////////////////////////
 
 implementation
 uses
  msestringenter_mfm,msestockobjects;
 
+// function stringenter(var avalue: msestring; const text: msestring = '';
+//                               const acaption: msestring = ''): modalresultty;
+////////////////////////////////////////////
 function stringenter(var avalue: msestring; const text: msestring = '';
-                               const acaption: msestring = ''): modalresultty;
+                               const acaption: msestring = '';
+                               providedform: tstringenterfo = nil): modalresultty;
+////////////////////////////////////////////
 var
  fo: tstringenterfo;
 begin
  application.lock;
  try
+////////////////////////////////////////////
+  if assigned (providedform)
+   then fo:= providedform
+   else
+////////////////////////////////////////////
   fo:= tstringenterfo.create(nil);
   try
    with fo do begin
@@ -58,6 +91,9 @@ begin
     end;
    end;
   finally
+////////////////////////////////////////////
+   if not assigned (providedform) then
+////////////////////////////////////////////
    fo.Free;
   end;
  finally
@@ -65,44 +101,38 @@ begin
  end;
 end;
 
-function checkpassword(const password: msestring; var modalresult: modalresultty): boolean;
+// function checkpassword(const password: msestring; var modalresult: modalresultty): boolean;
+////////////////////////////////////////////
+function checkpassword(const password: msestring; var modalresult: modalresultty;
+                       providedform: tstringenterfo = nil): boolean;
+////////////////////////////////////////////
 var
  fo: tstringenterfo;
 begin
  application.lock;
  try
+////////////////////////////////////////////
+  if assigned (providedform)
+   then fo:= providedform
+   else
+////////////////////////////////////////////
   fo:= tstringenterfo.create(nil);
   try
    with fo do begin
-{$ifdef mse_dynpo}
-   if length(lang_stockcaption) > ord(sc_All) then
-   begin
-    caption:= lang_stockcaption[ord(sc_passwordupper)];
-    lab.caption:= lang_stockcaption[ord(sc_enterpassword)]+':';
-   end else
-   begin
-    caption:= 'PASSWORD';
-    lab.caption:= 'Enter password:';
-   end; 
-{$else}
     caption:= sc(sc_passwordupper);
     lab.caption:= sc(sc_enterpassword)+':';
-{$endif}
     value.passwordchar:= '*';
     value.value:= '';
     modalresult:= fo.show(true,nil);
     result:= (modalresult = mr_ok) and (password = value.value);
     if not result and (modalresult = mr_ok) then begin
-{$ifdef mse_dynpo}
- if length(lang_stockcaption) > ord(sc_All) then
-      showerror(lang_stockcaption[ord(sc_invalidpassword)])
-  else       showerror('Invalid password');     
-{$else}
      showerror(sc(sc_invalidpassword));
-{$endif}
     end;
    end;
   finally
+////////////////////////////////////////////
+   if not assigned (providedform) then
+////////////////////////////////////////////
    fo.Free;
   end;
  finally
@@ -110,13 +140,39 @@ begin
  end;
 end;
 
-function checkpassword(const password: msestring): boolean;
+////////////////////////////////////////////
+FUNCTION tstringenterfo.getvalue: string;
+ begin
+   getvalue:= value.value;
+ end;
+
+PROCEDURE tstringenterfo.setvalue (text: string);
+ begin
+   value.value:= text;
+ end;
+
+FUNCTION tstringenterfo.gettagname: string;
+ begin
+   gettagname:= lab.caption;
+ end;
+
+PROCEDURE tstringenterfo.settagname (text: string);
+ begin
+   lab.caption:= text;
+ end;
+////////////////////////////////////////////
+
+// function checkpassword(const password: msestring): boolean;
+////////////////////////////////////////////
+function checkpassword(const password: msestring;
+                       providedform: tstringenterfo = nil): boolean; overload;
+////////////////////////////////////////////
 var
  res: modalresultty;
 begin
  res:= mr_none;
  repeat
-  result:= checkpassword(password,res);
+  result:= checkpassword(password,res, providedform);
  until result or (res <> mr_ok);
 end;
 

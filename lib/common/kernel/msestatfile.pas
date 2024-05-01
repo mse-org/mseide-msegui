@@ -24,6 +24,9 @@ type
 
  statfileoptionty = (sfo_memory,sfo_deletememorydata, //delete after read
                      sfo_createpath,
+//////////////////////////
+                     sfo_useexename,
+//////////////////////////
                      sfo_transaction, //use intermedate file and rename
                      sfo_savedata,sfo_autoreadstat,sfo_autowritestat,
                      sfo_activatorread,sfo_activatorwrite,
@@ -31,6 +34,9 @@ type
  statfileoptionsty = set of statfileoptionty;
 const
  defaultstatfileoptions = [sfo_activatorread,sfo_activatorwrite,sfo_transaction];
+//////////////////////////
+ StatExt = '.sta';
+//////////////////////////
 
 type
  tstatfile = class;
@@ -104,6 +110,9 @@ type
    procedure statread;
    function getstatvarname: msestring;
    function getstatpriority: integer;
+/////////////////////////////////////////////
+   PROCEDURE completepath (ar1: filenamearty);
+/////////////////////////////////////////////
   public
    constructor create(aowner: tcomponent); override;
    procedure initnewcomponent(const ascale: real); override;
@@ -172,6 +181,13 @@ type
 
 procedure setstatfilevar(const sender: istatfile; const source: tstatfile;
               var instance: tstatfile);
+
+////////////////////////////////////////////
+FUNCTION SavedMemoryFiles (CONST Filer: tstatfiler): msestringarty;
+PROCEDURE registerNewMemoryFile (StateFile: tStatFile; CONST SavedName: msestring);
+PROCEDURE registerSavedMemoryFiles (StateFile: tStatFile; CONST SavedNames: msestringarty);
+////////////////////////////////////////////
+
 implementation
 uses
  msesystypes,msesys,msefileutils,sysutils,msearrayutils;
@@ -198,6 +214,39 @@ begin
  end;
  setlinkedcomponent(sender,source,tmsecomponent(instance),typeinfo(istatfile));
 end;
+
+////////////////////////////////////////////
+FUNCTION SavedMemoryFiles (CONST Filer: tstatfiler): msestringarty;
+ BEGIN
+   IF filer IS tStatReader THEN BEGIN
+     Result:= (Filer AS tStatReader).ReadArray ('savedmemoryfiles', msestringarty (NIL));
+   END;
+ END;
+
+PROCEDURE registerNewMemoryFile (StateFile: tStatFile; CONST SavedName: msestring);
+ BEGIN
+   WITH  StateFile DO
+     IF savedmemoryfiles <> ''
+       THEN savedmemoryfiles:= savedmemoryfiles+ ' '+ SavedName
+       ELSE savedmemoryfiles:= SavedName;
+ END;
+
+PROCEDURE registerSavedMemoryFiles (StateFile: tStatFile; CONST SavedNames: msestringarty);
+ VAR
+   i:        integer;
+   NameList: msestring;
+ BEGIN
+   NameList:= '';
+   WITH  StateFile DO
+     IF savedmemoryfiles <> ''
+       THEN NameList:= savedmemoryfiles+ ' ';
+
+   FOR i:= 0 TO high (SavedNames) DO
+     NameList:= NameList+ ' '+ uppercase (SavedNames [i]);
+
+   StateFile.savedmemoryfiles:= NameList;
+ END;
+////////////////////////////////////////////
 
 { tstatfile }
 
@@ -262,15 +311,21 @@ begin
 //  statread;
  end
  else begin
+/////////////////////////////////////
+// moved before reloading saved memeory files
+// to allow for inspection, modification and handling
+  if assigned(fonstatupdate) then begin
+   fonstatupdate(self,reader);
+  end;
+/////////////////////////////////////
   if fsavedmemoryfiles <> '' then begin
    ar3:= reader.readarray('savedmemoryfiles',msestringarty(nil));
    for int1:= 0 to high(ar3) do begin
     reader.readmemorystatstream(ar3[int1],ar3[int1]);
    end;
   end;
-  if assigned(fonstatupdate) then begin
-   fonstatupdate(self,reader);
-  end;
+/////////////////////////////////////
+//  previous position: fonstatupdate(self,reader);
   if assigned(fonstatread) then begin
    fonstatread(self,reader);
   end;
@@ -320,15 +375,21 @@ begin
 //  end;
  end
  else begin
+/////////////////////////////////////
+// moved before (re)saving stored memeory files
+// to allow for inspection, modification and handling
+  if assigned(fonstatupdate) then begin
+   fonstatupdate(self,writer);
+  end;
+/////////////////////////////////////
   if fsavedmemoryfiles <> '' then begin
    ar3:= memorystatstreams.findfiles(fsavedmemoryfiles);
    writer.writearray('savedmemoryfiles',ar3);
    for int1:= 0 to high(ar3) do begin
     writer.writememorystatstream(ar3[int1],ar3[int1]);
    end;
-  end;
-  if assigned(fonstatupdate) then begin
-   fonstatupdate(self,writer);
+/////////////////////////////////////
+//  previous position: fonstatupdate(self,writer);
   end;
   if assigned(fonstatwrite) then begin
    fonstatwrite(self,writer);
@@ -449,6 +510,26 @@ begin
  end;
 end;
 
+/////////////////////////////////////////////
+PROCEDURE tstatfile.completepath (ar1: filenamearty);
+ VAR
+   i: integer;
+ BEGIN
+   FOR i:= 0 TO high (ar1) DO BEGIN
+{$IFDEF linux OR defined (freebsd) or defined (netbsd) OR
+                 defined (openbsd) OR defined (Solaris)}
+     // On Linux, resolve tilde character and replace with home directory
+     IF ar1 [i][1] = '~'
+       THEN ar1 [i]:= GetEnvironmentVariable ('HOME')+
+                      Copy (ar1 [i], 2, Length (ar1 [i]));
+{$ENDIF}
+     // No directory separator after directory name?
+     IF ar1 [i][Length (ar1 [i])] <> DirectorySeparator
+       THEN ar1 [i]:= ar1 [i]+ DirectorySeparator;
+   END;
+ END;
+/////////////////////////////////////////////
+
 procedure tstatfile.readstat(const stream: ttextstream = nil);
 var
  stream1: ttextstream;
@@ -462,6 +543,16 @@ begin
   fonstatbeforeread(self);
  end;
  stream1:= stream;
+/////////////////////////////////////////////
+// Suggestion: if no filename specified, use executable base name - ???
+// - optionally do so only if a NEWLY DEFINED option ("sfo_useexename" or so) is set
+// - presumes fixed extension of "ConfExt = '.sta';" or such
+// -code:
+   IF (sfo_useexename in foptions) AND (NOT (sfo_memory in foptions)) AND
+      (stream1 = nil) AND  // not a memory stat file ??
+      (fFileName = '')     // use program name as a "last ressort"
+   THEN fFileName:= ExtractFilename (Argv [0])+ StatExt;
+/////////////////////////////////////////////
  try
   if (stream1 = nil) and (filename <> '') then begin
    if sfo_memory in foptions then begin
@@ -472,6 +563,9 @@ begin
     by1:= false;
     repeat
      unquotefilename(ffiledir,ar1);
+/////////////////////////////////////////////
+     completepath (ar1);
+/////////////////////////////////////////////
      if not findfile(ffilename,ar1,floadedfile) then begin
       floadedfile:= ffilename;
      end;
@@ -603,6 +697,9 @@ begin
   else begin
    if floadedfile = '' then begin
     unquotefilename(ffiledir,ar1);
+/////////////////////////////////////////////
+    completepath (ar1);
+/////////////////////////////////////////////
     if not findfile(ffilename,ar1,floadedfile) then begin
      floadedfile:= defaultfile(ar1);
     end;

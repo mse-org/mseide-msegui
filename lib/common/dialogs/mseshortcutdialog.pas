@@ -16,10 +16,12 @@ uses
  msegraphutils,mseevent,mseclasses,mseforms,msedataedits,mseedit,msegrids,
  msestrings,msetypes,msewidgetgrid,msedatanodes,mselistbrowser,mseactions,
  msesimplewidgets,msewidgets,msegridsglob,msetimer,msesplitter,mseificomp,
- mseificompglob,mseifiglob;
+ mseificompglob,mseifiglob,msedialog;
 
 type
- tmseshortcutdialogfo = class(tmseform)
+////////////////////////////////////////////
+ tmseshortcutdialogfo = class (tdialogform)  // tmseform)
+////////////////////////////////////////////
    grid: twidgetgrid;
    sc: ttreeitemedit;
    scdi: tstringedit;
@@ -61,7 +63,11 @@ type
    procedure checkconflict;
  end;
 
-function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
+// function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
+////////////////////////////////////////////
+function shortcutdialog (const acontroller: tshortcutcontroller;
+                         providedform: tmseshortcutdialogfo = nil): modalresultty;
+////////////////////////////////////////////
 
 implementation
 uses
@@ -103,7 +109,11 @@ type
                       const aindex: assistiveshortcutty); overload;
  end;
 
-function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
+// function shortcutdialog(const acontroller: tshortcutcontroller): modalresultty;
+////////////////////////////////////////////
+function shortcutdialog(const acontroller: tshortcutcontroller;
+                        providedform: tmseshortcutdialogfo = nil): modalresultty;
+////////////////////////////////////////////
 var
  fo1: tmseshortcutdialogfo;
  no: tshortcutitem;
@@ -114,26 +124,21 @@ var
  ss1: sysshortcutty;
  as1: assistiveshortcutty;
 begin
+////////////////////////////////////////////
+ if assigned (providedform)
+  then fo1:= providedform
+  else
+////////////////////////////////////////////
  fo1:= tmseshortcutdialogfo.create(nil);
  try
-  {$ifdef mse_dynpo}
-  no1:= tsysshortcutitem.create(lang_stockcaption[ord(sc_system)]);
- {$else}
   no1:= tsysshortcutitem.create(stockobjects.captions[sc_system]);
-{$endif}
-  
-  
+
   for ss1:= low(ss1) to high(ss1) do begin
    no1.add(tsysshortcutitem.create(acontroller,ss1));
   end;
-  
-   {$ifdef mse_dynpo}
-  no2:= tassistiveshortcutitem.create(lang_stockcaption[ord(sc_voiceoutput)]);
-  {$else}
- no2:= tassistiveshortcutitem.create(stockobjects.captions[sc_voiceoutput]);
- {$endif}
-  
-  
+
+  no2:= tassistiveshortcutitem.create(stockobjects.captions[sc_voiceoutput]);
+
   for as1:= low(as1) to high(as1) do begin
    no2.add(tassistiveshortcutitem.create(acontroller,as1));
   end;
@@ -211,6 +216,9 @@ begin
    acontroller.doafterupdate;
   end;
  finally
+////////////////////////////////////////////
+  if not assigned (providedform) then
+////////////////////////////////////////////
   fo1.free;
  end;
 end;

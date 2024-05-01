@@ -1,0 +1,313 @@
+object replacedialogfo: treplacedialogfo
+  visible = False
+  bounds_x = 253
+  bounds_y = 270
+  bounds_cx = 389
+  bounds_cy = 178
+  bounds_cxmin = 389
+  bounds_cymin = 178
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.frame.sbhorz.width = 0
+  container.frame.sbvert.width = 0
+  container.bounds = (
+    0
+    0
+    389
+    178
+  )
+  font.name = 'stf_default'
+  font.localprops = []
+  fontempty.name = 'stf_empty'
+  fontempty.localprops = []
+  options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  caption = 'Find and Replace Text'
+  icon.options = [bmo_masked]
+  icon.origformat = 'png'
+  icon.image = {
+    00000000020000001000000010000000F0010000000000000000000000000000
+    000000000000000000000000000000000000000000EF001531FFFF014AFFFF01
+    6BFFFF01A5FFFF01B5FFFF01A5FFFF0100EF00096BFFF70131FFFF0152FFFF01
+    7BFFFF01B5FFFF01C6FFFF01A5FFFF0200EF000708EF080118FFAD0139FFFF01
+    5AFFFF018CFFFF01C6FFFF01D6FFFF01A5FFFF015AFFB50129FF290100EF0005
+    31EF310108EF080118FFAD0142FFFF016BFFFF01A5FFFF01E7FFFF01DEFFFF01
+    A5FFFF0152FFB50129FF290142FF420100EF000431EF310108EF080118FF5A01
+    42FFF7017BFFFF01C6FFFF03A5FFFF014AFF840129FF290139F7390100EF0004
+    31EF310108EF080118FF21014AFFCE0194FFFF01DEFFFF01C6FFFF029CFFE701
+    42FF4A0121FF210139F7390100EF000431EF310108EF080118FF180152FF6B01
+    DEFFFF01C6FFFF0394FFA50142FF420121FF210139F7390100EF000431EF3101
+    08E7080110F7100139F73901DEF7DE01C6FFFF02DEF7DE015AFF5A0121FF2101
+    10F7100131EF310100EF000431EF310100E7000208E7080173EF7301C6FFFF02
+    73EF730110E7100100E7000231EF310100EF000431EF310100E7000310E71001
+    29DE290210E7100100E7000331EF310100EF000431EF310100E7000200DE0005
+    00E7000331EF310100EF000431EF310100E7000A31EF310100EF000431EF3101
+    00E7000A31EF310100EF000573EF730100DE000100E7000500DE000273EF7301
+    00EF001300000000E0070000F00F0000F81F0000FC3F0000FC3F0000FC3F0000
+    FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000FC3F0000F81F0000
+    00000000
+  }
+  windowopacity = -Inf
+  onshow = oncreat
+  moduleclassname = 'tmseform'
+  object layouter1: tlayouter
+    bounds_x = 0
+    bounds_y = 4
+    bounds_cx = 389
+    bounds_cy = 174
+    anchors = [an_left, an_top, an_right, an_bottom]
+    place_maxdist = 0
+    place_options = [plo_propmargin]
+    object layouter2: tlayouter
+      taborder = 3
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 389
+      bounds_cy = 26
+      anchors = [an_top]
+      optionslayout = [lao_placex]
+      place_options = [plo_propmargin]
+      linkbottom = layouter3
+      object FindFirst: tbutton
+        frame.localprops = []
+        frame.localprops1 = []
+        face.localprops = []
+        bounds_x = 6
+        bounds_y = 2
+        bounds_cx = 114
+        bounds_cy = 22
+        state = [as_localcaption]
+        caption = '&Find'
+        modalresult = mr_ok
+      end
+      object Replace: tbutton
+        frame.localprops = []
+        frame.localprops1 = []
+        face.localprops = []
+        taborder = 1
+        bounds_x = 126
+        bounds_y = 2
+        bounds_cx = 130
+        bounds_cy = 22
+        state = [as_localcaption]
+        caption = '&Replace'
+        modalresult = mr_all
+      end
+      object butok: tbutton
+        frame.hiddenedges = [edg_bottom]
+        frame.localprops = []
+        frame.localprops1 = []
+        face.localprops = []
+        taborder = 2
+        bounds_x = 262
+        bounds_y = 2
+        bounds_cx = 120
+        bounds_cy = 22
+        anchors = [an_top, an_right]
+        state = [as_default, as_localdefault, as_localcaption, as_localonexecute]
+        caption = 'Close'
+        captiondist = 1
+        onexecute = onok
+      end
+    end
+    object layouter3: tlayouter
+      bounds_x = 0
+      bounds_y = 26
+      bounds_cx = 389
+      bounds_cy = 82
+      anchors = [an_top]
+      optionsscale = [osc_invisishrinky, osc_expandshrinkx, osc_expandshrinky]
+      place_mindist = 8
+      place_maxdist = 8
+      place_options = [plo_noinvisible, plo_propmargin]
+      linkbottom = layouter4
+      object findtext: thistoryedit
+        frame.caption = '&Text to find'
+        frame.captiontextflags = [tf_bottom]
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.button.color = -2147483646
+        frame.button.frame.localprops = []
+        frame.button.frame.localprops1 = []
+        frame.buttons.count = 1
+        frame.buttons.items = <        
+          item
+            color = -2147483646
+            frame.localprops = []
+            frame.localprops1 = []
+          end>
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        bounds_x = 4
+        bounds_y = 2
+        bounds_cx = 379
+        bounds_cy = 37
+        anchors = [an_left, an_top, an_right]
+        caretwidth = 0
+        dropdown.cols.count = 1
+        dropdown.cols.items = <        
+          item
+          end>
+        reffontheight = 14
+      end
+      object replacetext: thistoryedit
+        frame.caption = '&Replace with'
+        frame.captiontextflags = [tf_bottom]
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.button.color = -2147483646
+        frame.button.frame.localprops = []
+        frame.button.frame.localprops1 = []
+        frame.buttons.count = 1
+        frame.buttons.items = <        
+          item
+            color = -2147483646
+            frame.localprops = []
+            frame.localprops1 = []
+          end>
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        taborder = 1
+        bounds_x = 4
+        bounds_y = 41
+        bounds_cx = 378
+        bounds_cy = 37
+        anchors = [an_left, an_top, an_right]
+        dropdown.cols.count = 1
+        dropdown.cols.items = <        
+          item
+          end>
+        reffontheight = 14
+      end
+    end
+    object layouter4: tlayouter
+      taborder = 1
+      bounds_x = 8
+      bounds_y = 108
+      bounds_cx = 184
+      bounds_cy = 66
+      optionsscale = [osc_invisishrinky, osc_expandshrinkx, osc_expandshrinky]
+      optionslayout = [lao_placey]
+      place_mindist = 4
+      place_maxdist = 4
+      place_options = [plo_noinvisible, plo_endmargin, plo_propmargin]
+      linktop = layouter3
+      linkright = layouter5
+      object casesensitive: tbooleanedit
+        frame.caption = '&case sensitive'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          0
+          80
+          0
+        )
+        bounds_x = 4
+        bounds_y = 4
+        bounds_cx = 93
+        bounds_cy = 16
+      end
+      object wholeword: tbooleanedit
+        frame.caption = '&whole word'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          66
+          2
+        )
+        taborder = 1
+        bounds_x = 4
+        bounds_y = 24
+        bounds_cx = 79
+        bounds_cy = 16
+      end
+      object promptonreplace: tbooleanedit
+        frame.caption = '&prompt on replace'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          102
+          2
+        )
+        taborder = 2
+        bounds_x = 4
+        bounds_y = 44
+        bounds_cx = 115
+        bounds_cy = 16
+        value = True
+      end
+    end
+    object layouter5: tlayouter
+      taborder = 2
+      bounds_x = 192
+      bounds_y = 108
+      bounds_cx = 194
+      bounds_cy = 66
+      optionsscale = [osc_invisishrinky, osc_expandshrinkx, osc_expandshrinky]
+      optionslayout = [lao_placey]
+      place_mindist = 4
+      place_maxdist = 4
+      place_options = [plo_noinvisible, plo_endmargin, plo_propmargin]
+      linktop = layouter3
+      object selectedonly: tbooleanedit
+        frame.caption = 'select&ed only'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          75
+          2
+        )
+        bounds_x = 4
+        bounds_y = 4
+        bounds_cx = 88
+        bounds_cy = 16
+      end
+      object backwards: tbooleanedit
+        frame.caption = '&backwards'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          62
+          2
+        )
+        taborder = 1
+        bounds_x = 4
+        bounds_y = 24
+        bounds_cx = 75
+        bounds_cy = 16
+      end
+      object doall: tbooleanedit
+        frame.caption = 'replace &all'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          60
+          2
+        )
+        taborder = 2
+        bounds_x = 4
+        bounds_y = 44
+        bounds_cx = 73
+        bounds_cy = 16
+      end
+    end
+  end
+end

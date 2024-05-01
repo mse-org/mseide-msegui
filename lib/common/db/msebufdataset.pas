@@ -37,6 +37,7 @@ uses
  mdb,classes,mclasses,variants,msetypes,msearrayprops,mseclasses,mselist,
  msestrings,
  msedb,msedatabase,mseglob,msearrayutils,msedatalist,msevariants,
+ FieldTypeError,
  msestream;
   
 const
@@ -3397,7 +3398,6 @@ begin
     {$objectChecks off}          
  with tfield1(sender) do begin
 {$pop}
-
  {$ifdef FPC}{$warnings on}{$endif}
   if fvalidating then begin
    result:= (fvaluebuffer <> nil) and (foffset and 1 = 0);
@@ -6066,6 +6066,8 @@ begin
     fek_filtermax: begin
      result:= b1 or (i1 <= 0);
     end;
+    // Warning: Case statement does not handle all possible cases
+    else { separately handled, ignored here };
    end;
   end
   else begin
@@ -6079,6 +6081,8 @@ begin
     fek_filtermax: begin
      result:= b1 or (afield.value <= v1);
     end;
+    // Warning: Case statement does not handle all possible cases
+    else { separately handled, ignored here };
    end;
   end;
  end;
@@ -6329,6 +6333,7 @@ begin
  try
   int2:= ffieldinfos[index1].base.offset;
   po2:= pointer(findexes[0]);
+  // Warning: Case statement does not handle all possible cases
   case ffieldinfos[afield.fieldno-1].base.fieldtype of
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
@@ -6396,6 +6401,11 @@ begin
      end;
     end;
    end;
+   // Warning: Case statement does not handle all possible cases
+   else { ignored here, cannot occur (?) };
+// more restrictively:
+//   // Cover remaining cases by raising an exception:
+//   else FieldError (ffieldinfos[afield.fieldno-1].base.fieldtype);
   end;
  finally
   restorestate(state1);
@@ -6419,6 +6429,7 @@ begin
  try
   int2:= ffieldinfos[index1].base.offset;
   po2:= pointer(findexes[0]);
+  // Warning: Case statement does not handle all possible cases
   case ffieldinfos[afield.fieldno-1].base.fieldtype of
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
@@ -6508,6 +6519,11 @@ begin
      end;
     end;
    end;
+   // Warning: Case statement does not handle all possible cases
+   else { ignored here, cannot occur (?) };
+// more restrictively:
+//   // Cover remaining cases by raising an exception:
+//   else FieldError (ffieldinfos[afield.fieldno-1].base.fieldtype);
   end;
  finally
   restorestate(state1);
@@ -6599,6 +6615,7 @@ begin
  try
   int2:= ffieldinfos[index1].base.offset;
   po2:= pointer(findexes[0]);
+  // Warning: Case statement does not handle all possible cases
   case ffieldinfos[afield.fieldno-1].base.fieldtype of
    ftinteger,ftsmallint,ftword: begin
     if bo1 then begin
@@ -6646,6 +6663,11 @@ begin
      end;
     end;
    end;
+   // Warning: Case statement does not handle all possible cases
+   else { ignored here, cannot occur (?) };
+// more restrictively:
+//   // Cover remaining cases by raising an exception:
+//   else FieldError (ffieldinfos[afield.fieldno-1].base.fieldtype);
   end;
  finally
   restorestate(state1);
@@ -8580,6 +8602,7 @@ begin
  end;
  po2:= data;
  indexpo:= pointer(factindexpo^.ind);
+ // Warning: Case statement does not handle all possible cases
  case afieldtype of
   ftinteger: begin
    for int1:= 0 to fbrecordcount-1 do begin
@@ -8624,6 +8647,8 @@ begin
     inc(pchar(po2),step);
    end;
   end;
+  // Warning: Case statement does not handle all possible cases
+  else { ignored here, cannot occur (?) };
  end;
 end;
 
@@ -10794,6 +10819,7 @@ begin
                   {$else}vwidestring{$endif}:= pointer(mstr1);
    end
    else begin
+    // Warning: Case statement does not handle all possible cases
     case datatype of
      ftString,ftFixedChar,ftmemo,ftblob: begin
       str1:= asstring;
@@ -10835,6 +10861,8 @@ begin
       vtype:= vtint64;
       vint64:= @lint1;
      end;
+     // Warning: Case statement does not handle all possible cases
+     else { ignored here, cannot occur (?) };
     end;
    end;
   end;

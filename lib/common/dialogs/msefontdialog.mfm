@@ -1,0 +1,392 @@
+object fontdialogfo: tfontdialogfo
+  visible = False
+  bounds_x = 1105
+  bounds_y = 632
+  bounds_cx = 348
+  bounds_cy = 140
+  bounds_cxmin = 348
+  bounds_cymin = 140
+  container.frame.localprops = []
+  container.frame.localprops1 = []
+  container.frame.sbhorz.options = []
+  container.frame.sbvert.options = []
+  container.bounds = (
+    0
+    0
+    348
+    140
+  )
+  options = [fo_freeonclose, fo_closeonesc, fo_autoreadstat, fo_autowritestat, fo_savepos]
+  caption = 'Edit Font Format'
+  windowopacity = -Inf
+  onclose = FormClose
+  moduleclassname = 'tmseform'
+  object tlayouter2: tlayouter
+    bounds_x = 0
+    bounds_y = 0
+    bounds_cx = 348
+    bounds_cy = 140
+    anchors = []
+    object tlayouter1: tlayouter
+      taborder = 1
+      bounds_x = 155
+      bounds_y = 92
+      bounds_cx = 186
+      bounds_cy = 46
+      align_glue = wam_start
+      place_mindist = 4
+      place_maxdist = -1530494977
+      place_mode = wam_end
+      place_options = [plo_propmargin]
+      dist_top = 4
+      options = [spao_gluebottom]
+      object Apply: tbutton
+        optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+        bounds_x = 8
+        bounds_y = 16
+        bounds_cx = 56
+        bounds_cy = 20
+        bounds_cxmin = 56
+        state = [as_default, as_localdefault, as_localcaption, as_localonexecute, as_localonafterexecute]
+        caption = '&Apply'
+        onexecute = applyFont
+        reffontheight = 14
+      end
+      object Ok: tbutton
+        optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+        taborder = 1
+        bounds_x = 68
+        bounds_y = 16
+        bounds_cx = 56
+        bounds_cy = 20
+        bounds_cxmin = 56
+        state = [as_localdefault, as_localcaption]
+        caption = '&OK'
+        modalresult = mr_ok
+        reffontheight = 14
+      end
+      object Cancel: tbutton
+        optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
+        taborder = 2
+        bounds_x = 128
+        bounds_y = 16
+        bounds_cx = 56
+        bounds_cy = 20
+        bounds_cxmin = 56
+        state = [as_localcaption]
+        caption = '&Cancel'
+        font.name = 'stf_default'
+        font.localprops = []
+        modalresult = mr_cancel
+        reffontheight = 14
+      end
+    end
+    object tlayouter3: tlayouter
+      taborder = 2
+      bounds_x = 155
+      bounds_y = 0
+      bounds_cx = 78
+      bounds_cy = 92
+      optionsscale = [osc_expandx, osc_shrinkx, osc_expandshrinkx, osc_expandshrinky]
+      optionslayout = [lao_placey]
+      place_maxdist = 8
+      place_mode = wam_center
+      place_options = [plo_propmargin]
+      object UnderlineEd: tbooleanedit
+        frame.caption = '&Underline'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          57
+          2
+        )
+        bounds_x = 8
+        bounds_y = 14
+        bounds_cx = 70
+        bounds_cy = 16
+        onsetvalue = set_underline
+      end
+      object StrikeoutEd: tbooleanedit
+        frame.caption = '&Strikeout'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          51
+          2
+        )
+        taborder = 1
+        bounds_x = 8
+        bounds_y = 38
+        bounds_cx = 64
+        bounds_cy = 16
+        onsetvalue = set_strikeout
+      end
+      object BlankEd: tbooleanedit
+        frame.caption = 'Bl&ank'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          1
+          34
+          2
+        )
+        taborder = 2
+        bounds_x = 8
+        bounds_y = 62
+        bounds_cx = 47
+        bounds_cy = 16
+        onsetvalue = set_blanking
+      end
+    end
+    object Colorstepper: tstepbox
+      frame.buttonsize = 11
+      frame.buttonsvisible = [sk_up, sk_down]
+      frame.localprops = []
+      frame.localprops1 = []
+      bounds_x = 233
+      bounds_y = 0
+      bounds_cx = 112
+      bounds_cy = 92
+      anchors = [an_left, an_top, an_right, an_bottom]
+      onstep = StepColor
+      object BackgroundColorEd: tcoloredit
+        frame.caption = '&Backgroundcolor'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.buttons.count = 2
+        frame.buttons.items = <        
+          item
+          end        
+          item
+            imagenr = 17
+          end>
+        frame.buttonellipse.imagenr = 17
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        taborder = 1
+        bounds_x = 2
+        bounds_y = 40
+        bounds_cy = 39
+        onsetvalue = set_fontbackgnd
+        reffontheight = 14
+      end
+      object FontcolorEd: tcoloredit
+        frame.caption = '&Fontcolor'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.buttons.count = 2
+        frame.buttons.items = <        
+          item
+          end        
+          item
+            imagenr = 17
+          end>
+        frame.buttonellipse.imagenr = 17
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        bounds_x = 2
+        bounds_y = 0
+        bounds_cy = 39
+        onsetvalue = set_fontcolor
+        reffontheight = 14
+      end
+      object SelectColorEd: tcoloredit
+        frame.caption = 'Selectcolor'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.buttons.count = 2
+        frame.buttons.items = <        
+          item
+          end        
+          item
+            imagenr = 17
+          end>
+        frame.buttonellipse.imagenr = 17
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        taborder = 2
+        visible = False
+        bounds_x = 2
+        bounds_y = 80
+        bounds_cy = 39
+        onsetvalue = set_SelColor
+        reffontheight = 14
+      end
+      object SelectBgcolorEd: tcoloredit
+        frame.caption = 'Selectbackground'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.buttons.count = 2
+        frame.buttons.items = <        
+          item
+          end        
+          item
+            imagenr = 17
+          end>
+        frame.buttonellipse.imagenr = 17
+        frame.outerframe = (
+          0
+          17
+          1
+          0
+        )
+        taborder = 3
+        visible = False
+        bounds_x = 2
+        bounds_y = 120
+        bounds_cx = 101
+        bounds_cy = 39
+        onsetvalue = set_SelBackgnd
+        reffontheight = 14
+      end
+    end
+    object tlayouter5: tlayouter
+      taborder = 3
+      bounds_x = 0
+      bounds_y = 0
+      bounds_cx = 155
+      bounds_cy = 140
+      anchors = [an_left]
+      place_mindist = 6
+      place_maxdist = 6
+      object FontNameSelector: tdropdownlistedit
+        frame.caption = 'Font name'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.buttons.count = 1
+        frame.buttons.items = <        
+          item
+          end>
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        bounds_x = 8
+        bounds_y = 0
+        bounds_cx = 140
+        bounds_cy = 39
+        value = 'stf_default'
+        valuedefault = 'stf_default'
+        onsetvalue = font_selected
+        dropdown.cols.count = 1
+        dropdown.cols.items = <        
+          item
+            data = (
+              'stf_default'
+              'stf_courier'
+              'stf_helvetica'
+              'stf_roman'
+              'stf_proportional'
+              'stf_fixed'
+              'stf_unicode'
+            )
+          end>
+        reffontheight = 14
+      end
+      object FontSizeSelector: trealspinedit
+        frame.framei_left = 1
+        frame.framei_top = 1
+        frame.framei_right = 1
+        frame.framei_bottom = 1
+        frame.caption = 'Points'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        taborder = 1
+        bounds_x = 104
+        bounds_y = 45
+        bounds_cx = 44
+        bounds_cy = 39
+        onsetvalue = size_selected
+        value = 10
+        valuedefault = 10
+        valuerange = 1
+        valuemin = 5
+        valuemax = 120
+        step = 1
+        wheelsensitivity = 1
+        reffontheight = 14
+      end
+      object Anzeigetext: tstringedit
+        optionswidget1 = []
+        frame.localprops = []
+        frame.localprops1 = []
+        taborder = 2
+        onmouseevent = AnzeigeClick
+        bounds_x = 8
+        bounds_y = 96
+        bounds_cx = 140
+        bounds_cy = 36
+        optionsedit1 = [oe1_noselectall, oe1_autopopupmenu, oe1_keyexecute, oe1_savevalue, oe1_savestate, oe1_checkvalueafterstatread]
+        optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_focusrectonreadonly]
+        font.name = 'stf_default'
+        font.localprops = []
+        textflags = [tf_xcentered, tf_ycentered, tf_noselect]
+        textflagsactive = [tf_xcentered, tf_ycentered]
+        value = 'Display test text'#10'+ 1234567890 -'
+        valuedefault = 'Display test text'#10'+ 1234567890 -'
+      end
+      object FontStyleSelector: tdropdownlistedit
+        frame.caption = 'Style'
+        frame.localprops = []
+        frame.localprops1 = []
+        frame.buttons.count = 1
+        frame.buttons.items = <        
+          item
+          end>
+        frame.outerframe = (
+          0
+          17
+          0
+          0
+        )
+        taborder = 3
+        bounds_x = 8
+        bounds_y = 45
+        bounds_cx = 92
+        bounds_cy = 39
+        value = 'normal'
+        valuedefault = 'normal'
+        onsetvalue = style_selected
+        dropdown.cols.count = 1
+        dropdown.cols.items = <        
+          item
+            data = (
+              'stf_default'
+              'stf_courier'
+              'stf_helvetica'
+              'stf_roman'
+              'stf_proportional'
+              'stf_fixed'
+              'stf_unicode'
+            )
+          end>
+        reffontheight = 14
+      end
+    end
+  end
+end

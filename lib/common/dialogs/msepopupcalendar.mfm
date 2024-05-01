@@ -3,15 +3,18 @@ object msepopupcalendarfo: tpopupcalendarfo
   frame.framewidth = 1
   frame.colorframe = -1610612734
   frame.localprops = [frl_framewidth, frl_colorframe]
-  frame.dummy = 0
+  frame.localprops1 = []
   visible = False
   bounds_x = 341
   bounds_y = 304
   bounds_cx = 233
   bounds_cy = 179
+  bounds_cxmin = 233
+  bounds_cymin = 179
   anchors = [an_left, an_top, an_bottom]
   container.optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_subfocus, ow_mousetransparent, ow_destroywidgets]
   container.frame.localprops = [frl_framewidth]
+  container.frame.localprops1 = []
   container.frame.sbhorz.options = [sbo_thumbtrack, sbo_moveauto]
   container.frame.sbvert.options = [sbo_thumbtrack, sbo_moveauto]
   container.bounds = (
@@ -22,6 +25,7 @@ object msepopupcalendarfo: tpopupcalendarfo
   )
   optionswindow = [wo_popup, wo_buttonendmodal]
   options = [fo_freeonclose, fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
+  windowopacity = -Inf
   oncreate = formoncreate
   moduleclassname = 'tmseform'
   object grid: tdrawgrid
@@ -32,6 +36,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     frame.sbvert.options = [sbo_thumbtrack]
     frame.sbhorz.options = [sbo_thumbtrack]
     frame.localprops = [frl_levelo, frl_leveli, frl_framewidth, frl_colorframe, frl_fileft, frl_fitop, frl_firight, frl_fibottom]
+    frame.localprops1 = []
     taborder = 6
     bounds_x = 0
     bounds_y = 22
@@ -43,7 +48,7 @@ object msepopupcalendarfo: tpopupcalendarfo
     datacols.width = 32
     datacols.options = [co_readonly, co_drawfocus, co_savevalue, co_savestate]
     datacols.options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused, co1_rowreadonly]
-    datacols.items = <
+    datacols.items = <    
       item
         coloractive = -1879048185
         width = 32
@@ -51,7 +56,7 @@ object msepopupcalendarfo: tpopupcalendarfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused, co1_rowreadonly]
         focusrectdist = 1
         ondrawcell = drawcell
-      end
+      end    
       item
         coloractive = -1879048185
         width = 32
@@ -59,7 +64,7 @@ object msepopupcalendarfo: tpopupcalendarfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused, co1_rowreadonly]
         focusrectdist = 1
         ondrawcell = drawcell
-      end
+      end    
       item
         coloractive = -1879048185
         width = 32
@@ -67,7 +72,7 @@ object msepopupcalendarfo: tpopupcalendarfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused, co1_rowreadonly]
         focusrectdist = 1
         ondrawcell = drawcell
-      end
+      end    
       item
         coloractive = -1879048185
         width = 32
@@ -75,7 +80,7 @@ object msepopupcalendarfo: tpopupcalendarfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused, co1_rowreadonly]
         focusrectdist = 1
         ondrawcell = drawcell
-      end
+      end    
       item
         coloractive = -1879048185
         width = 32
@@ -83,7 +88,7 @@ object msepopupcalendarfo: tpopupcalendarfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused, co1_rowreadonly]
         focusrectdist = 1
         ondrawcell = drawcell
-      end
+      end    
       item
         coloractive = -1879048185
         width = 32
@@ -91,7 +96,7 @@ object msepopupcalendarfo: tpopupcalendarfo
         options1 = [co1_rowfont, co1_rowcolor, co1_zebracolor, co1_rowcolorfocused, co1_rowreadonly]
         focusrectdist = 1
         ondrawcell = drawcell
-      end
+      end    
       item
         linewidth = 0
         coloractive = -1879048185
@@ -102,29 +107,29 @@ object msepopupcalendarfo: tpopupcalendarfo
         ondrawcell = drawcell
       end>
     fixrows.count = 1
-    fixrows.items = <
+    fixrows.items = <    
       item
         height = 21
         captions.count = 7
-        captions.items = <
+        captions.items = <        
           item
             options = []
-          end
+          end        
           item
             options = []
-          end
+          end        
           item
             options = []
-          end
+          end        
           item
             options = []
-          end
+          end        
           item
             options = []
-          end
+          end        
           item
             options = []
-          end
+          end        
           item
             options = []
           end>
@@ -170,9 +175,9 @@ object msepopupcalendarfo: tpopupcalendarfo
     bounds_y = 0
     bounds_cx = 11
     bounds_cy = 11
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_arrowupsmall
-    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     onexecute = moup
   end
   object tstockglyphbutton2: tstockglyphbutton
@@ -182,9 +187,9 @@ object msepopupcalendarfo: tpopupcalendarfo
     bounds_y = 11
     bounds_cx = 11
     bounds_cy = 11
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_arrowdownsmall
-    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     onexecute = modown
   end
   object buup: tstockglyphbutton
@@ -194,9 +199,9 @@ object msepopupcalendarfo: tpopupcalendarfo
     bounds_y = 0
     bounds_cx = 11
     bounds_cy = 11
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_arrowupsmall
-    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     onexecute = yearup
   end
   object budo: tstockglyphbutton
@@ -205,9 +210,9 @@ object msepopupcalendarfo: tpopupcalendarfo
     bounds_y = 11
     bounds_cx = 11
     bounds_cy = 11
+    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     state = [as_localimagelist, as_localimagenr, as_localonexecute]
     glyph = stg_arrowdownsmall
-    options = [bo_executeonclick, bo_executeonkey, bo_executeonshortcut, bo_executedefaultonenterkey, bo_nocandefocus]
     onexecute = yeardown
   end
 end

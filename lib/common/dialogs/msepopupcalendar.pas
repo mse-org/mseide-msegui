@@ -12,10 +12,10 @@ unit msepopupcalendar;
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 interface
 uses
- msegui,mseclasses,mseforms,msegraphutils,msegrids,msedispwidgets,classes,
- mclasses,
+ classes,mclasses,
+ msegui,mseclasses,mseforms,msegraphutils,msegrids,msedispwidgets,mseglob,
  msegraphics,mseeditglob,msetypes,msedropdownlist,msetimer,msesimplewidgets,
- mseinplaceedit,mseevent,mseguiglob,msegridsglob,msestrings;
+ mseinplaceedit,mseevent,mseguiglob,msegridsglob,msestrings,msedialog;
 
 const
  popupcalendarwidth = 233;
@@ -41,13 +41,15 @@ type
                                         write freddayofweek default dw_sun;
  end;
 
- tpopupcalendarfo = class(tmseform)
+////////////////////////////////////////////
+ tpopupcalendarfo = class (tdialogform)  // tmseform)
+////////////////////////////////////////////
    grid: tdrawgrid;
    monthdisp: tdatetimedisp;
-   tstockglyphbutton1: tstockglyphbutton;
-   tstockglyphbutton2: tstockglyphbutton;
-   buup: tstockglyphbutton;
-   budo: tstockglyphbutton;
+   bmup: tstockglyphbutton;
+   bmdo: tstockglyphbutton;
+   byup: tstockglyphbutton;
+   bydo: tstockglyphbutton;
    yeardisp: tdatetimedisp;
    procedure formoncreate(const sender: TObject);
    procedure drawcell(const sender: tcol; const canvas: tcanvas;
@@ -64,6 +66,10 @@ type
    fvalueupdating: integer;
    fcontroller: tcalendarcontroller;
    fformatedit: msestring;
+////////////////////////////////////////////
+// intermediate storage field for use as self-contained dialog...
+   fedit: tWidget;
+////////////////////////////////////////////
    procedure setvalue(const avalue: tdatetime);
    function isinvalidcell(const acell: gridcoordty): boolean;
   protected
@@ -77,6 +83,11 @@ type
   public
    constructor create(const aowner: tcomponent;
                        const acontroller: tcalendarcontroller); reintroduce;
+////////////////////////////////////////////
+   CONSTRUCTOR create (CONST aowner: tcomponent;
+                       CONST acontroller: tcalendarcontroller;
+                       CONST StatName: msestring); OVERLOAD;
+////////////////////////////////////////////
    property value: tdatetime read fvalue write setvalue;
    property formatedit: msestring read fformatedit write fformatedit;
  end;
@@ -174,6 +185,25 @@ begin
 // freddayofweeknum:= ord(fcontroller.freddayofweek)+1;
  inherited create(aowner);
 end;
+
+////////////////////////////////////////////
+CONSTRUCTOR tpopupcalendarfo.create (CONST aowner: tcomponent;
+                                     CONST acontroller: tcalendarcontroller;
+                                     CONST StatName: msestring);
+ BEGIN
+   IF assigned (aowner) THEN BEGIN
+////////////////////////////////////////////
+// special handling for use as self-contained dialog...
+     fedit:= acontroller.fowner;
+     acontroller.fowner:= NIL;
+////////////////////////////////////////////
+     fcontroller:= acontroller;
+     fdayofweekoffset:= ord (fcontroller. ffirstdayofweek)+ 1;
+     INHERITED create (aowner, StatName, dp_none);
+   END
+   ELSE create (NIL, acontroller);
+ END;
+////////////////////////////////////////////
 
 procedure tpopupcalendarfo.formoncreate(const sender: TObject);
 var
@@ -276,14 +306,28 @@ procedure tpopupcalendarfo.cellevent(const sender: TObject;
 begin
  if (fcontroller <> nil) and iscellclick(info,[ccr_buttonpress]) then begin
   setcellvalue;
+////////////////////////////////////////////
+// special handling for use as self-contained dialog...
+  IF fcontroller.fowner <> NIL THEN
+////////////////////////////////////////////
   options:= options - [fo_freeonclose];
   hide; //do not show error messages above the popup window
+
   if fcontroller.setdropdowntext(
                    mseformatstr.datetimetostring(fvalue,fformatedit),
                                           true,false,key_none) then begin
 //   release;
   end;
   release;
+////////////////////////////////////////////
+// special handling for use as self-contained dialog...
+  IF fcontroller.fowner = NIL THEN BEGIN
+    WITH fcontroller DO fowner:= fedit;
+    IF info.cell.row < 0
+      THEN close (mr_cancel)
+      ELSE close (mr_ok);
+  END;
+////////////////////////////////////////////
  end
  else begin
   with info do begin
@@ -345,8 +389,8 @@ procedure tpopupcalendarfo.mousewheelevent(var info: mousewheeleventinfoty);
   with info do begin
    result:= (shiftstate = [ss_ctrl]) or
                  pointinrect(pos,yeardisp.widgetrect) or
-                 pointinrect(pos,buup.widgetrect) or
-                 pointinrect(pos,budo.widgetrect);
+                 pointinrect(pos,byup.widgetrect) or
+                 pointinrect(pos,bydo.widgetrect);
   end;
  end;
 

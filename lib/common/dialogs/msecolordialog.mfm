@@ -4,6 +4,8 @@ object colordialogfo: tcolordialogfo
   bounds_y = 234
   bounds_cx = 338
   bounds_cy = 298
+  bounds_cxmin = 338
+  bounds_cymin = 298
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.onlayout = layoutexe
@@ -15,7 +17,6 @@ object colordialogfo: tcolordialogfo
   )
   onshortcut = shortcutexe
   options = [fo_closeonesc, fo_localshortcuts, fo_autoreadstat, fo_autowritestat, fo_savepos]
-  statfile = tstatfile1
   caption = 'Select Color'
   windowopacity = -Inf
   onloaded = loadedexe
@@ -26,9 +27,9 @@ object colordialogfo: tcolordialogfo
     optionswidget1 = [ow1_fontglyphheight, ow1_autoscale, ow1_autowidth]
     taborder = 6
     bounds_x = 4
-    bounds_y = 236
+    bounds_y = 237
     bounds_cx = 97
-    bounds_cy = 19
+    bounds_cy = 18
     bounds_cxmin = 97
     anchors = [an_left, an_bottom]
     state = [as_localinvisible, as_localcaption, as_localonexecute]
@@ -52,7 +53,7 @@ object colordialogfo: tcolordialogfo
       end>
     caption = 'Color &Picker'
     onexecute = colorpickexe
-    reffontheight = 15
+    reffontheight = 14
   end
   object colorarea: tpaintbox
     optionswidget = [ow_destroywidgets]
@@ -68,13 +69,13 @@ object colordialogfo: tcolordialogfo
       0
       0
       0
-      18
+      17
     )
     taborder = 5
     bounds_x = 51
     bounds_y = 3
     bounds_cx = 50
-    bounds_cy = 227
+    bounds_cy = 226
     anchors = [an_left, an_top, an_bottom]
   end
   object colorareabefore: tpaintbox
@@ -91,21 +92,21 @@ object colordialogfo: tcolordialogfo
       0
       0
       0
-      18
+      17
     )
     taborder = 4
     bounds_x = 3
     bounds_y = 3
     bounds_cx = 50
-    bounds_cy = 227
+    bounds_cy = 226
     anchors = [an_left, an_top, an_bottom]
   end
   object tlayouter1: tlayouter
     taborder = 1
     bounds_x = 112
-    bounds_y = 217
+    bounds_y = 219
     bounds_cx = 221
-    bounds_cy = 38
+    bounds_cy = 37
     anchors = [an_left, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     linktop = tlayouter3
@@ -119,19 +120,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        18
+        17
         0
         0
       )
       taborder = 5
       bounds_x = 185
-      bounds_y = -1
+      bounds_y = 0
       bounds_cx = 36
-      bounds_cy = 39
+      bounds_cy = 37
       onchange = rgbchange
       ondataentered = componentsdataentered
       valuemax = 255
-      reffontheight = 15
+      reffontheight = 14
     end
     object green: tintegeredit
       color = -2147483645
@@ -141,19 +142,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        18
-        1
+        17
+        0
         0
       )
       taborder = 4
       bounds_x = 148
-      bounds_y = -1
-      bounds_cx = 37
-      bounds_cy = 39
+      bounds_y = 0
+      bounds_cx = 36
+      bounds_cy = 37
       onchange = rgbchange
       ondataentered = componentsdataentered
       valuemax = 255
-      reffontheight = 15
+      reffontheight = 14
     end
     object red: tintegeredit
       color = -2147483645
@@ -163,19 +164,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        18
+        17
         0
         0
       )
       taborder = 3
       bounds_x = 111
-      bounds_y = -1
+      bounds_y = 0
       bounds_cx = 36
-      bounds_cy = 39
+      bounds_cy = 37
       onchange = rgbchange
       ondataentered = componentsdataentered
       valuemax = 255
-      reffontheight = 15
+      reffontheight = 14
     end
     object bright: tintegeredit
       color = -2147483645
@@ -185,19 +186,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        18
+        17
         0
         0
       )
       taborder = 2
       bounds_x = 72
-      bounds_y = -1
+      bounds_y = 0
       bounds_cx = 36
-      bounds_cy = 39
+      bounds_cy = 37
       onchange = hsbchange
       ondataentered = componentsdataentered
       valuemax = 100
-      reffontheight = 15
+      reffontheight = 14
     end
     object sat: tintegeredit
       color = -2147483645
@@ -207,19 +208,19 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        18
+        17
         0
         0
       )
       taborder = 1
       bounds_x = 36
-      bounds_y = -1
+      bounds_y = 0
       bounds_cx = 36
-      bounds_cy = 39
+      bounds_cy = 37
       onchange = hsbchange
       ondataentered = componentsdataentered
       valuemax = 100
-      reffontheight = 15
+      reffontheight = 14
     end
     object hue: tintegeredit
       color = -2147483645
@@ -229,25 +230,25 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        18
+        17
         0
         0
       )
       bounds_x = 0
-      bounds_y = -1
+      bounds_y = 0
       bounds_cx = 36
-      bounds_cy = 39
+      bounds_cy = 37
       onchange = hsbchange
       ondataentered = componentsdataentered
       valuemax = 360
-      reffontheight = 15
+      reffontheight = 14
     end
   end
   object tlayouter2: tlayouter
     bounds_x = 11
-    bounds_y = 255
+    bounds_y = 256
     bounds_cx = 322
-    bounds_cy = 39
+    bounds_cy = 38
     anchors = [an_left, an_bottom]
     optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
     font.name = 'stf_default'
@@ -263,12 +264,12 @@ object colordialogfo: tcolordialogfo
       bounds_x = 272
       bounds_y = 17
       bounds_cx = 50
-      bounds_cy = 22
+      bounds_cy = 21
       bounds_cxmin = 50
       state = [as_localcaption, as_localcolor]
       caption = '&Cancel'
       modalresult = mr_cancel
-      reffontheight = 15
+      reffontheight = 14
     end
     object ok: tbutton
       optionswidget1 = [ow1_fontglyphheight, ow1_autoscale]
@@ -276,11 +277,11 @@ object colordialogfo: tcolordialogfo
       bounds_x = 216
       bounds_y = 17
       bounds_cx = 50
-      bounds_cy = 22
+      bounds_cy = 21
       state = [as_default, as_localdefault, as_localcaption]
       caption = '&OK'
       modalresult = mr_ok
-      reffontheight = 15
+      reffontheight = 14
     end
     object colored: tcoloredit
       frame.caption = 'Color'
@@ -299,7 +300,7 @@ object colordialogfo: tcolordialogfo
       frame.buttonellipse.imagenr = 17
       frame.outerframe = (
         0
-        18
+        17
         0
         0
       )
@@ -307,12 +308,12 @@ object colordialogfo: tcolordialogfo
       bounds_x = 102
       bounds_y = 0
       bounds_cx = 108
-      bounds_cy = 39
+      bounds_cy = 37
       optionsedit = [oe_undoonesc, oe_closequery, oe_checkmrcancel, oe_shiftreturn, oe_eatreturn, oe_resetselectonexit, oe_exitoncursor, oe_endonenter, oe_autoselect, oe_autoselectonfirstclick, oe_focusrectonreadonly, oe_hintclippedtext]
       onchange = colorchangeev
       ondataentered = coloreddataentered
       dropdown.options = [deo_autodropdown, deo_keydropdown, deo_cliphint]
-      reffontheight = 15
+      reffontheight = 14
     end
     object rgbed: tintegeredit
       frame.caption = 'RGB'
@@ -321,18 +322,18 @@ object colordialogfo: tcolordialogfo
       frame.localprops1 = []
       frame.outerframe = (
         0
-        18
+        17
         0
         0
       )
       bounds_x = 32
       bounds_y = 0
       bounds_cx = 68
-      bounds_cy = 39
+      bounds_cy = 37
       ondataentered = rgbeddataentered
       base = nb_hex
       bitcount = 24
-      reffontheight = 15
+      reffontheight = 14
     end
   end
   object tlayouter3: tlayouter
@@ -340,7 +341,7 @@ object colordialogfo: tcolordialogfo
     bounds_x = 112
     bounds_y = 0
     bounds_cx = 221
-    bounds_cy = 217
+    bounds_cy = 219
     optionslayout = [lao_aligny]
     align_mode = wam_start
     object sliderblue: tslider
@@ -352,7 +353,7 @@ object colordialogfo: tcolordialogfo
       bounds_x = 196
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 212
+      bounds_cy = 214
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       scrollbar.face.image.transparentcolor = -2147483648
@@ -382,7 +383,7 @@ object colordialogfo: tcolordialogfo
       bounds_x = 160
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 212
+      bounds_cy = 214
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       scrollbar.face.image.transparentcolor = -2147483648
@@ -412,7 +413,7 @@ object colordialogfo: tcolordialogfo
       bounds_x = 124
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 212
+      bounds_cy = 214
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       scrollbar.face.image.transparentcolor = -2147483648
@@ -442,7 +443,7 @@ object colordialogfo: tcolordialogfo
       bounds_x = 83
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 212
+      bounds_cy = 214
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       scrollbar.face.image.transparentcolor = -2147483648
@@ -472,7 +473,7 @@ object colordialogfo: tcolordialogfo
       bounds_x = 48
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 212
+      bounds_cy = 214
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       scrollbar.face.image.transparentcolor = -2147483648
@@ -501,7 +502,7 @@ object colordialogfo: tcolordialogfo
       bounds_x = 12
       bounds_y = 3
       bounds_cx = 15
-      bounds_cy = 212
+      bounds_cy = 214
       anchors = [an_left, an_top, an_bottom]
       ondataentered = componentsdataentered
       scrollbar.face.image.transparentcolor = -2147483648
@@ -545,11 +546,5 @@ object colordialogfo: tcolordialogfo
     bounds_cx = 100
     bounds_cy = 209
     anchors = [an_left, an_top, an_bottom]
-  end
-  object tstatfile1: tstatfile
-    filename = 'colordialog.sta'
-    options = [sfo_memory]
-    left = 24
-    top = 104
   end
 end

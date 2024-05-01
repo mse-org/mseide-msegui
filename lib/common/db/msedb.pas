@@ -2732,6 +2732,7 @@ begin
                  (mstr1 <> tmsestringfield(field).asmsestring);
   end
   else begin
+   // Warning: Case statement does not handle all possible cases
    case field.datatype of
     ftString,ftFixedChar,ftmemo,ftblob,ftguid: begin
      str1:= field.asstring;
@@ -2777,7 +2778,8 @@ begin
  //    ftADT, ftArray, ftReference,
  //    ftDataSet, ftOraBlob, ftOraClob, ftVariant, ftInterface,
  //    ftIDispatch, ftGuid, ftTimeStamp, ftFMTBcd);
- 
+    // Warning: Case statement does not handle all possible cases
+    else { ignored here, cannot occur (?) };
    end;
   end;
   ds1.restorestate(statebefore); 
@@ -5373,6 +5375,7 @@ function tmsedatetimefield.gettext1(const r: tdatetime;
                                   const adisplaytext: boolean): msestring;
 var
  f: string;
+ d: integer;
 begin
  if adisplaytext and (length(displayformat) <> 0) then begin
   f:= displayformat;
@@ -5381,6 +5384,29 @@ begin
   case datatype of
    fttime: f:= {$ifdef FPC}defaultformatsettings.{$endif}shorttimeformat;
    ftdate: f:= {$ifdef FPC}defaultformatsettings.{$endif}shortdateformat;
+
+//////////////////////////////////////////////
+   ftdatetime:
+ // Added for recent postgresql versions (31. Mar 2024 122:54:58):
+   // Interval recognized by VERY arbitrary date value
+   if trunc (r- 0.25) < -655699 then begin  // (now ()- (655699 days) -> 0229-01-02 @ 2024-03-31)
+    result:= ''; f:= {$ifdef FPC}defaultformatsettings.{$endif}shorttimeformat;
+    d:= -((integer (hi (int64 (r))- 1)+ 1054601894 {"guessed" offset}) DIV 2);
+
+    if d <> 0 then begin
+      result:= inttostr (d- ord (d < 0.0))+ ' day';
+      if (d < -1) or (1 < d) then result:= result+ 's';
+      result:= result+ ' ';
+    end;
+
+    result:= result+ formatdatetimemse (msestring (f), r+ 655699.0 {any number of full days...?});
+    exit;
+    // NO more  processing to be done here!
+   end
+   else begin
+    f:= 'c';
+   end;
+//////////////////////////////////////////////
    else f:= 'c'
   end;
  end;

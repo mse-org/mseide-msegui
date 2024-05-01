@@ -13,12 +13,13 @@ unit msecolordialog;
 
 interface
 uses
- msegui,mseclasses,mseforms,msegraphedits,msewidgets,msesimplewidgets,
- msedataedits,msegraphics,mseglob,mseguiglob,msedialog,classes,mclasses,
- msetypes,msedropdownlist,msegrids,msestrings,mseedit,msestat,msestatfile,
+ sysutils,classes,mclasses,msegui,mseclasses,mseforms,msegraphedits,msewidgets,
+ msesimplewidgets,msedataedits,msegraphics,mseglob,mseguiglob,msedialog,
+ msetypes,msedropdownlist,msegrids,msestrings,mseedit,msestat,
  msegraphutils,msemenus,mseevent,mseificomp,mseificompglob,mseifiglob,
  msesplitter,msedispwidgets,mserichstring,msescrollbar;
 
+// NOT USED HERE - TO BE DELETED!
 const
  colordialogstatname = 'colordialog.sta';
 
@@ -111,8 +112,9 @@ type
    property frame;
  end;
 
- tcolordialogfo = class(tmseform)
-   tstatfile1: tstatfile;
+////////////////////////////////////////////
+ tcolordialogfo = class (tdialogform)  // tmseform)
+////////////////////////////////////////////
    tlayouter1: tlayouter;
    blue: tintegeredit;
    green: tintegeredit;
@@ -164,15 +166,26 @@ type
    fupdating: boolean;
    foncolorchange: coloreventty;
    procedure updatecomponents;
+////////////////////////////////////////////
+   FUNCTION  getcolored: colorty;
+   PROCEDURE setcolored (currcolor: colorty);
+////////////////////////////////////////////
   protected
    fcolorpicking: boolean;
    fcolorbefore: colorty;
    procedure begincolorpick();
    procedure endcolorpick();
    procedure dochange();
+////////////////////////////////////////////
+  public
+   FUNCTION  Execute: modalresultty; OVERRIDE;
+////////////////////////////////////////////
   published
    property oncolorchange: coloreventty read foncolorchange
                                                   write foncolorchange;
+////////////////////////////////////////////
+   property currcolor: colorty read getcolored write setcolored;
+////////////////////////////////////////////
  end;
 
  tcolordropdowncontroller = class(tnocolsdropdownlistcontroller)
@@ -186,9 +199,15 @@ type
    property options default defaultautodropdownoptions;
  end;
 
+// function colordialog(var acolor: colorty;
+//                      const aoncolorchange: coloreventty = nil;
+//                      const aoptions: colordialogoptionsty = []): modalresultty;
+////////////////////////////////////////////
 function colordialog(var acolor: colorty;
                       const aoncolorchange: coloreventty = nil;
-                     const aoptions: colordialogoptionsty = []): modalresultty;
+                     const aoptions: colordialogoptionsty = [];
+                     providedform: tcolordialogfo = nil): modalresultty;
+////////////////////////////////////////////
 //threadsafe
 procedure paintcolorimage(const sender: twidget; const canvas: tcanvas;
                                                     const acolor: colorty);
@@ -199,7 +218,7 @@ implementation
 uses
  msecolordialog_mfm,
  msestockobjects,  
- mseformatstr,sysutils,msepointer,
+ mseformatstr,{sysutils,}msepointer,
  msekeyboard,mseguiintf,mseeditglob;
 type
  twidget1 = class(twidget);
@@ -214,16 +233,28 @@ type
                 const acontroller: tcustomdropdownlistcontroller); override;
  end;
 
+// function colordialog(var acolor: colorty;
+//                      const aoncolorchange: coloreventty = nil;
+//                      const aoptions: colordialogoptionsty = []): modalresultty;
+////////////////////////////////////////////
 function colordialog(var acolor: colorty;
                       const aoncolorchange: coloreventty = nil;
-                      const aoptions: colordialogoptionsty = []): modalresultty;
+                     const aoptions: colordialogoptionsty = [];
+                     providedform: tcolordialogfo = nil): modalresultty;
+////////////////////////////////////////////
 var
  fo: tcolordialogfo;
  col1: rgbtriplety;
 begin
  application.lock;
  try
-  fo:= tcolordialogfo.create(nil);
+////////////////////////////////////////////
+  if assigned (providedform)
+   then fo:= providedform
+   else
+////////////////////////////////////////////
+  fo:= tcolordialogfo.create (nil, dp_mousepos);
+//  fo:= tcolordialogfo.create(nil);
   fo.oncolorchange:= aoncolorchange;
   fo.colored.options:= coloreditoptionsty(aoptions);
   try
@@ -249,6 +280,9 @@ begin
     end;
    end;
   finally
+////////////////////////////////////////////
+   if not assigned (providedform) then
+////////////////////////////////////////////
    fo.free;
   end;
  finally
@@ -952,4 +986,43 @@ begin
  dochange();
 end;
 
+////////////////////////////////////////////
+FUNCTION tcolordialogfo.getcolored: colorty;
+ begin
+   getcolored:= colored.value;
+ end;
+
+PROCEDURE tcolordialogfo.setcolored (currcolor: colorty);
+ begin
+   colored.value:= currcolor;
+ end;
+
+FUNCTION tcolordialogfo.Execute: modalresultty;
+ VAR
+   ColorRGB: rgbtriplety;
+ BEGIN
+   application.lock;
+   TRY
+     TRY
+       TRY
+         ColorRGB:= colortorgb (currcolor);
+         colored.value:= currcolor;
+       EXCEPT
+         fillchar (ColorRGB, sizeof (ColorRGB), 0);
+         colored.value:= 0;
+       END;
+       rgbed.value:= integer (ColorRGB);
+       colorareabefore.frame.colorclient:= colorty (ColorRGB);
+       red.value:=   ColorRGB.red;
+       green.value:= ColorRGB.green;
+       blue.value:=  ColorRGB.blue;
+       Result:= show (true);
+       IF Result = mr_ok THEN currcolor:= colored.value;
+     FINALLY
+     END;
+   FINALLY
+     application.unlock;
+   END;
+ END;
+////////////////////////////////////////////
 end.
