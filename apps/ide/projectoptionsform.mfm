@@ -1991,7 +1991,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 2
               bounds_x = 0
-              bounds_y = 216
+              bounds_y = 202
               bounds_cx = 830
               bounds_cy = 39
               anchors = [an_top]
@@ -2135,7 +2135,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 3
               bounds_x = 0
-              bounds_y = 248
+              bounds_y = 255
               bounds_cx = 830
               bounds_cy = 39
               anchors = [an_top]
@@ -2242,7 +2242,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 1
               bounds_x = 0
-              bounds_y = 171
+              bounds_y = 157
               bounds_cx = 610
               bounds_cy = 45
               optionsscale = [osc_expandx, osc_shrinkx, osc_expandy, osc_shrinky]
@@ -2394,7 +2394,7 @@ object projectoptionsfo: tprojectoptionsfo
               taborder = 4
               bounds_x = 1
               bounds_y = 1
-              bounds_cx = 633
+              bounds_cx = 617
               bounds_cy = 117
               anchors = [an_left, an_top, an_right]
               optionsscale = [osc_expandy, osc_shrinky, osc_expandshrinkx, osc_expandshrinky]
@@ -2430,7 +2430,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 78
-                bounds_cx = 633
+                bounds_cx = 617
                 bounds_cy = 39
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -2464,7 +2464,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 39
-                bounds_cx = 633
+                bounds_cx = 617
                 bounds_cy = 39
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]
@@ -2500,7 +2500,7 @@ object projectoptionsfo: tprojectoptionsfo
                 onshowhint = hintexpandedmacros
                 bounds_x = 0
                 bounds_y = 0
-                bounds_cx = 633
+                bounds_cx = 617
                 bounds_cy = 39
                 anchors = [an_left, an_top, an_right]
                 textflags = [tf_ycentered, tf_noselect, tf_ellipseleft]

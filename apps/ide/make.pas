@@ -38,6 +38,8 @@ function runscript(const script: filenamety;
                              const clearscreen,setmakedir: boolean): boolean;
 {$ifdef darwin}
 procedure RunWithoutDebugMac(Const AFilename: String; Aparam: String);
+ var 
+ targetcons: boolean = false;
 {$endif}                             
 
 implementation
@@ -45,6 +47,7 @@ uses
   {$IFDEF darwin}
    Process,
    debuggerform,
+   targetconsole,
   {$ENDIF}
  mseprocutils,main,projectoptionsform,sysutils,msegrids,
  sourceform,mseeditglob,msefileutils,msesys,
@@ -134,13 +137,14 @@ begin
 
   AProcess := TProcess.Create(Nil);
 
-        {$WARN SYMBOL_DEPRECATED OFF}
+  {$WARN SYMBOL_DEPRECATED OFF}
   AProcess.CommandLine := ansistring(tosysfilepath(filepath(UTF8Decode(AFilename), fk_file, True))) + ' ' + Aparam;
-       {$WARN SYMBOL_DEPRECATED ON}
+  {$WARN SYMBOL_DEPRECATED ON}
 
   AProcess.Options := [poUsePipes];
 
-  messagefo.messages.clear;
+  if targetcons  = false then
+     messagefo.messages.clear else targetconsolefo.clear;
 
   application.processmessages;
 
@@ -161,19 +165,24 @@ begin
 
     AStringList.LoadFromStream(OutputStream2);
 
-    messagefo.addtext(AStringList.text);
+    if targetcons  = false then
+       messagefo.addtext(AStringList.text) else   
+       targetconsolefo.addtext(AStringList.text);
 
     application.processmessages;
 
   until BytesRead = 0;
  
-  messagefo.messages.clear;
+  if targetcons  = false then
+    messagefo.messages.clear else targetconsolefo.clear;
 
   OutputStream.Position := 0;
   
   AStringList.LoadFromStream(OutputStream);
 
-  messagefo.addtext(AStringList.text);
+  if targetcons  = false then
+       messagefo.addtext(AStringList.text) else   
+       targetconsolefo.addtext(AStringList.text);
 
   mainfo.setstattext('Process done', mtk_finished);
 
@@ -182,6 +191,7 @@ begin
   AStringList.Free;
   AProcess.Free;
   OutputStream.Free;
+  targetcons  := false;
 end;
 {$endif} 
 
@@ -416,10 +426,11 @@ begin
   try
 
  {$ifdef darwin}
+  targetcons  := false;
   mainfo.setstattext('Compiling ' + gettargetfile + '...' , mtk_signal);
   RunWithoutDebugMac(ansistring(acommandline), '');
  {$else}
-   procid:= execmse2(UTF8Decode(acommandline),nil,messagepipe,messagepipe,-1,[exo_inactive,exo_tty]);
+  procid:= execmse2(UTF8Decode(acommandline),nil,messagepipe,messagepipe,-1,[exo_inactive,exo_tty]);
  {$endif} 
     
   except

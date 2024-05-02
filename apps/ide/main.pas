@@ -1297,12 +1297,8 @@ end;
 
 procedure tmainfo.startconsole();
 begin
-  {$ifndef darwin}
  targetconsolefo.clear;
- if projectoptions.d.showconsole then begin
- targetconsolefo.activate;
- end;
- {$endif} 
+ if projectoptions.d.showconsole then targetconsolefo.activate;
 end;
 
 function tmainfo.loadexec(isattach: boolean;

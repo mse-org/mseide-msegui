@@ -19,6 +19,8 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
+projectdir=/home/fred/mseide-msegui/apps/demo
+projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
 mainfile=demo.pas
 targetfile=demo${EXEEXT}
 messageoutputfile=
@@ -549,6 +551,7 @@ files=
  a=0,8229,6,Text Files
  )
 [componentstore]
+storedir=/home/fred/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -571,7 +574,7 @@ editpos=1
  0,2
 bookmarks0=0
 sourcefiles=1
- ${PROJECTDIR}demo.pas
+ /home/fred/mseide-msegui/apps/demo/demo.pas
 relpaths=1
  demo.pas
 ismoduletexts=1
@@ -584,7 +587,7 @@ nomenumodules=0
 firsttab=0
 index=0
 [layout]
-windowlayout=525
+windowlayout=526
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -702,7 +705,7 @@ windowlayout=525
  [findinfilefo]
  splitdir=0
  useroptions=268451947
- stackedunder=
+ stackedunder=confideufo
  parent=
  mdistate=0
  nx=0
@@ -718,7 +721,7 @@ windowlayout=525
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=conflangfo
+ stackedunder=componentpalettefo
  parent=
  mdistate=3
  nx=0
@@ -802,7 +805,7 @@ windowlayout=525
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -988,7 +991,7 @@ windowlayout=525
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=confdebuggerfo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=0
  nx=0
@@ -1045,8 +1048,9 @@ windowlayout=525
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=${PROJECTDIR}/demo.pas
- history=2
+ value=/home/fred/mseide-msegui/apps/demo/demo.pas
+ history=3
+  /home/fred/mseide-msegui/apps/demo/demo.pas
   ${PROJECTDIR}/demo.pas
   ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
@@ -1078,7 +1082,7 @@ windowlayout=525
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=componentpalettefo
+ stackedunder=confdebuggerfo
  parent=
  mdistate=0
  nx=0

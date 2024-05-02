@@ -682,10 +682,14 @@ begin
  {$else}
     if fileexists(gettargetfile) then
     begin
+    targetcons  := true;
+    targetconsolefo.clear;
+    if projectoptions.d.showconsole then targetconsolefo.activate;
     mainfo.setstattext('Running ' + gettargetfile + '...' ,mtk_running);
     RunWithoutDebugMac(gettargetfile, '')
     end else 
     begin
+    targetcons  := false;
     mainfo.setstattext('Compiling ' + gettargetfile + '...' ,mtk_running);
     RunWithoutDebugMac(buildmakecommandline(1), '');
     end;
