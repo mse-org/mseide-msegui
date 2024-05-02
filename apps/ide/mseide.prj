@@ -115,7 +115,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=2
+ index=3
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=921
  width0=47
@@ -139,8 +139,8 @@ options=114
  index=2
  [projectoptionsfo]
  stackedunder=
- x=53
- y=82
+ x=5
+ y=135
  cx=981
  cy=634
 settings=8
@@ -480,14 +480,14 @@ makeoptionson=14
  0
  0
 compilerusedon=29
- 3635
+ 3647
  0
  0
  0
  0
  64
  128
- 264
+ 256
  0
  0
  0
@@ -556,7 +556,7 @@ unitdirson=5
  197631
  196800
  66367
- 197631
+ 197568
  66559
 macroon=0
 macronames=0
@@ -759,7 +759,6 @@ files=
  a=0,8228,6,Text Files
  )
 [componentstore]
-filename=
 [components]
 [selecteditpage]
 colwidth=100
@@ -814,7 +813,7 @@ nomenumodules=0
 firsttab=0
 index=0
 [layout]
-windowlayout=525
+windowlayout=526
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1181,23 +1180,7 @@ windowlayout=525
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
- filecolwidth=0
- x=0
- y=0
- cx=0
- cy=0
- filehistory=0
- filefilterindex=0
- filefilter=
  [componentstorefo.groupfiledialog]
- filecolwidth=0
- x=0
- y=0
- cx=0
- cy=0
- filehistory=0
- filefilterindex=0
- filefilter=
  [componentstorefo.compfiledialog]
  filenames=0
  filecolwidth=0
@@ -1254,12 +1237,12 @@ windowlayout=525
  mdistate=0
  nx=0
  ny=0
- ncx=1422
- ncy=64
+ ncx=1190
+ ncy=63
  x=0
  y=0
  cx=1160
- cy=63
+ cy=69
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1269,10 +1252,6 @@ windowlayout=525
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=mseide.pas
- history=2
-  mseide.pas
-  ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
