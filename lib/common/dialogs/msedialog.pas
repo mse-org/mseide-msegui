@@ -17,7 +17,7 @@ uses
 
  classes,mclasses,mseclasses,msegui,mseglob,mseguiglob,mseforms,
  msedataedits,mseedit,mseevent,msestat,msestatfile,msemenus,msestrings,
- mseeditglob,msetypes,msegraphutils,msegraphics, TypInfo, vectors;
+ mseeditglob,msegraphutils, msetypes;
 
 ////////////////////////////////////////////
 const
@@ -41,7 +41,7 @@ type
    doPrepareDialog:  mseDialogEventty;
    doEvaluateDialog: mseDialogResEventty;
 ////////////////////////////////////////////
-   procedure updatewindowinfo(var info: windowinfoty); override;
+   procedure updatewindowinfo (var info: windowinfoty); override;
    class function hasresource: boolean; override;
 ////////////////////////////////////////////
   private
@@ -264,7 +264,8 @@ FUNCTION keepOnScreen (CONST Sender: tcustommseform{twidget}; shift: PointTy): P
 
 implementation
 uses
- sysutils,msestockobjects,msekeyboard,mseformatstr,msereal;
+ sysutils,msestockobjects,msekeyboard,mseformatstr,msereal,
+ TypInfo, vectors;
 
 type
  tcustomdataedit1 = class(tcustomdataedit);
@@ -297,12 +298,35 @@ FUNCTION keepOnScreen (CONST Sender: tcustommseform{twidget}; shift: PointTy): P
 ////////////////////////////////////////////
 
 { tdialogform }
-
-procedure tdialogform.updatewindowinfo(var info: windowinfoty);
-begin
- inherited;
- info.options:= [wo_message];
-end;
+(*
+ windowoptionty = (wo_popup,wo_message,
+                   wo_desktop,wo_dock,wo_toolbar,wo_menu,
+                   wo_utility,wo_splash,wo_dialog,wo_dropdownmenu,
+                   wo_popupmenu,wo_tooltip,wo_notification,wo_combo,
+                   wo_dnd,
+                   wo_noframe, //uses motif hints on linux
+                   wo_noactivate,wo_overrideredirect,
+                   wo_embedded,
+                   wo_buttonendmodal,
+                   wo_groupleader,
+                   wo_taskbar,    //win32 only
+                   wo_notaskbar,
+                   wo_windowcentermessage, //showmessage centered in window
+                   wo_sysdnd, //activate system drag and drop (xdnd on Linux)
+                   wo_alwaysontop,
+                   wo_ellipse,
+                   wo_rounded,
+                   wo_transparentbackground,
+                   wo_transparentbackgroundellipse,
+                   wo_transparentbackgroundround, 
+                   wo_onalldesktops
+                   );
+*)
+procedure tdialogform.updatewindowinfo (var info: windowinfoty);
+ begin
+  inherited;
+  info.options:= [wo_message];
+ end;
 
 class function tdialogform.hasresource: boolean;
  begin
@@ -347,6 +371,9 @@ CONSTRUCTOR tdialogform.Create (Sender: TComponent; CONST StatName: msestring; w
 
 CONSTRUCTOR tdialogform.Create (Sender: TComponent; where: dialogposty);
  BEGIN
+
+   Options:= Options+ [fo_modal,fo_createmodal];  ////????
+
    INHERITED Create (Sender);
    IF (Sender <> NIL) OR
       NOT (where IN [dp_transientforcentered, dp_mainwindowcentered])
@@ -363,7 +390,7 @@ FUNCTION tdialogform.Execute: modalresultty;
    Application.lock;
    TRY
      IF assigned (doPrepareDialog) THEN doPrepareDialog (Self);
-     Result:= Show (TRUE, NIL);
+     Result:= Show (TRUE, Self.Window); //NIL);
      IF Result IN acceptingResults THEN BEGIN
       Result:= mr_Ok;
       IF assigned (doEvaluateDialog) THEN doEvaluateDialog (self, Result);
@@ -411,7 +438,8 @@ PROCEDURE tdialogform.showatmouse;
 
 PROCEDURE tdialogform.setPosition (where: dialogposty);
  BEGIN
-   Options:= Options+ [formoptionty (ord (where))];
+   if where <> dp_none then
+     Options:= Options+ [formoptionty (ord (where))];
 
    CASE where OF
      dp_mousepos:                 // MUST RELOCATE WINDOW itself too!

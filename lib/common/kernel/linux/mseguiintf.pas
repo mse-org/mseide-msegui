@@ -1762,7 +1762,9 @@ begin
 //  xflush(appdisp);    //windowmanager has to work
   sleep(5*int1);
   inc(int1);
- until (int1 > 45);
+//////////////////////////////////////////////
+ until (int1 > 5);	// ?? 45);
+//////////////////////////////////////////////
  if raiseexception and not result then begin
   raise exception.Create('not decorated');
  end;
@@ -3287,7 +3289,9 @@ begin
 {$endif}
 
 // xseticfocus(getic(id));
- waitfordecoration(id);
+//////////////////////////////////////////////
+///??? waitfordecoration(id);  -- causes unwarranted exceptions?
+//////////////////////////////////////////////
 
  if netatoms[net_active_window] <> 0 then begin
   sendnetrootcardinalmessage(netatoms[net_active_window],id,
@@ -6730,8 +6734,14 @@ var
 begin
  if xlockerror = 0 then begin
   xgeterrortext(display,errorevent^.error_code,@buffer,buflen);
-   sys_errorout('X Error: '+ pchar(@buffer) + '  '+inttostr(errorevent^.error_code)+
-        lineend +'  Major opcode:  '+inttostr(errorevent^.request_code)+lineend);
+//////////////////////////////////////////////
+ if (errorevent^.request_code <> 42 {X_SetInputFocus}) or
+    (errorevent^.error_code <> 8 {BadMatch}) // ignore this error...
+ then begin
+//////////////////////////////////////////////
+    sys_errorout('X Error: '+ pchar(@buffer) + '  '+inttostr(errorevent^.error_code)+
+         lineend +'  Major opcode:  '+inttostr(errorevent^.request_code)+lineend);
+  end;
  end;
  result:= 0;
 end;

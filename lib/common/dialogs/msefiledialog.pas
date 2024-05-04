@@ -182,10 +182,10 @@ type
    foptions: filedialogoptionsty;
 ////////////////////////////////////
    fwindowrect: rectty;
-////////////////////////////////////
-   fDialogPlacement: dialogposty;
-////////////////////////////////////
   public
+////////////////////////////////////
+   DialogPlacement: dialogposty;
+////////////////////////////////////
    constructor create(const aowner: tmsecomponent = nil;
                     const onchange: proceventty = nil); reintroduce;
    destructor destroy; override;
@@ -259,9 +259,6 @@ type
    property syscommandline: filenamety read getsysfilename; deprecated;
    property sysfilename: filenamety read getsysfilename;
    property params: msestring read fparams;
-////////////////////////////////////////////
-   PROPERTY DialogPlacement: dialogposty READ fDialogPlacement WRITE fDialogPlacement;
-////////////////////////////////////////////
   published
    property filename: filenamety read getfilename write setfilename;
    property lastdir: filenamety read flastdir write setlastdir;
@@ -679,11 +676,6 @@ procedure getfileicon(const info: fileinfoty; var imagelist: timagelist;
                             out imagenr: integer);
 procedure updatefileinfo(const item: tlistitem; const info: fileinfoty;
                    const withicon: boolean);
-
-////////////////////////////////////////////
-// VAR
-//   defaultDialogPlacement: dialogposty = dp_none;
-////////////////////////////////////////////
 
 implementation
 
@@ -2138,8 +2130,7 @@ begin
 ////////////////////////////////////
  if assigned (providedform)
    then fo:= providedform
-   else fo:= tfiledialogfo.create ({?nil?}fowner, fDialogPlacement);
-
+   else fo:= tfiledialogfo.create ({?nil?}fowner, DialogPlacement);
  fwindowrect:= fo.widgetrect;
 ////////////////////////////////////
 // fo:= tfiledialogfo.create(nil);
@@ -2162,9 +2153,6 @@ begin
   else begin
    fo.listview.directory:= flastdir;
   end;
-
-////????  IF assigned (providedform) THEN fo.widgetrect:= fwindowrect;
-
   if (fwindowrect.cx > 0) and (fwindowrect.cy > 0) then begin
    fo.widgetrect:= clipinrect(fwindowrect,application.screenrect(fo.window));
   end;
@@ -2546,7 +2534,9 @@ constructor tfiledialog.create(aowner: tcomponent);
 begin
 // foptionsedit:= defaultfiledialogoptionsedit;
  foptionsedit1:= defaultfiledialogoptionsedit1;
+////////////////////////////////////
  fcontroller:= tfiledialogcontroller.create({?nil?}aowner AS tmsecomponent);
+////////////////////////////////////
  inherited;
 end;
 
