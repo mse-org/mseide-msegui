@@ -182,6 +182,7 @@ type
    foptions: filedialogoptionsty;
 ////////////////////////////////////
    fwindowrect: rectty;
+////////////////////////////////////
   public
 ////////////////////////////////////
    DialogPlacement: dialogposty;
@@ -579,8 +580,8 @@ type
    procedure afterclosedrop(const sender: TObject);
 
 ////////////////////////////////////////////
-   procedure StateRead  (const sender: TObject; const reader: tStatReader);
-   procedure StateWrite (const sender: TObject; const writer: tStatWriter);
+   procedure StateRead  (const sender: TObject; const reader: tStatReader); VIRTUAL;
+   procedure StateWrite (const sender: TObject; const writer: tStatWriter); VIRTUAL;
 ////////////////////////////////////////////
 //   procedure resized    (const sender: TObject);
 ////////////////////////////////////////////
@@ -2128,9 +2129,10 @@ begin
   po1:= nil;
  end;
 ////////////////////////////////////
- if assigned (providedform)
-   then fo:= providedform
-   else fo:= tfiledialogfo.create ({?nil?}fowner, DialogPlacement);
+ if assigned (providedform) then begin
+   fo:= providedform; fo.setposition (DialogPlacement);
+ end
+ else fo:= tfiledialogfo.create ({?nil?}fowner, DialogPlacement);
  fwindowrect:= fo.widgetrect;
 ////////////////////////////////////
 // fo:= tfiledialogfo.create(nil);

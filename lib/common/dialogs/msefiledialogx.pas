@@ -625,8 +625,12 @@ type
     procedure onpain(const sender: twidget; const acanvas: tcanvas);
    
 ////////////////////////////////////////////
-   procedure StateRead  (const sender: TObject; const reader: tStatReader);
-   procedure StateWrite (const sender: TObject; const writer: tStatWriter);
+   procedure StateRead  (const sender: TObject; const reader: tStatReader); VIRTUAL;
+   procedure StateWrite (const sender: TObject; const writer: tStatWriter); VIRTUAL;
+////////////////////////////////////////////
+//   procedure resized    (const sender: TObject);
+////////////////////////////////////////////
+//   procedure componentevent(const event: tcomponentevent); override;
 ////////////////////////////////////////////
 
   private
@@ -1391,6 +1395,7 @@ CONSTRUCTOR tfiledialogxfo.Create (CONST Sender: TComponent; CONST StatName: mse
  BEGIN
    INHERITED Create (Sender, StatName, where);
    fcontroller:= tfiledialogxcontroller.create (Self);
+   fcontroller.DialogPlacement:= where;
  END;
 
 CONSTRUCTOR tfiledialogxfo.Create (CONST Sender: TComponent; where: dialogposty);
@@ -3074,10 +3079,10 @@ begin
     fowner.sendrootcomponentevent(tcomponentevent.Create(self), True);
 end;
 
-// function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty; overload;
+// function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty;
 ////////////////////////////////////
 function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty;
-                                         providedform: tfiledialogxfo = nil): modalresultty; overload;
+                                         providedform: tfiledialogxfo = nil): modalresultty;
 ////////////////////////////////////
 var
   po1: pmsestringarty;
@@ -3111,9 +3116,13 @@ begin
     po1 := nil;
 
 ////////////////////////////////////
- if assigned (providedform)
-  then fo:= providedform
-   else fo:= tfiledialogxfo.create ({?nil?}fowner, DialogPlacement);
+ if assigned (providedform) then begin
+   fo:= providedform; fo.setposition (DialogPlacement);
+writeln ('Using provided form');
+ end
+ else begin fo:= tfiledialogxfo.create ({?nil?}fowner, DialogPlacement);
+writeln ('Using NEW form');
+ end;
  fwindowrect:= fo.widgetrect;
 ////////////////////////////////////
 // fo:= tfiledialogxfo.create(nil);
@@ -3391,13 +3400,13 @@ begin
   end;
 end;
 
-// function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const acaption: msestring): modalresultty; overload;
+// function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const acaption: msestring): modalresultty;
 ////////////////////////////////////
 function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const acaption: msestring;
-                                         providedform: tfiledialogxfo = nil): modalresultty; overload;
+                                         providedform: tfiledialogxfo = nil): modalresultty;
 ////////////////////////////////////
 begin
-  Result := Execute(dialogkind, acaption, foptions);
+  Result := Execute(dialogkind, acaption, foptions, providedform);
 end;
 
 function tfiledialogxcontroller.actcaption (const dialogkind: filedialogkindty): msestring;
@@ -3418,21 +3427,21 @@ begin
   end;
 end;
 
-// function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty; overload;
+// function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty;
 ////////////////////////////////////
 function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty;
-                                         providedform: tfiledialogxfo = nil): modalresultty; overload;
+                                         providedform: tfiledialogxfo = nil): modalresultty;
 ////////////////////////////////////
 begin
  if fdo_directory in aoptions then
- Result := Execute(dialogkind, fcaptiondir, aoptions) else
-  Result := Execute(dialogkind, actcaption(dialogkind), aoptions);
+ Result := Execute(dialogkind, fcaptiondir, aoptions, providedform) else
+  Result := Execute(dialogkind, actcaption(dialogkind), aoptions, providedform);
 end;
 
-// function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty = fdk_none): modalresultty; overload;
+// function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty = fdk_none): modalresultty;
 ////////////////////////////////////
 function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty = fdk_none;
-                                         providedform: tfiledialogxfo = nil): modalresultty; overload;
+                                         providedform: tfiledialogxfo = nil): modalresultty;
 ////////////////////////////////////
 begin
   if dialogkind = fdk_none then
@@ -3442,13 +3451,13 @@ begin
       dialogkind := fdk_none;
    if fdo_directory in foptions then
    Result := Execute(dialogkind, fcaptiondir) else
-  Result := Execute(dialogkind, actcaption(dialogkind));
+  Result := Execute(dialogkind, actcaption(dialogkind), providedform);
 end;
 
-// function tfiledialogxcontroller.Execute (var avalue: filenamety; dialogkind: filedialogkindty = fdk_none): Boolean; overload;
+// function tfiledialogxcontroller.Execute (var avalue: filenamety; dialogkind: filedialogkindty = fdk_none): Boolean;
 ////////////////////////////////////
 function tfiledialogxcontroller.Execute (var avalue: filenamety; dialogkind: filedialogkindty = fdk_none;
-                                         providedform: tfiledialogxfo = nil): Boolean; overload;
+                                         providedform: tfiledialogxfo = nil): Boolean;
 ////////////////////////////////////
 begin
   if dialogkind = fdk_none then
@@ -3458,14 +3467,14 @@ begin
       dialogkind := fdk_none;
 
     if fdo_directory in foptions then
-   Result := Execute(avalue, dialogkind, fcaptiondir) else
-  Result := Execute(avalue, dialogkind, actcaption(dialogkind));
+   Result := Execute(avalue, dialogkind, fcaptiondir, providedform) else
+  Result := Execute(avalue, dialogkind, actcaption(dialogkind), providedform);
 end;
 
-// function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): Boolean; overload;
+// function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): Boolean;
 ////////////////////////////////////
 function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty;
-                                         providedform: tfiledialogxfo = nil): Boolean; overload;
+                                         providedform: tfiledialogxfo = nil): Boolean;
 ////////////////////////////////////
 var
   wstr1: filenamety;
@@ -3479,7 +3488,7 @@ begin
       Exit;
   end;
   filename := avalue;
-  Result   := Execute(dialogkind, acaption, aoptions) = mr_ok;
+  Result   := Execute(dialogkind, acaption, aoptions, providedform) = mr_ok;
   if Result then
   begin
     avalue := filename;
@@ -3514,13 +3523,13 @@ if length(lang_stockcaption) > ord(sc_file) then
 {$endif}
 end;
 
-// function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring): Boolean; overload;
+// function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring): Boolean;
 ////////////////////////////////////
 function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring;
-                                         providedform: tfiledialogxfo = nil): Boolean; overload;
+                                         providedform: tfiledialogxfo = nil): Boolean;
 ////////////////////////////////////
 begin
-  Result := Execute(avalue, dialogkind, acaption, foptions);
+  Result := Execute(avalue, dialogkind, acaption, foptions, providedform);
 end;
 
 function tfiledialogxcontroller.getfilename: filenamety;

@@ -48,6 +48,8 @@ object filedialogxfo: Tfiledialogxfo
   oncreated = onformcreated
   onkeydown = listviewonkeydown
   onresize = onresize
+  onstatread = StateRead
+  onstatwrite = StateWrite
   onlayout = layoutev
   left = 239
   top = 138
