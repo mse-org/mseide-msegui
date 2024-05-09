@@ -293,5 +293,8 @@ FUNCTION FontStyle (Styles: String): FontStylesTy;
    UNTIL s = '';
  END;
 
+{$else}
+INTERFACE
+IMPLEMENTATION
 {$endif}
 END.

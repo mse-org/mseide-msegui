@@ -2323,8 +2323,7 @@ begin
 
           if (info.eventkind = cek_buttonrelease) then
           begin
-            if (ss_double in info
-              .mouseeventinfopo^.shiftstate) then
+            if (ss_double in info.mouseeventinfopo^.shiftstate) then
               okonexecute(Sender)
             else
             begin
@@ -3118,11 +3117,8 @@ begin
 ////////////////////////////////////
  if assigned (providedform) then begin
    fo:= providedform; fo.setposition (DialogPlacement);
-writeln ('Using provided form');
  end
- else begin fo:= tfiledialogxfo.create ({?nil?}fowner, DialogPlacement);
-writeln ('Using NEW form');
- end;
+ else fo:= tfiledialogxfo.create ({?nil?}fowner, DialogPlacement);
  fwindowrect:= fo.widgetrect;
 ////////////////////////////////////
 // fo:= tfiledialogxfo.create(nil);
