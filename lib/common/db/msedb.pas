@@ -8993,11 +8993,22 @@ begin
            else
            begin
              ParamNameStart:=p;
+//////////////////////////////////////////////
+             IF p^ = '"' THEN BEGIN             // QUOTED field name, use unmodified and in full!
+               REPEAT Inc (p) UNTIL p^ = '"';   // skip to closing quote
+               ParamName:= Copy (ParamNameStart, 2, pred (p- ParamNameStart));
+               Inc (p);
+             END
+             ELSE BEGIN
+//////////////////////////////////////////////
              while (p^ > #127) or
               not (char(byte(p^)) in (SQLDelimiterCharacters +
                                       [#0,'=','+','-','*','\','[',']'])) do
                Inc(p);
              ParamName:=Copy(ParamNameStart,1,p-ParamNameStart);
+//////////////////////////////////////////////
+             END;
+//////////////////////////////////////////////
            end;
          end
          else

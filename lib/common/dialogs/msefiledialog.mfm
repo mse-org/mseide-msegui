@@ -31,7 +31,6 @@ object filedialogfo: Tfiledialogfo
     optionswidget = [ow_mousefocus, ow_arrowfocus, ow_focusbackonesc, ow_mousewheel, ow_destroywidgets]
     frame.localprops = []
     frame.localprops1 = []
-    taborder = 1
     bounds_x = 0
     bounds_y = 24
     bounds_cx = 587
@@ -55,6 +54,7 @@ object filedialogfo: Tfiledialogfo
     reffontheight = 14
   end
   object tlayouter2: tlayouter
+    taborder = 1
     bounds_x = 0
     bounds_y = 262
     bounds_cx = 585
@@ -86,6 +86,7 @@ object filedialogfo: Tfiledialogfo
           100
           2
         )
+        taborder = 2
         bounds_x = 6
         bounds_y = 4
         bounds_cx = 113
@@ -104,7 +105,7 @@ object filedialogfo: Tfiledialogfo
       object cancel: tbutton
         optionswidget1 = [ow1_autowidth, ow1_autoheight]
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
-        taborder = 2
+        taborder = 1
         bounds_x = 49
         bounds_y = 22
         bounds_cx = 49
@@ -119,7 +120,6 @@ object filedialogfo: Tfiledialogfo
         optionswidget1 = [ow1_autowidth, ow1_autoheight]
         optionswidget = [ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
         color = -1879048187
-        taborder = 1
         bounds_x = 6
         bounds_y = 22
         bounds_cx = 35
