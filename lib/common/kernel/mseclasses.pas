@@ -78,11 +78,15 @@ const
   {$endif}
  {$else}
   {$ifdef bsd}
-   {$ifdef CPU64}
+   {$ifdef CPUAARCH64}
+   platformtext = 'aarch64-bsd';
+  {$else}
+   {$ifdef CPUamd}
   platformtext = 'x86_64-bsd';
    {$else}
   platformtext = 'i386-bsd';
    {$endif}
+    {$endif}
   {$else}
    {$ifdef cpu64}
    platformtext = 'x86_64-win64';
