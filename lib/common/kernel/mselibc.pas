@@ -2311,11 +2311,30 @@ type
        end;
 {$else}
  dirent64 = record
-        {$if defined(freebsd) or defined(dragonfly) or defined(netbsd) or defined(darwin)}
+        {$if defined(dragonfly) or defined(netbsd) or defined(darwin)}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
         d_type: cuint8;               //* file type, see below */
         d_namlen: cuint8;             //* length of string in d_name */
+        d_name: array[0..255] of char;        //* name must be no longer than this */
+        {$endif}
+
+        {$if defined(freebsd) and defined(cpuamd64)}
+        d_fileno: cuint32;            //* file number of entry */
+        d_reclen: cuint16;            //* length of this record */
+        d_type: cuint8;               //* file type, see below */
+        d_namlen: cuint8;             //* length of string in d_name */
+        d_name: array[0..255] of char;        //* name must be no longer than this */
+        {$endif}
+
+        {$if defined(freebsd) and defined(cpuaarch64)}
+        d_fileno: cuint32;          //* file number of entry */
+        d_off : __off64_t;
+        d_reclen: cuint16;            //* length of this record */
+        d_type:  cuint8;               //* file type, see below */
+        d_pad0: cuint8;
+        d_namlen: cuint16;             //* length of string in d_name */
+        d_pad1:  cuint16;
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
 
