@@ -1302,7 +1302,8 @@ begin
  end;
 end;
 
-{$ifdef linux}
+
+{$if defined(linux) or  defined(freebsd) }
 procedure fpstattofileinfo(statbuffer: stat; var info: fileinfoty);
 begin
  with info,extinfo1,extinfo2,statbuffer do begin
@@ -1316,13 +1317,24 @@ begin
   end;
   state:= state + [fis_typevalid,fis_extinfo1valid,fis_extinfo2valid];
   size:= st_size;
-  modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
+{$if defined(freebsd) }
+  modtime:= filetimetodatetime(st_mtime,0);
+  accesstime:= filetimetodatetime(st_atime,0);
+  {$if fpc_fullversion >= 030100}
+  ctime:= filetimetodatetime(st_ctime,0);
+  {$else} 
+  ctime:= st_ctime;
+  {$endif}
+  {$else} 
+    modtime:= filetimetodatetime(st_mtime,st_mtime_nsec);
   accesstime:= filetimetodatetime(st_atime,st_atime_nsec);
   {$if fpc_fullversion >= 030100}
   ctime:= filetimetodatetime(st_ctime,st_ctime_nsec);
   {$else} 
   ctime:= st_ctime;
   {$endif}
+  {$endif}
+
   id:= st_ino;
   owner:= st_uid;
   group:= st_gid;
@@ -1355,7 +1367,7 @@ end;
 function sys_getfileinfo(const path: filenamety; var info: fileinfoty): boolean;
 var
  str1: filenamety;
- {$ifdef linux}
+{$if defined(linux) or  defined(freebsd) }
   fpstatbuffer : baseunix.stat;
  {$else} // for bsd
   statbuffer: _stat64;
@@ -1365,7 +1377,7 @@ begin
  clearfileinfo(info);
  str1:= tosysfilepath(path);
  
- {$ifdef linux}
+{$if defined(linux) or  defined(freebsd) }
  fillchar(fpstatbuffer,sizeof(fpstatbuffer),0);
  result := fpstat(pchar(tosys(str1)),fpstatbuffer) = 0;
  {$else}
@@ -1374,7 +1386,7 @@ begin
  {$endif}
  
  if result then begin
-   {$ifdef linux}
+{$if defined(linux) or  defined(freebsd) }
    fpstattofileinfo(fpstatbuffer,info);
    {$else}
    stattofileinfo(statbuffer,info);
@@ -1386,15 +1398,15 @@ end;
 
 function sys_getfdinfo(const fd: longint; var info: fileinfoty): boolean;
 var
- {$ifdef linux}
+{$if defined(linux) or  defined(freebsd) }
   fpstatbuffer : baseunix.stat;
- {$else} // for bsd
+ {$else} // for other bsd
   statbuffer: _stat64;
   {$endif}
 begin
  clearfileinfo(info);
 
- {$ifdef linux}
+{$if defined(linux) or  defined(freebsd) }
  fillchar(fpstatbuffer,sizeof(fpstatbuffer),0);
  result := fpfstat(fd,fpstatbuffer) = 0;
  {$else}
@@ -1403,7 +1415,7 @@ begin
  {$endif}
 
  if result then begin
-   {$ifdef linux}
+{$if defined(linux) or  defined(freebsd) }
    fpstattofileinfo(fpstatbuffer,info);
    {$else}
    stattofileinfo(statbuffer,info);
