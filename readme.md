@@ -14,12 +14,12 @@ And because it is developed in Pascal, you have full control on the widgetset.
 # Features
 - Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2. and 3.3.1.
 - Compiles with FPC-LLVM 3.3.1.
-- For FreeBSD-x86_64, FreeBSD-i386,
+- For FreeBSD-x86_64, FreeBSD-i386, FreeBSD-aarch64,
   Linux-x86_64, Linux-i386,
   Linux-Rpi-arm32, Linux-Rpi-aarch64,
   NetBSD-x86_64, NetBSD-i386,
   OpenBSD x86_64, OpenBSD-i386,
-  Darwin-MacOs-x86_64,  Darwin-MacOs-aarch64,
+  Darwin-MacOs-x86_64, Darwin-MacOs-aarch64,
   Windows-i386, Windows-x86_64.
 - Links to xlib and gdi32, no external widget library needed.
 - Internal character encoding is utf-16.
