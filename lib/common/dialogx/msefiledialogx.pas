@@ -1,4 +1,3 @@
-
 { MSEgui Copyright (c) 1999-2016 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
@@ -31,37 +30,33 @@ interface
 {$endif}
 
 uses
- {$ifdef unix}baseunix,{$endif}Math,mseglob,mseguiglob,mseforms,Classes,
- mclasses,mseclasses,msewidgets,msegrids,mselistbrowser,mseedit,
- msesimplewidgets,msedataedits,msedialog,msetypes,msestrings,msesystypes,msesys,
- msedispwidgets,msedatalist,msestat,msestatfile,msedatanodes,
- msefileutils,msedropdownlist,mseevent,msegraphedits,mseeditglob,msesplitter,
- msemenus,msegridsglob,msegraphics,msegraphutils,msedirtree,msewidgetgrid,
- mseact,mseapplication,msegui,mseificomp,mseificompglob,mseifiglob,msestream,
- SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,msetimer,
- {$ifdef BGRABITMAP_USE_MSEGUI}BGRABitmap,BGRADefaultBitmap,BGRABitmapTypes,
- {$endif}mseformatbmpicoread,mseformatjpgread,mseformatpngread,
- mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage,msebitmap;
+ SysUtils,Classes,{$ifdef unix}baseunix,{$endif}Math,mclasses,mseclasses,mseglob,mseguiglob,
+ msekeyboard,mseforms,msewidgets, msegrids,mselistbrowser,mseedit,msesimplewidgets,
+ msedataedits,msedialog,msetypes,msestrings,msesystypes,msesys,msedispwidgets,msedatalist,
+ msestat,msestatfile,msebitmap,msedatanodes,msefileutils,msedropdownlist,mseevent,
+ {$ifdef BGRABITMAP_USE_MSEGUI}BGRABitmap,BGRADefaultBitmap,BGRABitmapTypes,{$endif}
+ msegraphedits,mseeditglob,msesplitter,msemenus,msegridsglob,msegraphics,
+ msegraphutils,msedirtree,msewidgetgrid,mseact,mseapplication,msegui,mseificomp,
+ mseificompglob,mseifiglob,msestream,msemenuwidgets,msescrollbar,msedragglob,
+ mserichstring,msetimer,mseformatbmpicoread,mseformatjpgread,mseformatpngread,
+ mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage;
 
 const
-  defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
+  defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly];
 
 type
   tfilelistitem = class(tlistitem)
   private
   protected
   public
-
-    constructor Create(const aowner: tcustomitemlist);
-      override;
+   constructor create(const aowner: tcustomitemlist); override;
   end;
 
   pfilelistitem = ^tfilelistitem;
 
   tfileitemlist = class(titemviewlist)
   protected
-    procedure createitem(out item: tlistitem);
-      override;
+   procedure createitem(out item: tlistitem); override;
   end;
 
   getfileiconeventty = procedure(const Sender: TObject; const ainfo: fileinfoty; var imagelist: timagelist; var imagenr: integer) of object;
@@ -95,30 +90,28 @@ type
     foptionsdir: dirstreamoptionsty;
     fcaseinsensitive: Boolean;
     //   procedure setoptions(const Value: listviewoptionsty); override;
-    procedure docellevent(var info: celleventinfoty);
-      override;
+    procedure docellevent(var info: celleventinfoty); override;
   public
 
-    constructor Create(aowner: TComponent);
-      override;
-
-    destructor Destroy;
-      override;
+    constructor Create(aowner: TComponent); override;
+    destructor Destroy; override;
     procedure readlist;
     procedure updir;
     function filecount: integer;
     property directory: filenamety read fdirectory write setdirectory;
     property includeattrib: fileattributesty read fincludeattrib write fincludeattrib default [fa_all];
     property excludeattrib: fileattributesty read fexcludeattrib write fexcludeattrib default [fa_hidden];
-    property maskar: filenamearty read fmaskar write fmaskar;
-    //nil -> all
-    property mask: filenamety read getmask write setmask;
-    //'' -> all
+    property maskar: filenamearty read fmaskar write fmaskar; //nil -> all
+////////////////////////////////////
+//// WHY MOVED HERE ????
+////????    property mask: filenamety read getmask write setmask;     //'' -> all
+////////////////////////////////////
     property path: filenamety read getpath write setpath;
     //calls readlist
     property selectednames: filenamearty read getselectednames write setselectednames;
     property checksubdir: Boolean read getchecksubdir write setchecksubdir;
   published
+    property mask: filenamety read getmask write setmask;     //'' -> all
     property options default defaultlistviewoptionsfile;
     property optionsfile: filelistviewoptionsty read foptionsfile write setoptionsfile default defaultfilelistviewoptions;
     property filelist: tfiledatalist read ffilelist write setfilelist;
@@ -151,6 +144,7 @@ const
 type
   filedialogkindty = (fdk_none,fdk_open,fdk_save,fdk_new);
 
+  tfiledialogxfo = class;
   tfiledialogxcontroller = class;
 
   filedialogbeforeexecuteeventty = procedure(const Sender: tfiledialogxcontroller; var dialogkind: filedialogkindty; var aresult: modalresultty) of object;
@@ -160,37 +154,39 @@ type
   private
     fowner: tmsecomponent;
     fgroup: integer;
-    ffontname: msestring;
-    ffontheight: integer;
-    fsplitterplaces: integer;
-    fsplitterlateral: integer;
-    ffontcolor: colorty;
-    fbackcolor: colorty;
+{-}//    ffontname: msestring;
+{-}//    ffontheight: integer;
+{-}//    fsplitterplaces: integer;
+{-}//    fsplitterlateral: integer;
+{-}//    ffontcolor: colorty;
+{-}//    fbackcolor: colorty;
     fonchange: proceventty;
     ffilenames: filenamearty;
     ffilterlist: tdoublemsestringdatalist;
     ffilter: filenamety;
-    fnopanel: Boolean;
-    ficon: tmaskedbitmap;
-    fcompact: Boolean;
-    fshowoptions: Boolean;
-    fhidehistory: Boolean;
-    fhideicons: Boolean;
-    ffilenamescust: filenamearty;
-    fshowhidden: Boolean;
+{-}//    fnopanel: Boolean;
+{-}//    ficon: tmaskedbitmap;
+{-}//    fcompact: Boolean;
+{-}//    fshowoptions: Boolean;
+{-}//    fhidehistory: Boolean;
+{-}//    fhideicons: Boolean;
+{-}//    ffilenamescust: filenamearty;
+{-}//    fshowhidden: Boolean;
     ffilterindex: integer;
-    fcolwidth: integer;
-    fcolnamewidth: integer;
-    fcolsizewidth: integer;
-    fcolextwidth: integer;
-    fcoldatewidth: integer;
-    fwindowrect: rectty;
+{+}//    fcolwidth: integer;
+{-}//    fcolnamewidth: integer;
+{-}//    fcolsizewidth: integer;
+{-}//    fcolextwidth: integer;
+{-}//    fcoldatewidth: integer;
+////////////////////////////////////
+//   fwindowrect: rectty;
+////////////////////////////////////
     fhistorymaxcount: integer;
     fhistory: msestringarty;
     fcaptionopen: msestring;
     fcaptionsave: msestring;
     fcaptionnew: msestring;
-    fcaptiondir: msestring;
+{-??}    fcaptiondir: msestring;
     finclude: fileattributesty;
     fexclude: fileattributesty;
     fonbeforeexecute: filedialogbeforeexecuteeventty;
@@ -200,7 +196,7 @@ type
     foncheckfile: checkfileeventty;
     fimagelist: timagelist;
     fparams: msestring;
-    procedure seticon(const avalue: tmaskedbitmap);
+{-}//    procedure seticon(const avalue: tmaskedbitmap);
     procedure setfilterlist(const Value: tdoublemsestringdatalist);
     procedure sethistorymaxcount(const Value: integer);
     function getfilename: filenamety;
@@ -217,13 +213,18 @@ type
     fbasedir: filenamety;
     fdefaultext: filenamety;
     foptions: filedialogoptionsty;
+////////////////////////////////////
+   fwindowrect: rectty;
+////////////////////////////////////
   public
+////////////////////////////////////
+   DialogPlacement: dialogposty;
+////////////////////////////////////
 
     constructor Create(const aowner: tmsecomponent = nil; const onchange: proceventty = nil);
       reintroduce;
 
-    destructor Destroy;
-      override;
+    destructor Destroy; override;
     procedure readstatvalue(const reader: tstatreader);
     procedure readstatstate(const reader: tstatreader);
     procedure readstatoptions(const reader: tstatreader);
@@ -231,28 +232,50 @@ type
     procedure writestatstate(const writer: tstatwriter);
     procedure writestatoptions(const writer: tstatwriter);
     function actcaption(const dialogkind: filedialogkindty): msestring;
-    function Execute(dialogkind: filedialogkindty = fdk_none): modalresultty;
-      overload;
-    //fdk_none -> use options fdo_save
-    function Execute(dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty;
-      overload;
-    function Execute(const dialogkind: filedialogkindty; const acaption: msestring): modalresultty;
-      overload;
-    function Execute(const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty;
-      overload;
-    function Execute(var avalue: filenamety; dialogkind: filedialogkindty = fdk_none): Boolean;
-      overload;
-    function Execute(var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring): Boolean;
-      overload;
-    function Execute(var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): Boolean;
-      overload;
+
+//    function Execute (dialogkind: filedialogkindty = fdk_none): modalresultty; overload;
+//    //fdk_none -> use options fdo_save
+//////////////////////////////////// - 1p
+    function Execute (dialogkind: filedialogkindty = fdk_none;
+                      providedform: tfiledialogxfo = nil): modalresultty; overload;
+//////////////////////////////////// - 3p
+//    function Execute (dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty; overload;
+////////////////////////////////////
+    function Execute (dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty;
+                      providedform: tfiledialogxfo = nil): modalresultty; overload;
+//////////////////////////////////// - 2p
+//    function Execute (const dialogkind: filedialogkindty; const acaption: msestring): modalresultty; overload;
+////////////////////////////////////
+    function Execute (const dialogkind: filedialogkindty; const acaption: msestring;
+                      providedform: tfiledialogxfo = nil): modalresultty; overload;
+//////////////////////////////////// - 2p
+//    function Execute (const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty; overload;
+////////////////////////////////////
+    function Execute (const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty;
+                      providedform: tfiledialogxfo = nil): modalresultty; overload;
+//////////////////////////////////// - 2p
+//    function Execute (var avalue: filenamety; dialogkind: filedialogkindty = fdk_none): Boolean; overload;
+////////////////////////////////////
+    function Execute (var avalue: filenamety; dialogkind: filedialogkindty = fdk_none;
+                      providedform: tfiledialogxfo = nil): Boolean; overload;
+//////////////////////////////////// - 3p
+//    function Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring): Boolean; overload;
+////////////////////////////////////
+    function Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring;
+                      providedform: tfiledialogxfo = nil): Boolean; overload;
+//////////////////////////////////// - 4p
+//    function Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): Boolean; overload;
+////////////////////////////////////
+    function Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty;
+                      providedform: tfiledialogxfo = nil): Boolean; overload;
+////////////////////////////////////
     function canoverwrite(): Boolean;
     //true if current filename is allowed to write
     procedure Clear;
     procedure componentevent(const event: tcomponentevent);
     property history: msestringarty read fhistory write fhistory;
     property filenames: filenamearty read ffilenames write ffilenames;
-    property filenamescust: filenamearty read ffilenamescust write ffilenamescust;
+{-}//    property filenamescust: filenamearty read ffilenamescust write ffilenamescust;
     property syscommandline: filenamety read getsysfilename; deprecated;
     property sysfilename: filenamety read getsysfilename;
     property params: msestring read fparams;
@@ -260,30 +283,30 @@ type
     property filename: filenamety read getfilename write setfilename;
     property lastdir: filenamety read flastdir write setlastdir;
     property basedir: filenamety read fbasedir write fbasedir;
-    property fontheight: integer read ffontheight write ffontheight;
-    property fontname: msestring read ffontname write ffontname;
-    property fontcolor: colorty read ffontcolor write ffontcolor;
-    property backcolor: colorty read fbackcolor write fbackcolor;
+{-}//    property fontheight: integer read ffontheight write ffontheight;
+{-}//    property fontname: msestring read ffontname write ffontname;
+{-}//    property fontcolor: colorty read ffontcolor write ffontcolor;
+{-}//    property backcolor: colorty read fbackcolor write fbackcolor;
     property filter: filenamety read ffilter write ffilter;
-    property nopanel: Boolean read fnopanel write fnopanel;
-    property icon: tmaskedbitmap read ficon write seticon;
-    property compact: Boolean read fcompact write fcompact;
-    property showoptions: Boolean read fshowoptions write fshowoptions;
-    property hidehistory: Boolean read fhidehistory write fhidehistory;
-    property hideicons: Boolean read fhideicons write fhideicons;
-    property showhidden: Boolean read fshowhidden write fshowhidden;
+{-}//    property nopanel: Boolean read fnopanel write fnopanel;
+{-}//    property icon: tmaskedbitmap read ficon write seticon;
+{-}//    property compact: Boolean read fcompact write fcompact;
+{-}//    property showoptions: Boolean read fshowoptions write fshowoptions;
+{-}//    property hidehistory: Boolean read fhidehistory write fhidehistory;
+{-}//    property hideicons: Boolean read fhideicons write fhideicons;
+{-}//    property showhidden: Boolean read fshowhidden write fshowhidden;
     property filterlist: tdoublemsestringdatalist read ffilterlist write setfilterlist;
     property filterindex: integer read ffilterindex write ffilterindex default 0;
     property include: fileattributesty read finclude write finclude default [fa_all];
     property exclude: fileattributesty read fexclude write fexclude default [fa_hidden];
-    property colwidth: integer read fcolwidth write fcolwidth default 0;
+{+}//    property colwidth: integer read fcolwidth write fcolwidth default 0;
     property defaultext: filenamety read fdefaultext write setdefaultext;
     property options: filedialogoptionsty read foptions write setoptions default defaultfiledialogoptions;
     property historymaxcount: integer read fhistorymaxcount write sethistorymaxcount default defaulthistorymaxcount;
     property captionopen: msestring read fcaptionopen write fcaptionopen;
     property captionsave: msestring read fcaptionsave write fcaptionsave;
     property captionnew: msestring read fcaptionnew write fcaptionnew;
-    property captiondir: msestring read fcaptiondir write fcaptiondir;
+{-}    property captiondir: msestring read fcaptiondir write fcaptiondir;
     property group: integer read fgroup write fgroup default 0;
     property imagelist: timagelist read fimagelist write setimagelist;
     property ongetfilename: setstringeventty read fongetfilename write fongetfilename;
@@ -291,6 +314,9 @@ type
     property oncheckfile: checkfileeventty read foncheckfile write foncheckfile;
     property onbeforeexecute: filedialogbeforeexecuteeventty read fonbeforeexecute write fonbeforeexecute;
     property onafterexecute: filedialogafterexecuteeventty read fonafterexecute write fonafterexecute;
+////////////////////////////////////////////
+   PROPERTY onchange: proceventty READ fonchange WRITE fonchange;
+////////////////////////////////////////////
   end;
 
 const
@@ -322,22 +348,14 @@ type
     function getstatpriority: integer;
   public
 
-    constructor Create(aowner: TComponent);
-      override;
-
-    destructor Destroy;
-      override;
-    function Execute: modalresultty;
-      overload;
-      override;
+    constructor Create(aowner: TComponent); override;
+    destructor Destroy; override;
+    function Execute: modalresultty; overload; override;
     function Execute(const akind: filedialogkindty): modalresultty;
-      reintroduce;
-      overload;
+      reintroduce; overload;
     function Execute(const akind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty;
-      reintroduce;
-      overload;
-    procedure componentevent(const event: tcomponentevent);
-      override;
+      reintroduce; overload;
+    procedure componentevent(const event: tcomponentevent); override;
   published
     property statfile: tstatfile read fstatfile write setstatfile;
     property statvarname: msestring read getstatvarname write fstatvarname;
@@ -352,8 +370,7 @@ type
 
   tfilenameeditcontroller = class(tstringdialogcontroller)
   protected
-    function Execute(var avalue: msestring): Boolean;
-      override;
+    function Execute(var avalue: msestring): Boolean; override;
   public
 
     constructor Create(const aowner: tcustomfilenameedit1);
@@ -367,41 +384,24 @@ type
     procedure setsysvalue(const avalue: filenamety);
     function getsysvaluequoted: filenamety;
   protected
-    function createdialogcontroller: tstringdialogcontroller;
-      override;
-    procedure texttovalue(var accept: Boolean; const quiet: Boolean);
-      override;
-    procedure updatedisptext(var avalue: msestring);
-      override;
-    function getvaluetext: msestring;
-      override;
-    procedure readstatvalue(const reader: tstatreader);
-      override;
-    procedure readstatstate(const reader: tstatreader);
-      override;
-    procedure readstatoptions(const reader: tstatreader);
-      override;
-    procedure writestatvalue(const writer: tstatwriter);
-      override;
-    procedure writestatstate(const writer: tstatwriter);
-      override;
-    procedure writestatoptions(const writer: tstatwriter);
-      override;
-    procedure valuechanged;
-      override;
-    procedure updatecopytoclipboard(var atext: msestring);
-      override;
-    procedure updatepastefromclipboard(var atext: msestring);
-      override;
+    function createdialogcontroller: tstringdialogcontroller; override;
+    procedure texttovalue(var accept: Boolean; const quiet: Boolean); override;
+    procedure updatedisptext(var avalue: msestring); override;
+    function getvaluetext: msestring; override;
+    procedure readstatvalue(const reader: tstatreader); override;
+    procedure readstatstate(const reader: tstatreader); override;
+    procedure readstatoptions(const reader: tstatreader); override;
+    procedure writestatvalue(const writer: tstatwriter); override;
+    procedure writestatstate(const writer: tstatwriter); override;
+    procedure writestatoptions(const writer: tstatwriter); override;
+    procedure valuechanged; override;
+    procedure updatecopytoclipboard(var atext: msestring); override;
+    procedure updatepastefromclipboard(var atext: msestring); override;
   public
 
-    constructor Create(aowner: TComponent);
-      override;
-
-    destructor Destroy;
-      override;
-    procedure componentevent(const event: tcomponentevent);
-      override;
+    constructor Create(aowner: TComponent); override;
+    destructor Destroy; override;
+    procedure componentevent(const event: tcomponentevent); override;
     property controller: tfiledialogxcontroller read fcontroller write setcontroller;
     property sysvalue: filenamety read getsysvalue write setsysvalue;
     property sysvaluequoted: filenamety read getsysvaluequoted write setsysvalue;
@@ -412,11 +412,8 @@ type
   tcustomfilenameedit = class(tcustomfilenameedit1)
   public
 
-    constructor Create(aowner: TComponent);
-      override;
-
-    destructor Destroy;
-      override;
+    constructor Create(aowner: TComponent); override;
+    destructor Destroy; override;
   end;
 
   tcustomremotefilenameedit = class(tcustomfilenameedit1)
@@ -424,8 +421,7 @@ type
     fdialog: tfiledialogx;
     procedure setfiledialog(const avalue: tfiledialogx);
   protected
-    procedure objectevent(const Sender: TObject; const event: objecteventty);
-      override;
+    procedure objectevent(const Sender: TObject; const event: objecteventty); override;
   public
     property dialog: tfiledialogx read fdialog write setfiledialog;
   end;
@@ -461,17 +457,12 @@ type
     function getchecksubdir: Boolean;
     procedure setchecksubdir(const avalue: Boolean);
   protected
-    procedure createdropdownwidget(const atext: msestring; out awidget: twidget);
-      override;
-    function getdropdowntext(const awidget: twidget): msestring;
-      override;
+    procedure createdropdownwidget(const atext: msestring; out awidget: twidget); override;
+    function getdropdowntext(const awidget: twidget): msestring; override;
     procedure pathchanged(const Sender: TObject);
-    procedure doafterclosedropdown;
-      override;
-    procedure updatecopytoclipboard(var atext: msestring);
-      override;
-    procedure updatepastefromclipboard(var atext: msestring);
-      override;
+    procedure doafterclosedropdown; override;
+    procedure updatecopytoclipboard(var atext: msestring); override;
+    procedure updatepastefromclipboard(var atext: msestring); override;
   public
     property showhiddenfiles: Boolean read getshowhiddenfiles write setshowhiddenfiles;
     property checksubdir: Boolean read getchecksubdir write setchecksubdir;
@@ -521,19 +512,13 @@ type
     procedure dopathchanged(const Sender: TObject);
     procedure dopathselected(const Sender: TObject);
     procedure doselectionchanged(const Sender: TObject; const aitem: tlistitem);
-    procedure internalcreateframe;
-      override;
-    procedure loaded();
-      override;
-    class function classskininfo: skininfoty;
-      override;
+    procedure internalcreateframe; override;
+    procedure loaded(); override;
+    class function classskininfo: skininfoty; override;
   public
 
-    constructor Create(aowner: TComponent);
-      override;
-
-    destructor Destroy();
-      override;
+    constructor Create(aowner: TComponent); override;
+    destructor Destroy(); override;
     procedure refresh();
     property dirview: tdirtreefo read fdirview;
     property path: filenamety read getpath write setpath;
@@ -558,45 +543,43 @@ type
     property optionswidget default defaultoptionswidgetsubfocus;
   end;
 
-  tfiledialogxfo = class(tmseform)
-    tlayouter2: tlayouter;
-    dir: tdirdropdownedit;
-    up: tstockglyphbutton;
-    back: tstockglyphbutton;
-    forward: tstockglyphbutton;
-    filename: thistoryedit;
-    filter: tdropdownlistedit;
-    showhidden: tbooleanedit;
-    list_log: tstringgrid;
-    home: TButton;
-    createdir: TButton;
-    cancel: TButton;
-    ok: TButton;
-    bcompact: tbooleanedit;
-    tsplitter1: tsplitter;
-    listview: tfilelistviewx;
-    blateral: tbooleanedit;
-    placespan: tstringdisp;
-    places: tstringgrid;
-    tsplitter3: tsplitter;
-    placescust: tstringgrid;
-    labtest: tlabel;
-    bnoicon: tbooleanedit;
-   bshowoptions: tbooleanedit;
-   tsplitter2: tsplitter;
-   bhidehistory: tbooleanedit;
-  
-   imImage: timage;
-   iconslist: timagelist;
-   
+  tfiledialogxfo = class (tdialogform)  // tmseform)
+    back:         tstockglyphbutton;
+    forward:      tstockglyphbutton;
+    up:           tstockglyphbutton;
+    home:         TButton;
+    createdir:    TButton;
+    cancel:       TButton;
+    ok:           TButton;
+    dir:          tdirdropdownedit;
+    tsplitter2:   tsplitter;
+    filter:       tdropdownlistedit;
+    placespan:    tstringdisp;
+    places:       tstringgrid;
+    tsplitter3:   tsplitter;
+    placescust:   tstringgrid;
+    tsplitter1:   tsplitter;
+    list_log:     tstringgrid;
+    listview:     tfilelistviewx;
+    imImage:      timage;
+    filename:     thistoryedit;
+    labtest:      tlabel;
+    tlayouter2:   tlayouter;
+    iconslist:    timagelist;
+////////////////////////////////////////////
+    Settings:     tpopupmenu;
+////////////////////////////////////////////
+    fController:  tfiledialogxcontroller;
+////////////////////////////////////////////
+
     {$ifdef BGRABITMAP_USE_MSEGUI}
     tbitmapcomp1: TBGRABitmap;
     function LoadImagebgra(const AFileName: msestring): msestring;
-    {$else} 
+    {$else}
     tbitmapcomp1: tbitmapcomp;
     function LoadImage(const AFileName: msestring): msestring;
-   {$endif}    
-   
+   {$endif}
+
     procedure createdironexecute(const Sender: TObject);
     procedure listviewselectionchanged(const Sender: tcustomlistview);
     procedure listviewitemevent(const Sender: tcustomlistview; const index: integer; var info: celleventinfoty);
@@ -610,7 +593,11 @@ type
     procedure filepathentered(const Sender: TObject);
     procedure okonexecute(const Sender: TObject);
     procedure layoutev(const Sender: TObject);
+////////////////////////////////////////////
+////    procedure list_logselectionchanged (const Sender: TObject);
+////////////////////////////////////////////
     procedure showhiddenonsetvalue(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+////////////////////////////////////////////
     procedure dirshowhint(const Sender: TObject; var info: hintinfoty);
     procedure copytoclip(const Sender: TObject; var avalue: msestring);
     procedure pastefromclip(const Sender: TObject; var avalue: msestring);
@@ -621,6 +608,7 @@ type
     procedure oncellev(const Sender: TObject; var info: celleventinfoty);
     procedure ondrawcell(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
     procedure onsetcomp(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+////////////////////////////////////////////
     procedure oncreat(const Sender: TObject);
     procedure onbefdrop(const Sender: TObject);
     procedure oncellevplaces(const Sender: TObject; var info: celleventinfoty);
@@ -628,6 +616,7 @@ type
     procedure onlayout(const Sender: tcustomgrid);
     procedure onformcreated(const Sender: TObject);
     procedure onlateral(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+////////////////////////////////////////////
     procedure afterclosedrop(const Sender: TObject);
     procedure onresize(const Sender: TObject);
     procedure onchangdir(const Sender: TObject);
@@ -635,17 +624,52 @@ type
     procedure oncellevcustplaces(const Sender: TObject; var info: celleventinfoty);
     procedure onmovesplit(const Sender: TObject);
     procedure onsetvalnoicon(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+////////////////////////////////////////////
     procedure afclosedropdir(const sender: TObject);
     procedure onpain(const sender: twidget; const acanvas: tcanvas);
-   
+////////////////////////////////////////////
+    procedure onswitchvalnoicon   (const Sender: TObject);
+    procedure onswitchcomp        (const Sender: TObject);
+    procedure onswitchlateral     (const Sender: TObject);
+////    procedure onswitchhidehistory (const Sender: TObject);
+    procedure onswitchshowhidden  (const Sender: TObject);
+    procedure onswitchpreview     (const Sender: TObject);
+////////////////////////////////////////////
+
+////////////////////////////////////////////
+   procedure StateRead  (const sender: TObject; const reader: tStatReader); VIRTUAL;
+   procedure StateWrite (const sender: TObject; const writer: tStatWriter); VIRTUAL;
+////////////////////////////////////////////
+//   procedure resized    (const sender: TObject);
+////////////////////////////////////////////
+//   procedure componentevent(const event: tcomponentevent); override;
+////////////////////////////////////////////
+
   private
     fselectednames: filenamearty;
     finit: Boolean;
-    fisfixedrow: Boolean;
+////????    fisfixedrow: Boolean;
     fsplitterpanpos: integer;
     fcourse: filenamearty;
     fcourseid: int32;
     fcourselock: Boolean;
+////////////////////////////////////////////
+(*    last_row:   integer; *)
+////////////////////////////////////////////
+    ffCaption: msestring;
+////////////////////////////////////////////
+    UserPopup: tpopupmenu;
+////////////////////////////////////////////
+
+////////////////////////////////////////////
+//// Configuration flags:
+////    bnoicon,
+////    blateral,
+////    bcompact,
+////    showhidden,
+////    bhidehistory: boolean;
+////////////////////////////////////////////
+
     procedure updatefiltertext;
     function tryreadlist(const adir: filenamety; const errormessage: Boolean): Boolean;
     //restores old dir on error
@@ -653,10 +677,48 @@ type
     procedure checkcoursebuttons();
     procedure course(const adir: filenamety);
     procedure doup();
+////////////////////////////////////////////
+   FUNCTION  getDialogOptions: filedialogoptionsty;
+   PROCEDURE setDialogOptions (FileOptions: filedialogoptionsty);
+////////////////////////////////////////////
+   PROCEDURE setUserPopup (Popup: tpopupmenu);
+////////////////////////////////////////////
+//   FUNCTION  getFilenames: filenamearty;
+//   PROCEDURE setFilenames (Files: filenamearty);
+////////////////////////////////////////////
+    PROCEDURE realizeSelection;
+////////////////////////////////////////////
+    PROCEDURE showpreview;
+////////////////////////////////////////////
+
   public
-    dialogoptions: filedialogoptionsty;
-    defaultext: filenamety;
-    filenames: filenamearty;
+////////////////////////////////////////////
+   CONSTRUCTOR Create (CONST Sender: TComponent; ControlIn: tfiledialogxcontroller;
+                       CONST StatName: msestring; where: dialogposty = dp_none); OVERLOAD; REINTRODUCE;
+   CONSTRUCTOR Create (CONST Sender: TComponent; ControlIn: tfiledialogxcontroller; where: dialogposty); OVERLOAD; REINTRODUCE;
+   CONSTRUCTOR Create (CONST Sender: TComponent; ControlIn: tfiledialogxcontroller); OVERLOAD; REINTRODUCE;
+////////////////////////////////////////////
+   CONSTRUCTOR Create (CONST Sender: TComponent; CONST StatName: msestring;
+                       where: dialogposty = dp_none); OVERLOAD; REINTRODUCE;
+   CONSTRUCTOR Create (CONST Sender: TComponent; where: dialogposty); OVERLOAD; REINTRODUCE;
+   CONSTRUCTOR Create (CONST Sender: TComponent); OVERLOAD; REINTRODUCE;
+   DESTRUCTOR  Destroy; OVERRIDE;
+////////////////////////////////////////////
+   FUNCTION Execute (dialogkind: filedialogkindty = fdk_none): modalresultty; REINTRODUCE;  // ??
+////////////////////////////////////////////
+
+   PROPERTY Controller:    tfiledialogxcontroller READ fController; // NO WRITE HERE!
+   PROPERTY DialogCaption: msestring              READ ffCaption        WRITE ffCaption;
+   PROPERTY DialogOptions: filedialogoptionsty    READ getDialogOptions WRITE setDialogOptions;
+
+////////////////////////////////////////////
+   PROPERTY PopupMenu:     tpopupmenu             READ UserPopup        WRITE setUserPopup;
+////////////////////////////////////////////
+
+//   PROPERTY Filenames: filenamearty READ getFilenames WRITE setFilenames;
+//   PROPERTY DefaultExt: filenamety READ fController.getdefaultext WRITE fController.setdefaultext;
+
+////////////////////////////////////////////
   end;
 
 function filedialogx(var afilenames: filenamearty; const aoptions: filedialogoptionsty; const acaption: msestring;    //'' -> 'Open' or 'Save'
@@ -687,11 +749,15 @@ var
 implementation
 
 uses
+  StrUtils,
+{$ifdef BGRABITMAP_USE_MSEGUI}
+  msefiledialogxbgra_mfm,
+{$else}
   msefiledialogx_mfm,
+{$endif}
   msebits,
   mseactions,
   msestringenter,
-  msekeyboard,
   msestockobjects,
   msesysintf,
   msearrayutils;
@@ -708,6 +774,95 @@ uses
   {$warn 6018 off}
   {$endif}
 {$endif}
+
+////////////////////////////////////////////
+{$Macro On}
+// defined as macros here for easier adaptation to layout changes
+{$define IconsSetting:=   Settings.Menu.SubMenu [1]}
+{$define PlacesSetting:=  Settings.Menu.SubMenu [2]}
+{$define CompactSetting:= Settings.Menu.SubMenu [3]}
+{$define HiddenSetting:=  Settings.Menu.SubMenu [5]}
+{$define HistorySetting:= Settings.Menu.SubMenu [6]}
+{$define PreviewSetting:= Settings.Menu.SubMenu [7]}
+////////////////////////////////////////////
+
+TYPE
+  SizeMark = RECORD
+               Text: msestring;
+               Sign: char;
+             END;
+CONST
+  sizeSign: ARRAY OF SizeMark =
+    ((Text: ' B '; Sign: '!'), (Text: ' KB'; Sign: '^'), (Text: ' MB'; Sign: '_'),
+     (Text: ' GB'; Sign: '~'), (Text: ' TB'; Sign: '"'), (Text: ' PB'; Sign: ''''));
+
+TYPE
+  ExtIcons = RECORD
+      Icon: integer;
+      Ext:  string [9];
+    END;
+
+  ExtIconTable = ARRAY OF ExtIcons;
+
+CONST
+  ExtIcon: ExtIconTable =
+{2} ((Icon:  2; Ext: '.txt'),   (Icon:  2; Ext: '.pdf'),   (Icon:  2; Ext: '.ini'),
+     (Icon:  2; Ext: '.md'),    (Icon:  2; Ext: '.html'),  (Icon:  2; Ext: '.inc'),
+{8}  (Icon:  8; Ext: '.pas'),   (Icon:  8; Ext: '.lpi'),   (Icon:  8; Ext: '.lpr'),
+     (Icon:  8; Ext: '.prj'),   (Icon:  8; Ext: '.pp'),
+{9}  (Icon:  9; Ext: '.lps'),   (Icon:  9; Ext: '.mfm'),
+{10} (Icon: 10; Ext: '.java'),  (Icon: 10; Ext: '.js'),    (Icon: 10; Ext: '.class'),
+{11} (Icon: 11; Ext: '.c'),     (Icon: 11; Ext: '.cc'),    (Icon: 11; Ext: '.cpp'),
+     (Icon: 11; Ext: '.h'),
+{12} (Icon: 12; Ext: '.py'),    (Icon: 12; Ext: '.pyc'),
+{3}  (Icon:  3; Ext: '.wav'),   (Icon:  3; Ext: '.m4a'),   (Icon:  3; Ext: '.mp3'),
+     (Icon:  3; Ext: '.opus'),  (Icon:  3; Ext: '.flac'),  (Icon:  3; Ext: '.ogg'),
+{4}  (Icon:  4; Ext: '.avi'),   (Icon:  4; Ext: '.flv'),   (Icon:  4; Ext: '.mov'),
+     (Icon:  4; Ext: '.mpg'),   (Icon:  4; Ext: '.mpeg'),  (Icon:  4; Ext: '.mkv'),
+     (Icon:  4; Ext: '.webm'),  (Icon:  4; Ext: '.wmv'),   (Icon:  4; Ext: '.mp4'),
+{7}  (Icon:  7; Ext: '.png'),   (Icon:  7; Ext: '.jpg'),   (Icon:  7; Ext: '.jpeg'),  // can shpw image
+     (Icon:  7; Ext: '.ico'),   (Icon:  7; Ext: '.xpm'),   (Icon:  7; Ext: '.bmp'),   // can shpw image
+     (Icon:  7; Ext: '.tiff'),                                                        // can shpw image
+{$ifdef BGRABITMAP_USE_MSEGUI}
+     (Icon:  7; Ext: '.gif'),   (Icon:  7; Ext: '.svg'),   (Icon:  7; Ext: '.webp'),
+{$ELSE}
+     (Icon: -7; Ext: '.gif'),   (Icon: -7; Ext: '.svg'),   (Icon: -7; Ext: '.webp'),
+{$ENDIF}
+{5}  (Icon:  5; Ext: ''),       (Icon:  5; Ext: '.exe'),   (Icon:  5; Ext: '.dbg'),
+     (Icon:  5; Ext: '.com'),   (Icon:  5; Ext: '.bat'),   (Icon:  5; Ext: '.bin'),
+     (Icon:  5; Ext: '.dll'),   (Icon:  5; Ext: '.res'),   (Icon:  5; Ext: '.so'),
+     (Icon:  5; Ext: '.dylib'),
+{6}  (Icon:  6; Ext: '.zip'),   (Icon:  6; Ext: '.iso'),   (Icon:  6; Ext: '.cab'),
+     (Icon:  6; Ext: '.7z'),    (Icon:  6; Ext: '.txz'),   (Icon:  6; Ext: '.rpm'),
+     (Icon:  6; Ext: '.tar'),   (Icon:  6; Ext: '.gz'),    (Icon:  6; Ext: '.deb'),
+     (Icon:  6; Ext: '.torrent'),
+{1}  (Icon:  1; Ext: ''));
+
+CONST
+  ImageList =37;   // Index of first image type entry, TO BE UPDATED ON CHANGES!
+
+TYPE
+  PlaceIcons = RECORD
+      Icon:  integer;
+      Place: string [9];
+    END;
+
+  SubPlaces = (SysRoot, DataDir, atHome, Desktop, Music, Sound, Pictures, Videos, Documents, Downloads, no_more);
+
+  PlaceIconTable = ARRAY [SubPlaces] OF PlaceIcons;
+
+CONST
+  SubPlace: PlaceIconTable = (
+  {$ifdef windows}
+    (Icon:  0; Place: ':\'),       (Icon:  0; Place: ':\users'),
+  {$else}
+    (Icon:  0; Place: '/'),         (Icon:  0; Place: '/usr'),
+  {$endif}
+    (Icon: 13; Place: 'Home'),      (Icon: 14; Place: 'Desktop'),
+    (Icon:  3; Place: 'Music'),     (Icon:  3; Place: 'Sound'),
+    (Icon:  7; Place: 'Pictures'),  (Icon:  4; Place: 'Videos'),
+    (Icon:  2; Place: 'Documents'), (Icon: 15; Place: 'Downloads'),
+    (Icon:  0; Place: ''));
 
 type
   tdirtreefo1 = class(tdirtreefo);
@@ -758,24 +913,26 @@ begin
   end;
 end;
 
-function filedialogx1(dialog: tfiledialogxfo; var afilenames: filenamearty;
- const filterdesc: array of msestring;
-  const filtermask:
- array of msestring; const filterindex: pinteger;
-  const afilter: pfilenamety;      //nil -> unused
-  const colwidth: pinteger;        //nil -> default
-  const includeattrib: fileattributesty;
-  const excludeattrib: fileattributesty;
-  const history: pmsestringarty;
-   const historymaxcount: integer;
-    const acaption: msestring;
-     const aoptions: filedialogoptionsty;
-  const adefaultext: filenamety;
-   const imagelist: timagelist;
-    const ongetfileicon: getfileiconeventty;
-     const oncheckfile: checkfileeventty): modalresultty;
+function filedialogx1 (dialog: tfiledialogxfo;
+                       var afilenames: filenamearty;
+                       const filterdesc: array of msestring;
+                       const filtermask: array of msestring;
+                       const filterindex: pinteger;
+                       const afilter: pfilenamety;      //nil -> unused
+                       const colwidth: pinteger;        //nil -> default
+                       const includeattrib: fileattributesty;
+                       const excludeattrib: fileattributesty;
+                       const history: pmsestringarty;
+                       const historymaxcount: integer;
+                       const acaption: msestring;
+                       const aoptions: filedialogoptionsty;
+                       const adefaultext: filenamety;
+                       const imagelist: timagelist;
+                       const ongetfileicon: getfileiconeventty;
+                       const oncheckfile: checkfileeventty
+                       ): modalresultty;
 var
-  int1: integer;
+  int1:  integer;
   abool: Boolean;
 begin
   with dialog do
@@ -786,11 +943,13 @@ begin
     if fdo_filtercasesensitive in aoptions then
       listview.optionsfile := listview.optionsfile + [flvo_maskcasesensitive];
     if fdo_filtercaseinsensitive in aoptions then
-      listview.optionsfile := listview.optionsfile + [flvo_maskcaseinsensitive
-        ];
-    if fdo_single in aoptions then
-      listview.options     := listview.options - [lvo_multiselect];
-    defaultext := adefaultext;
+      listview.optionsfile := listview.optionsfile + [flvo_maskcaseinsensitive];
+////////////////////////////////////////////
+////    if fdo_single in aoptions then
+////      listview.options     := listview.options - [lvo_multiselect];
+    setDialogOptions (aoptions);    // set selection options for both displays
+////////////////////////////////////////////
+    fController.defaultext := adefaultext;
     Caption := acaption;
     //caption := 'Select a file';
     listview.includeattrib := includeattrib;
@@ -826,12 +985,15 @@ begin
       filename.dropdown.valuelist.asarray := history^;
       filename.dropdown.historymaxcount := historymaxcount;
     end
-    else
-      filename.dropdown.options := [deo_disabled];
+//// DO NOT disable the history display HERE! You DON'T KNOW YET whether it's wanted!
+////    else
+////      filename.dropdown.options := [deo_disabled];
+;
     if (high(afilenames) = 0) and (fdo_directory in aoptions) then
       filename.Value     := filepath(afilenames[0])
     else
       filename.Value     := quotefilename(afilenames);
+
     if (colwidth <> nil) and (colwidth^ <> 0) then
       listview.cellwidth := colwidth^;
 
@@ -845,75 +1007,98 @@ begin
     if filename.tag = 1 then
       filename.Value := ExtractFilePath(filename.Value);
 
-    abool := True;
+////    abool := True;
 
-    if bhidehistory.Value then filename.visible := false
-    else filename.visible := true;
+////    if bhidehistory.Value then filename.visible := false
+////    else filename.visible := true;
+   filename.visible := NOT HistorySetting.checked;
 
-    if blateral.Value then
-      onlateral(nil, abool, abool);
-    if bcompact.Value then
-      onsetcomp(nil, abool, abool);
-    if showhidden.Value then
-      showhiddenonsetvalue(nil, abool, abool);
-    //  showhidden.Value := not (fa_hidden in excludeattrib);
+////??    if blateral.Value then
+////??      onlateral(nil, abool, abool);
+////??    if bcompact.Value then
+////??      onsetcomp(nil, abool, abool);
+////??    if showhidden.Value then
+////??      showhiddenonsetvalue(nil, abool, abool);
+    //  showhidden := not (fa_hidden in excludeattrib);
+////////////////////////////////////////////
+    abool:= PlacesSetting.checked;
+    onlateral (nil, abool, abool {not used});
+    abool:= CompactSetting.checked;
+    onsetcomp (nil, abool, abool {not used});
+    abool:= HiddenSetting.checked;
+    showhiddenonsetvalue (nil, abool, abool {not used});
+////////////////////////////////////////////
 
-    if bshowoptions.value then
-    begin
-    bnoicon.visible := true;
-    bcompact.visible := true;
-    showhidden.visible := true;
-    blateral.visible := true;
-    filename.top := list_log.bottom + 8;
-    imimage.top := filename.top - 4;
-    imimage.height := filename.height + 8;
-
-    end else
-    begin
-    dir.top := back.bottom + 8;
-    filter.top := dir.top;
-    tsplitter2.top := dir.top;
-    placespan.top := filter.bottom + 8;
-    tsplitter1.top := placespan.top;
-    list_log.top := placespan.top;
-    listview.top := list_log.top;
-    filename.top := list_log.bottom + 8;
-    tsplitter1.height := list_log.height;
-    filename.top := list_log.bottom + 8;
-    imimage.top := filename.top - 4;
-    imimage.height := filename.height + 8;
-    bnoicon.visible := false;
-    bcompact.visible := false;
-    showhidden.visible := false;
-    blateral.visible := false;
-    end;
+////////////////////////////////////////////
+////    if bshowoptions.value then
+////    begin
+////      bnoicon.visible := true;
+////      bcompact.visible := true;
+////      showhidden.visible := true;
+////      blateral.visible := true;
+////      filename.top := list_log.bottom + 8;
+////      imimage.top := filename.top - 4;
+////      imimage.height := filename.height + 8;
+////    end else
+////    begin
+////      dir.top := back.bottom + 8;
+////      filter.top := dir.top;
+////      tsplitter2.top := dir.top;
+////      placespan.top := filter.bottom + 8;
+////      tsplitter1.top := placespan.top;
+////      list_log.top := placespan.top;
+////      listview.top := list_log.top;
+      filename.top := list_log.bottom + 8;
+      tsplitter1.height := list_log.height;
+      filename.top := list_log.bottom + 8;
+      imimage.top := filename.top - 4;
+////      imimage.height := filename.height + 8;
+////      bnoicon.visible := false;
+////      bcompact.visible := false;
+////      showhidden.visible := false;
+////      blateral.visible := false;
+////    end;
+////////////////////////////////////////////
 
     if filename.visible = false then
-    height := list_log.bottom + 8
+      height := list_log.bottom + 8
     else
-    height := filename.bottom + 8;
+      height := filename.bottom + 8;
 
     placespan.anchors := [an_left,an_top, an_bottom];
     list_log.anchors := [an_left,an_top, an_bottom];
     listview.anchors := [an_left,an_top, an_bottom];
-
-    Show(True);
-    Result      := window.modalresult;
-    if Result <> mr_ok then
+////////////////////////////////////////////
+//    Show(True);
+  Result:= Show (True, Window);
+//    Result      := window.modalresult;
+////////////////////////////////////////////
+////????    if Result <> mr_ok then
+    if (Result <> mr_ok) AND (Result <> mr_none) then
       Result    := mr_cancel;
+
     if (colwidth <> nil) then
       colwidth^ := listview.cellwidth;
-    if Result = mr_ok then
+
+////????    if Result = mr_ok then
+    if (Result = mr_ok) OR (Result = mr_none{gnrfzg...}) then
     begin
-      afilenames     := filenames;
+      Result:= mr_ok;
+
+      afilenames     := fController.filenames;
+
       if filterindex <> nil then
         filterindex^ := filter.dropdown.ItemIndex;
+
       if afilter <> nil then
         afilter^     := listview.mask;
+
       if high(afilenames) = 0 then
         filename.dropdown.savehistoryvalue(afilenames[0]);
+
       if history <> nil then
         history^ := filename.dropdown.valuelist.asarray;
+
       if fdo_chdir in aoptions then
         setcurrentdirmse(listview.directory);
     end;
@@ -944,8 +1129,8 @@ begin
   try
     dialog := tfiledialogxfo.Create(nil);
 
-    dialog.blateral.value  := true;
-    dialog.bcompact.value  := true;
+    dialog.PlacesSetting.checked := true;
+    dialog.CompactSetting.checked:= true;
 
     if acaption = '' then
     begin
@@ -963,7 +1148,7 @@ begin
         else
           str1 := 'Open';
     end;
-          
+
    {$else}
     if fdo_save in aoptions then
           str1 := sc(sc_save)
@@ -1102,8 +1287,6 @@ begin
   end;
 end;
 
-
-
 procedure tfilelistviewx.filelistchanged(const Sender: TObject);
 var
   int1: integer;
@@ -1114,7 +1297,7 @@ var
   bo1: Boolean;
 begin
   options := options - [lvo_focusselect];
-  options := options + [lvo_horz];
+////  options := options + [lvo_horz];
 
   ffocusmoved := False;
   with ffilelist do
@@ -1365,6 +1548,263 @@ end;
 
 { tfiledialogxfo }
 
+////////////////////////////////////////////
+CONST  //// "list_log" column selection index constants
+  LabelCol = -1;
+  NameCol =   0;
+  ExtCol =    1;
+  SizeCol =   2;
+  DateCol =   3;
+  IconFudge = 4;   //// additional space needed in column...
+////////////////////////////////////////////
+
+////////////////////////////////////////////
+CONSTRUCTOR tfiledialogxfo.Create (CONST Sender: TComponent; ControlIn: tfiledialogxcontroller;
+                                   CONST StatName: msestring; where: dialogposty);
+ BEGIN
+   fcontroller:= ControlIn;
+   INHERITED Create (Sender, StatName, where);
+   fcontroller.DialogPlacement:= where;
+ END;
+
+CONSTRUCTOR tfiledialogxfo.Create (CONST Sender: TComponent; ControlIn: tfiledialogxcontroller; where: dialogposty);
+ BEGIN
+   fcontroller:= ControlIn;
+   INHERITED Create (Sender, where);
+ END;
+
+CONSTRUCTOR tfiledialogxfo.Create (CONST Sender: TComponent; ControlIn: tfiledialogxcontroller);
+ BEGIN
+   fcontroller:= ControlIn;
+   INHERITED Create (Sender);
+ END;
+////////////////////////////////////////////
+CONSTRUCTOR tfiledialogxfo.Create (CONST Sender: TComponent; CONST StatName: msestring;
+                                  where: dialogposty);
+ BEGIN
+   fcontroller:= tfiledialogxcontroller.create (Self);
+   INHERITED Create (Sender, StatName, where);
+   fcontroller.DialogPlacement:= where;
+ END;
+
+CONSTRUCTOR tfiledialogxfo.Create (CONST Sender: TComponent; where: dialogposty);
+ BEGIN
+   fcontroller:= tfiledialogxcontroller.create (Self);
+   INHERITED Create (Sender, where);
+ END;
+
+CONSTRUCTOR tfiledialogxfo.Create (CONST Sender: TComponent);
+ BEGIN
+   fcontroller:= tfiledialogxcontroller.create (Self);
+   INHERITED Create (Sender);
+ END;
+
+DESTRUCTOR tfiledialogxfo.Destroy;
+ BEGIN
+   fcontroller.free;
+   INHERITED;
+ END;
+////////////////////////////////////////////
+FUNCTION  tfiledialogxfo.getDialogOptions: filedialogoptionsty;
+ BEGIN
+   Result:= fController.fOptions;
+ END;
+
+PROCEDURE tfiledialogxfo.setDialogOptions (FileOptions: filedialogoptionsty);
+ BEGIN
+   fController.Options:= FileOptions;
+   IF fdo_single IN FileOptions THEN BEGIN
+     WITH List_Log.dataCols DO Options:= Options- [co_multiselect];
+     WITH ListView DO Options:= Options- [lvo_multiselect];
+   END
+   ELSE BEGIN
+     WITH List_Log.dataCols DO Options:= Options+ [co_multiselect, co_rowselect];
+     WITH ListView DO Options:= Options+ [lvo_multiselect];
+   END;
+ END;
+
+////////////////////////////////////////////
+PROCEDURE tfiledialogxfo.setUserPopup (Popup: tpopupmenu);
+ BEGIN
+   UserPopup:= Popup;
+   ListView.PopupMenu:= Popup; List_Log.PopupMenu:= Popup; Filename.PopupMenu:= Popup;
+ END;
+////////////////////////////////////////////
+
+// FUNCTION tfiledialogxfo.getFilenames: filenamearty;
+//  BEGIN
+//    Result:= fController.fFilenames;
+//  END;
+
+// PROCEDURE tfiledialogxfo.setFilenames (Files: filenamearty);
+//  BEGIN
+//    fController.fFilenames:= Files;
+//  END;
+
+////////////////////////////////////////////
+////////////////////////////////////////////
+PROCEDURE tfiledialogxfo.realizeSelection;
+  VAR
+    i:         integer;
+    selection: integerarty;
+  BEGIN
+    SetLength (selection, 0);
+    FOR i:= 0 TO pred (list_log.rowcount) DO
+      IF finditem (fselectednames, list_log [NameCol][i]) >= 0
+      THEN additem (selection, i);   // add to selection
+
+    listview.selectednames:= fselectednames;
+////????    filename.value:= quotefilename (fselectednames);
+    list_log.datacols.selectedrows:= selection;
+    IF PreviewSetting.checked AND (Length (selection) = 1) THEN showpreview;
+  END;
+////////////////////////////////////////////
+////////////////////////////////////////////
+FUNCTION tfiledialogxfo.Execute (dialogkind: filedialogkindty = fdk_none): modalresultty;
+// main part copied from dialog function definition
+ BEGIN
+   Application.lock;
+   TRY
+     IF assigned (doPrepareDialog) THEN doPrepareDialog (Self);
+     WITH fController DO
+       Result:= Execute (dialogkind, ffCaption, fOptions, Self);
+
+     IF Result IN acceptingResults THEN BEGIN
+      Result:= mr_Ok;
+      IF assigned (doEvaluateDialog) THEN doEvaluateDialog (self, Result);
+     END;
+   FINALLY
+     Application.unlock;
+   end;
+ END;
+
+procedure tfiledialogxfo.StateRead (const sender: TObject; const reader: tStatReader);
+ VAR
+   i:          integer;
+   CustPlaces: mseStringArTy;
+ begin
+   IF sender = self THEN        // I.e. when run "stand alone"
+     WITH fController DO BEGIN
+       ReadStatOptions (Reader);  // LastDir, FileHistory
+       ReadStatValue   (Reader);  // Filenames, Params (??)
+       ReadStatState   (Reader);  // Position, Size, FileColWidth, Filter
+     END;
+
+   WITH reader DO BEGIN
+////////////////////////////////////////////
+     WITH Font DO BEGIN
+       ColorBackground:=          ReadInteger ('BgColor',         integer (cl_default));
+       Name:=                     ReadString  ('FontName',        'stf_default');
+       Height:=                   ReadInteger ('FontSize',        0);
+       Style:=      fontstylesty (ReadInteger ('FontStyle',       integer (style)));
+       Color:=                    ReadInteger ('FontColor',       integer (cl_black));
+       ColorSelect:=              ReadInteger ('SelColor',        integer (cl_selectedtext));
+       ColorSelectBackground:=    ReadInteger ('SelBgColor',      integer (cl_selectedtextbackground));
+     END;
+     SetLength (CustPlaces, 0);
+     CustPlaces:=                 readarray('filenamescust',      CustPlaces);
+////////////////////////////////////////////
+     PlacesSetting.checked:=      readboolean ('nopanel',         PlacesSetting.checked);
+     CompactSetting.checked:=     readboolean ('compact',         CompactSetting.checked);
+     HiddenSetting.checked:=      readboolean ('showhidden',      HiddenSetting.checked);
+     HistorySetting.checked:=     readboolean ('hidehistory',     HistorySetting.checked);
+     IconsSetting.checked:=       readboolean ('hideicons',       IconsSetting.checked);
+     PreviewSetting.checked:=     readboolean ('imagepreview',    PreviewSetting.checked);
+
+     listview.cellwidth:=         readinteger ('filecolwidth',    listview.cellwidth);
+     list_log.datacols[0].Width:= readinteger ('colnamewidth',    list_log.datacols [0].Width);
+     list_log.datacols[1].Width:= readinteger ('colextwidth',     list_log.datacols [1].Width);
+     list_log.datacols[2].Width:= readinteger ('colsizewidth',    list_log.datacols [2].Width);
+     list_log.datacols[3].Width:= readinteger ('coldatewidth',    list_log.datacols [3].Width);
+     tsplitter1.left:=            readinteger ('splitterlateral', tsplitter1.left);
+     tsplitter3.top:=             readinteger ('splitterplaces',  tsplitter3.top);
+   END;
+   fsplitterpanpos:= tsplitter1.left;
+
+   placescust.rowcount:= succ (Length (CustPlaces));  //// ????
+   placescust [0][0]:= '';              // flag place names "column" empty
+   FOR i:= 0 TO high (CustPlaces) DO
+     placescust [1][i]:= CustPlaces [i];
+   SetLength (CustPlaces, 0);          // goes away soon anyway ...
+
+   onswitchcomp (NIL);
+   onswitchlateral (NIL);
+   onswitchpreview (NIL);
+   onswitchvalnoicon (NIL);
+   onswitchshowhidden (NIL);
+
+   filename.visible:= NOT HistorySetting.checked;
+
+   IF filename.visible THEN BEGIN
+     WITH Filename.dropdown DO
+       IF dropdownrowcount > 0
+         THEN itemindex:= 0;
+
+     IF Length (fController.ffilenames) > 0 THEN BEGIN
+       fselectednames:=  fcontroller.ffilenames;
+       filename.value:=  quotefilename (fselectednames);
+     END;
+   END;
+ end;
+
+procedure tfiledialogxfo.StateWrite (const sender: TObject; const writer: tStatWriter);
+ VAR
+   i:          integer;
+   CustPlaces: mseStringArTy;
+ begin
+   IF sender = self THEN        // I.e. when run "stand alone"
+     WITH fController DO BEGIN
+////////////////////////////////////////////
+       ffilterindex:= self.filter.dropdown.itemindex;
+       IF high (ffilenames) = 0 THEN
+         self.filename.dropdown.savehistoryvalue (ffilenames [0]);
+       IF fdo_chdir IN options THEN
+         setCurrentDirmse (listview.directory);
+////////////////////////////////////////////
+       WriteStatOptions (Writer);  // LastDir, FileHistory, Filter
+       WriteStatValue (Writer);    // Filenames, Params (??)
+       WriteStatState (Writer);    // Position, Size, FileColWidth
+     END (* WITH FController *);
+
+   SetLength (CustPlaces, pred (placescust.rowcount));
+   FOR i:= 0 TO high (CustPlaces) DO
+     CustPlaces [i]:= placescust [1][i];
+
+   WITH writer DO BEGIN
+////////////////////////////////////////////
+     WITH Font DO BEGIN
+       WriteInteger ('BgColor',       ColorBackground);
+       WriteString  ('FontName',      Name);
+       WriteInteger ('FontSize',      Height);
+       WriteInteger ('FontStyle',     integer (Style));
+       WriteInteger ('FontColor',     Color);
+       WriteInteger ('SelColor',      ColorSelect);
+       WriteInteger ('SelBgColor',    ColorSelectBackground);
+     END;
+     writearray   ('filenamescust',   CustPlaces); SetLength (CustPlaces, 0);
+////////////////////////////////////////////
+     writeboolean ('nopanel',         PlacesSetting.checked);
+     writeboolean ('compact',         CompactSetting.checked);
+     writeboolean ('hidehistory',     HistorySetting.checked);
+     writeboolean ('hideicons',       IconsSetting.checked);
+     writeboolean ('showhidden',      HiddenSetting.checked);
+     writeboolean ('imagepreview',    PreviewSetting.checked);
+
+     writeinteger ('filecolwidth',    listview.cellwidth);
+     writeinteger ('colnamewidth',    list_log.datacols [0].Width);
+     writeinteger ('colextwidth',     list_log.datacols [1].Width);
+     writeinteger ('colsizewidth',    list_log.datacols [2].Width);
+     writeinteger ('coldatewidth',    list_log.datacols [3].Width);
+
+     IF PlacesSetting.checked
+       THEN writeinteger ('splitterlateral', fsplitterpanpos)
+       ELSE writeinteger ('splitterlateral', tsplitter1.left);
+
+     writeinteger ('splitterplaces',  tsplitter3.top);
+   END;
+ end;
+////////////////////////////////////////////
+
 {$ifdef BGRABITMAP_USE_MSEGUI}
 function tfiledialogxfo.LoadImagebgra(const AFileName: msestring): msestring;
 begin
@@ -1373,13 +1813,13 @@ begin
 // imImage.Bitmap := tbitmapcomp1.bitmap;
   Result := '0' ;
 end;
-{$else} 
+{$else}
 function tfiledialogxfo.LoadImage(const AFileName: msestring): msestring;
 begin
  result := imImage.bitmap.tryLoadFromFile(tosysfilepath(AFileName));
 // if result <> '' then imImage.Bitmap := tbitmapcomp2.bitmap;
 end;
-{$endif}  
+{$endif}
 
 procedure tfiledialogxfo.createdironexecute(const Sender: TObject);
 var
@@ -1389,7 +1829,7 @@ begin
 
 {$ifdef mse_dynpo}
 if length(lang_stockcaption) > ord(sc_name) then
-begin 
+begin
     if stringenter(mstr1, lang_stockcaption[ord(sc_name)],
       lang_stockcaption[ord(sc_create_new_directory)]) = mr_ok then
       begin
@@ -1401,7 +1841,7 @@ begin
       filename.SetFocus;
     end;
 end else
-begin 
+begin
     if stringenter(mstr1, 'Name', 'Create new directory') = mr_ok then
       begin
       places.defocuscell;
@@ -1412,7 +1852,7 @@ begin
       filename.SetFocus;
     end;
 end
-    
+
 {$else}
     if stringenter(mstr1, sc(sc_name),
       sc(sc_create_new_directory)) = mr_ok then
@@ -1423,68 +1863,107 @@ end
       msefileutils.createdir(mstr1);
       changedir(mstr1);
       filename.SetFocus;
-    end;   
+    end;
 {$endif}
 end;
 
 procedure tfiledialogxfo.listviewselectionchanged(const Sender: tcustomlistview);
 var
-  ar1: msestringarty;
+////////////////////////////////////////////
+////  ar1: msestringarty;
+////////////////////////////////////////////
+  Ext: string;
+  i:   integer;
 begin
-  ar1 := nil;
+////////////////////////////////////////////
+////  ar1 := nil;
+////////////////////////////////////////////
   //compiler warning
   if not (fdo_directory in dialogoptions) then
   begin
-    ar1 := listview.selectednames;
-    if length(ar1) > 0 then
+////////////////////////////////////////////
+////    ar1 := listview.selectednames;
+////    if length(ar1) > 0 then
+////    begin
+////      if length(ar1) > 1 then
+////        filename.Value := quotefilename(ar1)
+////      else
+////      begin
+////        filename.Value := ar1[0];
+////      end;
+////    end
+////////////////////////////////////////////
+    fselectednames := listview.selectednames;
+    if length (fselectednames) > 0 then
     begin
-      if length(ar1) > 1 then
-        filename.Value := quotefilename(ar1)
+      if length (fselectednames) > 1 then
+        filename.Value:= quotefilename (fselectednames)
       else
       begin
-        filename.Value := ar1[0];
+        filename.Value:= fselectednames [0];
       end;
+      realizeselection;
     end
+////////////////////////////////////////////
     else
+      ////////////////////////////////////////////
+      EXIT;   //// Nothing more to do here ---- ????
+      ////////////////////////////////////////////
       //   filename.value:= ''; //dir chanaged
     ;
   end;
 
-  if filename.tag = 1 then
-    filename.Value := dir.Value;
-
-  //  writeln(dir.Value + filename.Value);
-
-  //    writeln(fileext(filename.Value));
-
- if (lowercase(fileext(filename.Value)) = 'xpm') or
-    (lowercase(fileext(filename.Value)) = 'jpeg') or
-  //   (lowercase(fileext(filename.Value)) = 'ico') or
-      (lowercase(fileext(filename.Value)) = 'bmp') or
-      (lowercase(fileext(filename.Value)) ='png') or
-      (lowercase(fileext(filename.Value)) = 'jpg') then
- begin
-  if fileexists(dir.Value + filename.Value) then
-  {$ifdef BGRABITMAP_USE_MSEGUI}
-  if loadimagebgra(dir.Value + filename.Value) <> '' then
-  {$else} 
-  if loadimage(dir.Value + filename.Value) <> '' then
-  {$endif} 
-       begin
-         imImage.visible := true;
-         filename.left := imImage.right + 2 ;
-         filename.width := width - imImage.right - 6 ;
-         imImage.invalidate;
-      end
-  end else
-  begin
-   imImage.visible := false;
-   filename.left := 4 ;
-   filename.width := width - 8 ;
-  end;
-// {$endif} 
-  
- end;
+////////////////////////////////////////////
+////   imImage.visible := false;
+////   filename.left := 4 ;
+////   filename.width := width - 8 ;
+////
+////  if filename.tag = 1 then
+////    filename.Value := dir.Value
+////////////////////////////////////////////
+////  else                                              //// no images for directories ---- ????
+////  if fileexists(dir.Value + filename.Value) then    //// why bother further otherwise ---- ????
+////  begin
+////
+////    Ext:= '.'+ lowercase (FileExt (filename.Value));
+////    i:= ImageList;
+////    WHILE (ExtIcon [i].Icon = 7) AND (ExtIcon [i].Ext <> Ext) DO Inc (i);
+////    {$ifdef BGRABITMAP_USE_MSEGUI}
+////    if loadimagebgra(dir.Value + filename.Value) <> '' then
+////    {$else}
+////    if loadimage(dir.Value + filename.Value) <> '' then
+////    {$endif}
+////    begin
+////      imImage.visible := true;
+////      filename.left := imImage.right + 2 ;
+////      filename.width := width - imImage.right - 6 ;
+////      imImage.invalidate;
+////    end
+////
+////////////!!!!!!!!!!
+//////// if (lowercase(fileext(filename.Value)) = 'xpm') or
+////////    (lowercase(fileext(filename.Value)) = 'jpeg') or
+////////  //   (lowercase(fileext(filename.Value)) = 'ico') or
+////////      (lowercase(fileext(filename.Value)) = 'bmp') or
+////////      (lowercase(fileext(filename.Value)) ='png') or
+////////      (lowercase(fileext(filename.Value)) = 'jpg') then
+//////// begin
+////////  if fileexists(dir.Value + filename.Value) then
+////////  {$ifdef BGRABITMAP_USE_MSEGUI}
+////////  if loadimagebgra(dir.Value + filename.Value) <> '' then
+////////  {$else}
+////////  if loadimage(dir.Value + filename.Value) <> '' then
+////////  {$endif}
+////////       begin
+////////         imImage.visible := true;
+////////         filename.left := imImage.right + 2 ;
+////////         filename.width := width - imImage.right - 6 ;
+////////         imImage.invalidate;
+////////      end
+////////////////////////////////////////////
+////  end;
+////////////////////////////////////////////
+end;
 
 function tfiledialogxfo.changedir(const adir: filenamety): Boolean;
 begin
@@ -1533,6 +2012,12 @@ begin
     begin
       doup();
       include(info.eventstate, es_processed);
+////////////////////////////////////////////
+    END
+    ELSE IF key = key_return THEN BEGIN
+      okonexecute (Sender);
+      window.modalresult:= mr_ok;
+////////////////////////////////////////////
     end;
 end;
 
@@ -1564,7 +2049,7 @@ if length(lang_stockcaption) > ord(sc_can_not_read_directory) then
           showerror(lang_stockcaption[ord(sc_can_not_read_directory)] + ' ' +
             msestring(esys(ex).Text), lang_stockcaption[ord(sc_error)]) else
          showerror('Can not read directory ' +
-            msestring(esys(ex).Text), 'ERROR');       
+            msestring(esys(ex).Text), 'ERROR');
 {$else}
           showerror(sc(sc_can_not_read_directory) + ' ' +
             msestring(esys(ex).Text), sc(sc_error));
@@ -1667,25 +2152,26 @@ if length(lang_stockcaption) > ord(sc_single_item_only) then
   end;
   listview.selectednames := fselectednames;
   theexist := -1;
-
+(*------------------------
   for theint := 0 to list_log.rowcount - 1 do
          if trim(copy(list_log[0][theint], 2, length(list_log[0][theint])))  = str2 then
                  theexist := theint;
 
-    if theexist > 0 then
-      begin
-          sel.col := 0;
-          sel.row := theexist;
-          fisfixedrow := true;
-          list_log.defocuscell;
-          list_log.datacols.clearselection;
-          list_log.selectcell(sel,csm_select);
-          list_log.frame.sbvert.value := theexist/ (list_log.rowcount-1);
-        end;
-         places.defocuscell;
-         places.datacols.clearselection;
-         placescust.defocuscell;
-         placescust.datacols.clearselection;
+  if theexist > 0 then
+    begin
+        sel.col := 0;
+        sel.row := theexist;
+////????        fisfixedrow := true;
+        list_log.defocuscell;
+        list_log.datacols.clearselection;
+        list_log.selectcell(sel,csm_select);
+        list_log.frame.sbvert.value := theexist/ (list_log.rowcount-1);
+      end;
+------------------------*)
+   places.defocuscell;
+   places.datacols.clearselection;
+   placescust.defocuscell;
+   placescust.datacols.clearselection;
 
 end;
 
@@ -1707,11 +2193,12 @@ begin
     course(avalue);
   listview.directory := avalue;
 
+//////// Is this REALLY useful ???????
  if filename.tag <> 2 then begin // save file
   if filename.tag = 1 then
     filename.Value   := dir.Value
-  else
-    filename.Value   := '';
+////  else
+////    filename.Value   := '';
     end;
 end;
 
@@ -1724,24 +2211,39 @@ var
    {$else}
   info: fileinfoty;
   {$endif}
-  thedir, thestrnum, thestrfract, thestrx, thestrext, tmp, tmp2, tmp3: msestring;
+  thedir, thestrnum, thestrfract, {thestrx,} thestrext, tmp, tmp2, tmp3: msestring;
 begin
+////////////////////////////////////////////
 
-  listview.Width := 30;
-  listview.invalidate;
+  IF listview.rowcount <= 0 THEN exit;  //// Nothing more to do here ...
+////////////////////////////////////////////
 
-  if bnoicon.Value = False then
+////////////////////////////////////////////
+////  listview.Width := 30;
+////  listview.invalidate;
+////////////////////////////////////////////
+  labtest.Width := 30;
+  labtest.invalidate;
+////////////////////////////////////////////
+
+  if NOT IconsSetting.checked then
   begin
-    x := 30;
-    labtest.Caption := '';
-
-    while labtest.Width < x do
-    begin
-      labtest.Caption := labtest.caption + ' ';
-      labtest.invalidate;
-    end;
-
-    tmp2 := labtest.Caption;
+////////////////////////////////////////////
+//    x := 30;
+//    labtest.Caption := ' ';
+//////!!!!
+//    while labtest.Width < x do
+//    begin
+//      labtest.Caption := labtest.caption + ' ';
+//      labtest.invalidate;
+//    end;
+//
+//    tmp2 := labtest.Caption;
+////////////////////////////////////////////
+    labtest.Caption := ' ';
+    tmp2:= StringOfChar (' ', Max (1, pred (30 DIV labtest.Width)));
+    labtest.Caption := tmp2;
+////////////////////////////////////////////
     tmp3 := '';
 
   end
@@ -1762,23 +2264,41 @@ begin
   tmp2 := labtest.Caption;
    }
 
+////////////////////////////////////////////
+   IF IconsSetting.checked THEN BEGIN
+     labtest.Caption:= 'D |';
+     list_log.fixcols [LabelCol].width:= labtest.Width;
+   END
+   ELSE list_log.fixcols [LabelCol].width:= iconslist.width+ IconFudge;
+
+////////////////////////////////////////////
+
   with listview do
   begin
     dir.Value        := tosysfilepath(directory);
     if fdo_directory in self.dialogoptions then
       filename.Value := tosysfilepath(directory);
   end;
+////////////////////////////////////////////
+       listview.rowcount:= listview.filelist.count;   ////!!!!
+       list_log.rowcount:= listview.rowcount;
 
-  list_log.rowcount := listview.rowcount;
+       list_log.fixcols [-1].Captions.Count:= listview.rowcount;  //// for selection ????
+////////////////////////////////////////////
+//// if list_log.rowcount = listview.rowcount then exit;    //// Data set already ---- ????
+//// Zus. Spalte fuer Icons oder Kennung einrichten, nur die umschalten ????
 
-  for x := 0 to listview.rowcount - 1 do
-  begin
-    list_log[0][x] := '';
-    list_log[1][x] := '';
-    list_log[2][x] := '';
-    list_log[3][x] := '';
-    list_log[4][x] := '';
-  end;
+////////////////////////////////////////////
+//  list_log.rowcount := listview.rowcount;
+//  for x := 0 to listview.rowcount - 1 do
+//  begin
+//    list_log[0][x] := '';
+//    list_log[1][x] := '';
+//    list_log[2][x] := '';
+//    list_log[3][x] := '';
+//////????    list_log[4][x] := '';
+//  end;
+////////////////////////////////////////////
 
   y  := 0;
   x2 := 0;
@@ -1786,30 +2306,53 @@ begin
   if listview.rowcount > 0 then
     for x := 0 to listview.rowcount - 1 do
     begin
-      list_log[4][x] := msestring(IntToStr(x));
+////????      list_log[4][x] := msestring(IntToStr(x));
 
+////////////////////////////////////////////
+     if listview.filelist.count > 0 then begin
+////       for x := 0 to listview.rowcount - 1 do
+       begin
+////////////////////////////////////////////
+//// ----         list_log.fixcols [LabelCol].Captions [x]:= inttostr (x);  //// for selection ????
+////////////////////////////////////////////
+         list_log[NameCol][x] := '';
+         list_log[ExtCol][x] := '';
+         list_log[SizeCol][x] := '';
+         list_log[DateCol][x] := '';
+////????    list_log[4][x] := '';
+       end;
+////////////////////////////////////////////
       if listview.filelist.isdir(x) then
       begin
         Inc(x2);
-        if bnoicon.Value = True then
+        if IconsSetting.checked then
           tmp3 := 'D |'
         else
           tmp3 := '.';
-        list_log[0][x] := tmp3 + tmp2 + msestring(listview.itemlist[x].Caption);
-        list_log[1][x] := '';
+////////////////////////////////////////////
+////        list_log[NameCol][x] := {tmp3 + tmp2 +} msestring(listview.itemlist[x].Caption);
+        list_log.fixcols [LabelCol].Captions [x]:= tmp3;
+        list_log [NameCol][x]:= msestring (listview.itemlist [x].Caption);
+////////////////////////////////////////////
+        list_log[ExtCol][x] := '';
       end
       else
       begin
-        if bnoicon.Value = True then
+        if IconsSetting.checked then
           tmp3 := 'F |'
         else
           tmp3 := ':';
-        list_log[0][x] := tmp3 + tmp2 + msestring(filenamebase(listview.itemlist[x].Caption));
+//// XXXX zus. Einstellung mit/ohne Extension?
+////////////////////////////////////////////
+////        list_log[NameCol][x] := tmp3 + tmp2 + msestring(filenamebase(listview.itemlist[x].Caption));
+        list_log.fixcols [LabelCol].Captions [x]:= tmp3;
+        list_log [NameCol][x]:=  msestring(filenamebase (listview.itemlist [x].Caption));
+////////////////////////////////////////////
         tmp := fileext(listview.itemlist[x].Caption);
         if tmp <> '' then
           tmp          := '.' + tmp;
-        list_log[1][x] := msestring(tmp);
-        list_log[0][x] := list_log[0][x] + list_log[1][x];
+        list_log[ExtCol][x] := msestring(tmp);
+        list_log[NameCol][x] := list_log[NameCol][x] + list_log[ExtCol][x];
        {
         if (lowercase(list_log[1][x]) = '.png')
             or (lowercase(list_log[1][x]) = '.jpg')
@@ -1822,7 +2365,7 @@ begin
              list_log[5][x] := inttostr(x);
             end;
         }
-         end;
+       end;
 
       dir.Value := tosysfilepath(dir.Value);
 
@@ -1841,10 +2384,8 @@ begin
         {$else}
          fsize := info.extinfo1.size;
         {$endif}
-
+(*************************
         if fsize div 1000000000 > 0 then
-
-
         begin
           y2        := Trunc(Frac(fsize / 1000000000) * Power(10, 1));
           y         := fsize div 1000000000;
@@ -1872,6 +2413,19 @@ begin
           thestrx   := '!';
           thestrext := ' B ';
         end;
+*************************)
+        IF fsize > 0
+          THEN y:= min (floor (log10 (fsize)) DIV 3, High (sizeSign))
+          ELSE y:= 0;
+
+        thestrext:= SizeSign [y].Text;
+////        thestrx:= SizeSign [y].Sign;    //// DOES that have any meaning AT ALL ???? It's not used anywhere!
+        IF y > 0 THEN BEGIN
+          y2:= 10 ** (3* y); y:= fsize DIV y2; y2:= (((10* fsize)+ (y2 DIV 2)) DIV y2) MOD 10;
+        END                             //                       ^^^^^^^^^^^ optional rounding
+        ELSE BEGIN
+          y2:= 0; y:= fsize;
+        END;
 
         thestrnum := msestring(IntToStr(y));
 
@@ -1886,41 +2440,52 @@ begin
         else
           thestrfract := '';
 
-        list_log[2][x] := thestrx + thestrnum + thestrfract + thestrext;
+        list_log[SizeCol][x] := {thestrx +} thestrnum + thestrfract + thestrext;  //// looks MUCH cleaner that way!
       end
       else
-        list_log[2][x] := ' ';
+        list_log[SizeCol][x] := ' ';
 
       {$ifdef unix}
-       list_log[3][x] := msestring(formatdatetime('YY-MM-DD hh:mm:ss', FileDateToDateTime(info.st_mtime)));
+       list_log[DateCol][x] := msestring(formatdatetime('YY-MM-DD hh:mm:ss', FileDateToDateTime(info.st_mtime)));
       {$else}
-      list_log[3][x] := msestring(formatdatetime('YY-MM-DD hh:mm:ss', info.extinfo1.modtime));
+      list_log[DateCol][x] := msestring(formatdatetime('YY-MM-DD hh:mm:ss', info.extinfo1.modtime));
       {$endif}
 
       if listview.filelist.isdir(x) then
-        list_log[3][x] := ' ' + list_log[3][x];
+        list_log[DateCol][x] := ' ' + list_log[DateCol][x];
     end; // else dir.frame.caption := 'Directory with 0 files';
 
-  if bcompact.Value then
-  begin
-    listview.Width := list_log.Width;
-    listview.invalidate;
-  end;
+////////////////////////////////////////////
+    //// NO files selected here yet ---- ????
+////    SetLength (fselectednames, 0);
+    listview.selectednames:= fselectednames;
+    list_log.datacols.clearselection;
+////////////////////////////////////////////
 
-  list_log.defocuscell;
-  list_log.datacols.clearselection;
+    if CompactSetting.checked then
+    begin
+      listview.Width := list_log.Width;
+      listview.invalidate;
+    end;
+
+////----  list_log.defocuscell;
+////----  list_log.datacols.clearselection;
 
  // dir.frame.Caption := 'Directory with ' + msestring(IntToStr(list_log.rowcount - x2)) + ' files';
 
- if filename.tag <> 2 then begin // save file
-  if filename.tag = 1 then
-    filename.Value := (dir.Value)
-  else
-    filename.Value := '';
+//////// Is this REALLY useful ???????
+    if filename.tag <> 2 then begin // save file
+      if filename.tag = 1 then
+        filename.Value := (dir.Value)
+////      else
+////        filename.Value := '';
     end;
 
-  filename.Value := tosysfilepath(filename.Value);
+    filename.Value := tosysfilepath(filename.Value);
 
+////////////////////////////////////////////
+  end;
+////////////////////////////////////////////
 end;
 
 procedure tfiledialogxfo.updatefiltertext;
@@ -1953,16 +2518,18 @@ begin
 
   bool := True;
 
-  list_log.defocuscell;
-  list_log.datacols.clearselection;
+////----  list_log.defocuscell;
+////----  list_log.datacols.clearselection;
 
   dironsetvalue(Sender, rootdir, bool);
 
-  fisfixedrow := True;
+////????  fisfixedrow := True;
 
-  list_log.defocuscell;
-  list_log.datacols.clearselection;
-
+////----  list_log.defocuscell;
+////----  list_log.datacols.clearselection;
+////////////////////////////////////////////
+  list_log.row:= -1; listview.row:= -1;
+////////////////////////////////////////////
 end;
 
 procedure tfiledialogxfo.okonexecute(const Sender: TObject);
@@ -1980,17 +2547,17 @@ begin
     begin
       str1 := tosysfilepath(quotefilename(listview.directory, filename.Value));
     end;
-    unquotefilename(str1, filenames);
-    if (defaultext <> '') then
-      for int1 := 0 to high(filenames) do
-        if not hasfileext(filenames[int1]) then
-          filenames[int1] := tosysfilepath(filenames[int1] + '.' + defaultext);
+    unquotefilename(str1, Controller.ffilenames);
+    if (fController.defaultext <> '') then
+      for int1 := 0 to high(fController.filenames) do
+        if not hasfileext(fController.filenames[int1]) then
+          fController.filenames[int1] := tosysfilepath(fController.filenames[int1] + '.' + fController.defaultext);
     if (fdo_checkexist in dialogoptions) and not ((filename.Value = '') and (fdo_acceptempty in dialogoptions)) then
     begin
       if fdo_directory in dialogoptions then
-        bo1 := finddir(tosysfilepath(filenames[0]))
+        bo1 := finddir(tosysfilepath(fController.filenames[0]))
       else
-        bo1 := findfile(tosysfilepath(filenames[0]));
+        bo1 := findfile(tosysfilepath(fController.filenames[0]));
       if fdo_save in dialogoptions then
       begin
         if bo1 then
@@ -2014,34 +2581,34 @@ if length(lang_stockcaption) > ord(sc_file) then
               Exit;
             end;
    end;
-             
-   
+
+
 {$else}
-           if not askok(sc(sc_file)  + ' "' + tosysfilepath(filenames[0]) +
+           if not askok(sc(sc_file)  + ' "' + tosysfilepath(fController.filenames[0]) +
               '" ' + sc(sc_exists_overwrite),
               sc(sc_warningupper)) then
           begin
              filename.SetFocus;
              Exit;
             end;
-     
+
 {$endif}
-            
+
       end
       else if not bo1 then
       begin
 {$ifdef mse_dynpo}
 if length(lang_stockcaption) > ord(sc_file) then
-             showerror(lang_stockcaption[ord(sc_file)] + ' "' + tosysfilepath(filenames[0]) + '" ' +
+             showerror(lang_stockcaption[ord(sc_file)] + ' "' + tosysfilepath(fController.filenames[0]) + '" ' +
             lang_stockcaption[ord(sc_does_not_exist)] + '.',
             uppercase(lang_stockcaption[ord(sc_error)]))
             else
-             showerror('File "' + tosysfilepath(filenames[0]) + 
+             showerror('File "' + tosysfilepath(filenames[0]) +
             '" does not exist.',
             'ERROR');
-           
+
 {$else}
-             showerror(sc(sc_file) + ' "' + tosysfilepath(filenames[0]) + '" ' +
+             showerror(sc(sc_file) + ' "' + tosysfilepath(fController.filenames[0]) + '" ' +
             sc(sc_does_not_exist) + '.',
             uppercase(sc(sc_error)));
 {$endif}
@@ -2053,7 +2620,7 @@ if length(lang_stockcaption) > ord(sc_file) then
     window.modalresult := mr_ok;
   end
   else
-    filename.SetFocus;
+if filename.value <> '' then {????}    filename.SetFocus;
   // end;
 end;
 
@@ -2062,14 +2629,45 @@ begin
   listview.synctofontheight;
 end;
 
+////////////////////////////////////////////
+procedure tfiledialogxfo.onswitchpreview (const Sender: TObject);
+////var
+////  fakebool: boolean;
+ begin
+   showpreview;
+////  fakebool:= PreviewSetting.checked;
+////  bimgpreview:= fakebool;  // avalue;
+ end;
+////////////////////////////////////////////
+////procedure tfiledialogxfo.onswitchhidehistory (const Sender: TObject);
+////var
+////  fakebool: boolean;
+////begin
+////  fakebool:= HistorySetting.checked;  // showhidden.value;
+//////  showhiddenonsetvalue (Sender, fakebool, fakebool {not used?});
+////  bhidehistory:= fakebool;  // avalue;
+////end;
+////////////////////////////////////////////
+procedure tfiledialogxfo.onswitchshowhidden (const Sender: TObject);
+var
+  fakebool: boolean;
+begin
+  fakebool:= HiddenSetting.checked;  // showhidden.value;
+  showhiddenonsetvalue (Sender, fakebool, fakebool {not used});
+end;
+////////////////////////////////////////////
+
 procedure tfiledialogxfo.showhiddenonsetvalue(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
 begin
+  {showhidden}HiddenSetting.checked:= avalue;
+
   dir.showhiddenfiles      := avalue;
   if avalue then
     listview.excludeattrib := listview.excludeattrib - [fa_hidden]
   else
     listview.excludeattrib := listview.excludeattrib + [fa_hidden];
   listview.readlist;
+  accept:= true;
 end;
 
 procedure tfiledialogxfo.dirshowhint(const Sender: TObject; var info: hintinfoty);
@@ -2159,106 +2757,641 @@ if length(lang_stockcaption) > ord(tag) then
       ' (' + encodeshortcutname(shortcut) + ')' else
     ainfo.Caption := 'Tag (' + encodeshortcutname(shortcut) + ')' ;
 {$else}
-    ainfo.Caption := sc(stockcaptionty(tag)) + 
+    ainfo.Caption := sc(stockcaptionty(tag)) +
       ' (' + encodeshortcutname(shortcut) + ')';
 {$endif}
-    
+
 end;
 
-procedure tfiledialogxfo.oncellev(const Sender: TObject; var info: celleventinfoty);
-var
-  cellpos, cellpos2: gridcoordty;
-  y: integer;
-  str1: msestring;
-begin
+////////////////////////////////////////////
+PROCEDURE tfiledialogxfo.showpreview;
+//// to be called with single regular file selected ONLY !!!!
+ VAR
+   i:   integer = 0;
+   Ext: filenamety;
+ BEGIN
+   //// Check whether a preview image should be displayed (just for safety)
+   IF PreviewSetting.checked AND
+      (Length (fselectednames) = 1) AND
+      NOT listview.filelist.isdir (list_log.datacols.selectedrows [0])
+   THEN BEGIN
+     IF fileexists (dir.Value+ filename.Value) THEN BEGIN
+       Ext:= lowercase (list_log [ExtCol][list_log.datacols.selectedrows [0]]);
+       i:= ImageList;
+       WHILE (ExtIcon [i].Icon = 7) AND (ExtIcon [i].Ext <> Ext) DO Inc (i);
+       IF (ExtIcon [i].Icon = 7) AND
+          {$ifdef BGRABITMAP_USE_MSEGUI}
+          (loadimagebgra (dir.Value+ filename.Value) <> '')
+          {$else}
+          (loadimage (dir.Value+ filename.Value) <> '')
+          {$endif}
+       THEN BEGIN   //// image file found
+         imImage.visible:= true;
+         filename.left:= imImage.right+ 2;
+         filename.width:= width- imImage.right- 6;
+         imImage.invalidate;
+         i:= 7;
+       END
+       ELSE i:= 0;  //// flag no such image
+     END;
+   END;
+   //// no such image, file not found, or is directory
+   IF i = 0 THEN BEGIN
+     //// Remove preview image field
+     imImage.visible:= false;
+     filename.left:= 4;
+     filename.width:= width- 8;
+   END;
+ END;
 
-  if (list_log.rowcount > 0) and ((info.eventkind = cek_buttonrelease) or
-    (info.eventkind = cek_keyup)) then
-    if (info.cell.row > -1) then
-    begin
-      if (fisfixedrow = False) then
-      begin
-        cellpos := info.cell;
-        cellpos.col := 0;
-        cellpos2.col := 0;
-        places.defocuscell;
-        places.datacols.clearselection;
-        y := StrToInt(ansistring(list_log[4][cellpos.row]));
-        cellpos2.row := y;
+procedure tfiledialogxfo.oncellev (const Sender: TObject; var info: celleventinfoty);
+////////////////////////////////////////////
+//// celleventinfoty = record //same layout as ificelleventinfoty
+////   cell: gridcoordty;
+////   grid: tcustomgrid;
+////
+////   case eventkind: celleventkindty of
+////    cek_exit, cek_enter, cek_focusedcellchanged:
+////       (cellbefore,
+////        newcell: gridcoordty;
+////        selectaction: focuscellactionty);
+////    cek_select:
+////       (selected: boolean;
+////        accept: boolean);
+////    cek_mousemove, cek_mousepark, cek_firstmousepark, cek_buttonpress, cek_buttonrelease:
+////       (zone: cellzonety;
+////        mouseeventinfopo: pmouseeventinfoty;
+////        gridmousepos: pointty);
+////    cek_keydown, cek_keyup:
+////       (keyeventinfopo: pkeyeventinfoty);
+//// end;
+////
+//// keyeventinfoty = record
+////  eventkind: eventkindty;
+////  key,keynomod: keyty;
+////  chars: msestring;
+////  shiftstate: shiftstatesty;
+////  eventstate: eventstatesty;
+////  timestamp: longword; //usec
+////  serial: card32; //0 -> invalid
+//// end;
+////
+//// mouseeventinfoty = record //same layout as mousewheeleventinfoty!
+////  eventkind: eventkindty;
+////  shiftstate: shiftstatesty;
+////  pos: pointty;
+////  eventstate: eventstatesty;
+////  timestamp: longword; //usec, 0 -> invalid
+////  serial: card32; //0 -> invalid
+////  button: mousebuttonty;
+//// end;
+////
+////////////////////////////////////////////
+//// From "tdatacols":
+////   property selectedrowcount: int32 read fselectedrowcount;
+////   function hascolselection: boolean;
+////   property selectedrows: integerarty read getselectedrows write setselectedrows;
+////////////////////////////////////////////
+////  var
+////   y: integer;
+////  cellpos{, cellpos2}: gridcoordty;
+////i, k,
+////  y: integer;
+////  str1: msestring;
+ VAR
+   i: integer;
+   r: gridcoordty;
 
-        if listview.filelist.isdir(y) then
-        begin
-          listview.defocuscell;
-          listview.datacols.clearselection;
-          str1 := tosysfilepath(filepath(dir.Value + listview.filelist[y].Name));
+ PROCEDURE activateSelection (selection: integerarty);
+  BEGIN
+    IF Length (fselectednames) > 0
+    THEN filename.value:= quotefilename (fselectednames);
+    listview.selectednames:= fselectednames;
+    list_log.datacols.selectedrows:= selection;
+    IF PreviewSetting.checked AND (Length (selection) = 1) THEN showpreview;
+  END;
 
-          if (info.eventkind = cek_buttonrelease) then
-          begin
-            if (ss_double in info
-              .mouseeventinfopo^.shiftstate) then
-              okonexecute(Sender)
-            else
-            begin
-              changedir(str1);
+ PROCEDURE changeSelection (atRow: integer; single: boolean);
+  VAR
+    i, k:      integer;
+    newfile:   msestring;
+    selection: integerarty;
+  BEGIN
+    IF single THEN BEGIN
+      setLength (fselectednames, 0); realizeselection;
+    END;
+    setLength (selection, 0);
+    FOR i:= 0 TO pred (list_log.rowcount) DO BEGIN
+      IF NOT listview.filelist.isdir (i) THEN BEGIN
+        newfile:= list_log [NameCol][i];
+        k:= finditem (fselectednames, newfile);
+        IF i = atRow THEN BEGIN   // current row, check selection
+          IF k >= 0 THEN                  // already selected, remove
+            deleteitem (fselectednames, k)
+          ELSE BEGIN                      // select newly
+            additem (selection, i); additem (fselectednames, newfile);
+          END;
+        END
+        ELSE                              // just transfer selection
+          IF k >= 0 THEN additem (selection, i);   // add to selection
+      END;
+    END;
+    activateSelection (selection);
+  END;
 
-               if filename.tag <> 2 then  // save file
-              filename.Value := '';
-            end;
-          end
-          else if info.keyeventinfopo^.key = key_return then
-          begin
-            changedir(str1);
-            if filename.tag <> 2 then  // save file
-            filename.Value := '';
-          end;
-        end
-        else
-        begin
-          listview.defocuscell;
-          listview.datacols.clearselection;
-          listview.selectcell(cellpos2, csm_select, False);
-          if (info.eventkind = cek_buttonrelease) then
-          begin
-            if (listview.rowcount > 0) and (list_log.rowcount > 0) and
-              (not listview.filelist.isdir(y)) and
-              (ss_double in info.mouseeventinfopo^.shiftstate) then
-              okonexecute(Sender);
-          end
-          else if (listview.rowcount > 0) and (list_log.rowcount > 0) and
-            (not listview.filelist.isdir(y)) and
-            (info.keyeventinfopo^.key = key_return) then
-            okonexecute(Sender);
-        end;
+ PROCEDURE BlockSelection;
+  VAR
+    i:         integer;
+    selection: integerarty;
+  BEGIN
+////????
+    IF NOT (co_multiselect IN List_Log.dataCols.Options)
+////????
+    THEN changeSelection (info.cell.row, true)
+////????
+    ELSE
+    WITH info DO BEGIN
+      IF Length (fselectednames) >= 1 THEN BEGIN
+        i:= finditem (list_log.datacols [NameCol].datalist.asStringArray, fselectednames [0]);
+      END
+      ELSE i:= cell.row;
 
-        dir.Value        := tosysfilepath(dir.Value);
-        if filename.tag = 1 then
-          filename.Value := dir.Value;
-        filename.Value := tosysfilepath(filename.Value);
+      IF Length (fselectednames) = 0 THEN BEGIN
+        //// no selection yet, assume start point in directory area
+        setLength (selection, 0);
+        i:= 0;
+        FOR i:= i TO cell.row DO        //// select all rows in block
+          IF NOT listview.filelist.isdir (i) THEN BEGIN
+            additem (selection, i); additem (fselectednames, list_log [NameCol][i]);
+          END;
 
-      end
-      else
-      begin
-        listview.defocuscell;
-        listview.datacols.clearselection;
-        list_log.defocuscell;
-        list_log.datacols.clearselection;
-        fisfixedrow := False;
-      end;
-    end
-    else
-      fisfixedrow := True;
+        activateSelection (selection);
+      END
+      ELSE
+      IF (Length (fselectednames) >= 1) AND (i <> cell.row)
+      THEN BEGIN
+        //// no selection yet, assume start point in directory area or
+        //// single selection only and not current row ----
+        //// select all entries between current and selected one
+        setLength (fselectednames, 0); setLength (selection, 0);
+
+        IF i > cell.row THEN BEGIN      //// must change direction
+          FOR i:= i DOWNTO cell.row DO  //// select all rows in block
+            IF NOT listview.filelist.isdir (i) THEN BEGIN
+              additem (selection, i); additem (fselectednames, list_log [NameCol][i]);
+            END;
+        END
+        ELSE                      
+          FOR i:= i TO cell.row DO      //// select all rows in block
+            IF NOT listview.filelist.isdir (i) THEN BEGIN
+              additem (selection, i); additem (fselectednames, list_log [NameCol][i]);
+            END;
+
+        activateSelection (selection);
+      END
+      ELSE BEGIN
+        //// multiple selection existing ----- clear and select current entry
+        changeSelection (cell.row, true);
+      END;
+    END;
+  END;
+
+ PROCEDURE multiselect_down;
+  BEGIN
+////????
+    IF NOT (co_multiselect IN List_Log.dataCols.Options)
+////????
+    THEN changeSelection (info.cell.row, true)
+////????
+    ELSE
+    WITH info DO BEGIN
+      // if cell "outside" is unselected: unselect current cell
+      IF Length (fselectednames) > 1 THEN BEGIN
+        IF (cell.row = 0) OR listview.filelist.isdir (pred (cell.row)) OR
+           (finditem (fselectednames, list_log [NameCol][pred (cell.row)]) < 0)
+        THEN BEGIN                                        // switched direction?
+          i:= finditem (fselectednames, list_log [NameCol][cell.row]);
+          IF i >= 0 THEN deleteitem (fselectednames, i);  // already selected, remove
+        END;
+      END;
+      // Now, add the "new" cell to the selection
+      IF cell.row < pred (list_log.rowcount)
+      THEN Inc (cell.row);
+      // if cell "outside" is selected: select current cell
+      IF listview.filelist.isdir (pred (cell.row)) OR
+         (finditem (fselectednames, list_log [NameCol][pred (cell.row)]) >= 0)
+      THEN IF finditem (fselectednames, list_log [NameCol][cell.row]) < 0
+        THEN additem (fselectednames, list_log [NameCol][cell.row]);
+    END;
+  END;
+
+ PROCEDURE multiselect_up;
+  BEGIN
+////????
+    IF NOT (co_multiselect IN List_Log.dataCols.Options)
+////????
+    THEN changeSelection (info.cell.row, true)
+////????
+    ELSE
+    WITH info DO BEGIN
+      // if cell "outside" is unselected: unselect current cell
+      IF listview.filelist.isdir (pred (cell.row)) THEN BEGIN
+        IF NOT (ss_shift IN keyeventinfopo^.shiftstate)
+        THEN setLength (fselectednames, 0);
+      END
+      ELSE
+      IF Length (fselectednames) > 1 THEN BEGIN
+        IF (cell.row >= pred (list_log.rowcount)) OR
+           (finditem (fselectednames, list_log [NameCol][succ (cell.row)]) < 0)
+        THEN BEGIN                                        // switched direction?
+          i:= finditem (fselectednames, list_log [NameCol][cell.row]);
+          IF i >= 0 THEN deleteitem (fselectednames, i);  // already selected, remove
+        END;
+      END;
+      // Now, add the "new" cell to the selection
+      IF (cell.row > 0) AND (NOT listview.filelist.isdir (pred (cell.row)))
+      THEN Dec (cell.row);
+      // if cell "outside" is selected: select current cell
+      IF finditem (fselectednames, list_log [NameCol][succ (cell.row)]) >= 0
+        THEN IF finditem (fselectednames, list_log [NameCol][cell.row]) < 0
+        THEN additem (fselectednames, list_log [NameCol][cell.row]);
+    END;
+  END;
+
+BEGIN
+  IF (list_log.rowcount > 0) AND (info.cell.row > -1) THEN BEGIN
+//    IF info.eventkind = cek_select THEN BEGIN    //// does never occur ---- ????
+//      IF info.selected {row selected} THEN BEGIN  // deselect
+//      END
+//      ELSE BEGIN  // select new
+//      END;
+//      //// propagate selection to listview
+//    END
+//    ELSE
+
+////    list_log.beginUpdate;  //// not really neccessary, but do it anyway ...
+
+    WITH info DO
+      CASE eventkind OF
+        cek_buttonpress:  ;   //// no action to take ---- ????
+        cek_buttonrelease:
+          IF listview.filelist.isdir (cell.row) THEN BEGIN
+            (**** >>>> change directory key <<<< ****)
+            changedir (tosysfilepath (filepath (dir.Value+ list_log [NameCol][cell.row])));  ////str1);
+          END
+          ELSE BEGIN
+            IF ss_double in mouseeventinfopo^.shiftstate THEN BEGIN
+              IF Length (fselectednames) = 0 THEN  (* no selection yet *)
+                changeselection (info.cell.row, false);           // select current file
+              okonexecute (Sender);
+            END
+            ELSE IF mouseeventinfopo^.shiftstate = [{clicked?}] THEN BEGIN
+              (**** >>>> new selection action <<<< ****)
+              changeSelection (info.cell.row, true);
+              WITH mouseeventinfopo^ DO
+                eventstate:= eventstate+ [es_processed];  // make mouse action invalid
+            END
+            ELSE IF mouseeventinfopo^.shiftstate = [ss_ctrl]  THEN BEGIN
+              (**** >>>> add selection action <<<< ****)
+              changeSelection (info.cell.row, NOT (co_multiselect IN List_Log.dataCols.Options));
+              WITH mouseeventinfopo^ DO
+                eventstate:= eventstate+ [es_processed];  // make mouse action invalid
+            END
+            ELSE IF mouseeventinfopo^.shiftstate = [ss_shift]  THEN BEGIN
+              (**** >>>> block selection action <<<< ****)
+              IF cell.row >= 0 THEN BlockSelection;
+              WITH mouseeventinfopo^ DO
+                eventstate:= eventstate+ [es_processed];  // make mouse action invalid
+            END
+            ELSE realizeSelection;
+          END;
+        cek_keydown {press}:
+          BEGIN
+            IF listview.filelist.isdir (cell.row) THEN
+              CASE keyeventinfopo^.key OF
+                key_return:
+                  WITH keyeventinfopo^ DO
+                    eventstate:= eventstate+ [es_processed];    // make key invalid
+                key_pagedown:
+                  IF keyeventinfopo^.shiftstate = [ss_shift]
+                    (**** >>>> block selection key <<<< ****)
+                    THEN setLength (fselectednames, 0);
+                key_down:
+                  IF NOT (keyeventinfopo^.shiftstate = [ss_shift])
+                  THEN setLength (fselectednames, 0);
+                key_up:
+                  IF (NOT (keyeventinfopo^.shiftstate = [ss_shift])) AND
+                     (Length (fselectednames) = 1)
+                  THEN BEGIN
+                    // when got here, must have reached upermost file entry
+                    setLength (fselectednames, 0); i:= 0;
+                    WHILE (listview.filelist.isdir (i)) AND (i < list_log.rowcount)  DO Inc (i);
+                    IF i < list_log.rowcount THEN BEGIN
+                      additem (fselectednames, list_log [NameCol][i]);
+                      filename.value:= quotefilename (fselectednames);
+                    END;
+                  END;
+              END
+            ELSE
+            CASE keyeventinfopo^.key OF
+              key_space:                                   //// ignore here
+                WITH keyeventinfopo^ DO
+                  eventstate:= eventstate+ [es_processed];      // make key invalid
+              key_down:
+                IF keyeventinfopo^.shiftstate = [{none}] THEN BEGIN
+                  setLength (fselectednames, 0);
+                END
+                // ELSE IF keyeventinfopo^.shiftstate = [ss_ctrl] THEN BEGIN
+                // END
+                // ELSE IF keyeventinfopo^.shiftstate = [ss_shift] THEN BEGIN -- or
+                ELSE IF ss_shift IN keyeventinfopo^.shiftstate THEN BEGIN
+                  IF co_multiselect IN List_Log.dataCols.Options THEN BEGIN
+                    multiselect_down;
+                  END
+                  ELSE  BEGIN
+                    setLength (fselectednames, 0);
+                  END;
+                END;
+              key_up:
+                IF keyeventinfopo^.shiftstate = [{none}] THEN BEGIN
+                  setLength (fselectednames, 0);
+                END
+                // ELSE IF keyeventinfopo^.shiftstate = [ss_ctrl] THEN BEGIN
+                // END
+                // ELSE IF keyeventinfopo^.shiftstate = [ss_shift] THEN BEGIN -- or
+                ELSE IF ss_shift IN keyeventinfopo^.shiftstate THEN BEGIN
+                  IF co_multiselect IN List_Log.dataCols.Options THEN BEGIN
+                    multiselect_up;
+                  END
+                  ELSE  BEGIN
+                    setLength (fselectednames, 0);
+                  END;
+                END;
+              ELSE
+            END (* CASE keyeventinfopo^.key *);
+          END;
+        cek_keyup {release}:
+          IF listview.filelist.isdir (cell.row) THEN BEGIN
+            CASE keyeventinfopo^.key OF
+              key_return:
+                BEGIN
+                  (**** >>>> change directory key <<<< ****)
+                  changedir (tosysfilepath (filepath (dir.Value+ list_log [NameCol][info.cell.row])));  ////str1);
+                END;
+              key_pageup:
+                IF keyeventinfopo^.shiftstate = [ss_ctrl] THEN BEGIN
+                  (**** >>>> directory up key <<<< ****)
+                  doup ();
+                  WITH info.keyeventinfopo^ DO
+                    eventstate:= eventstate+ [es_processed];  // make key invalid
+                END
+                ELSE IF keyeventinfopo^.shiftstate = [ss_shift] THEN BEGIN
+                  (**** >>>> block selection key <<<< ****)
+                  BlockSelection;
+                END
+                ELSE changeSelection (info.cell.row, true);
+              key_down,
+              key_up:
+                BEGIN
+                  IF keyeventinfopo^.shiftstate = [{none}]
+                  THEN setLength (fselectednames, 0);
+                  realizeselection;
+                END;
+              ELSE
+            END (* CASE keyeventinfopo^.key *);
+          END
+          ELSE BEGIN
+            CASE keyeventinfopo^.key OF
+              key_space:
+                // listview function:
+                // shiftstate = []:                  select current cell
+                // shiftstate = [ss_ctrl]:           switch current cell state
+                // shiftstate = [ss_shift]:          no action
+                // shiftstate = [ss_ctrl, ss_shift]: execute
+                //
+                BEGIN
+                  IF info.keyeventinfopo^.shiftstate = [{none}] THEN BEGIN
+                    (**** >>>> new selection key <<<< ****)
+                    changeSelection (info.cell.row, true);
+                  END
+                  ELSE IF info.keyeventinfopo^.shiftstate = [ss_ctrl] THEN BEGIN
+                     (**** >>>> add selection key <<<< ****)
+                     changeSelection (info.cell.row, NOT (co_multiselect IN List_Log.dataCols.Options));
+                  END
+                  ELSE realizeselection;
+
+                  IF info.keyeventinfopo^.shiftstate <> [ss_ctrl, ss_shift] THEN
+                    WITH info.keyeventinfopo^ DO
+                      eventstate:= eventstate+ [es_processed];  // make key invalid
+                END;
+              key_return:
+                BEGIN
+                  IF info.keyeventinfopo^.shiftstate = [{none}] THEN BEGIN
+                    (**** >>>> execute action key <<<< ****)
+                    IF Length (fselectednames) = 0 THEN  (* no selection yet *)
+                      changeselection (info.cell.row, false);           // select current file
+                    okonexecute (Sender);
+                  END
+                  ELSE realizeselection;
+
+                  WITH info.keyeventinfopo^ DO
+                    eventstate:= eventstate+ [es_processed];  // make key invalid
+                END;
+              key_home,
+              key_end:
+                IF info.keyeventinfopo^.shiftstate = [ss_ctrl]
+                THEN changeSelection (info.cell.row, true);
+              key_pagedown:
+                IF keyeventinfopo^.shiftstate = [ss_shift] THEN BEGIN
+                  (**** >>>> block selection key <<<< ****)
+                  BlockSelection;
+                END
+                ELSE changeSelection (info.cell.row, true);
+              key_pageup:
+                IF keyeventinfopo^.shiftstate = [ss_ctrl] THEN BEGIN
+                  (**** >>>> directory up key <<<< ****)
+                  doup ();
+                END
+                ELSE IF keyeventinfopo^.shiftstate = [ss_shift] THEN BEGIN
+                  (**** >>>> block selection key <<<< ****)
+                  BlockSelection;
+                END
+                ELSE changeSelection (info.cell.row, true);
+              key_down, ////:
+              key_up:
+                BEGIN
+                  IF (keyeventinfopo^.shiftstate = [ss_shift]) AND (length (fselectednames) = 0)
+                  THEN BlockSelection
+                  ELSE
+                    IF finditem (fselectednames, list_log [NameCol][cell.row]) < 0
+                    THEN additem (fselectednames, list_log [NameCol][cell.row]);
+
+                  filename.value:= quotefilename (fselectednames);
+                  realizeselection;
+                END;
+              ELSE
+            END (* CASE keyeventinfopo^.key *);
+          END;
+        ELSE          ;   //// no action to take ---- ????
+      END (* CASE eventkind *);
+
+    list_log.invalidate;
+////    list_log.endUpdate;   //// undo begin of this
+  END;
+////////////////////////////////////////////
+///////////////// old code: ////////////////
+////  if (list_log.rowcount > 0) and
+////     ((info.eventkind = cek_buttonrelease) or (info.eventkind = cek_keyup))
+////  then
+////    if (info.cell.row > -1) then
+////    begin
+////////????      if ((listview.visible) AND (listview.row >= 0)) OR
+////////????         ((list_log.visible) AND (list_log.row >= 0)) THEN   ////???? OR
+////      IF ////???? ((listview.visible) AND (listview.row IN [0..pred (listview.rowcount)])) OR
+////         ((list_log.visible) AND (list_log.row IN [0..pred (list_log.rowcount)])) THEN
+////////????         (fisfixedrow = False) then
+////      begin
+////        cellpos := info.cell;
+////        cellpos.col := 0;
+////////????        cellpos2.col := 0;
+////        places.defocuscell;
+////        places.datacols.clearselection;
+//////// ???? WHAT SHOULD  T H A T  EFFECT ????
+////////????        y := StrToInt(ansistring(list_log[4][cellpos.row]));
+////        y:= cellpos.row;
+////////????        cellpos2.row := y;
+////
+////        if listview.filelist.isdir(y) then
+////        begin
+////          listview.defocuscell;
+////////----          listview.datacols.clearselection;
+////          str1 := tosysfilepath(filepath(dir.Value + listview.filelist[y].Name));
+////
+////          if (info.eventkind = cek_buttonrelease) then
+////          begin
+////            if (ss_double in info.mouseeventinfopo^.shiftstate) then
+////              okonexecute(Sender)
+////            else
+////            begin
+////              changedir(str1);
+////
+////////               if filename.tag <> 2 then  // save file
+////////              filename.Value := '';
+////            end;
+////          end
+////          else if info.keyeventinfopo^.key = key_return then
+////          begin
+////            changedir(str1);
+////////            if filename.tag <> 2 then  // save file
+////////            filename.Value := '';
+////          end;
+////        end
+////        else
+////        begin
+////          listview.defocuscell;
+////////----          listview.datacols.clearselection;
+////////          listview.selectcell(cellpos2, csm_select, False);
+////
+////////////////////////////////////////////////
+////
+////str1:= trim (copy (list_log.datacols [0][y], 2, length (list_log.datacols [0][y])));
+////
+////WITH listview DO
+////for y:= 0 to high (selectednames) do writeln (y:2, ':: ', selectednames [y]);
+////y:= cellpos.row;
+////
+////WITH listview DO
+////writeln (str1, ': ', finditem (selectednames, str1) < 0);
+////
+////          WITH listview DO
+////            IF finditem (selectednames, str1) < 0  // not included
+////            THEN selectcell (cellpos{2}, csm_select,   lvo_multiselect IN options)
+////            ELSE selectcell (cellpos{2}, csm_deselect, lvo_multiselect IN options);
+////////////////////////////////////////////////
+////
+////          if (info.eventkind = cek_buttonrelease) then
+////          begin
+////            if (listview.rowcount > 0) and (list_log.rowcount > 0) and
+////              (not listview.filelist.isdir(y)) and
+////              (ss_double in info.mouseeventinfopo^.shiftstate) then
+////              okonexecute(Sender);
+////          end
+////          else if (listview.rowcount > 0) and (list_log.rowcount > 0) and
+////            (not listview.filelist.isdir(y)) and
+////            (info.keyeventinfopo^.key = key_return) then
+////            okonexecute(Sender);
+////////////////////////////////////////////////
+////
+////////          WITH listview DO BEGIN
+////////            FOR y:= 0 TO pred (rowcount) DO
+///////////////              IF listview.itemlist [y].Caption = list_log [0{filename field}][y]
+////////              IF itemlist [y].selected
+////////              THEN list_log.datacols [0].selected [y];
+////////          END;
+////////          list_log.invalidate;
+////
+////////////////////////////////////////////////
+////
+////
+////////////////////////////////////////////////
+////writeln ('oncellev (selected): ', length (listview.selectednames));
+////      WITH list_log DO BEGIN
+////        datacols.clearselection; i:= 0; k:= 0;
+////        WHILE (i < datacols.Count) AND (k < Length (listview.selectednames)) DO BEGIN
+////          IF datacols [0][i] = listview.selectednames [k] THEN BEGIN
+////            datacols.rowselected [i]:= true; Inc (k);
+////writeln ('oncellev: ', datacols [0][i], ' - ', datacols.rowselected [i]);
+////          END;
+////          Inc (i);
+////        END;
+////      END;
+////////////////////////////////////////////////
+////
+////
+////        end;
+////
+////        dir.Value        := tosysfilepath(dir.Value);
+////        if filename.tag = 1 then
+////          filename.Value := dir.Value;
+////        filename.Value := tosysfilepath(filename.Value);
+////
+////////----      end
+////////----      else
+////////----      begin
+////////----        listview.defocuscell;
+////////----        listview.datacols.clearselection;
+////////----        list_log.defocuscell;
+////////----        list_log.datacols.clearselection;
+////////----////????        fisfixedrow := False;
+////      end;
+////    end
+////////????    else
+////////????      fisfixedrow := True;
 end;
 
 procedure tfiledialogxfo.ondrawcell(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
 var
+  i,
   aicon: integer;
   apoint: pointty;
   recti: rectty;
   // tbitmapcompico: tbitmapcomp;
    thefilename : msestring;
+   Ext:    String;
 begin
  if list_log.visible then
  begin
+   IF NOT IconsSetting.checked THEN BEGIN
+     Ext:= List_Log [ExtCol][cellinfo.cell.row];
+
+     IF (trim (Ext) <> '') OR (trim (List_Log [SizeCol][cellinfo.cell.row]) <> '')
+     THEN BEGIN
+       i:= 0; Ext:= lowercase (List_Log [ExtCol][cellinfo.cell.row]);
+       WHILE (i < {ExtCount}High  (ExtIcon)) AND (Ext <> ExtIcon [i].Ext) DO Inc (i);
+       aicon:= abs (ExtIcon [i].Icon);
+     END (* IF (trim (Ext) <> '') OR ... *)
+     ELSE aicon := 0;
+(*************************
   if bnoicon.Value = False then
   begin
 
@@ -2339,7 +3472,7 @@ begin
       aicon := 6
     else
       aicon := 1;
-
+*************************)
     apoint.x := 2;
     apoint.y := 1;
 
@@ -2350,17 +3483,17 @@ begin
    else
     begin
 
-    thefilename := list_log[0][cellinfo.cell.row];
+    thefilename := list_log[NameCol][cellinfo.cell.row];
     thefilename := dir.value + trim(copy(thefilename,2,length(thefilename)));
 
 //    writeln(thefilename);
-  
+
     {$ifdef BGRABITMAP_USE_MSEGUI}
     tbitmapcomp1.free;
     tbitmapcomp1 := TBGRABitmap.Create(tosysfilepath(thefilename));
-    {$else} 
+    {$else}
     tbitmapcomp1.bitmap.LoadFromFile(tosysfilepath(thefilename));
-    {$endif}  
+    {$endif}
 
     recti.x := 0;
     recti.y := 0;
@@ -2377,51 +3510,83 @@ begin
 
 end;
 
-procedure tfiledialogxfo.onsetcomp(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+////////////////////////////////////////////
+procedure tfiledialogxfo.onswitchcomp (const Sender: TObject);
 var
- theint, theexist : integer;
-  sel : gridcoordty;
+  fakebool: boolean;
 begin
+  fakebool:= CompactSetting.checked;  // bcompact.value;
+  onsetcomp (Sender, fakebool, fakebool {not used});
+end;
+////////////////////////////////////////////
+
+procedure tfiledialogxfo.onsetcomp(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
+////var
+//// theint{, theexist }: integer;
+////  sel : gridcoordty;
+begin
+  CompactSetting.checked := avalue;
+
   if avalue then
   begin
     listview.Width   := list_log.Width;
     listview.invalidate;
     list_log.Visible := False;
-    listview.Visible := true;
+////////////////////////////////////////////
+
+    listview.beginupdate;
+    listview.row:= list_log.focusedcell.row;
+    listview.selectednames:= fselectednames;
+    listview.endupdate;
+
+    listview.show;    //// REQUIRED for "setFocus" here!
+    listview.setFocus;
+////////////////////////////////////////////
   end
   else
   begin
     listview.Visible := False;
     listview.Width   := 40;
-    listview.invalidate;
-    list_log.Visible := True;
-     theexist := -1;
 
-  for theint := 0 to list_log.rowcount - 1 do
-         if trim(copy(list_log[0][theint], 2,
-          length(list_log[0][theint]))) = filename.value then
-                 theexist := theint;
+////////////////////////////////////////////
+    list_log.row:= listview.focusedcell.row;
+    realizeselection;
+////////////////////////////////////////////
 
-    if theexist > 0 then
-      begin
-          sel.col := 0;
-          sel.row := theexist;
-          list_log.defocuscell;
-          list_log.datacols.clearselection;
-          list_log.selectcell(sel,csm_select);
-          list_log.frame.sbvert.value := theexist/ (list_log.rowcount-1);
-      end;
+////////////////////////////////////////////
+////    theexist := -1;
+
+////    for theint := 0 to list_log.rowcount - 1 do
+////      if trim (copy(list_log[NameCol][theint], 2,
+////               length(list_log[NameCol][theint]))) = filename.value then
+////        theexist := theint;
+
+////    if theexist > 0 then
+////    begin
+////      sel.col := 0;
+////      sel.row := theexist;
+////////----      list_log.defocuscell;
+////////----      list_log.datacols.clearselection;
+////////----      list_log.selectcell(sel,csm_select);
+////      list_log.frame.sbvert.value := theexist/ (list_log.rowcount-1);
+////    end;
+////////////////////////////////////////////
+////////////////////////////////////////////
+    list_log.show;    //// REQUIRED for "setFocus" here!
+    list_log.setFocus;
+////////////////////////////////////////////
   end;
+  accept:= true;
 end;
 
 procedure tfiledialogxfo.oncreat(const Sender: TObject);
 begin
   {$if defined(netbsd) or defined(darwin) or defined(nomask)}
-  iconslist.options := [bmo_masked]; 
+  iconslist.options := [bmo_masked];
   {$endif}
   theimagelist    := iconslist;
   fsplitterpanpos := tsplitter1.left;
-  fisfixedrow     := False;
+////????  fisfixedrow     := False;
 end;
 
 procedure tfiledialogxfo.onbefdrop(const Sender: TObject);
@@ -2451,18 +3616,18 @@ begin
         course(listview.directory);
       end;
 
-       if filename.tag <> 2 then begin // save file
-
-      if filename.tag = 1 then
-        filename.Value := dir.Value
-      else
-        filename.Value := '';
-        end;
+      //////// Is this REALLY useful ???????
+      if filename.tag <> 2 then begin // save file
+        if filename.tag = 1 then
+          filename.Value := dir.Value
+////        else
+////          filename.Value := '';
+      end;
 
       filename.Value := tosysfilepath(filename.Value);
 
-      list_log.defocuscell;
-      list_log.datacols.clearselection;
+////----      list_log.defocuscell;
+////----      list_log.datacols.clearselection;
 
       placescust.defocuscell;
       placescust.datacols.clearselection;
@@ -2479,27 +3644,27 @@ end;
 
 procedure tfiledialogxfo.ondrawcellplace(const Sender: tcol; const Canvas: tcanvas; var cellinfo: cellinfoty);
 var
-  aicon: integer = -1;
+  aicon:  integer = -1;
   apoint: pointty;
-  astr: msestring;
-  {$ifdef windows}
-  achar : char;
-  {$endif}
+  astr:   msestring;
+  select: SubPlaces;
+//  {$ifdef windows}
+//  achar : char;
+//  {$endif}
 begin
-  if bnoicon.Value = False then
+  if NOT IconsSetting.checked then
   begin
     astr := trim(places[0][cellinfo.cell.row]);
-   
+(*************************
   {$ifdef windows}
   for achar := 'A' to 'Z' do
    if (uppercase(astr) = achar + ':\') then aicon := 0;
   {$endif}
-  
-  if aicon <> 0 then  
+  if aicon <> 0 then
   if (astr = '/') or (lowercase(astr) = '/usr') or
      (lowercase(astr) = 'c:\users') then aicon := 0;
-      
-  if aicon <> 0 then  
+
+  if aicon <> 0 then
     if astr = 'Home' then
       aicon := 13
     else if astr = 'Desktop' then
@@ -2514,6 +3679,18 @@ begin
       aicon := 2
     else if astr = 'Downloads' then
       aicon := 15;
+*************************)
+    select:= SysRoot;
+  {$ifdef windows}
+    WHILE (select < atHome) AND
+          NOT ((astr [1]) IN ['A'..'Z', 'a'..'z']) AND (System.Pos (SubPlace [select].Place, astr) = 2)))
+    DO Inc (select);
+
+    IF select >= atHome THEN
+  {$endif}
+     WHILE (select < no_more) AND (astr <> SubPlace [select].Place) DO Inc (select);
+    aicon:= SubPlace [select].Icon;
+
 
     apoint.x := 2;
     apoint.y := 3;
@@ -2550,12 +3727,19 @@ begin
     createdir.hint    := lang_stockcaption[ord(sc_create_new_directory)] + strz ;
     filename.frame.caption:= lang_stockcaption[ord(sc_namehk)] + strz ;
     filter.frame.Caption := lang_stockcaption[ord(sc_filterhk)] + strz ;
-    showhidden.frame.caption:= lang_stockcaption[ord(sc_show_hidden_fileshk)] + strz ;
     ok.Caption           := lang_modalresult[Ord(mr_ok)] + strz ;
     cancel.Caption       := lang_modalresult[Ord(mr_cancel)] + strz ;
-    bnoicon.frame.caption:= lang_stockcaption[ord(sc_noicons)] + strz ;
-    blateral.frame.caption:= lang_stockcaption[ord(sc_nolateral)] + strz ;
-    bcompact.frame.caption:= lang_stockcaption[ord(sc_compact)] + strz ;
+////////////////////////////////////////////
+    PlacesSetting.Caption:=  lang_stockcaption [ord (sc_nolateral)]+ strz;
+    CompactSetting.Caption:= lang_stockcaption [ord (sc_compact)]+ strz;
+    HiddenSetting.Caption:=  lang_stockcaption [ord (sc_show_hidden_fileshk)]+ strz;
+////????    HistorySetting:= 
+////????    PreviewSetting:= 
+////    bnoicon.frame.caption:= lang_stockcaption[ord(sc_noicons)] + strz ;
+////    blateral.frame.caption:= lang_stockcaption[ord(sc_nolateral)] + strz ;
+////    bcompact.frame.caption:= lang_stockcaption[ord(sc_compact)] + strz ;
+////    showhidden.frame.caption:= lang_stockcaption[ord(sc_show_hidden_fileshk)] + strz ;
+////////////////////////////////////////////
     end;
 {$else}
     dir.frame.caption:= sc(sc_directory) + strz ;
@@ -2565,24 +3749,43 @@ begin
     createdir.hint    := sc(sc_create_new_directory) + strz ;
     filename.frame.caption:= sc(sc_namehk) + strz ;
     filter.frame.Caption := sc(sc_filterhk) + strz ;
-    showhidden.frame.caption:= sc(sc_show_hidden_fileshk) + strz ;
     ok.caption:= stockobjects.modalresulttext[mr_ok] + strz ;
     cancel.caption:= stockobjects.modalresulttext[mr_cancel] + strz ;
-    bnoicon.frame.caption:= sc(sc_noicons) + strz ;
-    blateral.frame.caption:= sc(sc_nolateral) + strz ;
-    bcompact.frame.caption:= sc(sc_compact) + strz ;
+////////////////////////////////////////////
+    PlacesSetting.Caption:=  sc (sc_nolateral)+ strz;
+    CompactSetting.Caption:= sc (sc_compact)+ strz;
+    HiddenSetting.Caption:=  sc (sc_show_hidden_fileshk)+ strz;
+////????    HistorySetting:= 
+////????    PreviewSetting:= 
+////    bnoicon.frame.caption:= sc(sc_noicons) + strz ;
+////    blateral.frame.caption:= sc(sc_nolateral) + strz ;
+////    bcompact.frame.caption:= sc(sc_compact) + strz ;
+////    showhidden.frame.caption:= sc(sc_show_hidden_fileshk) + strz ;
+////////////////////////////////////////////
 {$endif}
 
   back.tag    := Ord(sc_back);
   forward.tag := Ord(sc_forward);
   up.tag      := Ord(sc_up);
 
-  application.ProcessMessages;
+/////????////  application.ProcessMessages;
 
 end;
 
+////////////////////////////////////////////
+procedure tfiledialogxfo.onswitchlateral (const Sender: TObject);
+var
+  fakebool: boolean;
+begin
+  fakebool:= PlacesSetting.checked;  // blateral.value;
+  onlateral (Sender, fakebool, fakebool {not used});
+end;
+////////////////////////////////////////////
+
 procedure tfiledialogxfo.onlateral(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
 begin
+  {blateral}PlacesSetting.checked:= avalue;
+
   if not avalue then
   begin
     placespan.Visible  := True;
@@ -2613,13 +3816,14 @@ begin
 
   listview.invalidate;
   list_log.invalidate;
+  accept:= true;
 end;
 
 procedure tfiledialogxfo.afterclosedrop(const Sender: TObject);
 begin
    if filename.tag = 1 then
     filename.Value := dir.Value;
-  filename.Value   := tosysfilepath(filename.Value);
+  filename.Value   := tosysfilepath(filename.Value);  //// ????
 end;
 
 procedure tfiledialogxfo.onresize(const Sender: TObject);
@@ -2638,6 +3842,11 @@ begin
     listview.Width := list_log.Width;
     tsplitter1.height := list_log.height;
 
+////////////////////////////////////////////
+    list_log [0].Width:= list_log.Width- (list_log [1].Width+ list_log [3].Width+ list_log [3].Width+
+                                          list_log.fixcols [-1].Width);
+////////////////////////////////////////////
+
    filename.top := height - filename.height - 8;
    imimage.top := filename.top - 4;
 
@@ -2653,7 +3862,7 @@ var
   aicon: integer;
   apoint: pointty;
  begin
-  if bnoicon.Value = False then
+  if NOT IconsSetting.checked then
     if cellinfo.cell.row < placescust.rowcount - 1 then
     begin
       aicon := 19;
@@ -2695,7 +3904,7 @@ begin
 
         if doexist = False then
         begin
-          if bnoicon.Value = False then
+          if NOT IconsSetting.checked then
           begin
             labtest.Caption := '';
 
@@ -2740,18 +3949,19 @@ begin
             course(listview.directory);
           end;
 
-           if filename.tag <> 2 then begin // save file
+          //////// Is this REALLY useful ???????
+          if filename.tag <> 2 then begin // save file
 
-          if filename.tag = 1 then
-            filename.Value := dir.Value
-          else
-            filename.Value := '';
-            end;
+            if filename.tag = 1 then
+              filename.Value := dir.Value
+////            else
+////              filename.Value := '';
+          end;
 
           filename.Value := tosysfilepath(filename.Value);
 
-          list_log.defocuscell;
-          list_log.datacols.clearselection;
+////----          list_log.defocuscell;
+////----          list_log.datacols.clearselection;
 
           places.defocuscell;
           places.datacols.clearselection;
@@ -2778,12 +3988,22 @@ begin
 
 end;
 
+////////////////////////////////////////////
+procedure tfiledialogxfo.onswitchvalnoicon (const Sender: TObject);
+var
+  fakebool: boolean;
+begin
+  fakebool:= IconsSetting.checked;  // bnoicon.value;
+  onsetvalnoicon (Sender, fakebool, fakebool {not used});
+end;
+////////////////////////////////////////////
+
 procedure tfiledialogxfo.onsetvalnoicon(const Sender: TObject; var avalue: Boolean; var accept: Boolean);
 var
   tmp: msestring;
   x: integer;
 begin
-  bnoicon.Value := avalue;
+  {bnoicon}IconsSetting.checked:= avalue;
   theboolicon   := avalue;
 
   if avalue = False then
@@ -2809,6 +4029,7 @@ begin
     placescust[0][x] := tmp + trim(placescust[0][x]);
 
   listview.readlist;
+  accept:= true;
 end;
 
 procedure tfiledialogxfo.afclosedropdir(const sender: TObject);
@@ -2819,24 +4040,30 @@ end;
 procedure tfiledialogxfo.onpain(const sender: twidget; const acanvas: tcanvas);
 {$ifdef BGRABITMAP_USE_MSEGUI}
 var stretched: TBGRABitmap;
-{$endif} 
+{$endif}
 begin
 {$ifdef BGRABITMAP_USE_MSEGUI}
   stretched := tbitmapcomp1.Resample(imImage.Width, imImage.Height) as TBGRABitmap;
   stretched.Draw(aCanvas,0,0,True);
   stretched.Free;
-{$endif} 
+{$endif}
 end;
+
+////////////////////////////////////////////
+{$Macro Off}
+////////////////////////////////////////////
 
 { tfiledialogxcontroller }
 
 constructor tfiledialogxcontroller.Create(const aowner: tmsecomponent = nil; const onchange: proceventty = nil);
 begin
-  ficon       := tmaskedbitmap.Create(bmk_rgb);
-  fbackcolor  := cl_default;
-  ffontname   := 'stf_default';
-  ffontheight := 0;
-  ffontcolor  := cl_black;
+////////////////////////////////////
+//  ficon       := tmaskedbitmap.Create(bmk_rgb);
+//  fbackcolor  := cl_default;
+//  ffontname   := 'stf_default';
+//  ffontheight := 0;
+//  ffontcolor  := cl_black;
+////////////////////////////////////
   foptions    := defaultfiledialogoptions;
   fhistorymaxcount := defaulthistorymaxcount;
   fowner      := aowner;
@@ -2850,14 +4077,22 @@ end;
 destructor tfiledialogxcontroller.Destroy;
 begin
   inherited;
-  ficon.Free;
+////////////////////////////////////
+//  ficon.Free;
+////////////////////////////////////
   ffilterlist.Free;
 end;
 
 procedure tfiledialogxcontroller.readstatvalue(const reader: tstatreader);
 begin
   ffilenames     := reader.readarray('filenames', ffilenames);
-  ffilenamescust := reader.readarray('filenamescust', ffilenamescust);
+////////////////////////////////////
+ // If multiple files, but single selectiononly cut off all beyond first
+ IF (fdo_single IN fOptions) AND (high (ffilenames) > 0)
+   THEN setLength (ffilenames, 1);
+////////////////////////////////////
+//  ffilenamescust := reader.readarray('filenamescust', ffilenamescust);
+////////////////////////////////////
   if fdo_params in foptions then
     fparams := reader.readmsestring('params', fparams);
 end;
@@ -2870,19 +4105,23 @@ begin
   fwindowrect.y    := reader.readinteger('y', fwindowrect.y);
   fwindowrect.cx   := reader.readinteger('cx', fwindowrect.cx);
   fwindowrect.cy   := reader.readinteger('cy', fwindowrect.cy);
-  fcolwidth        := reader.readinteger('filecolwidth', fcolwidth);
-  fshowhidden      := reader.readboolean('showhidden', fshowhidden);
-  fcompact         := reader.readboolean('compact', fcompact);
-  fshowoptions     := reader.readboolean('showoptions', fshowoptions);
-  fhidehistory     := reader.readboolean('hidehistory', fhidehistory);
-  fhideicons     := reader.readboolean('hideicons', fhideicons);
-  fnopanel         := reader.readboolean('nopanel', fnopanel);
-  fcolnamewidth    := reader.readinteger('colnamewidth', fcolnamewidth);
-  fcolsizewidth    := reader.readinteger('colsizewidth', fcolsizewidth);
-  fcolextwidth     := reader.readinteger('colextwidth', fcolextwidth);
-  fcoldatewidth    := reader.readinteger('coldatewidth', fcoldatewidth);
-  fsplitterplaces  := reader.readinteger('splitterplaces', fsplitterplaces);
-  fsplitterlateral := reader.readinteger('splitterlateral', fsplitterlateral);
+
+////////////////////////////////////
+//  fshowhidden      := reader.readboolean('showhidden', fshowhidden);
+//  fcompact         := reader.readboolean('compact', fcompact);
+//  fshowoptions     := reader.readboolean('showoptions', fshowoptions);
+//  fhidehistory     := reader.readboolean('hidehistory', fhidehistory);
+//  fhideicons       := reader.readboolean('hideicons', fhideicons);
+//  fnopanel         := reader.readboolean('nopanel', fnopanel);
+//  fcolwidth        := reader.readinteger('filecolwidth', fcolwidth);  //// ????
+//  fcolnamewidth    := reader.readinteger('colnamewidth', fcolnamewidth);
+//  fcolsizewidth    := reader.readinteger('colsizewidth', fcolsizewidth);
+//  fcolextwidth     := reader.readinteger('colextwidth', fcolextwidth);
+//  fcoldatewidth    := reader.readinteger('coldatewidth', fcoldatewidth);
+//  fsplitterplaces  := reader.readinteger('splitterplaces', fsplitterplaces);
+//  fsplitterlateral := reader.readinteger('splitterlateral', fsplitterlateral);
+////////////////////////////////////
+
   if fdo_chdir in foptions then
     trysetcurrentdirmse(flastdir);
 end;
@@ -2898,30 +4137,36 @@ end;
 procedure tfiledialogxcontroller.writestatvalue(const writer: tstatwriter);
 begin
   writer.writearray('filenames', ffilenames);
-  writer.writearray('filenamescust', ffilenamescust);
+////////////////////////////////////
+//  writer.writearray('filenamescust', ffilenamescust);
+////////////////////////////////////
   if fdo_params in foptions then
     writer.writemsestring('params', fparams);
 end;
 
 procedure tfiledialogxcontroller.writestatstate(const writer: tstatwriter);
 begin
-  writer.writeinteger('filecolwidth', fcolwidth);
   writer.writeinteger('x', fwindowrect.x);
   writer.writeinteger('y', fwindowrect.y);
   writer.writeinteger('cx', fwindowrect.cx);
   writer.writeinteger('cy', fwindowrect.cy);
-  writer.writeboolean('nopanel', fnopanel);
-  writer.writeboolean('compact', fcompact);
-  writer.writeboolean('showoptions', fshowoptions);
-  writer.writeboolean('hidehistory', fhidehistory);
-  writer.writeboolean('hideicons', fhideicons);
-  writer.writeboolean('showhidden', fshowhidden);
-  writer.writeinteger('colnamewidth', fcolnamewidth);
-  writer.writeinteger('colsizewidth', fcolsizewidth);
-  writer.writeinteger('colextwidth', fcolextwidth);
-  writer.writeinteger('coldatewidth', fcoldatewidth);
-  writer.writeinteger('splitterplaces', fsplitterplaces);
-  writer.writeinteger('splitterlateral', fsplitterlateral);
+////////////////////////////////////
+//  writer.writeboolean('nopanel', fnopanel);
+//  writer.writeboolean('compact', fcompact);
+//  writer.writeboolean('showoptions', fshowoptions);
+//  writer.writeboolean('hidehistory', fhidehistory);
+//  writer.writeboolean('hideicons', fhideicons);
+//  writer.writeboolean('showhidden', fshowhidden);
+
+////////////////////////////////////
+//  writer.writeinteger('filecolwidth', fcolwidth);
+//  writer.writeinteger('colnamewidth', fcolnamewidth);
+//  writer.writeinteger('colsizewidth', fcolsizewidth);
+//  writer.writeinteger('colextwidth', fcolextwidth);
+//  writer.writeinteger('coldatewidth', fcoldatewidth);
+//  writer.writeinteger('splitterplaces', fsplitterplaces);
+//  writer.writeinteger('splitterlateral', fsplitterlateral);
+////////////////////////////////////
 end;
 
 procedure tfiledialogxcontroller.writestatoptions(const writer: tstatwriter);
@@ -2949,7 +4194,11 @@ begin
     fowner.sendrootcomponentevent(tcomponentevent.Create(self), True);
 end;
 
-function tfiledialogxcontroller.Execute(dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty;
+// function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): modalresultty;
+////////////////////////////////////
+function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty;
+                                         providedform: tfiledialogxfo = nil): modalresultty;
+////////////////////////////////////
 var
   po1: pmsestringarty;
   fo: tfiledialogxfo;
@@ -2957,11 +4206,62 @@ var
   //acaption2: msestring;
   rectbefore: rectty;
   x: integer;
-  theint: integer;
+////  theint: integer;  //// no (longer) in use
   thestr, tmp: msestring;
   {$ifdef windows}
   achar : char;
   {$endif}
+
+////////////////////////////////////
+ PROCEDURE SetSubplaces (CONST Prefix: msestring);
+  VAR
+    place:   SubPlaces;
+    SubDir,
+    HomeDir: msestring;
+  BEGIN
+    place:= SysRoot; HomeDir:= ''; SubDir:= SubPlace [place].Place;
+    fo.places.clear;
+    REPEAT
+  {$ifdef windows}
+        SubDir:= 'A'+ SubDir;     // Search drive letters for candidate...
+        WHILE SubDir [1] <= 'Z' DO BEGIN
+          IF DirectoryExists (SubDir) THEN BEGIN
+            fo.places.appendrow ([Prefix+ SubDir, SubDir]);
+            SubDir [1]:= succ ('Z');
+          END
+          ELSE Inc (SubDir [1]);
+        END;
+  {$else}
+      IF DirectoryExists (SubDir) THEN BEGIN
+        fo.places.appendrow ([Prefix+ SubDir, SubDir]);
+      END;
+  {$endif}
+      Inc (place);
+      SubDir:= SubPlace [Place].Place;
+    UNTIL place >= atHome;
+
+    place:= atHome; SubDir:= ''; HomeDir:= sys_getUserHomedir;
+    REPEAT
+      IF DirectoryExists (HomeDir+ SubDir) THEN
+        fo.places.appendrow ([Prefix+ SubPlace [place].Place{SubDir}, HomeDir+ SubDir]);
+
+      Inc (place);
+      SubDir:= DirectorySeparator+ SubPlace [Place].Place;
+    UNTIL place = no_more;
+{?
+    WITH fo.Places DO BEGIN
+      Bounds_cy:= RowCount* (DatarowHeight+ DatarowLinewidth)+ 2* DatarowLinewidth;
+      Bounds_cymin:= Bounds_cy;
+    END (* WITH Places *);
+
+    WITH fo.PlacesCust DO BEGIN
+      Bounds_cy:= RowCount* (DatarowHeight+ DatarowLinewidth)+ 2* DatarowLinewidth;
+      Bounds_cymin:= Bounds_cy;
+    END (* WITH PlacesCust *);
+?}
+  END;
+////////////////////////////////////
+
 begin
   //acaption2 := acaption;
   ara    := nil;
@@ -2976,11 +4276,34 @@ begin
     if Result <> mr_ok then
       Exit;
   end;
-  if fhistorymaxcount > 0 then
+////  if fhistorymaxcount > 0 then
+////  if assigned (history) AND (fhistorymaxcount > 0) then
     po1 := @fhistory
-  else
-    po1 := nil;
-  fo := tfiledialogxfo.Create(nil);
+////  else
+////    po1 := nil
+;
+
+////////////////////////////////////
+ if assigned (providedform) then begin
+   fo:= providedform; fo.setposition (DialogPlacement);
+ end
+ else begin
+   IF assigned (fOwner) AND (fowner IS tmseForm)  ///??? tFileDialogX)
+     THEN fo:= tfiledialogxfo.create ({?nil?}fowner, Self, (fOwner AS tmseForm).Name, DialogPlacement)
+     ELSE fo:= tfiledialogxfo.create ({?nil?}fowner, Self, 'FiledialogXForm', DialogPlacement);
+
+////   IF assigned (fOwner) AND (fowner IS tmseForm)  ///??? tFileDialogX)
+////     THEN fo.StatFile:= (fOwner AS tmseForm {tFileDialogX}).Statfile;
+//   IF assigned (fOwner) AND (fowner IS tmseForm) AND
+//      assigned ((fOwner AS tmseForm).StatFile)
+//     THEN fo:= tfiledialogxfo.create (fowner, (fOwner AS tmseForm).StatFile.Name, DialogPlacement)
+//     ELSE fo:= tfiledialogxfo.create (fowner, DialogPlacement);
+//// ???? Set "self" as the responsible controller ---- ????
+//// ####   fo.fController:= self;
+ end;
+ fwindowrect:= fo.widgetrect;
+////////////////////////////////////
+// fo:= tfiledialogxfo.create(nil);
 
   try
  {$ifdef FPC} {$checkpointer off} {$endif}
@@ -2988,29 +4311,41 @@ begin
     ara := ffilterlist.asarraya;
     arb := ffilterlist.asarrayb;
 
-    if fontheight = 0 then
-      fo.font.Height := 12;
+////////////////////////////////////
+//    if fontheight = 0 then
+//      fo.font.Height := 12;
 
-    if fontheight > 0 then
-      if fontheight < 21 then
-        fo.font.Height := fontheight
-      else
-        fo.font.Height := 20;
+//    if fontheight > 0 then
+//      if fontheight < 21 then
+//        fo.font.Height := fontheight
+//      else
+//        fo.font.Height := 20;
+
+    // Limit allowed font sizes -- better do it in font setting code ??
+    WITH fo.font DO
+      IF Height = 0 THEN Height:= 12
+      ELSE // IF Height > 0 THEN
+        IF Height > 20 THEN Height:= 20;
+////////////////////////////////////
 
     fo.list_log.datacols[2].widthmax := fo.font.Height * 7;
 
-    fo.font.color := fontcolor;
+//--    fo.font.color := fontcolor;
 
-    fo.container.color := backcolor;
+//--    fo.container.color := backcolor;
 
-    if fontname <> '' then
-      fo.font.Name := ansistring(fontname);
+//--    if fontname <> '' then
+//--      fo.font.Name := ansistring(fontname);
 
-    fo.bnoicon.Value := fhideicons;
+//--    fo.bnoicon.Value := fhideicons;
+//--    fhideicons:= fo.bnoicon.Value;
 
-    theboolicon := fhideicons;
+    //// Macro doesn't work here !!!!
+    theboolicon := fo.Settings.Menu.SubMenu [1].checked;   // fhideicons;
 
-    if fhideicons = False then
+//    if fhideicons = False then
+    //// Macro doesn't work here !!!!
+    IF NOT fo.Settings.Menu.SubMenu [1].checked THEN
     begin
       fo.labtest.Caption := '';
 
@@ -3026,20 +4361,22 @@ begin
     else
       tmp := ' ';
 
+    SetSubplaces (tmp);
+(*************************
     x := -1;
     fo.places.rowcount := 0;
-    
- {$ifdef windows}
- for achar := 'A' to 'Z' do
-    begin
-     if directoryexists(achar + ':\') then
+
+    {$ifdef windows}
+    for achar := 'A' to 'Z' do
        begin
-        Inc(x);
-        fo.places.rowcount := x+1;
-        fo.places[0][x] := tmp + achar + ':\';
-        fo.places[1][x] := msestring(achar + ':\');
-       end;
-   end;
+        if directoryexists(achar + ':\') then
+          begin
+           Inc(x);
+           fo.places.rowcount := x+1;
+           fo.places[0][x] := tmp + achar + ':\';
+           fo.places[1][x] := msestring(achar + ':\');
+          end;
+      end;
 
     if directoryexists('C:\users') then
     begin
@@ -3116,42 +4453,68 @@ begin
     end;
 
     fo.places.rowcount := fo.places.rowcount +1;;
+*************************)
 
-    if length(ffilenamescust) > 0 then
-    begin
-      fo.placescust.rowcount := length(ffilenamescust) + 1;
-      for x    := 0 to length(ffilenamescust) - 1 do
-      begin
-        thestr := copy(ffilenamescust[x], 1, length(ffilenamescust[x]) - 1);
-        theint := lastdelimiter(directoryseparator, ansistring(thestr));
-        fo.placescust[1][x] := ffilenamescust[x];
-        fo.placescust[0][x] := tmp + copy(thestr, theint + 1, 14);
-      end;
-    end;
+////////////////////////////////////
+//    if length(ffilenamescust) > 0 then
+//    begin
+//      fo.placescust.rowcount := length(ffilenamescust) + 1;
+//      for x    := 0 to length(ffilenamescust) - 1 do
+//      begin
+//        thestr := copy(ffilenamescust[x], 1, length(ffilenamescust[x]) - 1);
+//        theint := lastdelimiter(directoryseparator, ansistring(thestr));
+//        fo.placescust[1][x] := ffilenamescust[x];
+//        fo.placescust[0][x] := tmp + copy(thestr, theint + 1, 14);
+//      end;
+//    end;
+////////////////////////////////////
+    WITH fo DO
+      FOR x:= 0 TO pred (placescust.rowhigh) DO BEGIN
+        thestr:= placescust [1][x];
+         IF thestr [Length (thestr)] = DirectorySeparator THEN
+          SetLength (thestr, pred (Length (thestr)));
+        thestr:= ExtractFilename (thestr); //// SetLength (thestr, 14);  // ??
+        IF thestr <> ''
+          THEN placescust [0][x]:= tmp+ thestr
+          ELSE placescust [0][x]:= tmp+ SubPlace [SysRoot].Place;
+      END;
+//////////////////////////////////////
 
-    fo.blateral.Value := fnopanel;
+//--    fo.blateral.Value := fnopanel;
+//--    fnopanel:= fo.blateral.Value;
 
-    if ficon <> nil then
-      fo.icon := ficon;
+//--    if ficon <> nil then
+//--      fo.icon := ficon;
 
-    fo.bcompact.Value   := fcompact;
-    fo.showhidden.Value := fshowhidden;
-    fo.bshowoptions.Value := fshowoptions;
-    fo.bhidehistory.Value := fhidehistory;
-    fo.bnoicon.Value := fhideicons;
+//--    fo.bcompact.Value   := fcompact;
+//--    fo.showhidden.Value := fshowhidden;
+//--    fo.bshowoptions.Value := fshowoptions;
+//--    fo.bhidehistory.Value := fhidehistory;
+//--    fo.bnoicon.Value := fhideicons;
+//    fcompact:=     fo.bcompact.Value;
+//    fshowhidden:=  fo.showhidden.Value;
+//    fshowoptions:= fo.bshowoptions.Value;
+//    fhidehistory:= fo.bhidehistory.Value;
+//    fhideicons:=   fo.bnoicon.Value;
 
-    if fcolnamewidth > 0 then
-      fo.list_log.datacols[0].Width := fcolnamewidth;
-    if fcolextwidth > 0 then
-      fo.list_log.datacols[1].Width := fcolextwidth;
-    if fcolsizewidth > 0 then
-      fo.list_log.datacols[2].Width := fcolsizewidth;
-    if fcoldatewidth > 0 then
-      fo.list_log.datacols[3].Width := fcoldatewidth;
+//--    if fcolnamewidth > 0 then
+//--      fo.list_log.datacols[0].Width := fcolnamewidth;
+//--    if fcolextwidth > 0 then
+//--      fo.list_log.datacols[1].Width := fcolextwidth;
+//--    if fcolsizewidth > 0 then
+//--      fo.list_log.datacols[2].Width := fcolsizewidth;
+//--    if fcoldatewidth > 0 then
+//--      fo.list_log.datacols[3].Width := fcoldatewidth;
 
     // fo.list_log.datacols[0].Width := fo.list_log.Width -
     //   fo.list_log.datacols[1].Width - fo.list_log.datacols[2].Width -
     //   fo.list_log.datacols[3].Width - 20;
+
+//// filename.tag meanings:
+////  1 - fdo_directory in aoptions
+////  2 - dialogkind = fdk_save
+
+    fo.filename.tag:= 0;      //// Just to be sure ---- ????
 
     if (fdo_directory in aoptions) then
     begin
@@ -3161,31 +4524,36 @@ begin
      if length(lang_stockcaption) > 0 then
       fo.filename.frame.Caption := lang_stockcaption[ord(sc_dirhk)];
     end
-    else if (dialogkind in [fdk_save]) then
+////    else if (dialogkind in [fdk_save]) then
+    else if (dialogkind = fdk_save) then
     begin
       if length(lang_stockcaption) > 0 then
       fo.filename.frame.Caption :=  lang_stockcaption[ord(sc_namehk)];
       fo.filename.tag           := 2;
     end
-    else if (dialogkind in [fdk_new]) then
+////    else if (dialogkind in [fdk_new]) then
+    else if (dialogkind = fdk_new) then
       if length(lang_stockcaption) > 0 then
       fo.filename.frame.Caption := lang_stockcaption[ord(sc_newfile)]
-    else
-      if length(lang_stockcaption) > 0 then
-      fo.filename.frame.Caption := lang_stockcaption[ord(sc_namehk)];
+      else
+        if length(lang_stockcaption) > 0 then
+        fo.filename.frame.Caption := lang_stockcaption[ord(sc_namehk)];
 {$else}
       fo.filename.frame.Caption := sc(sc_dirhk);
     end
-    else if (dialogkind in [fdk_save]) then
+////    else if (dialogkind in [fdk_save]) then
+    else if (dialogkind = fdk_save) then
     begin
       fo.filename.frame.Caption :=  sc(sc_namehk);
       fo.filename.tag           := 2;
     end
-    else if (dialogkind in [fdk_new]) then
+////    else if (dialogkind in [fdk_new]) then
+    else if (dialogkind = fdk_new) then
       fo.filename.frame.Caption := sc(sc_newfile)
-    else
-      fo.filename.frame.Caption := sc(sc_namehk);
+      else
+        fo.filename.frame.Caption := sc(sc_namehk);
 {$endif}
+
     if dialogkind <> fdk_none then
       if dialogkind in [fdk_save, fdk_new] then
         system.include(aoptions, fdo_save)
@@ -3193,23 +4561,41 @@ begin
         system.exclude(aoptions, fdo_save);
     if fdo_relative in foptions then
       fo.listview.directory := getcurrentdirmse
-    else
+    else 
       fo.listview.directory := flastdir;
     if (fwindowrect.cx > 0) and (fwindowrect.cy > 0) then
       fo.widgetrect         := clipinrect(fwindowrect, application.screenrect(fo.window));
     rectbefore := fo.widgetrect;
+////////////////////////////////////
+//    if fsplitterplaces > 0 then
+//      fo.tsplitter3.top := fsplitterplaces;
+//
+//    if fnopanel = True then
+//      fo.tsplitter1.left := 0
+//    else if fsplitterlateral > 0 then
+//      fo.tsplitter1.left := fsplitterlateral;
+////////////////////////////////////
 
-    if fsplitterplaces > 0 then
-      fo.tsplitter3.top := fsplitterplaces;
+    Result:=
+    filedialogx1
+     (fo,
+      ffilenames,
+      ara,
+      arb,
+      @ffilterindex,
+      @ffilter,
+      NIL,  //// @fcolwidth, --- not used here, nor applicable here
+      finclude,
+      fexclude,
+      po1,
+      fhistorymaxcount,
+      acaption,
+      aoptions,
+      fdefaultext,
+      fimagelist,
+      fongetfileicon,
+      foncheckfile);
 
-    if fnopanel = True then
-      fo.tsplitter1.left := 0
-    else if fsplitterlateral > 0 then
-      fo.tsplitter1.left := fsplitterlateral;
-
-    Result        := filedialogx1(fo, ffilenames, ara, arb, @ffilterindex, @ffilter, @fcolwidth, finclude,
-      fexclude, po1, fhistorymaxcount, acaption, aoptions, fdefaultext,
-      fimagelist, fongetfileicon, foncheckfile);
     if not rectisequal(fo.widgetrect, rectbefore) then
       fwindowrect := fo.widgetrect;
 
@@ -3222,42 +4608,56 @@ begin
       else
         flastdir := fo.dir.Value;
 
-    fnopanel        := fo.blateral.Value;
-    fcompact        := fo.bcompact.Value;
-    fshowoptions    := fo.bshowoptions.Value;
-    fshowhidden     := fo.showhidden.Value;
-    fhidehistory    := fo.bhidehistory.Value ;
-    fhideicons       := fo.bnoicon.Value ;
+//    fnopanel        := fo.blateral.Value;
+//    fcompact        := fo.bcompact.Value;
+//    fshowoptions    := fo.bshowoptions.Value;
+//    fshowhidden     := fo.showhidden.Value;
+//    fhidehistory    := fo.bhidehistory.Value;
+//    fhideicons      := fo.bnoicon.Value;
 
-    fcolnamewidth   := fo.list_log.datacols[0].Width;
-    fcolextwidth    := fo.list_log.datacols[1].Width;
-    fcolsizewidth   := fo.list_log.datacols[2].Width;
-    fcoldatewidth   := fo.list_log.datacols[3].Width;
-    fsplitterplaces := fo.tsplitter3.top;
+//    fcolnamewidth   := fo.list_log.datacols[0].Width;
+//    fcolextwidth    := fo.list_log.datacols[1].Width;
+//    fcolsizewidth   := fo.list_log.datacols[2].Width;
+//    fcoldatewidth   := fo.list_log.datacols[3].Width;
+//    fsplitterplaces := fo.tsplitter3.top;
 
-    if fo.tsplitter1.left > 0 then
-      fsplitterlateral := fo.tsplitter1.left;
+//    if fo.tsplitter1.left > 0 then
+//      fsplitterlateral := fo.tsplitter1.left;
 
-    if fo.placescust.rowcount > 1 then
-    begin
-      setlength(ffilenamescust, fo.placescust.rowcount - 1);
-      for x := 0 to length(ffilenamescust) - 1 do
-        ffilenamescust[x] := fo.placescust[1][x];
-    end
-    else
-      setlength(ffilenamescust, 0);
+////////////////////////////////////
+//    if fo.placescust.rowcount > 1 then
+//    begin
+//      setlength(ffilenamescust, fo.placescust.rowcount - 1);
+//      for x := 0 to length(ffilenamescust) - 1 do
+//        ffilenamescust[x] := fo.placescust[1][x];
+//    end
+//    else
+//      setlength(ffilenamescust, 0);
+////////////////////////////////////
 
   finally
+////////////////////////////////////////////
+   if not assigned (providedform) then begin
+       fo.fController:= NIL;
+       if self = nil then ;
+////////////////////////////////////////////
     fo.Free;
+////////////////////////////////////////////
+    end;
+////////////////////////////////////////////
   end;
 end;
 
-function tfiledialogxcontroller.Execute(const dialogkind: filedialogkindty; const acaption: msestring): modalresultty;
+// function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const acaption: msestring): modalresultty;
+////////////////////////////////////
+function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const acaption: msestring;
+                                         providedform: tfiledialogxfo = nil): modalresultty;
+////////////////////////////////////
 begin
-  Result := Execute(dialogkind, acaption, foptions);
+  Result := Execute(dialogkind, acaption, foptions, providedform);
 end;
 
-function tfiledialogxcontroller.actcaption(const dialogkind: filedialogkindty): msestring;
+function tfiledialogxcontroller.actcaption (const dialogkind: filedialogkindty): msestring;
 begin
   case dialogkind of
     fdk_save:
@@ -3275,26 +4675,22 @@ begin
   end;
 end;
 
-function tfiledialogxcontroller.Execute(const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty;
+// function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty): modalresultty;
+////////////////////////////////////
+function tfiledialogxcontroller.Execute (const dialogkind: filedialogkindty; const aoptions: filedialogoptionsty;
+                                         providedform: tfiledialogxfo = nil): modalresultty;
+////////////////////////////////////
 begin
  if fdo_directory in aoptions then
- Result := Execute(dialogkind, fcaptiondir, aoptions) else
-  Result := Execute(dialogkind, actcaption(dialogkind), aoptions);
+  Result := Execute(dialogkind, fcaptiondir, aoptions, providedform) else
+  Result := Execute(dialogkind, actcaption(dialogkind), aoptions, providedform);
 end;
 
-function tfiledialogxcontroller.Execute(dialogkind: filedialogkindty = fdk_none): modalresultty;
-begin
-  if dialogkind = fdk_none then
-    if fdo_save in foptions then
-      dialogkind := fdk_save
-    else
-      dialogkind := fdk_none;
-   if fdo_directory in foptions then
-   Result := Execute(dialogkind, fcaptiondir) else
-  Result := Execute(dialogkind, actcaption(dialogkind));
-end;
-
-function tfiledialogxcontroller.Execute(var avalue: filenamety; dialogkind: filedialogkindty = fdk_none): Boolean;
+// function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty = fdk_none): modalresultty;
+////////////////////////////////////
+function tfiledialogxcontroller.Execute (dialogkind: filedialogkindty = fdk_none;
+                                         providedform: tfiledialogxfo = nil): modalresultty;
+////////////////////////////////////
 begin
   if dialogkind = fdk_none then
     if fdo_save in foptions then
@@ -3302,12 +4698,33 @@ begin
     else
       dialogkind := fdk_none;
 
-    if fdo_directory in foptions then
-   Result := Execute(avalue, dialogkind, fcaptiondir) else
-  Result := Execute(avalue, dialogkind, actcaption(dialogkind));
+  if fdo_directory in foptions then
+  Result := Execute(dialogkind, fcaptiondir, providedform) else
+  Result := Execute(dialogkind, actcaption(dialogkind), providedform);
 end;
 
-function tfiledialogxcontroller.Execute(var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): Boolean;
+// function tfiledialogxcontroller.Execute (var avalue: filenamety; dialogkind: filedialogkindty = fdk_none): Boolean;
+////////////////////////////////////
+function tfiledialogxcontroller.Execute (var avalue: filenamety; dialogkind: filedialogkindty = fdk_none;
+                                         providedform: tfiledialogxfo = nil): Boolean;
+////////////////////////////////////
+begin
+  if dialogkind = fdk_none then
+    if fdo_save in foptions then
+      dialogkind := fdk_save
+    else
+      dialogkind := fdk_none;
+
+  if fdo_directory in foptions then
+  Result := Execute(avalue, dialogkind, fcaptiondir, providedform) else
+  Result := Execute(avalue, dialogkind, actcaption(dialogkind), providedform);
+end;
+
+// function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty): Boolean;
+////////////////////////////////////
+function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring; aoptions: filedialogoptionsty;
+                                         providedform: tfiledialogxfo = nil): Boolean;
+////////////////////////////////////
 var
   wstr1: filenamety;
 begin
@@ -3320,7 +4737,7 @@ begin
       Exit;
   end;
   filename := avalue;
-  Result   := Execute(dialogkind, acaption, aoptions) = mr_ok;
+  Result   := Execute(dialogkind, acaption, aoptions, providedform) = mr_ok;
   if Result then
   begin
     avalue := filename;
@@ -3346,7 +4763,7 @@ if length(lang_stockcaption) > ord(sc_file) then
       '" exists, do you want to overwrite?',
       'WARNING');
   end;
-      
+
 {$else}
       Result := not findfile(filename) or
       askok(sc(sc_file) + ' "' + filename +
@@ -3355,9 +4772,13 @@ if length(lang_stockcaption) > ord(sc_file) then
 {$endif}
 end;
 
-function tfiledialogxcontroller.Execute(var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring): Boolean;
+// function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring): Boolean;
+////////////////////////////////////
+function tfiledialogxcontroller.Execute (var avalue: filenamety; const dialogkind: filedialogkindty; const acaption: msestring;
+                                         providedform: tfiledialogxfo = nil): Boolean;
+////////////////////////////////////
 begin
-  Result := Execute(avalue, dialogkind, acaption, foptions);
+  Result := Execute(avalue, dialogkind, acaption, foptions, providedform);
 end;
 
 function tfiledialogxcontroller.getfilename: filenamety;
@@ -3383,10 +4804,12 @@ end;
 const
   quotechar = msechar('"');
 
-procedure tfiledialogxcontroller.seticon(const avalue: tmaskedbitmap);
-begin
-  ficon.Assign(avalue);
-end;
+////////////////////////////////////
+//procedure tfiledialogxcontroller.seticon(const avalue: tmaskedbitmap);
+//begin
+//  ficon.Assign(avalue);
+//end;
+////////////////////////////////////
 
 procedure tfiledialogxcontroller.setfilename(const avalue: filenamety);
 var
@@ -3519,7 +4942,9 @@ begin
   ffilenames     := nil;
   flastdir       := '';
   fhistory       := nil;
-  ffilenamescust := nil;
+////////////////////////////////////////////
+//  ffilenamescust := nil;
+////////////////////////////////////////////
 end;
 
 procedure tfiledialogxcontroller.setlastdir(const avalue: filenamety);
@@ -3544,13 +4969,15 @@ begin
     system.exclude(foptions, fdo_sysfilename);
 end;
 
-{ tfiledialog }
+{ tfiledialogx }
 
 constructor tfiledialogx.Create(aowner: TComponent);
 begin
   // foptionsedit:= defaultfiledialogoptionsedit;
   foptionsedit1 := defaultfiledialogoptionsedit1;
-  fcontroller   := tfiledialogxcontroller.Create(nil);
+////////////////////////////////////
+  fcontroller   := tfiledialogxcontroller.Create({Self);  ///??? ?nil?}aowner AS tmsecomponent);
+////////////////////////////////////
   inherited;
 end;
 
@@ -3654,10 +5081,12 @@ end;
 constructor tfilenameeditcontroller.Create(const aowner: tcustomfilenameedit1);
 begin
   inherited Create(aowner);
-  aowner.controller.fbackcolor  := cl_default;
-  aowner.controller.ffontname   := 'stf_default';
-  aowner.controller.ffontheight := 0;
-  aowner.controller.ffontcolor  := cl_black;
+////////////////////////////////////
+//  aowner.controller.fbackcolor  := cl_default;
+//  aowner.controller.ffontname   := 'stf_default';
+//  aowner.controller.ffontheight := 0;
+//  aowner.controller.ffontcolor  := cl_black;
+////////////////////////////////////
  end;
 
 function tfilenameeditcontroller.Execute(var avalue: msestring): Boolean;
@@ -4155,4 +5584,3 @@ begin
 end;
 
 end.
-
