@@ -6784,6 +6784,8 @@ procedure tdatacol.docellevent(var info: celleventinfoty);
 var
  hintinfo: hintinfoty;
 begin
+if grid.rowcount > 0 then
+begin
  if fcellinfo.grid.canevent(tmethod(foncellevent)) then begin
   foncellevent(self,info);
  end;
@@ -6793,6 +6795,13 @@ begin
   application.inithintinfo(hintinfo,fcellinfo.grid);
   fonshowhint(self,info.cell.row,hintinfo);
   application.showhint(fcellinfo.grid,hintinfo);
+ end;
+ 
+ if info.eventkind = cek_focusedcellchanged then
+begin
+grid.invalidatewidget;
+end; 
+ 
  end;
 end;
 
@@ -10721,6 +10730,7 @@ begin
    else;
   end;
  end;
+ invalidatewidget;
 end;
 
 function tcustomgrid.caninsertrow: boolean;

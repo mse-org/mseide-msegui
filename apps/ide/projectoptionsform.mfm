@@ -2135,7 +2135,7 @@ object projectoptionsfo: tprojectoptionsfo
               frame.localprops1 = [frl1_framefaceoffset, frl1_framefaceoffsetdisabled, frl1_framefaceoffsetmouse, frl1_framefaceoffsetclicked, frl1_framefaceoffsetactive]
               taborder = 3
               bounds_x = 0
-              bounds_y = 255
+              bounds_y = 241
               bounds_cx = 830
               bounds_cy = 39
               anchors = [an_top]
@@ -3348,6 +3348,8 @@ object projectoptionsfo: tprojectoptionsfo
                   dataclass = tgridmsestringdatalist
                 end>
               datarowheight = 17
+              onscrollrows = onscrollev
+              oncellevent = cellevcomm
               reffontheight = 15
               object befmakeon: tbooleanedit
                 Tag = 1
@@ -3581,6 +3583,8 @@ object projectoptionsfo: tprojectoptionsfo
                 end>
               datarowheight = 17
               statfile = statfile1
+              onscrollrows = onscrollev
+              oncellevent = cellevcomm
               reffontheight = 15
               object makeoptpurpose: tstringedit
                 optionswidget1 = [ow1_fontglyphheight]
@@ -3864,6 +3868,8 @@ object projectoptionsfo: tprojectoptionsfo
                   dataclass = tgridmsestringdatalist
                 end>
               datarowheight = 17
+              onscrollrows = onscrollev
+              oncellevent = cellevcomm
               reffontheight = 15
               object dmakeon: tbooleanedit
                 Tag = 1
@@ -4245,6 +4251,8 @@ object projectoptionsfo: tprojectoptionsfo
                   dataclass = tgridmsestringdatalist
                 end>
               datarowheight = 17
+              onscrollrows = onscrollev
+              oncellevent = cellevcomm
               reffontheight = 15
               object aftmakeon: tbooleanedit
                 Tag = 1
@@ -5021,6 +5029,8 @@ object projectoptionsfo: tprojectoptionsfo
             end>
           datarowheight = 17
           statfile = statfile1
+          onscrollrows = onscrollev
+          oncellevent = cellevcomm
           reffontheight = 15
           object fontalias: tstringedit
             optionswidget = [ow_mousefocus, ow_tabfocus, ow_arrowfocus, ow_arrowfocusin, ow_arrowfocusout, ow_destroywidgets]
@@ -5223,6 +5233,8 @@ object projectoptionsfo: tprojectoptionsfo
               dataclass = tgridmsestringdatalist
             end>
           datarowheight = 17
+          onscrollrows = onscrollev
+          oncellevent = cellevcomm
           reffontheight = 15
           object coldi: tpointeredit
             optionsskin = [osk_framebuttononly]

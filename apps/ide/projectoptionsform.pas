@@ -33,7 +33,7 @@ unit projectoptionsform;
 
 interface
 uses
- mseforms,msefiledialog,mseapplication,msegui,msestat,msestatfile,msetabs,
+ mseforms,msefiledialog,mseapplication,msegui,msestat,msestatfile,msetabs,msegridsglob,
  msesimplewidgets,msetypes,msestrings,msedataedits,msetextedit,msegraphedits,
  msewidgetgrid,msegrids,msesplitter,msemacros,msegdbutils,msedispwidgets,msesys,
  mseclasses,msegraphutils,mseevent,msetabsglob,msearrayutils,msegraphics,
@@ -1138,6 +1138,8 @@ type
    procedure colorhint(const sender: TObject; var info: hintinfoty);
    procedure initeolstyleexe(const sender: tenumtypeedit);
    procedure debugtargetlayoutev(const sender: TObject);
+   procedure cellevcomm(const sender: TObject; var info: celleventinfoty);
+   procedure onscrollev(const sender: tcustomgrid; var step: Integer);
   private
    procedure activegroupchanged;
  end;
@@ -3295,6 +3297,22 @@ procedure tprojectoptionsfo.debugtargetlayoutev(const sender: TObject);
 begin
  serverla.width:= serverla.width + uploadcommand.width-gdbservercommand.width;
 end;
+
+procedure tprojectoptionsfo.cellevcomm(const sender: TObject;
+               var info: celleventinfoty);
+begin
+if info.eventkind = cek_focusedcellchanged then
+begin
+twidgetgrid(sender).invalidatewidget;
+end; 
+end;
+
+procedure tprojectoptionsfo.onscrollev(const sender: tcustomgrid;
+               var step: Integer);
+begin
+twidgetgrid(sender).invalidatewidget;
+end;
+
 (*
 { tprojectoptions }
 

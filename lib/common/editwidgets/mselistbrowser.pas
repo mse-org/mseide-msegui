@@ -1527,6 +1527,12 @@ begin
    end;
   end;
  end;
+ 
+ if info.eventkind = cek_select then
+begin
+grid.invalidatewidget;
+end;
+
  inherited;
 end;
 
