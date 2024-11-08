@@ -21,6 +21,11 @@ const
   LIBC_SUFFIX2 = ''; // '@GLIBC_2.17'
   LIBC_SUFFIX3 = ''; // '@GLIBC_2.17'
   {$else}
+  {$if defined(linux) and defined(cpuarm)}
+  LIBC_SUFFIX =  '@GLIBC_2.4';
+  LIBC_SUFFIX2 = '@GLIBC_2.4';
+  LIBC_SUFFIX3 = '@GLIBC_2.4';
+  {$else}
   {$if defined(linux) and defined(cpui386)}
   LIBC_SUFFIX = '@GLIBC_2.0';
   LIBC_SUFFIX2 = '@GLIBC_2.1';
@@ -31,6 +36,7 @@ const
   LIBC_SUFFIX3 = '';
   {$endif}
   {$endif}  
+  {$endif}
   {$endif}
 
 const
