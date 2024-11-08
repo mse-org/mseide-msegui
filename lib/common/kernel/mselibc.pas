@@ -9,13 +9,29 @@ uses
 
 //todo: remove not used definitions, use msectypes
 
-{$if defined(linux) and defined(CPUX86_64)}
-{$define glibc225}
-{$endif}
-
-{$if defined(linux) and defined(CPUI386)}
-{$define glibc20}
-{$endif}
+const
+  // allow to assign proper signed symbol table name for a libc.so.6 method
+  {$if defined(linux) and defined(cpux86_64)}
+  LIBC_SUFFIX = '@GLIBC_2.2.5';
+  LIBC_SUFFIX2 = '@GLIBC_2.2.5';
+  LIBC_SUFFIX3 = '@GLIBC_2.2.5';
+  {$else}
+  {$if defined(linux) and defined(cpuaarch64)}
+  LIBC_SUFFIX = '';  // '@GLIBC_2.17'
+  LIBC_SUFFIX2 = ''; // '@GLIBC_2.17'
+  LIBC_SUFFIX3 = ''; // '@GLIBC_2.17'
+  {$else}
+  {$if defined(linux) and defined(cpui386)}
+  LIBC_SUFFIX = '@GLIBC_2.0';
+  LIBC_SUFFIX2 = '@GLIBC_2.1';
+  LIBC_SUFFIX3 = '@GLIBC_2.2';
+  {$else}
+  LIBC_SUFFIX = '';
+  LIBC_SUFFIX2 = '';
+  LIBC_SUFFIX3 = '';
+  {$endif}
+  {$endif}  
+  {$endif}
 
 const
 {$ifdef FPC}
@@ -751,31 +767,12 @@ type
  end;
  pkevent_t = ^kevent_t;
  
-
-{$if defined(glibc225)} // 64 bit
-   function kqueue(): cint; cdecl; external clib name 'kqueue@GLIBC_2.2.5';
-   function kevent(kq: cint; changelist: pkevent_t; nchanges: cint;
+  function kqueue(): cint; cdecl; external clib name 'kqueue' + LIBC_SUFFIX;
+  function kevent(kq: cint; changelist: pkevent_t; nchanges: cint;
               eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint;
-                                           cdecl; external clib name 'kevent@GLIBC_2.2.5';
- {$else}
- {$ifdef glibc20}  // 32 bit
-   function kqueue(): cint; cdecl; external clib name 'kqueue@GLIBC_2.0';
-   function kevent(kq: cint; changelist: pkevent_t; nchanges: cint;
-              eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint;
-                                           cdecl; external clib name 'kevent@GLIBC_2.0';
- {$else}
-   function kqueue(): cint; cdecl; external clib name 'kqueue';
-   function kevent(kq: cint; changelist: pkevent_t; nchanges: cint;
-              eventlist: pkevent_t; nevents: cint; timeout: ptimespec): cint;
-                                           cdecl; external clib name 'kevent';
-
+                                           cdecl; external clib name 'kevent' + LIBC_SUFFIX;
 {$endif}
-{$endif}
- 
- 
  const
-{$endif}
-
    LOCK_SH = 1;
    LOCK_EX = 2;
    LOCK_NB = 4;
@@ -1793,15 +1790,8 @@ type
  Pnl_item = ^nl_item;
  nl_item = longint;
 
-{$if defined(glibc225)}
-function nl_langinfo(__item: nl_item):Pchar; cdecl; external clib name 'nl_langinfo@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function nl_langinfo(__item: nl_item):Pchar; cdecl; external clib name 'nl_langinfo@GLIBC_2.0';
-{$else}
-function nl_langinfo(__item: nl_item):Pchar; cdecl; external clib name 'nl_langinfo';
-{$endif}
-{$endif}
+function nl_langinfo(__item: nl_item):Pchar; cdecl; external clib name 'nl_langinfo' + LIBC_SUFFIX;
+
 type
    Psched_param = ^sched_param;
    sched_param = record
@@ -2106,32 +2096,13 @@ const
    S_IFLNK  = __S_IFLNK;
    S_IFSOCK = __S_IFSOCK;
    
-{$if defined(glibc225)}
 function sigaction(__sig:longint; Const act: _sigaction;
        Var oldact: _sigaction):longint;
-                   cdecl;external clib name 'sigaction@GLIBC_2.2.5'; overload;
+                   cdecl;external clib name 'sigaction' + LIBC_SUFFIX; overload;
 function sigaction(__sig: longint; Action: PSigAction;
        OldAction: PSigAction): Integer;
-                    cdecl;external clib name 'sigaction@GLIBC_2.2.5'; overload;
+                    cdecl;external clib name 'sigaction' + LIBC_SUFFIX; overload;
 
-{$else}
-{$if defined(glibc20) }
-function sigaction(__sig:longint; Const act: _sigaction;
-       Var oldact: _sigaction):longint;
-                   cdecl;external clib name 'sigaction@GLIBC_2.0'; overload;
-function sigaction(__sig: longint; Action: PSigAction;
-       OldAction: PSigAction): Integer;
-                    cdecl;external clib name 'sigaction@GLIBC_2.0'; overload;
-
-{$else}
-function sigaction(__sig:longint; Const act: _sigaction;
-       Var oldact: _sigaction):longint;
-                   cdecl;external clib name 'sigaction'; overload;
-function sigaction(__sig: longint; Action: PSigAction;
-       OldAction: PSigAction): Integer;
-                    cdecl;external clib name 'sigaction'; overload;
-{$endif}
-{$endif}
 //function m_sigprocmask(__how:longint; var SigSet : TSigSet;
 //            var oldset: Tsigset):longint;cdecl;external clib name 'sigprocmask';
 //function m_sigismember(var SigSet : TSigSet; SigNum : Longint):longint;cdecl;external clib name 'sigismember';
@@ -2208,50 +2179,20 @@ type
  end;
  ppasswd = ^passwd;
  pppasswd = ^ppasswd;
-{$if defined(glibc225)}
-function getpid:__pid_t;cdecl;external clib name 'getpid@GLIBC_2.2.5';
-function getuid(): uid_t cdecl;external clib name 'getuid@GLIBC_2.2.5';
-function geteuid(): uid_t cdecl;external clib name 'geteuid@GLIBC_2.2.5';
- //function cuserid (_string: pcchar): pcchar; cdecl; external clib name 'cuserid';
-          //not available on freebsd
-function sscanf(__s:Pchar; __format:Pchar; args:array of const):longint;cdecl;external clib name 'sscanf@GLIBC_2.2.5';
-function sched_yield:longint;cdecl;external clib name 'sched_yield@GLIBC_2.2.5';
-function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'usleep@GLIBC_2.2.5';
-function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;external clib name 'strerror_r@GLIBC_2.2.5';
-{$ifdef linux}
-function __errno_location: PInteger; cdecl;external clib name '__errno_location@GLIBC_2.2.5';
-{$endif}
-{$else}
-{$if defined(glibc20) }
-function getpid:__pid_t;cdecl;external clib name 'getpid@GLIBC_2.0';
-function getuid(): uid_t cdecl;external clib name 'getuid@GLIBC_2.0';
-function geteuid(): uid_t cdecl;external clib name 'geteuid@GLIBC_2.0';
- //function cuserid (_string: pcchar): pcchar; cdecl; external clib name 'cuserid';
-          //not available on freebsd
-function sscanf(__s:Pchar; __format:Pchar; args:array of const):longint;cdecl;external clib name 'sscanf@GLIBC_2.0';
-function sched_yield:longint;cdecl;external clib name 'sched_yield@GLIBC_2.0';
-function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'usleep@GLIBC_2.0';
-function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;external clib name 'strerror_r@GLIBC_2.0';
-{$ifdef linux}
-function __errno_location: PInteger; cdecl;external clib name '__errno_location@GLIBC_2.0';
-{$endif}
-{$else}
-function getpid:__pid_t;cdecl;external clib name 'getpid';
-function getuid(): uid_t cdecl;external clib name 'getuid';
-function geteuid(): uid_t cdecl;external clib name 'geteuid';
- //function cuserid (_string: pcchar): pcchar; cdecl; external clib name 'cuserid';
-          //not available on freebsd
-function sscanf(__s:Pchar; __format:Pchar; args:array of const):longint;cdecl;external clib name 'sscanf';
-function sched_yield:longint;cdecl;external clib name 'sched_yield';
-function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'usleep';
-function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;external clib name 'strerror_r';
-{$ifdef linux}
-function __errno_location: PInteger; cdecl;external clib name '__errno_location';
-{$endif}
-{$endif}
-{$endif}
 
+function getpid:__pid_t;cdecl;external clib name 'getpid' + LIBC_SUFFIX;
+function getuid(): uid_t cdecl;external clib name 'getuid' + LIBC_SUFFIX;
+function geteuid(): uid_t cdecl;external clib name 'geteuid' + LIBC_SUFFIX;
+ //function cuserid (_string: pcchar): pcchar; cdecl; external clib name 'cuserid';
+          //not available on freebsd
+function sscanf(__s:Pchar; __format:Pchar; args:array of const):longint;cdecl;external clib name 'sscanf' + LIBC_SUFFIX;
+function sched_yield:longint;cdecl;external clib name 'sched_yield' + LIBC_SUFFIX;
+function usleep(__useconds:__useconds_t):longint;cdecl;external clib name 'usleep' + LIBC_SUFFIX;
+function strerror_r(__errnum:longint; __buf:Pchar; __buflen:size_t):Pchar;cdecl;external clib name 'strerror_r' + LIBC_SUFFIX;
 
+{$ifdef linux}
+function __errno_location: PInteger; cdecl;external clib name '__errno_location' + LIBC_SUFFIX;
+{$endif}
 {$if defined(freebsd) or defined(dragonfly) or defined(darwin)}
 function __errno_location: PInteger; cdecl;external clib name '__error';
 {$endif}
@@ -2383,86 +2324,30 @@ type
   TMutexAttribute = pthread_mutexattr_t;
   PMutexAttribute = ^TMutexAttribute;
 
-{$if defined(glibc225)}
 function pthread_mutexattr_init(var __attr: pthread_mutexattr_t):longint;cdecl; 
-                 external threadslib  name 'pthread_mutexattr_init@GLIBC_2.2.5';
+                 external threadslib  name 'pthread_mutexattr_init' + LIBC_SUFFIX;
 function pthread_mutexattr_settype(var __attr: pthread_mutexattr_t; Kind: Integer): Integer; cdecl; 
-                                 external threadslib name 'pthread_mutexattr_settype@GLIBC_2.2.5';
+                                 external threadslib name 'pthread_mutexattr_settype' + LIBC_SUFFIX2;
 function pthread_mutexattr_destroy(var __attr: pthread_mutexattr_t):longint;cdecl;
-                  external threadslib  name 'pthread_mutexattr_destroy@GLIBC_2.2.5';
+                  external threadslib  name 'pthread_mutexattr_destroy' + LIBC_SUFFIX;
 
 function __mkdir(__path:Pchar; __mode:__mode_t):longint;cdecl;
-                                            external clib name 'mkdir@GLIBC_2.2.5';
+                                            external clib name 'mkdir' + LIBC_SUFFIX;
 function fcntl(__fd: cint; __cmd: cint; args: array of const): cint;
-                   cdecl; external clib name 'fcntl@GLIBC_2.2.5'; overload;
+                   cdecl; external clib name 'fcntl' + LIBC_SUFFIX; overload;
 function fcntl(__fd: cint; __cmd: cint): cint;
-                   cdecl; varargs; external clib name 'fcntl@GLIBC_2.2.5'; overload;
+                   cdecl; varargs; external clib name 'fcntl' + LIBC_SUFFIX; overload;
 function open(__file:Pchar; __oflag: cint; args:array of const): cint;
-                                cdecl; external clib name 'open@GLIBC_2.2.5'; overload;
+                                cdecl; external clib name 'open' + LIBC_SUFFIX; overload;
 function open64(__file:Pchar; __oflag: cint; args:array of const): cint;
-                                cdecl; external clib name 'open64@GLIBC_2.2.5'; overload;
+                                cdecl; external clib name 'open64' + LIBC_SUFFIX; overload;
 function open(__file:Pchar; __oflag: cint): cint;
-                    cdecl; varargs; external clib name 'open@GLIBC_2.2.5'; overload;
-function __close(Handle: cint): cint; cdecl;external clib name 'close@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function pthread_mutexattr_init(var __attr: pthread_mutexattr_t):longint;cdecl; 
-                 external threadslib  name 'pthread_mutexattr_init@GLIBC_2.0';
-function pthread_mutexattr_settype(var __attr: pthread_mutexattr_t; Kind: Integer): Integer; cdecl; 
-                                 external threadslib name 'pthread_mutexattr_settype@GLIBC_2.1';
-function pthread_mutexattr_destroy(var __attr: pthread_mutexattr_t):longint;cdecl;
-                  external threadslib  name 'pthread_mutexattr_destroy@GLIBC_2.0';
-
-function __mkdir(__path:Pchar; __mode:__mode_t):longint;cdecl;
-                                            external clib name 'mkdir@GLIBC_2.0';
-function fcntl(__fd: cint; __cmd: cint; args: array of const): cint;
-                   cdecl; external clib name 'fcntl@GLIBC_2.0'; overload;
-function fcntl(__fd: cint; __cmd: cint): cint;
-                   cdecl; varargs; external clib name 'fcntl@GLIBC_2.0'; overload;
-function open(__file:Pchar; __oflag: cint; args:array of const): cint;
-                                cdecl; external clib name 'open@GLIBC_2.0'; overload;
-function open64(__file:Pchar; __oflag: cint; args:array of const): cint;
-                                cdecl; external clib name 'open64@GLIBC_2.0'; overload;
-function open(__file:Pchar; __oflag: cint): cint;
-                    cdecl; varargs; external clib name 'open@GLIBC_2.0'; overload;
-function __close(Handle: cint): cint; cdecl;external clib name 'close@GLIBC_2.0';
-{$else}
-function pthread_mutexattr_init(var __attr: pthread_mutexattr_t):longint;cdecl; 
-                 external threadslib  name 'pthread_mutexattr_init';
-function pthread_mutexattr_settype(var __attr: pthread_mutexattr_t; Kind: Integer): Integer; cdecl; 
-                                 external threadslib name 'pthread_mutexattr_settype';
-function pthread_mutexattr_destroy(var __attr: pthread_mutexattr_t):longint;cdecl;
-                  external threadslib  name 'pthread_mutexattr_destroy';
-
-function __mkdir(__path:Pchar; __mode:__mode_t):longint;cdecl;
-                                            external clib name 'mkdir';
-function fcntl(__fd: cint; __cmd: cint; args: array of const): cint;
-                   cdecl; external clib name 'fcntl'; overload;
-function fcntl(__fd: cint; __cmd: cint): cint;
-                   cdecl; varargs; external clib name 'fcntl'; overload;
-function open(__file:Pchar; __oflag: cint; args:array of const): cint;
-                                cdecl; external clib name 'open'; overload;
-function open64(__file:Pchar; __oflag: cint; args:array of const): cint;
-                                cdecl; external clib name 'open64'; overload;
-function open(__file:Pchar; __oflag: cint): cint;
-                    cdecl; varargs; external clib name 'open'; overload;
-function __close(Handle: cint): cint; cdecl;external clib name 'close';
-{$endif}
-{$endif}
+                    cdecl; varargs; external clib name 'open' + LIBC_SUFFIX; overload;
+function __close(Handle: cint): cint; cdecl;external clib name 'close' + LIBC_SUFFIX;
 
 {$ifdef linux}
-{$if defined(glibc225)}
 function ftruncate64(handle: cint; size: cint64): cint; cdecl;
-                                     external clib name 'ftruncate64@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function ftruncate64(handle: cint; size: cint64): cint; cdecl;
-                                     external clib name 'ftruncate64@GLIBC_2.1';
-{$else}
-function ftruncate64(handle: cint; size: cint64): cint; cdecl;
-                                     external clib name 'ftruncate64';
-{$endif}
-{$endif}
+                                     external clib name 'ftruncate64' + LIBC_SUFFIX2;
 
 {$else}
 function ftruncate64(handle: cint; size: cint64): cint; cdecl;
@@ -2479,100 +2364,36 @@ const
 
 //* Test for access to NAME using the real UID and real GID.  */
 
-{$if defined(glibc225)}
 function access(__name: pchar; __type: cint): cint;
-                                        cdecl; external clib name 'access@GLIBC_2.2.5';
+                                        cdecl; external clib name 'access' + LIBC_SUFFIX;
 
-function fsync(__fd: cint): cint; cdecl; external clib name 'fsync@GLIBC_2.2.5';
-function dup(__fd: cint): cint; cdecl; external clib name 'dup@GLIBC_2.2.5';
-function dup2(__fd: cint; __fd2: cint):longint; cdecl; external clib name 'dup2@GLIBC_2.2.5';
+function fsync(__fd: cint): cint; cdecl; external clib name 'fsync' + LIBC_SUFFIX;
+function dup(__fd: cint): cint; cdecl; external clib name 'dup' + LIBC_SUFFIX;
+function dup2(__fd: cint; __fd2: cint):longint; cdecl; external clib name 'dup2' + LIBC_SUFFIX;
 function __read(Handle: cint; var Buffer; Count: size_t): ssize_t;
-                                           cdecl; external clib name 'read@GLIBC_2.2.5';
+                                           cdecl; external clib name 'read' + LIBC_SUFFIX;
 function __write(Handle: cint; const Buffer; Count: size_t): ssize_t;
-                                           cdecl; external clib name 'write@GLIBC_2.2.5';
+                                           cdecl; external clib name 'write' + LIBC_SUFFIX;
 
 function chmod(__file: pchar;__mode: __mode_t): cint;
-                                           cdecl; external clib name 'chmod@GLIBC_2.2.5';
+                                           cdecl; external clib name 'chmod' + LIBC_SUFFIX;
 function fchmod(__fd: cint;__mode: __mode_t): cint;
-                                           cdecl; external clib name 'fchmod@GLIBC_2.2.5';
+                                           cdecl; external clib name 'fchmod' + LIBC_SUFFIX;
 
 function sem_init(__sem:Psem_t; __pshared: cint; __value: cuint): cint;
-                  cdecl; external threadslib name 'sem_init@GLIBC_2.2.5'; overload;
+                  cdecl; external threadslib name 'sem_init' + LIBC_SUFFIX; overload;
 function sem_init(var __sem: sem_t; __pshared: cint; __value: cuint): cint;
-                  cdecl; external threadslib name 'sem_init@GLIBC_2.2.5'; overload;
+                  cdecl; external threadslib name 'sem_init' + LIBC_SUFFIX; overload;
 function sem_destroy(var __sem: sem_t): cint;
-                        cdecl; external threadslib name 'sem_destroy@GLIBC_2.2.5';
+                        cdecl; external threadslib name 'sem_destroy' + LIBC_SUFFIX;
 function sem_post(var __sem: sem_t): cint;
-                          cdecl; external threadslib name 'sem_post@GLIBC_2.2.5';
+                          cdecl; external threadslib name 'sem_post' + LIBC_SUFFIX;
 function sem_wait(var __sem: sem_t): cint;
-                        cdecl; external threadslib name 'sem_wait@GLIBC_2.2.5';
+                        cdecl; external threadslib name 'sem_wait' + LIBC_SUFFIX;
 function sem_trywait(var __sem: sem_t): cint;
-                    cdecl; external threadslib name 'sem_trywait@GLIBC_2.2.5';
-function sem_getvalue(var __sem: sem_t; __sval:Plongint):longint;cdecl;external threadslib name 'sem_getvalue@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function access(__name: pchar; __type: cint): cint;
-                                        cdecl; external clib name 'access@GLIBC_2.0';
+                    cdecl; external threadslib name 'sem_trywait' + LIBC_SUFFIX;
+function sem_getvalue(var __sem: sem_t; __sval:Plongint):longint;cdecl;external threadslib name 'sem_getvalue' + LIBC_SUFFIX;
 
-function fsync(__fd: cint): cint; cdecl; external clib name 'fsync@GLIBC_2.0';
-function dup(__fd: cint): cint; cdecl; external clib name 'dup@GLIBC_2.0';
-function dup2(__fd: cint; __fd2: cint):longint; cdecl; external clib name 'dup2@GLIBC_2.0';
-function __read(Handle: cint; var Buffer; Count: size_t): ssize_t;
-                                           cdecl; external clib name 'read@GLIBC_2.0';
-function __write(Handle: cint; const Buffer; Count: size_t): ssize_t;
-                                           cdecl; external clib name 'write@GLIBC_2.0';
-
-function chmod(__file: pchar;__mode: __mode_t): cint;
-                                           cdecl; external clib name 'chmod@GLIBC_2.0';
-function fchmod(__fd: cint;__mode: __mode_t): cint;
-                                           cdecl; external clib name 'fchmod@GLIBC_2.0';
-
-function sem_init(__sem:Psem_t; __pshared: cint; __value: cuint): cint;
-                  cdecl; external threadslib name 'sem_init@GLIBC_2.0'; overload;
-function sem_init(var __sem: sem_t; __pshared: cint; __value: cuint): cint;
-                  cdecl; external threadslib name 'sem_init@GLIBC_2.0'; overload;
-function sem_destroy(var __sem: sem_t): cint;
-                        cdecl; external threadslib name 'sem_destroy@GLIBC_2.0';
-function sem_post(var __sem: sem_t): cint;
-                          cdecl; external threadslib name 'sem_post@GLIBC_2.0';
-function sem_wait(var __sem: sem_t): cint;
-                        cdecl; external threadslib name 'sem_wait@GLIBC_2.0';
-function sem_trywait(var __sem: sem_t): cint;
-                    cdecl; external threadslib name 'sem_trywait@GLIBC_2.0';
-function sem_getvalue(var __sem: sem_t; __sval:Plongint):longint;cdecl;external threadslib name 'sem_getvalue@GLIBC_2.0';
-{$else}
-function access(__name: pchar; __type: cint): cint;
-                                        cdecl; external clib name 'access';
-
-function fsync(__fd: cint): cint; cdecl; external clib name 'fsync';
-function dup(__fd: cint): cint; cdecl; external clib name 'dup';
-function dup2(__fd: cint; __fd2: cint):longint; cdecl; external clib name 'dup2';
-function __read(Handle: cint; var Buffer; Count: size_t): ssize_t;
-                                           cdecl; external clib name 'read';
-function __write(Handle: cint; const Buffer; Count: size_t): ssize_t;
-                                           cdecl; external clib name 'write';
-
-function chmod(__file: pchar;__mode: __mode_t): cint;
-                                           cdecl; external clib name 'chmod';
-function fchmod(__fd: cint;__mode: __mode_t): cint;
-                                           cdecl; external clib name 'fchmod';
-
-function sem_init(__sem:Psem_t; __pshared: cint; __value: cuint): cint;
-                  cdecl; external threadslib name 'sem_init'; overload;
-function sem_init(var __sem: sem_t; __pshared: cint; __value: cuint): cint;
-                  cdecl; external threadslib name 'sem_init'; overload;
-function sem_destroy(var __sem: sem_t): cint;
-                        cdecl; external threadslib name 'sem_destroy';
-function sem_post(var __sem: sem_t): cint;
-                          cdecl; external threadslib name 'sem_post';
-function sem_wait(var __sem: sem_t): cint;
-                        cdecl; external threadslib name 'sem_wait';
-function sem_trywait(var __sem: sem_t): cint;
-                    cdecl; external threadslib name 'sem_trywait';
-function sem_getvalue(var __sem: sem_t; __sval:Plongint):longint;cdecl;external threadslib name 'sem_getvalue';
-
-{$endif}
-{$endif}
 Const
   PTHREAD_CANCEL_ENABLE = 0;
   PTHREAD_CANCEL_DISABLE = 1;
@@ -2589,39 +2410,16 @@ Const
  {$else}
   RECURSIVE     = 2;
  {$endif}
-{$if defined(glibc225)}
+
 function pthread_setcanceltype(__type:longint; var __oldtype:longint):longint;
-                          cdecl; external threadslib name 'pthread_setcanceltype@GLIBC_2.2.5'; overload;
+                          cdecl; external threadslib name 'pthread_setcanceltype' + LIBC_SUFFIX; overload;
 function pthread_setcanceltype(__type:longint; __oldtype:Plongint):longint;
-            cdecl;external threadslib name 'pthread_setcanceltype@GLIBC_2.2.5'; overload;
+            cdecl;external threadslib name 'pthread_setcanceltype' + LIBC_SUFFIX; overload;
 function pthread_setcancelstate(__state:longint;__oldstate:Plongint):longint;
-                       cdecl;external threadslib name 'pthread_setcancelstate@GLIBC_2.2.5';
+                       cdecl;external threadslib name 'pthread_setcancelstate' + LIBC_SUFFIX;
 function pthread_equal(__thread1:pthread_t; __thread2:pthread_t):longint;
-                       cdecl;external threadslib name 'pthread_equal@GLIBC_2.2.5';
-function pthread_self:pthread_t;cdecl;external threadslib name 'pthread_self@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function pthread_setcanceltype(__type:longint; var __oldtype:longint):longint;
-                          cdecl; external threadslib name 'pthread_setcanceltype@GLIBC_2.0'; overload;
-function pthread_setcanceltype(__type:longint; __oldtype:Plongint):longint;
-            cdecl;external threadslib name 'pthread_setcanceltype@GLIBC_2.0'; overload;
-function pthread_setcancelstate(__state:longint;__oldstate:Plongint):longint;
-                       cdecl;external threadslib name 'pthread_setcancelstate@GLIBC_2.0';
-function pthread_equal(__thread1:pthread_t; __thread2:pthread_t):longint;
-                       cdecl;external threadslib name 'pthread_equal@GLIBC_2.0';
-function pthread_self:pthread_t;cdecl;external threadslib name 'pthread_self@GLIBC_2.0';
-{$else}
-function pthread_setcanceltype(__type:longint; var __oldtype:longint):longint;
-                          cdecl; external threadslib name 'pthread_setcanceltype'; overload;
-function pthread_setcanceltype(__type:longint; __oldtype:Plongint):longint;
-            cdecl;external threadslib name 'pthread_setcanceltype'; overload;
-function pthread_setcancelstate(__state:longint;__oldstate:Plongint):longint;
-                       cdecl;external threadslib name 'pthread_setcancelstate';
-function pthread_equal(__thread1:pthread_t; __thread2:pthread_t):longint;
-                       cdecl;external threadslib name 'pthread_equal';
-function pthread_self:pthread_t;cdecl;external threadslib name 'pthread_self';
-{$endif}
-{$endif}
+                       cdecl;external threadslib name 'pthread_equal' + LIBC_SUFFIX;
+function pthread_self:pthread_t;cdecl;external threadslib name 'pthread_self' + LIBC_SUFFIX;
 
 const
  _STAT_VER_LINUX_OLD = 1;
@@ -2635,54 +2433,19 @@ const
  _STAT_VER = _STAT_VER_LINUX;
 
 {$ifdef linux}
-{$if defined(glibc225)}
 function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__fxstat@GLIBC_2.2.5';
+                             cdecl;external clib name '__fxstat' + LIBC_SUFFIX;
 function __xstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__xstat@GLIBC_2.2.5';
+                             cdecl;external clib name '__xstat' + LIBC_SUFFIX;
 function __lxstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__lxstat@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__fxstat@GLIBC_2.0';
-function __xstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__xstat@GLIBC_2.0';
-function __lxstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__lxstat@GLIBC_2.0';
-{$else}
-function __fxstat(__ver:longint; __fildes:longint; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__fxstat';
-function __xstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__xstat';
-function __lxstat(__ver:longint; __filename:Pchar; __stat_buf:Pstat):longint;
-                             cdecl;external clib name '__lxstat';
+                             cdecl;external clib name '__lxstat' + LIBC_SUFFIX;
 
-{$endif}
-{$endif}
-
-
-{$ifndef CPU64}
-{$if defined(glibc20) }
 function __fxstat64(__ver:longint; __fildes:longint; __stat_buf:Pstat64):longint;
-                             cdecl;external clib name '__fxstat64@GLIBC_2.2';
+                             cdecl;external clib name '__fxstat64' + LIBC_SUFFIX2;
 function __xstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
-                             cdecl;external clib name '__xstat64@GLIBC_2.2';
+                             cdecl;external clib name '__xstat64' + LIBC_SUFFIX2;
 function __lxstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
-                             cdecl;external clib name '__lxstat64@GLIBC_2.2';
-
-{$else}
-function __fxstat64(__ver:longint; __fildes:longint; __stat_buf:Pstat64):longint;
-                             cdecl;external clib name '__fxstat64';
-function __xstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
-                             cdecl;external clib name '__xstat64';
-function __lxstat64(__ver:longint; __filename:Pchar; __stat_buf:Pstat64):longint;
-                             cdecl;external clib name '__lxstat64';
-
-{$endif}
-{$endif}
-
-
+                             cdecl;external clib name '__lxstat64' + LIBC_SUFFIX2;
 function stat(__file:Pchar; __buf:Pstat):longint;
 function fstat(__fd:longint; __buf:Pstat):longint;
 
@@ -2691,34 +2454,6 @@ function fstat64(__fd:longint; __buf:Pstat64):longint;
 function lstat(__file:Pchar; __buf:Pstat):longint;
 function lstat64(__file:Pchar; __buf:Pstat64):longint;
 {$else} //linux
-{$if defined(glibc225)}
-function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
-                                   external clib name 'stat@GLIBC_2.2.5';
-function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
-                                   external clib name 'fstat@GLIBC_2.2.5';
-function stat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
-                                   external clib name 'stat@GLIBC_2.2.5';
-function fstat64(__fd:longint; __buf:Pstat64):longint; cdecl;
-                                   external clib name 'fstat@GLIBC_2.2.5';
-function lstat(__file:Pchar; __buf:Pstat):longint; cdecl;
-                                   external clib name 'lstat@GLIBC_2.2.5';
-function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
-                                   external clib name 'lstat@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
-                                   external clib name 'stat@GLIBC_2.0';
-function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
-                                   external clib name 'fstat@GLIBC_2.0';
-function stat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
-                                   external clib name 'stat@GLIBC_2.0';
-function fstat64(__fd:longint; __buf:Pstat64):longint; cdecl;
-                                   external clib name 'fstat@GLIBC_2.0';
-function lstat(__file:Pchar; __buf:Pstat):longint; cdecl;
-                                   external clib name 'lstat@GLIBC_2.0';
-function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
-                                   external clib name 'lstat@GLIBC_2.0';
-{$else}
 function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
                                    external clib name 'stat';
 function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
@@ -2731,66 +2466,26 @@ function lstat(__file:Pchar; __buf:Pstat):longint; cdecl;
                                    external clib name 'lstat';
 function lstat64(__file:Pchar; __buf:Pstat64):longint; cdecl;
                                    external clib name 'lstat';
-{$endif}
-{$endif}
 {$endif} //not linux
 
 function S_ISDIR(mode : __mode_t) : boolean;
 
-{$if defined(glibc225)}
 function flock(fd: cint; operation: cint): cint; cdecl;
-                                   external clib name 'flock@GLIBC_2.2.5';
+                                   external clib name 'flock' + LIBC_SUFFIX;
 //function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
-function __rename(__old: Pchar; __new:Pchar):longint;cdecl;external clib name 'rename@GLIBC_2.2.5';
-function unlink(__name: Pchar): longint;cdecl;external clib name 'unlink@GLIBC_2.2.5';
-function rmdir(__name: Pchar): longint;cdecl;external clib name 'rmdir@GLIBC_2.2.5';
-function getcwd(__buf: Pchar; __size:size_t):Pchar;cdecl;external clib name 'getcwd@GLIBC_2.2.5';
-function getenv(__name: Pchar): Pchar; cdecl; external clib name 'getenv@GLIBC_2.2.5';
+function __rename(__old: Pchar; __new:Pchar):longint;cdecl;external clib name 'rename' + LIBC_SUFFIX;
+function unlink(__name: Pchar): longint;cdecl;external clib name 'unlink' + LIBC_SUFFIX;
+function rmdir(__name: Pchar): longint;cdecl;external clib name 'rmdir' + LIBC_SUFFIX;
+function getcwd(__buf: Pchar; __size:size_t):Pchar;cdecl;external clib name 'getcwd' + LIBC_SUFFIX;
+function getenv(__name: Pchar): Pchar; cdecl; external clib name 'getenv' + LIBC_SUFFIX;
 function setenv(envname: pchar; envval: pchar;
-                overwrite: cint): cint; cdecl; external clib name 'setenv@GLIBC_2.2.5';
-function putenv(astring: Pchar): longint; cdecl; external clib name 'putenv@GLIBC_2.2.5';
-function unsetenv(envname: pchar): cint; cdecl; external clib name 'unsetenv@GLIBC_2.2.5';
+                overwrite: cint): cint; cdecl; external clib name 'setenv' + LIBC_SUFFIX;
+function putenv(astring: Pchar): longint; cdecl; external clib name 'putenv' + LIBC_SUFFIX;
+function unsetenv(envname: pchar): cint; cdecl; external clib name 'unsetenv' + LIBC_SUFFIX;
 
-function __chdir(__path:Pchar):longint;cdecl;external clib name 'chdir@GLIBC_2.2.5';
-function opendir(__name:Pchar):PDIR;cdecl;external clib name 'opendir@GLIBC_2.2.5';
-function closedir(__dirp:PDIR):longint;cdecl;external clib name 'closedir@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function flock(fd: cint; operation: cint): cint; cdecl;
-                                   external clib name 'flock@GLIBC_2.0';
-//function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
-function __rename(__old: Pchar; __new:Pchar):longint;cdecl;external clib name 'rename@GLIBC_2.0';
-function unlink(__name: Pchar): longint;cdecl;external clib name 'unlink@GLIBC_2.0';
-function rmdir(__name: Pchar): longint;cdecl;external clib name 'rmdir@GLIBC_2.0';
-function getcwd(__buf: Pchar; __size:size_t):Pchar;cdecl;external clib name 'getcwd@GLIBC_2.0';
-function getenv(__name: Pchar): Pchar; cdecl; external clib name 'getenv@GLIBC_2.0';
-function setenv(envname: pchar; envval: pchar;
-                overwrite: cint): cint; cdecl; external clib name 'setenv@GLIBC_2.0';
-function putenv(astring: Pchar): longint; cdecl; external clib name 'putenv@GLIBC_2.0';
-function unsetenv(envname: pchar): cint; cdecl; external clib name 'unsetenv@GLIBC_2.0';
-
-function __chdir(__path:Pchar):longint;cdecl;external clib name 'chdir@GLIBC_2.0';
-function opendir(__name:Pchar):PDIR;cdecl;external clib name 'opendir@GLIBC_2.0';
-function closedir(__dirp:PDIR):longint;cdecl;external clib name 'closedir@GLIBC_2.0';
-{$else}
-function flock(fd: cint; operation: cint): cint; cdecl;
-                                   external clib name 'flock';
-//function fchmod(__fd: longint; __mode:__mode_t):longint;cdecl;external clib name 'fchmod';
-function __rename(__old: Pchar; __new:Pchar):longint;cdecl;external clib name 'rename';
-function unlink(__name: Pchar): longint;cdecl;external clib name 'unlink';
-function rmdir(__name: Pchar): longint;cdecl;external clib name 'rmdir';
-function getcwd(__buf: Pchar; __size:size_t):Pchar;cdecl;external clib name 'getcwd';
-function getenv(__name: Pchar): Pchar; cdecl; external clib name 'getenv';
-function setenv(envname: pchar; envval: pchar;
-                overwrite: cint): cint; cdecl; external clib name 'setenv';
-function putenv(astring: Pchar): longint; cdecl; external clib name 'putenv';
-function unsetenv(envname: pchar): cint; cdecl; external clib name 'unsetenv';
-
-function __chdir(__path:Pchar):longint;cdecl;external clib name 'chdir';
-function opendir(__name:Pchar):PDIR;cdecl;external clib name 'opendir';
-function closedir(__dirp:PDIR):longint;cdecl;external clib name 'closedir';
-{$endif}
-{$endif}
+function __chdir(__path:Pchar):longint;cdecl;external clib name 'chdir' + LIBC_SUFFIX;
+function opendir(__name:Pchar):PDIR;cdecl;external clib name 'opendir' + LIBC_SUFFIX;
+function closedir(__dirp:PDIR):longint;cdecl;external clib name 'closedir' + LIBC_SUFFIX;
 
 var
  environ : ppchar; cvar; external;
@@ -2799,33 +2494,14 @@ type
   TUnixTime = tm;
   PUnixTime = ^TUnixTime;
   TTime_T = Time_t;
-{$if defined(glibc225)}  
+
 function __time(var __timer : ttime_t):time_t;cdecl;
-                                 external clib name 'time@GLIBC_2.2.5'; overload;
+                                 external clib name 'time' + LIBC_SUFFIX; overload;
 function __time(__timer:Ptime_t):time_t;
-                                 cdecl;external clib name 'time@GLIBC_2.2.5'; overload;
-function timelocal(var __tp: tm):time_t;cdecl;external clib name 'timelocal@GLIBC_2.2.5';
+                                 cdecl;external clib name 'time' + LIBC_SUFFIX; overload;
+function timelocal(var __tp: tm):time_t;cdecl;external clib name 'timelocal' + LIBC_SUFFIX;
 function setlocale(__category:longint; __locale:Pchar):Pchar;cdecl;
-                                               external clib name 'setlocale@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }  
-function __time(var __timer : ttime_t):time_t;cdecl;
-                                 external clib name 'time@GLIBC_2.0'; overload;
-function __time(__timer:Ptime_t):time_t;
-                                 cdecl;external clib name 'time@GLIBC_2.0'; overload;
-function timelocal(var __tp: tm):time_t;cdecl;external clib name 'timelocal@GLIBC_2.0';
-function setlocale(__category:longint; __locale:Pchar):Pchar;cdecl;
-                                               external clib name 'setlocale@GLIBC_2.0';
-{$else}
-function __time(var __timer : ttime_t):time_t;cdecl;
-                                 external clib name 'time'; overload;
-function __time(__timer:Ptime_t):time_t;
-                                 cdecl;external clib name 'time'; overload;
-function timelocal(var __tp: tm):time_t;cdecl;external clib name 'timelocal';
-function setlocale(__category:longint; __locale:Pchar):Pchar;cdecl;
-                                               external clib name 'setlocale';
-{$endif}
-{$endif}
+                                               external clib name 'setlocale' + LIBC_SUFFIX;
 
 var
  clock_gettime: function(clk_id: cint; tp: ptimespec): cint; cdecl;
@@ -2956,18 +2632,9 @@ type
   P__itimer_which_t = ^__itimer_which_t;
   __itimer_which_t = __itimer_which;
 
-{$if defined(glibc225)}
 function setitimer(__which: __itimer_which_t; __new:Pitimerval;
-             __old:Pitimerval):longint;cdecl;external clib name 'setitimer@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function setitimer(__which: __itimer_which_t; __new:Pitimerval;
-             __old:Pitimerval):longint;cdecl;external clib name 'setitimer@GLIBC_2.0';
-{$else}
-function setitimer(__which: __itimer_which_t; __new:Pitimerval;
-             __old:Pitimerval):longint;cdecl;external clib name 'setitimer';
-{$endif}
-{$endif}
+             __old:Pitimerval):longint;cdecl;external clib name 'setitimer' + LIBC_SUFFIX;
+
 type
   wint_t = longword;
   __mbstate_t = record
@@ -2978,15 +2645,9 @@ type
     end;
   mbstate_t = __mbstate_t;
  Pmbstate_t = ^mbstate_t;
-{$if defined(glibc225)}
-function mbsnrtowcs(__dst:Pwchar_t; __src:PPchar; __nmc:size_t; __len:size_t; __ps:Pmbstate_t):size_t;cdecl;external clib name 'mbsnrtowcs@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function mbsnrtowcs(__dst:Pwchar_t; __src:PPchar; __nmc:size_t; __len:size_t; __ps:Pmbstate_t):size_t;cdecl;external clib name 'mbsnrtowcs@GLIBC_2.0';
-{$else}
-function mbsnrtowcs(__dst:Pwchar_t; __src:PPchar; __nmc:size_t; __len:size_t; __ps:Pmbstate_t):size_t;cdecl;external clib name 'mbsnrtowcs';
-{$endif}
-{$endif}
+
+function mbsnrtowcs(__dst:Pwchar_t; __src:PPchar; __nmc:size_t; __len:size_t; __ps:Pmbstate_t):size_t;cdecl;external clib name 'mbsnrtowcs' + LIBC_SUFFIX;
+
 const
    POLLIN = $001;
    POLLPRI = $002;
@@ -3021,20 +2682,14 @@ function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll';
                                               
 {$else}
-{$ifdef linux} 
-{$if defined(glibc225)}
+{$if (defined(linux) or defined(darwin)) and (defined(CPUX86_64) or defined(CPUi386))}
+
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
-                                              cdecl; external clib name 'poll@GLIBC_2.2.5';
+                                              cdecl; external clib name 'poll' + LIBC_SUFFIX;
 
 function ppoll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
-                                            cdecl; external clib name 'poll@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
-                                              cdecl; external clib name 'poll@GLIBC_2.0';
+                                            cdecl; external clib name 'poll' + LIBC_SUFFIX;
 
-function ppoll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
-                                            cdecl; external clib name 'poll@GLIBC_2.0';
 {$else}
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll';
@@ -3042,30 +2697,10 @@ function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
 function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                              __ss: p__sigset_t): cint
                                            cdecl; external clib name 'ppoll';
-{$endif}
-{$endif}
-{$else}
-
-{$ifndef darwin} 
-function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
-                                              cdecl; external clib name 'poll';
-
-function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
-                                             __ss: p__sigset_t): cint
-                                           cdecl; external clib name 'ppoll';
-{$else}
-function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
-                                              cdecl; external clib name 'poll';
-
-function ppoll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
-                                            cdecl; external clib name 'poll';
 
 {$endif}
-
 {$endif}
-
-{$endif} 
-                                             
+                               
 const
 {$ifdef linux}
    SIG_BLOCK = 0;
@@ -3077,116 +2712,41 @@ const
    SIG_SETMASK =3;         //* set specified signal set */
 {$endif}
 
-{$if defined(glibc225)}
 function signal(__sig:longint; __handler:__sighandler_t):__sighandler_t;
-                            cdecl; external clib name 'signal@GLIBC_2.2.5';
+                            cdecl; external clib name 'signal' + LIBC_SUFFIX;
 function sigemptyset(var SigSet : TSigSet):longint;
-                            cdecl; external clib name 'sigemptyset@GLIBC_2.2.5';
+                            cdecl; external clib name 'sigemptyset' + LIBC_SUFFIX;
 function sigfillset(var SigSet : TSigSet):longint;
-                            cdecl; external clib name 'sigfillset@GLIBC_2.2.5';
+                            cdecl; external clib name 'sigfillset' + LIBC_SUFFIX;
 function sigaddset(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigaddset@GLIBC_2.2.5';
+                            cdecl; external clib name 'sigaddset' + LIBC_SUFFIX;
 function sigdelset(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigdelset@GLIBC_2.2.5';
+                            cdecl; external clib name 'sigdelset' + LIBC_SUFFIX;
 function sigismember(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigismember@GLIBC_2.2.5';
+                            cdecl; external clib name 'sigismember' + LIBC_SUFFIX;
 function sigprocmask(__how: cint; sigset: p__sigset_t;
                                     oldset: p__sigset_t):longint;
-                            cdecl; external clib name 'sigprocmask@GLIBC_2.2.5';
+                            cdecl; external clib name 'sigprocmask' + LIBC_SUFFIX;
 function pthread_sigmask(__how: cint; __newmask: p__sigset_t;
                                      __oldmask: p__sigset_t):longint; cdecl;
-                                external threadslib name 'pthread_sigmask@GLIBC_2.2.5';
+                                external threadslib name 'pthread_sigmask' + LIBC_SUFFIX;
 
 function kill(__pid:__pid_t; __sig:longint):longint;cdecl;
-                                          external clib name 'kill@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function signal(__sig:longint; __handler:__sighandler_t):__sighandler_t;
-                            cdecl; external clib name 'signal@GLIBC_2.0';
-function sigemptyset(var SigSet : TSigSet):longint;
-                            cdecl; external clib name 'sigemptyset@GLIBC_2.0';
-function sigfillset(var SigSet : TSigSet):longint;
-                            cdecl; external clib name 'sigfillset@GLIBC_2.0';
-function sigaddset(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigaddset@GLIBC_2.0';
-function sigdelset(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigdelset@GLIBC_2.0';
-function sigismember(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigismember@GLIBC_2.0';
-function sigprocmask(__how: cint; sigset: p__sigset_t;
-                                    oldset: p__sigset_t):longint;
-                            cdecl; external clib name 'sigprocmask@GLIBC_2.0';
-function pthread_sigmask(__how: cint; __newmask: p__sigset_t;
-                                     __oldmask: p__sigset_t):longint; cdecl;
-                                external threadslib name 'pthread_sigmask@GLIBC_2.0';
-
-function kill(__pid:__pid_t; __sig:longint):longint;cdecl;
-                                          external clib name 'kill@GLIBC_2.0';
-{$else}
-function signal(__sig:longint; __handler:__sighandler_t):__sighandler_t;
-                            cdecl; external clib name 'signal';
-function sigemptyset(var SigSet : TSigSet):longint;
-                            cdecl; external clib name 'sigemptyset';
-function sigfillset(var SigSet : TSigSet):longint;
-                            cdecl; external clib name 'sigfillset';
-function sigaddset(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigaddset';
-function sigdelset(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigdelset';
-function sigismember(var SigSet : TSigSet; SigNum : Longint):longint;
-                            cdecl; external clib name 'sigismember';
-function sigprocmask(__how: cint; sigset: p__sigset_t;
-                                    oldset: p__sigset_t):longint;
-                            cdecl; external clib name 'sigprocmask';
-function pthread_sigmask(__how: cint; __newmask: p__sigset_t;
-                                     __oldmask: p__sigset_t):longint; cdecl;
-                                external threadslib name 'pthread_sigmask';
-
-function kill(__pid:__pid_t; __sig:longint):longint;cdecl;
-                                          external clib name 'kill';
-
-{$endif}
-{$endif}
+                                          external clib name 'kill' + LIBC_SUFFIX;
 
 {$ifdef linux}
-{$if defined(glibc225)}
-function getpt:longint;cdecl;external clib name 'getpt@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function getpt:longint;cdecl;external clib name 'getpt@GLIBC_2.1';
-{$else}
-function getpt:longint;cdecl;external clib name 'getpt';
-{$endif}
-{$endif}
+function getpt:longint;cdecl;external clib name 'getpt' + LIBC_SUFFIX2;
 {$else}
 function posix_openpt(oflag: cint):longint; cdecl;
                                      external clib name 'posix_openpt';
 function getpt(): longint;
 {$endif}
 
-{$if defined(glibc225)}
-function grantpt(__fd:longint):longint;cdecl;external clib name 'grantpt@GLIBC_2.2.5';
-function unlockpt(__fd:longint):longint;cdecl;external clib name 'unlockpt@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function grantpt(__fd:longint):longint;cdecl;external clib name 'grantpt@GLIBC_2.1';
-function unlockpt(__fd:longint):longint;cdecl;external clib name 'unlockpt@GLIBC_2.1';
-{$else}
-function grantpt(__fd:longint):longint;cdecl;external clib name 'grantpt';
-function unlockpt(__fd:longint):longint;cdecl;external clib name 'unlockpt';
-{$endif}
-{$endif}
+function grantpt(__fd:longint):longint;cdecl;external clib name 'grantpt' + LIBC_SUFFIX2;
+function unlockpt(__fd:longint):longint;cdecl;external clib name 'unlockpt' + LIBC_SUFFIX2;
 
 {$ifdef linux}
-{$if defined(glibc225)}
-function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;external clib name 'ptsname_r@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;external clib name 'ptsname_r@GLIBC_2.1';
-{$else}
-function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;external clib name 'ptsname_r';
-{$endif}
-{$endif}
+function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;cdecl;external clib name 'ptsname_r' + LIBC_SUFFIX2;
 {$else}
 function ptsname(fildes: cint): pchar; cdecl; external clib name 'ptsname';
 function ptsname_r(__fd:longint; __buf:Pchar; __buflen:size_t):longint;
@@ -3351,64 +2911,23 @@ const
   SIGRTMIN = 65;
   SIGRTMAX = 126;
   {$else}
-{$if defined(glibc225)}
-function SIGRTMIN(): cint; cdecl; external clib name '__libc_current_sigrtmin@GLIBC_2.2.5';
-function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function SIGRTMIN(): cint; cdecl; external clib name '__libc_current_sigrtmin@GLIBC_2.1';
-function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax@GLIBC_2.1';
-{$else}
-function SIGRTMIN(): cint; cdecl; external clib name '__libc_current_sigrtmin';
-function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax';
-{$endif}
-{$endif}
+function SIGRTMIN(): cint; cdecl; external clib name '__libc_current_sigrtmin' + LIBC_SUFFIX2;
+function SIGRTMAX(): cint; cdecl; external clib name '__libc_current_sigrtmax' + LIBC_SUFFIX2;
 {$endif}
 
+function ioctl(__fd: cint; __request:dword; args: array of const): cint;
+                               cdecl;external clib name 'ioctl' + LIBC_SUFFIX; overload;
+function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
+                               cdecl;external clib name 'ioctl' + LIBC_SUFFIX; overload;
+function cfsetispeed(var __termios_p: termios; __speed:speed_t): cint;
+                                       cdecl;external clib name 'cfsetispeed' + LIBC_SUFFIX;
+function cfsetospeed(var __termios_p: termios; __speed:speed_t): cint;
+                                       cdecl;external clib name 'cfsetospeed' + LIBC_SUFFIX;
+function isatty(__fd: cint): cint; cdecl; external clib name 'isatty' + LIBC_SUFFIX;
+function ttyname(__fd: cint): pchar; cdecl; external clib name 'ttyname' + LIBC_SUFFIX;
+function ttyname_r(__fd: cint; buf: pchar; buflen: size_t): cint;
+                                         cdecl; external clib name 'ttyname_r' + LIBC_SUFFIX;
 
-{$if defined(glibc225)}
-function ioctl(__fd: cint; __request:dword; args: array of const): cint;
-                               cdecl;external clib name 'ioctl@GLIBC_2.2.5'; overload;
-function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
-                               cdecl;external clib name 'ioctl@GLIBC_2.2.5'; overload;
-function cfsetispeed(var __termios_p: termios; __speed:speed_t): cint;
-                                       cdecl;external clib name 'cfsetispeed@GLIBC_2.2.5';
-function cfsetospeed(var __termios_p: termios; __speed:speed_t): cint;
-                                       cdecl;external clib name 'cfsetospeed@GLIBC_2.2.5';
-function isatty(__fd: cint): cint; cdecl; external clib name 'isatty@GLIBC_2.2.5';
-function ttyname(__fd: cint): pchar; cdecl; external clib name 'ttyname@GLIBC_2.2.5';
-function ttyname_r(__fd: cint; buf: pchar; buflen: size_t): cint;
-                                         cdecl; external clib name 'ttyname_r@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function ioctl(__fd: cint; __request:dword; args: array of const): cint;
-                               cdecl;external clib name 'ioctl@GLIBC_2.0'; overload;
-function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
-                               cdecl;external clib name 'ioctl@GLIBC_2.0'; overload;
-function cfsetispeed(var __termios_p: termios; __speed:speed_t): cint;
-                                       cdecl;external clib name 'cfsetispeed@GLIBC_2.0';
-function cfsetospeed(var __termios_p: termios; __speed:speed_t): cint;
-                                       cdecl;external clib name 'cfsetospeed@GLIBC_2.0';
-function isatty(__fd: cint): cint; cdecl; external clib name 'isatty@GLIBC_2.0';
-function ttyname(__fd: cint): pchar; cdecl; external clib name 'ttyname@GLIBC_2.0';
-function ttyname_r(__fd: cint; buf: pchar; buflen: size_t): cint;
-                                         cdecl; external clib name 'ttyname_r@GLIBC_2.0';
-{$else}
-function ioctl(__fd: cint; __request:dword; args: array of const): cint;
-                               cdecl;external clib name 'ioctl'; overload;
-function ioctl(__fd: cint; __request: cuint; args: pointer): cint;
-                               cdecl;external clib name 'ioctl'; overload;
-function cfsetispeed(var __termios_p: termios; __speed:speed_t): cint;
-                                       cdecl;external clib name 'cfsetispeed';
-function cfsetospeed(var __termios_p: termios; __speed:speed_t): cint;
-                                       cdecl;external clib name 'cfsetospeed';
-function isatty(__fd: cint): cint; cdecl; external clib name 'isatty';
-function ttyname(__fd: cint): pchar; cdecl; external clib name 'ttyname';
-function ttyname_r(__fd: cint; buf: pchar; buflen: size_t): cint;
-                                         cdecl; external clib name 'ttyname_r';
-
-{$endif}
-{$endif}
 const
    TIOCM_LE = $001;
    TIOCM_DTR = $002;
@@ -3437,65 +2956,28 @@ const
    N_HDLC = 13;
    N_SYNC_PPP = 14;
    N_HCI = 15;
-{$if defined(glibc225)}
-function gettimeofday(var __tv: timeval; var _tz: timezone):longint;
-                          cdecl;external clib name 'gettimeofday@GLIBC_2.2.5'; overload;
-function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
-                          cdecl;external clib name 'gettimeofday@GLIBC_2.2.5'; overload;
-function pthread_kill(__thread:pthread_t; __signo:longint):longint;
-                          cdecl;external threadslib name 'pthread_kill@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-function gettimeofday(var __tv: timeval; var _tz: timezone):longint;
-                          cdecl;external clib name 'gettimeofday@GLIBC_2.0'; overload;
-function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
-                          cdecl;external clib name 'gettimeofday@GLIBC_2.0'; overload;
-function pthread_kill(__thread:pthread_t; __signo:longint):longint;
-                          cdecl;external threadslib name 'pthread_kill@GLIBC_2.0';
-{$else}
-function gettimeofday(var __tv: timeval; var _tz: timezone):longint;
-                          cdecl;external clib name 'gettimeofday'; overload;
-function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
-                          cdecl;external clib name 'gettimeofday'; overload;
-function pthread_kill(__thread:pthread_t; __signo:longint):longint;
-                          cdecl;external threadslib name 'pthread_kill';
 
-{$endif}
-{$endif}
+function gettimeofday(var __tv: timeval; var _tz: timezone):longint;
+                          cdecl;external clib name 'gettimeofday' + LIBC_SUFFIX; overload;
+function gettimeofday(var __tv: timeval; __tz:__timezone_ptr_t):longint;
+                          cdecl;external clib name 'gettimeofday' + LIBC_SUFFIX; overload;
+function pthread_kill(__thread:pthread_t; __signo:longint):longint;
+                          cdecl;external threadslib name 'pthread_kill' + LIBC_SUFFIX;
+
 const
    WNOHANG = 1;
    WUNTRACED = 2;
    __WALL = $40000000;
    __WCLONE = $80000000;
    
-{$if defined(glibc225)}
 function waitpid(__pid:__pid_t; __stat_loc:Plongint; __options:longint):__pid_t;
-             cdecl;external clib name 'waitpid@GLIBC_2.2.5'; overload;
+             cdecl;external clib name 'waitpid' + LIBC_SUFFIX; overload;
 function waitpid(__pid:__pid_t; var __stat_loc:longint;
                          __options:longint):__pid_t;
-                             cdecl;external clib name 'waitpid@GLIBC_2.2.5'; overload;
-function __system(__command:Pchar):longint;cdecl;external clib name 'system@GLIBC_2.2.5';
-
-{$else}
-{$if defined(glibc20) }
-function waitpid(__pid:__pid_t; __stat_loc:Plongint; __options:longint):__pid_t;
-             cdecl;external clib name 'waitpid@GLIBC_2.0'; overload;
-function waitpid(__pid:__pid_t; var __stat_loc:longint;
-                         __options:longint):__pid_t;
-                             cdecl;external clib name 'waitpid@GLIBC_2.0'; overload;
-function __system(__command:Pchar):longint;cdecl;external clib name 'system@GLIBC_2.0';
-
-{$else}
-function waitpid(__pid:__pid_t; __stat_loc:Plongint; __options:longint):__pid_t;
-             cdecl;external clib name 'waitpid'; overload;
-function waitpid(__pid:__pid_t; var __stat_loc:longint;
-                         __options:longint):__pid_t;
-                             cdecl;external clib name 'waitpid'; overload;
-function __system(__command:Pchar):longint;cdecl;external clib name 'system';
+                             cdecl;external clib name 'waitpid' + LIBC_SUFFIX; overload;
+function __system(__command:Pchar):longint;cdecl;external clib name 'system' + LIBC_SUFFIX;
 
 
-{$endif}  
-{$endif}  
  
 function WEXITSTATUS(status: cint): cint;
 function WTERMSIG(status: cint): cint;
@@ -3512,35 +2994,20 @@ type
   TPipes = Array[0..1] of longint;
   PPipes = ^TPipes;
  
-{$if defined(glibc225)}
+{$if (defined(linux) or defined(darwin)) and (defined(CPUX86_64) or defined(CPUi386))}
 //function pipe2(var PipeDes: TPipeDescriptors; flags: cint): Integer; cdecl;
   //                           external clib name 'pipe2';    // to check for glibc_2.2.5                          
 function pipe(var __pipedes: TPipes):longint;
-                   cdecl; external clib name 'pipe@GLIBC_2.2.5'; overload;
+                   cdecl; external clib name 'pipe' + LIBC_SUFFIX; overload;
 function pipe(var PipeDes: TPipeDescriptors): Integer; cdecl;
-                               external clib name 'pipe@GLIBC_2.2.5'; overload;
-function vfork: __pid_t; cdecl; external clib name 'vfork@GLIBC_2.2.5';
-function fork: __pid_t; cdecl; external clib name 'fork@GLIBC_2.2.5';
-function setsid: __pid_t; cdecl; external clib name 'setsid@GLIBC_2.2.5';
-function getsid(pid: __pid_t): __pid_t; cdecl; external clib name 'getsid@GLIBC_2.2.5';
+                               external clib name 'pipe' + LIBC_SUFFIX; overload;
+function vfork: __pid_t; cdecl; external clib name 'vfork' + LIBC_SUFFIX;
+function fork: __pid_t; cdecl; external clib name 'fork' + LIBC_SUFFIX;
+function setsid: __pid_t; cdecl; external clib name 'setsid' + LIBC_SUFFIX;
+function getsid(pid: __pid_t): __pid_t; cdecl; external clib name 'getsid' + LIBC_SUFFIX;
 function setpgid(__pid:__pid_t; __pgid:__pid_t):longint; cdecl;
-                                             external clib name 'setpgid@GLIBC_2.2.5';
-function getpgid(pid: __pid_t): __pid_t; cdecl; external clib name 'getpgid@GLIBC_2.2.5';
-{$else}
-{$if defined(glibc20) }
-//function pipe2(var PipeDes: TPipeDescriptors; flags: cint): Integer; cdecl;
-  //                           external clib name 'pipe2';    // to check for glibc_2.2.5                          
-function pipe(var __pipedes: TPipes):longint;
-                   cdecl; external clib name 'pipe@GLIBC_2.0'; overload;
-function pipe(var PipeDes: TPipeDescriptors): Integer; cdecl;
-                               external clib name 'pipe@GLIBC_2.0'; overload;
-function vfork: __pid_t; cdecl; external clib name 'vfork@GLIBC_2.0';
-function fork: __pid_t; cdecl; external clib name 'fork@GLIBC_2.0';
-function setsid: __pid_t; cdecl; external clib name 'setsid@GLIBC_2.0';
-function getsid(pid: __pid_t): __pid_t; cdecl; external clib name 'getsid@GLIBC_2.0';
-function setpgid(__pid:__pid_t; __pgid:__pid_t):longint; cdecl;
-                                             external clib name 'setpgid@GLIBC_2.0';
-function getpgid(pid: __pid_t): __pid_t; cdecl; external clib name 'getpgid@GLIBC_2.0';
+                                             external clib name 'setpgid' + LIBC_SUFFIX;
+function getpgid(pid: __pid_t): __pid_t; cdecl; external clib name 'getpgid' + LIBC_SUFFIX;
 {$else}
 function pipe2(var PipeDes: TPipeDescriptors; flags: cint): Integer; cdecl;
                              external clib name 'pipe2';
@@ -3556,50 +3023,21 @@ function setpgid(__pid:__pid_t; __pgid:__pid_t):longint; cdecl;
                                              external clib name 'setpgid';
 function getpgid(pid: __pid_t): __pid_t; cdecl; external clib name 'getpgid';
 {$endif}
-{$endif}
 
 const
    EXIT_FAILURE = 1;
    EXIT_SUCCESS = 0;
 
-{$if defined(glibc225)}
-procedure _exit (__status : longint); cdecl; external clib name '_exit@GLIBC_2.2.5';
+procedure _exit (__status : longint); cdecl; external clib name '_exit' + LIBC_SUFFIX;
 function execl(__path:Pchar; __arg:Pchar):longint;
-               cdecl;varargs;external clib name 'execl@GLIBC_2.2.5'; overload;
+               cdecl;varargs;external clib name 'execl' + LIBC_SUFFIX; overload;
 function execl(__path:Pchar; __arg:Pchar; args:array of const):longint;
-                    cdecl;external clib name 'execl@GLIBC_2.2.5'; overload;
+                    cdecl;external clib name 'execl' + LIBC_SUFFIX; overload;
 function execv (__path: pcchar; __argv: ppchar): cint;
-                    cdecl;external clib name 'execv@GLIBC_2.2.5';
+                    cdecl;external clib name 'execv' + LIBC_SUFFIX;
 function execve(__path: pcchar; __argv: ppchar; __envp:ppchar): cint;
-                    cdecl;external clib name 'execve@GLIBC_2.2.5';
-procedure free(__ptr:pointer);cdecl;external clib name 'free@GLIBC_2.2.5';
-
-{$else}
-{$if defined(glibc20) }
-procedure _exit (__status : longint); cdecl; external clib name '_exit@GLIBC_2.0';
-function execl(__path:Pchar; __arg:Pchar):longint;
-               cdecl;varargs;external clib name 'execl@GLIBC_2.0'; overload;
-function execl(__path:Pchar; __arg:Pchar; args:array of const):longint;
-                    cdecl;external clib name 'execl@GLIBC_2.0'; overload;
-function execv (__path: pcchar; __argv: ppchar): cint;
-                    cdecl;external clib name 'execv@GLIBC_2.0';
-function execve(__path: pcchar; __argv: ppchar; __envp:ppchar): cint;
-                    cdecl;external clib name 'execve@GLIBC_2.0';
-procedure free(__ptr:pointer);cdecl;external clib name 'free@GLIBC_2.0';
-
-{$else}
-procedure _exit (__status : longint); cdecl; external clib name '_exit';
-function execl(__path:Pchar; __arg:Pchar):longint;
-               cdecl;varargs;external clib name 'execl'; overload;
-function execl(__path:Pchar; __arg:Pchar; args:array of const):longint;
-                    cdecl;external clib name 'execl'; overload;
-function execv (__path: pcchar; __argv: ppchar): cint;
-                    cdecl;external clib name 'execv';
-function execve(__path: pcchar; __argv: ppchar; __envp:ppchar): cint;
-                    cdecl;external clib name 'execve';
-procedure free(__ptr:pointer);cdecl;external clib name 'free';
-{$endif}
-{$endif}
+                    cdecl;external clib name 'execve' + LIBC_SUFFIX;
+procedure free(__ptr:pointer);cdecl;external clib name 'free' + LIBC_SUFFIX;
 
 Type
   error_t = Integer;
@@ -3826,101 +3264,37 @@ const
    SO_TIMESTAMP = 29;
    SCM_TIMESTAMP = SO_TIMESTAMP;
    SO_ACCEPTCONN = 30;
-{$if defined(glibc225)}
+
 function socket(__domain:longint; __type:longint; __protocol:longint):longint;
-             cdecl;external clib name 'socket@GLIBC_2.2.5'; overload;
+             cdecl;external clib name 'socket' + LIBC_SUFFIX; overload;
 function socket(__domain: Integer; __type: __socket_type;
                __protocol: Integer): TSocket;
-                cdecl;external clib name 'socket@GLIBC_2.2.5'; overload;
-function shutdown(__fd:longint; __how:longint):longint;cdecl;external clib name 'shutdown@GLIBC_2.2.5';
+                cdecl;external clib name 'socket' + LIBC_SUFFIX; overload;
+function shutdown(__fd:longint; __how:longint):longint;cdecl;external clib name 'shutdown' + LIBC_SUFFIX;
 function connect(__fd:longint; const __addr: sockaddr;
- __len:socklen_t):longint;cdecl;external clib name 'connect@GLIBC_2.2.5'; overload;
+ __len:socklen_t):longint;cdecl;external clib name 'connect' + LIBC_SUFFIX; overload;
 function connect(__fd:longint; __addr:Psockaddr;
-                 __len:socklen_t):longint;cdecl;external clib name 'connect@GLIBC_2.2.5'; overload;
+                 __len:socklen_t):longint;cdecl;external clib name 'connect' + LIBC_SUFFIX; overload;
 {$ifdef linux}
-function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len@GLIBC_2.2.5';
+function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len' + LIBC_SUFFIX;
 {$else}
   //use len field of FreeBSD struct
 {$endif}
-function bind(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'bind@GLIBC_2.2.5';
+function bind(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'bind' + LIBC_SUFFIX;
 //function SA_LEN(const buf): longword; // Untyped buffer; this is *unsafe*.
-function listen(__fd:longint; __n:longint):longint;cdecl;external clib name 'listen@GLIBC_2.2.5';
-function accept(__fd:longint; __addr:Psockaddr; __addr_len:Psocklen_t):longint;cdecl;external clib name 'accept@GLIBC_2.2.5';
-function isfdtype(__fd:longint; __fdtype:longint):longint;cdecl;external clib name 'isfdtype@GLIBC_2.2.5';
-function setsockopt(__fd:longint; __level:longint; __optname:longint; __optval:pointer; __optlen:socklen_t):longint;cdecl;external clib name 'setsockopt@GLIBC_2.2.5';
-function getaddrinfo(__name:Pchar; __service:Pchar; __req:Paddrinfo; __pai:PPaddrinfo):longint;cdecl;external clib name 'getaddrinfo@GLIBC_2.2.5';
-function htons(__hostshort:uint16_t):uint16_t;cdecl;external clib name 'htons@GLIBC_2.2.5';
-procedure freeaddrinfo(__ai:Paddrinfo);cdecl;external clib name 'freeaddrinfo@GLIBC_2.2.5';
-function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs@GLIBC_2.2.5';
+function listen(__fd:longint; __n:longint):longint;cdecl;external clib name 'listen' + LIBC_SUFFIX;
+function accept(__fd:longint; __addr:Psockaddr; __addr_len:Psocklen_t):longint;cdecl;external clib name 'accept' + LIBC_SUFFIX;
+function isfdtype(__fd:longint; __fdtype:longint):longint;cdecl;external clib name 'isfdtype' + LIBC_SUFFIX;
+function setsockopt(__fd:longint; __level:longint; __optname:longint; __optval:pointer; __optlen:socklen_t):longint;cdecl;external clib name 'setsockopt' + LIBC_SUFFIX;
+function getaddrinfo(__name:Pchar; __service:Pchar; __req:Paddrinfo; __pai:PPaddrinfo):longint;cdecl;external clib name 'getaddrinfo' + LIBC_SUFFIX;
+function htons(__hostshort:uint16_t):uint16_t;cdecl;external clib name 'htons' + LIBC_SUFFIX;
+procedure freeaddrinfo(__ai:Paddrinfo);cdecl;external clib name 'freeaddrinfo' + LIBC_SUFFIX;
+function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs' + LIBC_SUFFIX;
 
-function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror@GLIBC_2.2.5';
+function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror' + LIBC_SUFFIX;
 function syscall(SysNo: Longint): Integer; cdecl; varargs;
-                                    external clib name 'syscall@GLIBC_2.2.5';
+                                    external clib name 'syscall' + LIBC_SUFFIX;
 
-{$else}
-{$if defined(glibc20) }
-function socket(__domain:longint; __type:longint; __protocol:longint):longint;
-             cdecl;external clib name 'socket@GLIBC_2.0'; overload;
-function socket(__domain: Integer; __type: __socket_type;
-               __protocol: Integer): TSocket;
-                cdecl;external clib name 'socket@GLIBC_2.0'; overload;
-function shutdown(__fd:longint; __how:longint):longint;cdecl;external clib name 'shutdown@GLIBC_2.0';
-function connect(__fd:longint; const __addr: sockaddr;
- __len:socklen_t):longint;cdecl;external clib name 'connect@GLIBC_2.0'; overload;
-function connect(__fd:longint; __addr:Psockaddr;
-                 __len:socklen_t):longint;cdecl;external clib name 'connect@GLIBC_2.0'; overload;
-{$ifdef linux}
-function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len@GLIBC_2.1';
-{$else}
-  //use len field of FreeBSD struct
-{$endif}
-function bind(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'bind@GLIBC_2.0';
-//function SA_LEN(const buf): longword; // Untyped buffer; this is *unsafe*.
-function listen(__fd:longint; __n:longint):longint;cdecl;external clib name 'listen@GLIBC_2.0';
-function accept(__fd:longint; __addr:Psockaddr; __addr_len:Psocklen_t):longint;cdecl;external clib name 'accept@GLIBC_2.0';
-function isfdtype(__fd:longint; __fdtype:longint):longint;cdecl;external clib name 'isfdtype@GLIBC_2.0';
-function setsockopt(__fd:longint; __level:longint; __optname:longint; __optval:pointer; __optlen:socklen_t):longint;cdecl;external clib name 'setsockopt@GLIBC_2.0';
-function getaddrinfo(__name:Pchar; __service:Pchar; __req:Paddrinfo; __pai:PPaddrinfo):longint;cdecl;external clib name 'getaddrinfo@GLIBC_2.0';
-function htons(__hostshort:uint16_t):uint16_t;cdecl;external clib name 'htons@GLIBC_2.0';
-procedure freeaddrinfo(__ai:Paddrinfo);cdecl;external clib name 'freeaddrinfo@GLIBC_2.0';
-function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs@GLIBC_2.0';
-
-function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror@GLIBC_2.1';
-function syscall(SysNo: Longint): Integer; cdecl; varargs;
-                                    external clib name 'syscall@GLIBC_2.0';
-
-{$else}
-function socket(__domain:longint; __type:longint; __protocol:longint):longint;
-             cdecl;external clib name 'socket'; overload;
-function socket(__domain: Integer; __type: __socket_type;
-               __protocol: Integer): TSocket;
-                cdecl;external clib name 'socket'; overload;
-function shutdown(__fd:longint; __how:longint):longint;cdecl;external clib name 'shutdown';
-function connect(__fd:longint; const __addr: sockaddr;
- __len:socklen_t):longint;cdecl;external clib name 'connect'; overload;
-function connect(__fd:longint; __addr:Psockaddr;
-                 __len:socklen_t):longint;cdecl;external clib name 'connect'; overload;
-{$ifdef linux}
-function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len';
-{$else}
-  //use len field of FreeBSD struct
-{$endif}
-function bind(__fd:longint; __addr:Psockaddr; __len:socklen_t):longint;cdecl;external clib name 'bind';
-//function SA_LEN(const buf): longword; // Untyped buffer; this is *unsafe*.
-function listen(__fd:longint; __n:longint):longint;cdecl;external clib name 'listen';
-function accept(__fd:longint; __addr:Psockaddr; __addr_len:Psocklen_t):longint;cdecl;external clib name 'accept';
-function isfdtype(__fd:longint; __fdtype:longint):longint;cdecl;external clib name 'isfdtype';
-function setsockopt(__fd:longint; __level:longint; __optname:longint; __optval:pointer; __optlen:socklen_t):longint;cdecl;external clib name 'setsockopt';
-function getaddrinfo(__name:Pchar; __service:Pchar; __req:Paddrinfo; __pai:PPaddrinfo):longint;cdecl;external clib name 'getaddrinfo';
-function htons(__hostshort:uint16_t):uint16_t;cdecl;external clib name 'htons';
-procedure freeaddrinfo(__ai:Paddrinfo);cdecl;external clib name 'freeaddrinfo';
-function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs';
-
-function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror';
-function syscall(SysNo: Longint): Integer; cdecl; varargs;
-                                    external clib name 'syscall';
-{$endif}
-{$endif}
 const
  recursiveconst = PTHREAD_MUTEX_RECURSIVE;
 // libcmodulename = 'c';
@@ -3929,235 +3303,83 @@ const
  __SIZEOF_PTHREAD_COND_T = {$ifdef CPU64}48{$else}48{$endif};
 type
  tcondvar = array[0..__SIZEOF_PTHREAD_COND_T-1] of byte;
-{$if defined(glibc225)}
+
 function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
-                     external clib name 'gettimeofday@GLIBC_2.2.5'; overload;
+                     external clib name 'gettimeofday' + LIBC_SUFFIX; overload;
 function  msetcgetattr(filedes: longint;
          var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcgetattr@GLIBC_2.2.5';
+                                    cdecl;external clib name 'tcgetattr' + LIBC_SUFFIX;
 function  msetcsetattr(filedes: longint; when: longint;
          var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcsetattr@GLIBC_2.2.5';
-function  tcdrain(filedes: longint): longint;cdecl;external clib name 'tcdrain@GLIBC_2.2.5';
+                                    cdecl;external clib name 'tcsetattr' + LIBC_SUFFIX;
+function  tcdrain(filedes: longint): longint;cdecl;external clib name 'tcdrain' + LIBC_SUFFIX;
 function  tcflush(filedes: longint; queue_selector: longint): longint;
-                                    cdecl;external clib name 'tcflush@GLIBC_2.2.5';
+                                    cdecl;external clib name 'tcflush' + LIBC_SUFFIX;
 
 function pthread_create(__thread:Ppthread_t; __attr:Ppthread_attr_t;
       __start_routine:TStartRoutine; __arg:pointer):longint;cdecl;
-                        external threadslib name 'pthread_create@GLIBC_2.2.5';
+                        external threadslib name 'pthread_create' + LIBC_SUFFIX;
 function pthread_join(__th:pthread_t; __thread_return:Ppointer):longint;cdecl;
-                        external threadslib name 'pthread_join@GLIBC_2.2.5';
+                        external threadslib name 'pthread_join' + LIBC_SUFFIX;
 function pthread_detach(__th:pthread_t):longint;cdecl;
-                        external threadslib name 'pthread_detach@GLIBC_2.2.5';
+                        external threadslib name 'pthread_detach' + LIBC_SUFFIX;
 function pthread_cancel(__thread: pthread_t):longint;
-                        cdecl;external threadslib name 'pthread_cancel@GLIBC_2.2.5';
+                        cdecl;external threadslib name 'pthread_cancel' + LIBC_SUFFIX;
 
 function pthread_attr_init(var __attr: pthread_attr_t):longint;cdecl;
-                        external threadslib name 'pthread_attr_init@GLIBC_2.2.5';
+                        external threadslib name 'pthread_attr_init' + LIBC_SUFFIX;
 
 function pthread_cond_init(var Cond: TCondVar;
           CondAttr: PPthreadCondattr): Integer; cdecl;
-           external threadslib name 'pthread_cond_init@GLIBC_2.2.5';
+           external threadslib name 'pthread_cond_init' + LIBC_SUFFIX;
 function pthread_cond_destroy(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_destroy@GLIBC_2.2.5';
+           external threadslib name 'pthread_cond_destroy' + LIBC_SUFFIX;
 function pthread_cond_wait(var Cond: TCondVar;
   var Mutex: pthread_mutex_t): Integer; cdecl;
-           external threadslib name 'pthread_cond_wait@GLIBC_2.2.5';
+           external threadslib name 'pthread_cond_wait' + LIBC_SUFFIX;
 function pthread_cond_timedwait(var Cond: TCondVar;
   var Mutex: pthread_mutex_t; AbsTime: pTimeSpec): Integer; cdecl;
-           external threadslib name 'pthread_cond_timedwait@GLIBC_2.2.5';
+           external threadslib name 'pthread_cond_timedwait' + LIBC_SUFFIX;
 function pthread_cond_broadcast(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_broadcast@GLIBC_2.2.5';
+           external threadslib name 'pthread_cond_broadcast' + LIBC_SUFFIX;
 function pthread_cond_signal(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_signal@GLIBC_2.2.5';
+           external threadslib name 'pthread_cond_signal' + LIBC_SUFFIX;
            
- function sem_timedwait(var __sem: TSemaphore; __abstime: ptimespec): Integer; cdecl;
-            external threadslib name 'sem_timedwait@GLIBC_2.2.5';
-
-function pthread_mutex_init(__mutex: Ppthread_mutex_t;
-               __mutex_attr: Ppthread_mutexattr_t): longint; cdecl;
-            external threadslib name 'pthread_mutex_init@GLIBC_2.2.5';
-function pthread_mutex_destroy(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_destroy@GLIBC_2.2.5';
-function pthread_mutex_lock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_lock@GLIBC_2.2.5';
-function pthread_mutex_trylock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_trylock@GLIBC_2.2.5';
-function pthread_mutex_unlock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_unlock@GLIBC_2.2.5';
-
-{$ifdef linux}
-//function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
-//          __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
-function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir@GLIBC_2.2.5';          
-{$else}
-//function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
-//          __result:PPdirent64):integer;cdecl;external clib name 'readdir_r';
-function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir';          
-{$endif}
-
-function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;
-            external clib name 'localtime_r@GLIBC_2.2.5';
-
-
-{$else}
-{$if defined(glibc20) }
-function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
-                     external clib name 'gettimeofday@GLIBC_2.0'; overload;
-function  msetcgetattr(filedes: longint;
-         var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcgetattr@GLIBC_2.0';
-function  msetcsetattr(filedes: longint; when: longint;
-         var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcsetattr@GLIBC_2.0';
-function  tcdrain(filedes: longint): longint;cdecl;external clib name 'tcdrain@GLIBC_2.0';
-function  tcflush(filedes: longint; queue_selector: longint): longint;
-                                    cdecl;external clib name 'tcflush@GLIBC_2.0';
-
-function pthread_create(__thread:Ppthread_t; __attr:Ppthread_attr_t;
-      __start_routine:TStartRoutine; __arg:pointer):longint;cdecl;
-                        external threadslib name 'pthread_create@GLIBC_2.0';
-function pthread_join(__th:pthread_t; __thread_return:Ppointer):longint;cdecl;
-                        external threadslib name 'pthread_join@GLIBC_2.0';
-function pthread_detach(__th:pthread_t):longint;cdecl;
-                        external threadslib name 'pthread_detach@GLIBC_2.0';
-function pthread_cancel(__thread: pthread_t):longint;
-                        cdecl;external threadslib name 'pthread_cancel@GLIBC_2.0';
-
-function pthread_attr_init(var __attr: pthread_attr_t):longint;cdecl;
-                        external threadslib name 'pthread_attr_init@GLIBC_2.0';
-
-function pthread_cond_init(var Cond: TCondVar;
-          CondAttr: PPthreadCondattr): Integer; cdecl;
-           external threadslib name 'pthread_cond_init@GLIBC_2.0';
-function pthread_cond_destroy(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_destroy@GLIBC_2.0';
-function pthread_cond_wait(var Cond: TCondVar;
-  var Mutex: pthread_mutex_t): Integer; cdecl;
-           external threadslib name 'pthread_cond_wait@GLIBC_2.0';
-function pthread_cond_timedwait(var Cond: TCondVar;
-  var Mutex: pthread_mutex_t; AbsTime: pTimeSpec): Integer; cdecl;
-           external threadslib name 'pthread_cond_timedwait@GLIBC_2.0';
-function pthread_cond_broadcast(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_broadcast@GLIBC_2.0';
-function pthread_cond_signal(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_signal@GLIBC_2.0';
-function sem_timedwait(var __sem: TSemaphore; __abstime: ptimespec): Integer; cdecl;
-            external threadslib name 'sem_timedwait@GLIBC_2.2';
-
-function pthread_mutex_init(__mutex: Ppthread_mutex_t;
-               __mutex_attr: Ppthread_mutexattr_t): longint; cdecl;
-            external threadslib name 'pthread_mutex_init@GLIBC_2.0';
-function pthread_mutex_destroy(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_destroy@GLIBC_2.0';
-function pthread_mutex_lock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_lock@GLIBC_2.0';
-function pthread_mutex_trylock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_trylock@GLIBC_2.0';
-function pthread_mutex_unlock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_unlock@GLIBC_2.0';
-
-{$ifdef linux}
-//function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
-//          __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
-function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir64@GLIBC_2.2';          
-{$else}
-//function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
-//          __result:PPdirent64):integer;cdecl;external clib name 'readdir_r';
-function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir';          
-{$endif}
-
-function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;
-            external clib name 'localtime_r@GLIBC_2.0';
-
-{$else}
-function gettimeofday(__tv:Ptimeval; __tz:ptimezone):longint;cdecl;
-                     external clib name 'gettimeofday'; overload;
-                     
-{$ifndef darwin}                     
-function  msetcgetattr(filedes: longint;
-         var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcgetattr';
-function  msetcsetattr(filedes: longint; when: longint;
-         var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcsetattr';   
-{$else}  
-function  msetcgetattr(filedes: longint;
-         var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcgetattr';
-function  msetcsetattr(filedes: longint; when: longint;
-         var msetermios: termios{ty}): longint;
-                                    cdecl;external clib name 'tcsetattr';     
-{$endif}          
-                                    
-function  tcdrain(filedes: longint): longint;cdecl;external clib name 'tcdrain';
-function  tcflush(filedes: longint; queue_selector: longint): longint;
-                                    cdecl;external clib name 'tcflush';
-
-function pthread_create(__thread:Ppthread_t; __attr:Ppthread_attr_t;
-      __start_routine:TStartRoutine; __arg:pointer):longint;cdecl;
-                        external threadslib name 'pthread_create';
-function pthread_join(__th:pthread_t; __thread_return:Ppointer):longint;cdecl;
-                        external threadslib name 'pthread_join';
-function pthread_detach(__th:pthread_t):longint;cdecl;
-                        external threadslib name 'pthread_detach';
-function pthread_cancel(__thread: pthread_t):longint;
-                        cdecl;external threadslib name 'pthread_cancel';
-
-function pthread_attr_init(var __attr: pthread_attr_t):longint;cdecl;
-                        external threadslib name 'pthread_attr_init';
-
-function pthread_cond_init(var Cond: TCondVar;
-          CondAttr: PPthreadCondattr): Integer; cdecl;
-           external threadslib name 'pthread_cond_init';
-function pthread_cond_destroy(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_destroy';
-function pthread_cond_wait(var Cond: TCondVar;
-  var Mutex: pthread_mutex_t): Integer; cdecl;
-           external threadslib name 'pthread_cond_wait';
-function pthread_cond_timedwait(var Cond: TCondVar;
-  var Mutex: pthread_mutex_t; AbsTime: pTimeSpec): Integer; cdecl;
-           external threadslib name 'pthread_cond_timedwait';
-function pthread_cond_broadcast(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_broadcast';
-function pthread_cond_signal(var Cond: TCondVar): Integer; cdecl;
-           external threadslib name 'pthread_cond_signal';
-
   {$ifndef darwin}  
 function sem_timedwait(var __sem: TSemaphore; __abstime: ptimespec): Integer; cdecl;
-            external threadslib name 'sem_timedwait';
-   {$endif}
+            external threadslib name 'sem_timedwait' + LIBC_SUFFIX3;
+   {$endif}            
 
 function pthread_mutex_init(__mutex: Ppthread_mutex_t;
                __mutex_attr: Ppthread_mutexattr_t): longint; cdecl;
-            external threadslib name 'pthread_mutex_init';
+            external threadslib name 'pthread_mutex_init' + LIBC_SUFFIX;
 function pthread_mutex_destroy(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_destroy';
+            external threadslib name 'pthread_mutex_destroy' + LIBC_SUFFIX;
 function pthread_mutex_lock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_lock';
+            external threadslib name 'pthread_mutex_lock' + LIBC_SUFFIX;
 function pthread_mutex_trylock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_trylock';
+            external threadslib name 'pthread_mutex_trylock' + LIBC_SUFFIX;
 function pthread_mutex_unlock(var Mutex: pthread_mutex_t): Integer; cdecl;
-            external threadslib name 'pthread_mutex_unlock';
+            external threadslib name 'pthread_mutex_unlock' + LIBC_SUFFIX;
 
-{$ifdef linux}
-{$if defined(cpu64)}
+{$if defined(linux) and defined(CPUX86_64)}
 //function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
 //          __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
-function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir';        
+function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir' + LIBC_SUFFIX3;          
 {$else}
-function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir64';        
-{$endif}
+{$if defined(linux) and defined(CPUi386)}
+//function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
+//          __result:PPdirent64):longint;cdecl;external clib name 'readdir64_r';
+function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir64' + LIBC_SUFFIX3;          
 {$else}
 //function readdir64_r(__dirp:PDIR; __entry:Pdirent64;
 //          __result:PPdirent64):integer;cdecl;external clib name 'readdir_r';
 function readdir64_r(__dirp:PDIR):Pdirent64;cdecl;external clib name 'readdir';          
 {$endif}
+{$endif}
 
 function localtime_r(__timer:Ptime_t; __tp:Ptm):Ptm;cdecl;
-            external clib name 'localtime_r';
-{$endif}
-{$endif}
+            external clib name 'localtime_r' + LIBC_SUFFIX;
 
 const
 //* Protections are chosen from these bits, OR'd together.  The
@@ -4192,30 +3414,11 @@ function shm_open(name: pcchar; oflag: cint; mode: mode_t): cint; cdecl;
                                                 external shmlib name 'shm_open';
 function shm_unlink(name: pcchar): cint; cdecl;
                                               external shmlib name 'shm_unlink';
-{$if defined(glibc225)}
 function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
                                fd: cint; offset: off_t): pointer; cdecl;
-                                               external clib name 'mmap@GLIBC_2.2.5';
+                                               external clib name 'mmap' + LIBC_SUFFIX;
 function munmap(addr: pointer; length: size_t): cint; cdecl;
-                                               external clib name 'munmap@GLIBC_2.2.5';
-
-{$else}
-{$if defined(glibc20) }
-function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
-                               fd: cint; offset: off_t): pointer; cdecl;
-                                               external clib name 'mmap@GLIBC_2.0';
-function munmap(addr: pointer; length: size_t): cint; cdecl;
-                                               external clib name 'munmap@GLIBC_2.0';
-
-{$else}
-function mmap(addr: pointer; lengthint: size_t; prot: cint; flags: cint;
-                               fd: cint; offset: off_t): pointer; cdecl;
-                                               external clib name 'mmap';
-function munmap(addr: pointer; length: size_t): cint; cdecl;
-                                               external clib name 'munmap';
-{$endif}
-{$endif}
-
+                                               external clib name 'munmap' + LIBC_SUFFIX;
 procedure initlibc();
 
 implementation
