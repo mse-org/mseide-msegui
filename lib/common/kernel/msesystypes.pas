@@ -16,15 +16,19 @@ type
  {$ifndef FPC}
  tlibhandle = thandle;
  {$endif}
-
- {$if defined(FPC) and (fpc_fullversion >= 030200)}
- {$if defined(cpu64) and defined(mswindows)}
-   threadty = Longword;
+ 
+ {$if (fpc_fullversion >= 030204) and defined(cpu64) and defined(mswindows)}
+ threadty = qword;
  {$else}
-   threadty = ptruint;
+ {$if (fpc_fullversion >= 030200)}
+ {$if defined(cpu64) and defined(mswindows)}
+ threadty = Longword;
+ {$else}
+ threadty = ptruint;
  {$endif}
  {$else}
-  threadty = ptruint;
+ threadty = ptruint;
+ {$endif}
  {$endif}
 
  procidty = ptrint;

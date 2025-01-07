@@ -790,19 +790,10 @@ end;
 {$endif}
 
 function sys_threadcreate(var info: threadinfoty): syserrorty;
-{$if (fpc_fullversion >= 030204) and defined(cpu64) }
-var
-id2 : qword;
-{$endif}
 begin
 {$ifdef FPC}
  with info,win32threadinfoty(platformdata) do begin
-  {$if (fpc_fullversion >= 030204) and defined(cpu64) }
-  id2 := id;
-  handle:= beginthread(@threadexec,@info,id2,stacksize);
-  {$else}
   handle:= beginthread(@threadexec,@info,id,stacksize);
-  {$endif}
   
   if handle = 0 then begin
    result:= sye_thread;
