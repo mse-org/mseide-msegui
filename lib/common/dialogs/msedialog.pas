@@ -265,7 +265,7 @@ FUNCTION keepOnScreen (CONST Sender: tcustommseform{twidget}; shift: PointTy): P
 implementation
 uses
  sysutils,msestockobjects,msekeyboard,mseformatstr,msereal,
- TypInfo, vectors;
+ TypInfo, msevectors;
 
 type
  tcustomdataedit1 = class(tcustomdataedit);

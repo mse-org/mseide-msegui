@@ -1,16 +1,19 @@
-New features for "newdialogs”                     So 7. Apr 13:21:45 CEST 2024
+New features for "newdialogs”                     Mi 1. Jan 16:56:13 CET 2025
 
-Unit "vectors”
+Unit "msevectors”
   Completely new set of arithmetic operators for 2-dimensional vectors of "PointTy"
   OPERATOR  +  adds £wo vectors, i.e. appends one to the other
   OPERATOR  -  subtracts two vectors, i.e. appands the negative of the second to the first one
   OPERATOR  =  compares two vectors, returns "true" if both components match
   OPERATOR <>  compares two vectors, returns "true” if at least one component DOES NOT match
-  OPERATOR  *  calculates the scalar product of a vector
+  OPERATOR  *  calculates the scalar product of a vector, rounded to integer
   OPERATOR  *  multiplies a vector with an integer and returns the resulting larger vector
                (sequence if operands does not matter)
   OPERATOR DIV divides a vector by an integer and returns the resulting reduced vector
   OPERATOR := assigns an array of two integers to the components of a vector
+  - new:
+  FUNCTION length  length of vector, yielding "real" type value
+  FUNCTION angle   angle between 2 vectors, yielding "real" type value (radians)
 
 
 Unit "msedialog":
