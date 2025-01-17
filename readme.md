@@ -44,6 +44,20 @@ And because it is developed in Pascal, you have full control on the widgetset.
 - Visual form inheritance.
 - Integrated report designer.
 
+### About MSEide+MSEgui
+MSEide+MSEgui is exclusively designed for use with Free Pascal (FPC). It is not compatible with Delphi or Lazarus.
+
+### Demos and Examples
+To get the most out of MSEide+MSEgui, we highly recommend exploring our extensive collection of demos located in this repository. These demos are tailored to showcase various aspects of MSEgui's capabilities, usage patterns, and how to address common programming tasks with FPC. 
+- **Demos in package**: in the mseide-msegui/apps/ folder.
+- **Demos from mseuniverse**: https://github.com/mse-org/mseuniverse
+  
+Before you ask questions, contribute, or report issues, please take a moment to look through these demos. They can provide insights, solutions, and a better understanding of MSEide+MSEgui's functionality.
+
+[![Examples](https://img.shields.io/badge/Examples-Important-orange)](/apps)
+
+[![Examples](https://img.shields.io/badge/Examples-Important-orange)](https://github.com/mse-org/mseuniverse)
+
 # License
 IDE and tools are under GPL, library under modified LGPL like FPC-RTL.
 Package maintainers may delete the files "apps/ide/COPYING.GPL",
