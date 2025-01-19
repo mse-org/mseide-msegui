@@ -2605,7 +2605,9 @@ type
    fcontainer: winidty;
    fownerwidget: twidget;
    fcanvas: tcanvas;
+   {$ifndef use_singlecanvas}
    fasynccanvas: tcanvas;
+   {$endif}
    fmodalresult: modalresultty;
    fupdateregion: gdiregionty;
    procedure setasynccanvas(const acanvas: tcanvas);
@@ -14592,8 +14594,12 @@ function twidget.getcanvas(aorigin: originty = org_client): tcanvas;
 begin
  with tcanvas1(window.fcanvas) do begin
   fstate:= fstate - changedmask; //state invalid
- end;
+ end; 
+ {$ifndef use_singlecanvas}
  result:= fwindow.fasynccanvas;
+ {$else}
+ result:= fwindow.fcanvas;
+ {$endif}
  with result do begin
   if active then begin
    reset;
@@ -15980,7 +15986,9 @@ begin
  fownerwidget:= aowner;
  fownerwidget.fwindow:= self;
  fcanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
+ {$ifndef use_singlecanvas}
  fasynccanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
+  {$endif}
  fscrollnotifylist:= tnotifylist.create;
  fopacity:= emptyreal;
  inherited create;
@@ -15990,7 +15998,9 @@ end;
 destructor twindow.destroy;
 begin
  include(fstate,tws_destroying);
+ {$ifndef usesdl}
  freeandnil(fsysdragobject);
+ {$endif}
  container:= 0;
  appinst.twindowdestroyed(self);
  if ftransientfor <> nil then begin
@@ -16001,7 +16011,9 @@ begin
  end;
  destroywindow;
  fcanvas.free;
+ {$ifndef use_singlecanvas}
  fasynccanvas.free;
+ {$endif}
  inherited;
  destroyregion(fupdateregion);
  fscrollnotifylist.free;
@@ -16010,7 +16022,9 @@ end;
 procedure twindow.setasynccanvas(const acanvas: tcanvas);
 begin
  include(fstate,tws_canvasoverride);
+ {$ifndef use_singlecanvas}
  acanvas.initflags(fasynccanvas);
+ {$endif}
  fownerwidget.fontcanvaschanged;
 end;
 
@@ -16018,7 +16032,9 @@ procedure twindow.releaseasynccanvas;
 begin
  if tws_canvasoverride in fstate then begin
   exclude(fstate,tws_canvasoverride);
+  {$ifndef use_singlecanvas}
   fasynccanvas.initflags(fasynccanvas);
+  {$endif}
  end;
 end;
 
@@ -16110,17 +16126,21 @@ begin
   gdierror(fcanvas.creategc(fwindow.id,gck_screen,gc),self);
   gc.paintdevicesize:= fownerwidget.fwidgetrect.size;
   fcanvas.linktopaintdevice(fwindow.id,gc{,fowner.fwidgetrect.size},nullpoint);
+  {$ifndef use_singlecanvas}
   gdierror(fasynccanvas.creategc(fwindow.id,gck_screen,gc),self);
   fasynccanvas.linktopaintdevice(fwindow.id,gc,{fowner.fwidgetrect.size,}nullpoint);
+  {$endif}
   if appinst <> nil then begin
    tinternalapplication(application).registerwindow(self);
   end;
   if fcaption <> '' then begin
    gui_setwindowcaption(fwindow.id,fcaption);
   end;
+  {$ifndef usesdl}
   if fopacity <> emptyreal then begin
    gui_setwindowopacity(fwindow.id,fopacity);
   end;
+  {$endif}
   fownerwidget.windowcreated;
  end
  else begin
@@ -16138,7 +16158,9 @@ begin
   appinst.unregisterwindow(self);
  end;
  fcanvas.unlink;
+ {$ifndef use_singlecanvas}
  fasynccanvas.unlink;
+ {$endif}
  if fwindow.id <> 0 then begin
   appinst.windowdestroyed(fwindow.id);
  end;
@@ -16898,7 +16920,9 @@ procedure twindow.sizechanged;
 begin
  exclude(fstate,tws_sizevalid);
  tcanvas1(fcanvas).updatesize(fownerwidget.fwidgetrect.size);
+ {$ifndef use_singlecanvas}
  tcanvas1(fasynccanvas).updatesize(fownerwidget.fwidgetrect.size);
+ {$endif}
  if fobjectlinker <> nil then begin
   fobjectlinker.sendevent(oe_changed);
  end;
@@ -17496,7 +17520,11 @@ begin
     deleteitem(fwindowstack,typeinfo(windowstackinfoarty),int1);
    end;
   end;
-  gui_raisewindow(winid,wo_popup in self.foptions);
+{$ifndef usesdl}
+ gui_raisewindow(winid,wo_popup in self.foptions);
+{$else}
+  gui_raisewindow(winid);
+{$endif}
   include(fstate,aps_needsupdatewindowstack);
  end;
 end;
@@ -18349,8 +18377,10 @@ begin
  if fopacity <> avalue then begin
   fopacity:= avalue;
   if fwindow.id <> 0 then begin
+ {$ifndef usesdl}
    gui_setwindowopacity(fwindow.id,fopacity);
-  end;
+ {$endif}
+ end;
  end;
 end;
 
@@ -18417,7 +18447,11 @@ end;
 procedure twindow.processsysdnd(const event: twindowevent);
 var
  wi1: twidget;
-// obj1: tsysmimedragobject;
+ 
+ {$ifndef usesdl}
+obj1: tsysmimedragobject;
+{$endif}
+ 
  info: draginfoty;
  bo1: boolean;
 begin
@@ -18460,20 +18494,25 @@ begin
       wi1.dragevent(info);
      finally
       if fdndkind = dek_drop then begin
-       gui_sysdnd(sdnda_finished,isysdnd(tsysmimedragobject(fsysdragobject)),
-                                                                   nullrect,bo1);
+{$ifndef usesdl}
+    gui_sysdnd(sdnda_finished,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
+{$endif}    
       end
       else begin
        if info.accept then begin
-        gui_sysdnd(sdnda_accept,isysdnd(tsysmimedragobject(fsysdragobject))
-                                                                 ,nullrect,bo1);
+{$ifndef usesdl}
+   gui_sysdnd(sdnda_accept,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
+{$endif} 
        end
        else begin
-        gui_sysdnd(sdnda_reject,isysdnd(tsysmimedragobject(fsysdragobject)),
-                                                                   nullrect,bo1);
+{$ifndef usesdl}
+       gui_sysdnd(sdnda_reject,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
+{$endif}  
        end;
       end;
- //     obj1.free;
+{$ifndef usesdl}
+     obj1.free;
+{$endif}
      end;
     end;
    end;
@@ -19344,7 +19383,12 @@ begin
       else begin
        gui_setwindowfocus(fmodalwindow.fwindow.id);
       end;
-      gui_raisewindow(fmodalwindow.fwindow.id,wo_popup in fmodalwindow.options);
+        {$ifndef usesdl}
+         gui_raisewindow(fmodalwindow.fwindow.id,wo_popup in fmodalwindow.options);
+         {$else}
+         gui_raisewindow(fmodalwindow.fwindow.id);
+        {$endif}
+      
      end;
     end;
    end;
@@ -21190,7 +21234,9 @@ begin
  else begin
   id:= awindow.winid;
  end;
- gui_getppmm(id,result.re,result.im);
+{$ifndef usesdl}
+  gui_getppmm(id,result.re,result.im);
+ {$endif}
 end;
 
 function tguiapplication.normalactivewindow: twindow;

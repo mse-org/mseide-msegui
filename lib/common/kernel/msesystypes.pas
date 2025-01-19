@@ -22,9 +22,9 @@ type
  {$else}
  {$if (fpc_fullversion >= 030200)}
  {$if defined(cpu64) and defined(mswindows)}
- threadty = Longword;
+   threadty = Longword;
  {$else}
- threadty = ptruint;
+   threadty = ptruint;
  {$endif}
  {$else}
  threadty = ptruint;
@@ -37,7 +37,11 @@ type
  prochandlety = type ptrint;
  pprochandlety = ^prochandlety;
 
+ {$ifdef usesdl}
+ mutexty = pointer;
+ {$else}
  mutexty = array[0..9] of pointer;
+ {$endif}
  semty = array[0..7] of pointer;
  psemty = ^semty;
  condty = array[0..31] of pointer;

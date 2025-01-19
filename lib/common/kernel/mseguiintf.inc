@@ -22,7 +22,9 @@ function gui_grouphideminimizedwindows: boolean; //true for win32
 function gui_postevent(event: tmseevent): guierrorty;
 function gui_settimer(us: longword): guierrorty;
                //send et_timer event after delay of us (micro seconds)
+               
 
+{$ifndef usesdl}
 procedure gui_disconnectmaineventqueue(); //called by application.lock()
 procedure gui_connectmaineventqueue();    //called by application.unlock()
 function gui_addpollfd(var id: int32; const afd: int32;
@@ -33,18 +35,22 @@ function gui_removepollfd(const id: int32): guierrorty;
 function gui_setpollfdactive(const id: int32;
                        const aactive: boolean): guierrorty;
 
+{$endif}
 function gui_hasevent: boolean;         //false if no event pending
 function gui_getevent: tmseevent;          //can be nil
 function gui_escapepressed: boolean;
 procedure gui_resetescapepressed;
-
-
+                 
 function gui_createwindow(const rect: rectty;
-                               var options: internalwindowoptionsty;
-                               var awindow: windowty): guierrorty;
+                             var options: internalwindowoptionsty;
+                             var awindow: windowty): guierrorty;                               
+                               
+                               
 function gui_destroywindow(var awindow: windowty): guierrorty;
                       //id can be 0
-function gui_getrootwindow(id: winidty = 0): winidty;
+{$ifndef usesdl}
+  function gui_getrootwindow(id: winidty = 0): winidty;
+{$endif}
 function gui_getparentwindow(const awindow: winidty): winidty;
 function gui_reparentwindow(const child: winidty; const parent: winidty;
                             const pos: pointty): guierrorty;
@@ -75,10 +81,18 @@ function gui_settrayhint(var awindow: windowty;
 function gui_flushgdi(const synchronize: boolean = false): guierrorty;
 function gui_showwindow(id: winidty): guierrorty;
 function gui_hidewindow(id: winidty): guierrorty;
+ {$ifdef usesdl}
+function gui_raisewindow(id: winidty): guierrorty;
+                                          //windows only
+function gui_lowerwindow(id: winidty): guierrorty;
+                                          //windows only
+{$else}
 function gui_raisewindow(id: winidty; const topmost: boolean = false): guierrorty;
                                           //windows only
 function gui_lowerwindow(id: winidty; const topmost: boolean = false): guierrorty;
                                           //windows only
+{$endif}
+
 function gui_stackunderwindow(id: winidty; predecessor: winidty): guierrorty;
 function gui_stackoverwindow(id: winidty; predecessor: winidty): guierrorty;
 function gui_canstackunder: boolean; //no way found to change stacking order in KDE
@@ -97,8 +111,10 @@ function gui_setwindowstate(id: winidty; size: windowsizety;
 function gui_setwindowcaption(id: winidty;
                                    const caption: msestring): guierrorty;
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
+{$ifndef usesdl}
 function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
                     //empytyreal -> undefined, 0.0-> transparent, 1.1 -> opaque
+{$endif}                    
 
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
@@ -123,8 +139,11 @@ function gui_movewindowrect(id: winidty; const dist: pointty;
 function gui_windowatpos(const pos: pointty): winidty;
 function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
 function gui_getworkarea(id: winidty): rectty;
+
+{$ifndef usesdl}
 procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
                                            //0.0 if not supported
+{$endif}
 
 function gui_setapplicationicon(const icon,mask: pixmapty): guierrorty;
 function gui_pidtowinid(const pids: procidarty): winidty;
@@ -136,14 +155,17 @@ function gui_movepointer(const dist: pointty): guierrorty;
 function gui_grabpointer(id: winidty): guierrorty;
 function gui_ungrabpointer: guierrorty;
 
+{$ifndef usesdl}
 function gui_getpixel(const id: winidty; const pos: pointty;
-                                             out pixel: pixelty): guierrorty;
-function gui_rgbtopixel(rgb: longword): pixelty;
-function gui_pixeltorgb(pixel: pixelty): longword;
+                                           out pixel: pixelty): guierrorty;
 function gui_graytopixel(gray: byte): pixelty;
 function gui_pixeltogray(pixel: pixelty): byte;
 //function gui_rgbtocolormappixel(rgb: longword): pixelty;
-              //neutralizes color in 8bit coler depth
+            //neutralizes color in 8bit coler depth
+
+{$endif}
+function gui_rgbtopixel(rgb: longword): pixelty;
+function gui_pixeltorgb(pixel: pixelty): longword;
 function gui_initcolormap: guierrorty;
 
 function gui_regiontorects(const aregion: regionty): rectarty;
@@ -151,8 +173,16 @@ function gui_regiontorects(const aregion: regionty): rectarty;
 
 function gui_getdefaultfontnames: defaultfontnamesty;
 
+{$ifdef usesdl}   
+function gui_createpixmap(const size: sizety; winid: winidty = 0;
+                          monochrome: boolean = false;
+                          copyfrom: pixmapty = 0): pixmapty; overload; 
+{$else}
 function gui_createpixmap(const size: sizety; winid: winidty = 0;
       kind:  bitmapkindty = bmk_rgb; copyfrom: pixmapty = 0): pixmapty; overload;
+
+{$endif}      
+      
 function gui_freepixmap(pixmap: pixmapty): gdierrorty;
 function gui_getpixmapinfo(var info: pixmapinfoty): gdierrorty;
 function gui_createbitmapfromdata(const size: sizety; datapo: pbyte;
@@ -172,12 +202,23 @@ procedure gui_freeimagemem(data: plongwordaty);
 //procedure gui_copyarea(var drawinfo: drawinfoty);
 
 procedure gui_beep;
+
+{$ifndef usesdl}
 function gui_copytoclipboard(const value: msestring;
                              const buffer: clipboardbufferty): guierrorty;
 function gui_pastefromclipboard(out value: msestring;
                              const buffer: clipboardbufferty): guierrorty;
 function gui_canpastefromclipboard(const buffer: clipboardbufferty): boolean;
 
+ {$else}
+function gui_copytoclipboard(const value: msestring): guierrorty;
+
+function gui_pastefromclipboard(out value: msestring): guierrorty;
+
+function gui_canpastefromclipboard(): boolean;
+ {$endif}
+
+{$ifndef usesdl}
 function gui_sysdnd(const action: sysdndactionty;
                      const aintf: isysdnd; const arect: rectty;
                                out aresult: boolean): guierrorty;
@@ -187,8 +228,9 @@ function gui_sysdndreaddata(var adata: string;
 function gui_sysdndreadtext(var atext: msestring;
                               const typeindex: integer): guierrorty;
 
-function gui_getgdifuncs: pgdifunctionaty;
+{$endif}
 
+function gui_getgdifuncs: pgdifunctionaty;
 (*
 procedure gdi_creategc(var drawinfo: drawinfoty);
 procedure gdi_destroygc(var drawinfo: drawinfoty);

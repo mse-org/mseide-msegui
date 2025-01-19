@@ -1677,19 +1677,32 @@ end;
 procedure copytoclipboard(const value: msestring;
           const buffer: clipboardbufferty = cbb_clipboard);
 begin
- gui_copytoclipboard(value,buffer);
+{$ifdef usesdl}
+gui_copytoclipboard(value);
+{$else}
+gui_copytoclipboard(value,buffer);
+{$endif}
 end;
 
 function canpastefromclipboard(
              const buffer: clipboardbufferty = cbb_clipboard): boolean;
 begin
+{$ifdef usesdl}
+ result:= gui_canpastefromclipboard();
+{$else}
  result:= gui_canpastefromclipboard(buffer);
+{$endif}
 end;
 
 function pastefromclipboard(out value: msestring;
           const buffer: clipboardbufferty = cbb_clipboard): boolean;
 begin
+{$ifdef usesdl}
+ result:= gui_pastefromclipboard(value) = gue_ok;
+{$else}
  result:= gui_pastefromclipboard(value,buffer) = gue_ok;
+{$endif} 
+ 
 end;
 
 function confirmsavechangedfile(const filename: filenamety;

@@ -249,7 +249,10 @@ var
 procedure initcommandlineargs;
 begin
  if commandlineargs = nil then begin
+{$if defined(usesdl) and defined(windows)}
+{$else}
   commandlineargs:= sys_getcommandlinearguments;
+{$endif}  
  end;
 end;
 

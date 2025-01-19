@@ -236,7 +236,7 @@ end;
 procedure killprocesstree(handle: prochandlety);
 begin
 {$ifdef windows}
- killprocesstree1(procidfromprochandle(handle));
+// killprocesstree1(procidfromprochandle(handle));
 {$else}
  killprocesstree1(handle);
 {$endif}
@@ -725,7 +725,10 @@ begin
     end
    end
    else begin
+{$ifndef usesdl}
     i1:= timedwaitpid(prochandle,@dwo1,timeoutus);
+{$endif}
+   i1 := 0;
     case i1 of
      -2: begin
       result:= pee_timeout;

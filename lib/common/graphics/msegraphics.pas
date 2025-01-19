@@ -1755,7 +1755,9 @@ begin
  application.lock();
  gdilockthread:= sys_getcurrentthread();
  if (gdilockcount = 0) and not application.ismainthread then begin
+ {$ifndef usesdl} 
   gui_disconnectmaineventqueue();
+ {$endif}
  end;
  inc(gdilockcount);
 end;
@@ -1766,8 +1768,10 @@ begin
  if gdilockcount = 0 then begin
   gdilockthread:= 0;
   if not application.ismainthread then begin
-   gui_connectmaineventqueue();
-  end;
+{$ifndef usesdl} 
+  gui_connectmaineventqueue();
+ {$endif}
+   end;
  end;
  application.unlock();
 end;
