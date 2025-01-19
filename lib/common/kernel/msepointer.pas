@@ -297,12 +297,15 @@ procedure tmouse.setshape(const Value: cursorshapety);
 var
  id1: winidty;
 begin
+if assigned(fintf) then
+begin
  id1:= fintf.getmousewinid;
  if (fshape <> value) or (id1 <> fwinid) then begin
   fwinid:= id1;
   fshape := Value;
   gui_setcursorshape(id1,value);
  end;
+end;
 end;
 
 procedure tmouse.windowdestroyed(const id: winidty);

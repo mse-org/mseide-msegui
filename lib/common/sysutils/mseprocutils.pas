@@ -236,7 +236,7 @@ end;
 procedure killprocesstree(handle: prochandlety);
 begin
 {$ifdef windows}
-// killprocesstree1(procidfromprochandle(handle));
+ killprocesstree1(procidfromprochandle(handle));
 {$else}
  killprocesstree1(handle);
 {$endif}
