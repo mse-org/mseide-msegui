@@ -19,8 +19,6 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
-projectdir=/home/fred/mseide-msegui/apps/ide
-projectfilename=/home/fred/mseide-msegui/apps/ide/mseide.prj
 finddialog=8
  [finddialogfo.selectedonly]
  value=0
@@ -761,7 +759,6 @@ files=
  a=0,8228,6,Text Files
  )
 [componentstore]
-storedir=/home/fred/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -1184,26 +1181,10 @@ windowlayout=527
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
- filenames=1
-  /home/fred/mseide-msegui/apps/ide/compstore/
- filecolwidth=0
- x=0
- y=0
- cx=0
- cy=0
- lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
  [componentstorefo.groupfiledialog]
- filenames=1
-  /home/fred/mseide-msegui/apps/ide/compstore/
- filecolwidth=0
- x=0
- y=0
- cx=0
- cy=0
- lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
  filehistory=0
  filefilterindex=0
  filefilter=
@@ -1277,13 +1258,6 @@ windowlayout=527
  value=0
  [debuggerfo.edit_compiler]
  value=Pascal
- [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/mseide.pas
- history=4
-  /home/fred/mseide-msegui/apps/ide/mseide.pas
-  /home/fred/mseide-msegui/apps/demo/demo.pas
-  ${PROJECTDIR}/demo.pas
-  ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
