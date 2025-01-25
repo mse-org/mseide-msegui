@@ -55,20 +55,20 @@ options=114
  width9=368
  sortdescend9=0
  [projectoptionsfo.twidgetgrid4]
- propcolwidthref=737
+ propcolwidthref=757
  width0=96
  sortdescend0=0
  sortdescend1=0
  width2=73
  sortdescend2=0
- width3=352
+ width3=362
  sortdescend3=0
- width4=375
+ width4=386
  sortdescend4=0
  sorted=0
  col=-1073741823
  row=-1073741823
- rowheight=17
+ rowheight=20
  [projectoptionsfo.newfile]
  firsttab=0
  index=0
@@ -90,9 +90,9 @@ options=114
  sortdescend6=0
  [projectoptionsfo.macrosplitter]
  x=0
- y=129
+ y=128
  xprop=1
- yprop=0.24131627056673
+ yprop=0.24214417744917
  [projectoptionsfo.macrogrid]
  propcolwidthref=675
  sortdescend0=0
@@ -405,17 +405,14 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=1
- MAINFO
-moduletypes=1
- TMAINFO
-modulefiles=1
- /home/fred/mseide-msegui/apps/i18ndemo/main.mfm
+modulenames=0
+moduletypes=0
+modulefiles=0
 befcommandon=0
 makeoptionson=5
  63
  31
- 34
+ 63
  32
  4095
 compilerusedon=29
@@ -718,33 +715,24 @@ findhistory=2
  directoryexists('A:\')
  fdir
 findoptions=1
-editpos=2
+editpos=1
  0,1
- 0,0
 bookmarks0=0
-bookmarks1=0
-sourcefiles=2
+sourcefiles=1
  /home/fred/mseide-msegui/apps/i18ndemo/main.pas
- /home/fred/mseide-msegui/apps/i18ndemo/i18ndemo.pas
-relpaths=2
+relpaths=1
  main.pas
- i18ndemo.pas
-ismoduletexts=2
+ismoduletexts=1
  0
- 0
-modules=1
- /home/fred/mseide-msegui/apps/i18ndemo/main.mfm
-moduleoptions=1
- 0
-visiblemodules=1
- -1
-nomenumodules=1
- 0
+modules=0
+moduleoptions=0
+visiblemodules=0
+nomenumodules=0
 [sourcefo.files_tab]
 firsttab=0
 index=0
 [layout]
-windowlayout=546
+windowlayout=528
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -878,7 +866,7 @@ windowlayout=546
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=conflangfo
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -895,15 +883,15 @@ windowlayout=546
  active=0
  visible=0
  [projecttreefo.grid]
- propcolwidthref=30
+ propcolwidthref=27
  width0=141
  sortdescend0=0
- width1=28
+ width1=25
  sortdescend1=0
  sorted=0
  col=1
  row=0
- rowheight=17
+ rowheight=20
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -962,7 +950,7 @@ windowlayout=546
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -1077,8 +1065,8 @@ windowlayout=546
  ncx=0
  ncy=0
  x=0
- y=512
- cx=1221
+ y=509
+ cx=1218
  cy=88
  rcx=0
  rcy=0
@@ -1148,7 +1136,7 @@ windowlayout=546
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=_mse_mainfo_mse_
+ stackedunder=confdebuggerfo
  parent=
  mdistate=0
  nx=0
@@ -1178,7 +1166,7 @@ windowlayout=546
  ncy=0
  x=0
  y=0
- cx=1221
+ cx=1218
  cy=54
  rcx=0
  rcy=0
@@ -1194,7 +1182,7 @@ windowlayout=546
  ncy=62
  x=0
  y=0
- cx=1221
+ cx=1203
  cy=62
  rcx=0
  rcy=0
@@ -1205,8 +1193,9 @@ windowlayout=546
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/ideU/src/msefiledialogx.mfm
- history=4
+ value=/home/fred/mseide-msegui/apps/i18ndemo/i18ndemo.pas
+ history=5
+  /home/fred/mseide-msegui/apps/i18ndemo/main.pas
   /home/fred/ideU/src/msefiledialogx.mfm
   /home/fred/mseide-msegui/lib/common/dialogx/msefiledialogx.pas
   /home/fred/mseide-msegui/apps/ide/sourceform.pas
@@ -1227,8 +1216,8 @@ windowlayout=546
  ncy=0
  x=0
  y=0
- cx=1221
- cy=452
+ cx=1218
+ cy=449
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1268,29 +1257,10 @@ windowlayout=546
  ncy=0
  x=0
  y=57
- cx=1221
- cy=452
+ cx=1218
+ cy=449
  rcx=0
  rcy=0
- [_mse_mainfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=mainfo
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=291
- y=247
- cx=413
- cy=196
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
 [targetconsole]
 finddtext=
 findhistory=0

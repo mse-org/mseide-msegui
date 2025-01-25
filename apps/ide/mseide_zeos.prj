@@ -46,20 +46,20 @@ options=114
  width9=287
  sortdescend9=0
  [projectoptionsfo.twidgetgrid4]
- propcolwidthref=605
+ propcolwidthref=625
  width0=96
  sortdescend0=0
  sortdescend1=0
  width2=73
  sortdescend2=0
- width3=290
+ width3=300
  sortdescend3=0
- width4=305
+ width4=316
  sortdescend4=0
  sorted=0
  col=-1073741823
  row=-1073741823
- rowheight=17
+ rowheight=20
  [projectoptionsfo.newfile]
  firsttab=0
  index=0
@@ -81,9 +81,9 @@ options=114
  sortdescend6=0
  [projectoptionsfo.macrosplitter]
  x=0
- y=176
+ y=174
  xprop=1
- yprop=0.34892787524367
+ yprop=0.3491124260355
  [projectoptionsfo.macrogrid]
  propcolwidthref=543
  sortdescend0=0
@@ -311,6 +311,7 @@ checkmethods=1
 colorerror=-1610612717
 colorwarning=-1610612712
 colornote=-1610612716
+colorhint=15134207
 usercolors=30
  0
  0
@@ -382,23 +383,14 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=3
- ACTIONSMO
- MAINFO
- SOURCEFO
-moduletypes=3
- TACTIONSMO
- TMAINFO
- TSOURCEFO
-modulefiles=3
- /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
- /home/fred/mseide-msegui/apps/ide/main.mfm
- /home/fred/mseide-msegui/apps/ide/sourceform.mfm
+modulenames=0
+moduletypes=0
+modulefiles=0
 befcommandon=0
 makeoptionson=5
  63
  31
- 34
+ 63
  32
  4095
 compilerusedon=29
@@ -706,46 +698,24 @@ hintheight=0
 finddtext=
 findhistory=0
 findoptions=1
-editpos=3
+editpos=1
  0,6
- 0,-1073741823
- 0,-1073741823
 bookmarks0=0
-bookmarks1=0
-bookmarks2=0
-sourcefiles=3
- ${PROJECTDIR}/main.pas
- /home/mse/packs/standard/git/mseide-msegui/apps/ide/sourceform.pas
- /home/mse/packs/standard/git/mseide-msegui/apps/ide/actionsmodule.pas
-relpaths=3
+sourcefiles=1
+ /home/fred/mseide-msegui/apps/ide/main.pas
+relpaths=1
  main.pas
- sourceform.pas
- actionsmodule.pas
-ismoduletexts=3
+ismoduletexts=1
  0
- 0
- 0
-modules=3
- /home/fred/mseide-msegui/apps/ide/main.mfm
- /home/fred/mseide-msegui/apps/ide/actionsmodule.mfm
- /home/fred/mseide-msegui/apps/ide/sourceform.mfm
-moduleoptions=3
- 0
- 0
- 0
-visiblemodules=3
- -1
- -1
- -1
-nomenumodules=3
- 0
- 0
- 0
+modules=0
+moduleoptions=0
+visiblemodules=0
+nomenumodules=0
 [sourcefo.files_tab]
 firsttab=0
 index=0
 [layout]
-windowlayout=562
+windowlayout=541
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -886,19 +856,19 @@ windowlayout=562
  x=0
  y=0
  cx=205
- cy=445
+ cy=442
  rcx=0
  rcy=0
  [projecttreefo.grid]
  propcolwidthref=88
  width0=117
  sortdescend0=0
- width1=82
+ width1=86
  sortdescend1=0
  sorted=0
  col=1
  row=-1073741823
- rowheight=16
+ rowheight=19
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -961,7 +931,7 @@ windowlayout=562
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=memoryfo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -1076,8 +1046,8 @@ windowlayout=562
  ncx=0
  ncy=0
  x=0
- y=508
- cx=1212
+ y=505
+ cx=1211
  cy=92
  rcx=0
  rcy=0
@@ -1147,7 +1117,7 @@ windowlayout=562
  [componentpalettefo]
  splitdir=0
  useroptions=268460139
- stackedunder=_mse_mainfo_mse_
+ stackedunder=confdebuggerfo
  parent=
  mdistate=3
  nx=0
@@ -1177,7 +1147,7 @@ windowlayout=562
  ncy=0
  x=0
  y=0
- cx=1212
+ cx=1211
  cy=57
  rcx=0
  rcy=0
@@ -1193,7 +1163,7 @@ windowlayout=562
  ncy=75
  x=0
  y=0
- cx=1212
+ cx=1196
  cy=64
  rcx=0
  rcy=0
@@ -1204,7 +1174,7 @@ windowlayout=562
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/ide/main.pas
+ value=/home/fred/mseide-msegui/apps/ide/sourceform.pas
  history=20
   /home/fred/mseide-msegui/apps/ide/main.pas
   /home/fred/atest/test.prj
@@ -1242,22 +1212,20 @@ windowlayout=562
  ncy=0
  x=208
  y=0
- cx=1004
- cy=445
+ cx=1003
+ cy=442
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
  index=0
- [confideufo.fontname]
- value=stf_default
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
  irqoff=0
  splitdir=0
  useroptions=268451947
- stackedunder=confdebuggerfo
+ stackedunder=componentpalettefo
  parent=
  mdistate=0
  nx=0
@@ -1285,29 +1253,10 @@ windowlayout=562
  ncy=0
  x=0
  y=60
- cx=1212
- cy=445
+ cx=1211
+ cy=442
  rcx=0
  rcy=0
- [_mse_mainfo_mse_]
- splitdir=0
- useroptions=268451963
- stackedunder=_mse_actionsmo_mse_
- parent=
- mdistate=3
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=441
- y=200
- cx=469
- cy=149
- rcx=0
- rcy=0
- wsize=0
- active=0
- visible=1
 [targetconsole]
 finddtext=
 findhistory=0

@@ -19,6 +19,8 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
+projectdir=/home/fred/mseide-msegui/apps/ide
+projectfilename=/home/fred/mseide-msegui/apps/ide/mseide.prj
 finddialog=8
  [finddialogfo.selectedonly]
  value=0
@@ -66,7 +68,7 @@ options=114
  sorted=0
  col=-1073741823
  row=-1073741823
- rowheight=19
+ rowheight=20
  [projectoptionsfo.newfile]
  firsttab=1
  index=2
@@ -88,9 +90,9 @@ options=114
  sortdescend6=0
  [projectoptionsfo.macrosplitter]
  x=0
- y=198
+ y=197
  xprop=1
- yprop=0.35201401050788
+ yprop=0.35149384885765
  [projectoptionsfo.macrogrid]
  propcolwidthref=703
  sortdescend0=0
@@ -115,7 +117,7 @@ options=114
  value=
  [projectoptionsfo.makegroupbox]
  firsttab=0
- index=3
+ index=2
  [projectoptionsfo.exceptionsgrid]
  propcolwidthref=921
  width0=47
@@ -759,6 +761,8 @@ files=
  a=0,8228,6,Text Files
  )
 [componentstore]
+storedir=/home/fred/mseide-msegui/apps/ide/compstore/
+filename=
 [components]
 [selecteditpage]
 colwidth=100
@@ -813,7 +817,7 @@ nomenumodules=0
 firsttab=0
 index=0
 [layout]
-windowlayout=526
+windowlayout=527
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -947,7 +951,7 @@ windowlayout=526
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=conflangfo
+ stackedunder=mainfo
  parent=
  mdistate=3
  nx=0
@@ -964,15 +968,15 @@ windowlayout=526
  active=0
  visible=0
  [projecttreefo.grid]
- propcolwidthref=26
+ propcolwidthref=27
  width0=141
  sortdescend0=0
- width1=24
+ width1=25
  sortdescend1=0
  sorted=0
  col=1
  row=0
- rowheight=19
+ rowheight=20
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -1031,7 +1035,7 @@ windowlayout=526
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=projecttreefo
+ stackedunder=conflangfo
  parent=
  mdistate=0
  nx=0
@@ -1146,8 +1150,8 @@ windowlayout=526
  ncx=0
  ncy=0
  x=0
- y=613
- cx=1160
+ y=612
+ cx=1161
  cy=88
  rcx=0
  rcy=0
@@ -1180,7 +1184,29 @@ windowlayout=526
  width3=185
  sortdescend3=0
  [componentstorefo.storefiledialog]
+ filenames=1
+  /home/fred/mseide-msegui/apps/ide/compstore/
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentstorefo.groupfiledialog]
+ filenames=1
+  /home/fred/mseide-msegui/apps/ide/compstore/
+ filecolwidth=0
+ x=0
+ y=0
+ cx=0
+ cy=0
+ lastdir=/home/fred/mseide-msegui/apps/ide/compstore/
+ filehistory=0
+ filefilterindex=0
+ filefilter=
  [componentstorefo.compfiledialog]
  filenames=0
  filecolwidth=0
@@ -1225,7 +1251,7 @@ windowlayout=526
  ncy=0
  x=0
  y=0
- cx=1160
+ cx=1161
  cy=60
  rcx=0
  rcy=0
@@ -1241,7 +1267,7 @@ windowlayout=526
  ncy=63
  x=0
  y=0
- cx=1160
+ cx=1161
  cy=69
  rcx=0
  rcy=0
@@ -1252,6 +1278,12 @@ windowlayout=526
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
+ value=/home/fred/mseide-msegui/apps/ide/mseide.pas
+ history=4
+  /home/fred/mseide-msegui/apps/ide/mseide.pas
+  /home/fred/mseide-msegui/apps/demo/demo.pas
+  ${PROJECTDIR}/demo.pas
+  ${PROJECTDIR}/main.pas
  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
@@ -1268,8 +1300,8 @@ windowlayout=526
  ncy=0
  x=0
  y=0
- cx=1160
- cy=547
+ cx=1161
+ cy=546
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1309,8 +1341,8 @@ windowlayout=526
  ncy=0
  x=0
  y=63
- cx=1160
- cy=547
+ cx=1161
+ cy=546
  rcx=0
  rcy=0
 [targetconsole]
