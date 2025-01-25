@@ -390,7 +390,7 @@ makeoptionson=5
  32
  63
 compilerusedon=29
- 69631
+ 4095
  0
  0
  0
@@ -420,14 +420,14 @@ compilerusedon=29
  0
  0
 debuggerusedon=6
- 69631
+ 4095
  0
  0
  0
  0
  0
 exeusedon=15
- 69631
+ 4095
  0
  0
  0
@@ -459,7 +459,7 @@ project_creator=
 project_copyright=
 project_license=
 project_time=
-project_date=
+project_date=14:35:13 25/01/25
 project_comment=
 aftcommandon=0
 unitdirson=3
@@ -687,10 +687,10 @@ finddtext=
 findhistory=0
 findoptions=1
 editpos=1
- 0,2
+ 0,0
 bookmarks0=0
 sourcefiles=1
-${PROJECTDIR}/demo.pas
+ ${PROJECTDIR}/demo.pas
 relpaths=1
  demo.pas
 ismoduletexts=1
@@ -703,7 +703,7 @@ nomenumodules=0
 firsttab=0
 index=0
 [layout]
-windowlayout=526
+windowlayout=573
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -837,7 +837,7 @@ windowlayout=526
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=mainfo
+ stackedunder=objectinspectorfo
  parent=
  mdistate=3
  nx=0
@@ -862,7 +862,7 @@ windowlayout=526
  sorted=0
  col=1
  row=0
- rowheight=20
+ rowheight=17
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -940,10 +940,10 @@ windowlayout=526
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=355
- width0=85
+ propcolwidthref=330
+ width0=79
  sortdescend0=0
- width1=264
+ width1=245
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1138,7 +1138,7 @@ windowlayout=526
  x=0
  y=0
  cx=1417
- cy=60
+ cy=59
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1154,7 +1154,7 @@ windowlayout=526
  x=0
  y=0
  cx=1417
- cy=63
+ cy=62
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1164,7 +1164,7 @@ windowlayout=526
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- [debuggerfo.project_options]
+  [debuggerfo.project_options]
  value=1
  [debuggerfo.hints]
  value=1
@@ -1181,7 +1181,7 @@ windowlayout=526
  x=0
  y=0
  cx=1417
- cy=546
+ cy=547
  rcx=0
  rcy=0
  [sourcefo.files_tab]
@@ -1220,9 +1220,9 @@ windowlayout=526
  ncx=0
  ncy=0
  x=0
- y=63
+ y=62
  cx=1417
- cy=546
+ cy=547
  rcx=0
  rcy=0
 [targetconsole]
