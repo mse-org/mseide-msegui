@@ -2006,8 +2006,7 @@ var
  newwidget: boolean;
  controller1: tdockcontroller;
  bo1: boolean;
-label
- endlab;
+ endlab: boolean = false;
 begin
  result:= false;
  container1:= twidget1(fintf.getwidget.container);
@@ -2042,8 +2041,10 @@ begin
   if fsplitdir = sd_none then begin
    fsplitterrects:= nil;
   end;
-  goto endlab;
+  endlab := true;
  end;
+ if endlab = false then
+ begin
  rect1:= fplacementrect;//idockcontroller(fintf).getplacementrect;
  po1:= addpoint(pointty(rect1.size),rect1.pos); //lower right
  include(fdockstate,dos_updating1);
@@ -2212,7 +2213,7 @@ begin
  exclude(fdockstate,dos_updating1);
  sizechanged(true,false,ar1);
  updatesplitterrects(ar1);
-endlab:
+end;
  widget1:= fintf.getwidget;
  if widget1.canevent(tmethod(foncalclayout)) and
                              not application.terminated then begin
@@ -4867,8 +4868,7 @@ var
  dirbefore: graphicdirectionty;
  face1: tface1;
  isactive: boolean;
-label
- endlab;
+ endlab : boolean = false;
 begin
  inherited;
  dirbefore:= gd_none;
@@ -5096,8 +5096,7 @@ begin
  //  stockobjects.bitmaps[fgrip_grip].paint(canvas,fhandlerect,
  //         [al_xcentered,al_ycentered,al_tiled],fgrip_color,cl_transparent);
    end;
-endlab:
-   canvas.restore;//color:= colorbefore;
+      canvas.restore;//color:= colorbefore;
   end;
  end;
 end;

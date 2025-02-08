@@ -1275,8 +1275,7 @@ var
  textbackup: msestring;
  formatbackup: formatinfoarty;
 
-label
- endlab;
+ endlab :boolean = false;
 
 begin                  //drawtext
  with info,tcanvas1(canvas) do begin
@@ -1318,8 +1317,10 @@ begin                  //drawtext
    end;
    if text.text = '' then begin
     info.res:= nullrect;
-    goto endlab;
+    endlab := true;
    end;
+   if endlab = false then
+   begin
    layouttext(canvas,info,layoutinfo);
    defaultcolor:= font.color;
    defaultcolorbackground:= font.colorbackground;
@@ -1438,8 +1439,9 @@ begin                  //drawtext
      end;
     end;
    end;
-endlab:
-   restore;
+   end;
+ // if endlab then
+  restore;
   finally
    if tf_tabtospace in flags then begin
     text.text:= textbackup;

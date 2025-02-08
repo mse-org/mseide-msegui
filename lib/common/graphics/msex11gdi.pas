@@ -2223,8 +2223,8 @@ var
  destcopygc: tgc;
  dpic2: tpicture;
  ddev2: paintdevicety;
-label
- endlab,endlab2;
+ endlab: boolean = false;
+ endlab2: boolean = false;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2340,19 +2340,24 @@ begin
         end;
        end
        else begin
-        goto endlab2;
+        endlab2 := true;
        end;
       end
       else begin
-       goto endlab2;
+       endlab2 := true;
       end;
-      spd:= bitmap;
+      if endlab2 = false then spd:= bitmap;
      end
      else begin
+     if endlab2 = false then
+     begin
       spd:= tcanvas1(source).fdrawinfo.paintdevice;
       x1:= x;
       y1:= y;
      end;
+     end;
+     if endlab2 = false then
+     begin
      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
                       sourceformats,@sattributes);
      format1:= screenrenderpictformat;
@@ -2445,16 +2450,21 @@ begin
      end;
      xrenderfreepicture(appdisp,dpic);
      checkddevcopy(); //possibly rgb -> gray conversion
-endlab2:
+     end;
+
+if endlab2 = true then
+     begin
      if maskpic <> 0 then begin
       xrenderfreepicture(appdisp,maskpic);
      end;
      if bitmapgc2 <> nil then begin
-      xfreegc(appdisp,bitmapgc2);
+      xfreegc(
+      appdisp,bitmapgc2);
      end;
      if bitmap <> 0 then begin
       xfreepixmap(appdisp,bitmap);
      end;
+    end;
     end;
    end
    else begin //no colorconvert
@@ -2553,8 +2563,11 @@ endlab2:
       if dkind = bmk_mono then begin //convert to monochrome
        pixmap:= gui_createpixmap(size,0,skind);
        if pixmap = 0 then begin
-        goto endlab;
+        endlab := true ;
        end;
+       
+       if endlab = false then
+       begin
        pixmapgc:= xcreategc(appdisp,pixmap,gcgraphicsexposures,@xvalues);
        if pixmapgc <> nil then begin
         xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,pixmap,
@@ -2594,6 +2607,7 @@ endlab2:
         xfreegc(appdisp,pixmapgc);
        end;
        xfreepixmap(appdisp,pixmap);
+       end;
       end
       else begin
               //convert from monochrome
@@ -2631,9 +2645,11 @@ endlab2:
    if copymode <> gcrasterop then begin
     xsetfunction(appdisp,tgc(gc.handle),integer(gcrasterop));
    end;
-endlab:
+if endlab = true then
+   begin
    if pixmap2 <> 0 then begin
     xfreepixmap(appdisp,pixmap2);
+   end;
    end;
   end;
  end;
