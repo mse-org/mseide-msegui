@@ -2452,8 +2452,6 @@ begin
      checkddevcopy(); //possibly rgb -> gray conversion
      end;
 
-if endlab2 = true then
-     begin
      if maskpic <> 0 then begin
       xrenderfreepicture(appdisp,maskpic);
      end;
@@ -2464,7 +2462,6 @@ if endlab2 = true then
      if bitmap <> 0 then begin
       xfreepixmap(appdisp,bitmap);
      end;
-    end;
     end;
    end
    else begin //no colorconvert
@@ -2645,11 +2642,9 @@ if endlab2 = true then
    if copymode <> gcrasterop then begin
     xsetfunction(appdisp,tgc(gc.handle),integer(gcrasterop));
    end;
-if endlab = true then
-   begin
+
    if pixmap2 <> 0 then begin
     xfreepixmap(appdisp,pixmap2);
-   end;
    end;
   end;
  end;

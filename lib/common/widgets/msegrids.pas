@@ -5224,8 +5224,6 @@ var
  pt1: pointty;
  sizebefore: sizety;
  linemerged: boolean;
-
-
  endlab : boolean = false;
  endlab2 : boolean = false;
 begin
@@ -5250,10 +5248,9 @@ begin
     if fmergeflags * [cmf_v,cmf_h] <> [] then begin
      endlab := true;
     end;
-    
     if endlab = false then
     begin
-    if fcolor <> cl_parent then begin
+     if fcolor <> cl_parent then begin
      fcellinfo.color:= fcolor;
     end;
     inc(fcellrect.cx,fmergedcx);
@@ -5268,7 +5265,11 @@ begin
      face1:= fface;
     end;
    end;
+   end;
   end;
+  
+  if endlab = false then
+  begin
   canvas.move(pt1);
   updatecellrect(frame1);
   ftextinfo.dest:= fcellinfo.innerrect;
@@ -5296,15 +5297,13 @@ begin
   if calcautocellsize then begin
    endlab2 := true;
   end;
-  end;
-  
-  if (endlab = false) and (endlab2 = false) then
-  begin
   drawcelloverlay(canvas,frame1);
   canvas.remove(makepoint(0,pt1.y));
-  end;
-  if (endlab2 = false) then
-  begin
+    
+  end; //endlab:
+  
+ if endlab2 = false then
+ begin   
   if (flinewidth > 0) and not linemerged then begin
    linewidthbefore:= canvas.linewidth;
    if flinewidth = 1 then begin
@@ -5318,11 +5317,9 @@ begin
    canvas.linewidth:= linewidthbefore;
   end;
   canvas.remove(makepoint(pt1.x,0));
-  end;
-if (endlab2 = true) then
-  begin
+
+  end; //endlab2:
   fcellrect.size:= sizebefore;
- end;
  end;
 end;
 
