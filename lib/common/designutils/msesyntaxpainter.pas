@@ -701,9 +701,7 @@ var
  format: formatinfoarty;
 // firstrow,lastrow: integer;
  wpo2: pmsechar;
-
-label
- endlab;
+// endlab : boolean = false;
 
 begin
 // ar1:= nil; //copilerwarning
@@ -715,7 +713,8 @@ begin
  with fclients[handle] do begin
   if (syntaxdefhandle < 0) or (syntaxdefhandle > high(fsyntaxdefs)) or
               (fsyntaxdefs[syntaxdefhandle].charstyles = nil) then begin
-   goto endlab;
+  // goto endlab;
+  exit;
   end;
   with fsyntaxdefs[syntaxdefhandle] do begin
    if startscopenr = -1 then begin
@@ -731,7 +730,8 @@ begin
     scopeinfopo:= @scopeinfos[startscopenr];
     while count > 0 do begin
      if start >= list.count then begin
-      goto endlab;
+      //goto endlab;
+      exit;
      end;
      if (flinesperslice <> 0) and (start mod flinesperslice = 0) then begin
       scopestackcachepo:= start div flinesperslice + 1;
@@ -961,7 +961,7 @@ begin
     end;
    end;
   end;
-endlab:
+// endlab:
 {
   for int1:= 0 to high(boldchars.items) do begin
    with boldchars.items[int1],pos do begin

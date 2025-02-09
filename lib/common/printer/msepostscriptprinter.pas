@@ -2070,8 +2070,7 @@ var
  po1,po2,po3: pbyte;
  int1: integer;
  image: imagety;
-label
- endlab;
+ endlab : boolean = false;
 begin
  with fdrawinfo,copyarea do begin
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
@@ -2105,9 +2104,12 @@ begin
       with tcanvas1(source).fdrawinfo do begin
        gdi_lock;
        if gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
-                                     mask.canvas.gchandle) <> gde_ok then begin
-        goto endlab;
+                                    mask.canvas.gchandle) <> gde_ok then begin
+        endlab := true;  
        end;
+     
+      if endlab = false then
+      begin                
        gdi_unlock;
        if mask.kind = bmk_mono then begin
         convertmono(sourcerect^,image,ar2,maskrowbytes);
@@ -2123,10 +2125,15 @@ begin
        gui_freeimagemem(image.pixels);
        gdi_lock;
        if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
-        goto endlab;
+        endlab := true;
        end;
-       gdi_unlock;
+       if endlab = false then  gdi_unlock;
+       end;
       end;
+      
+      
+     if endlab = false then 
+      begin  
       if mono{image.monochrome} then begin
        if colorspace = cos_gray then begin
         convertmonotogray(sourcerect^,image,ar3,rowbytes,
@@ -2161,7 +2168,12 @@ begin
       rowbytes:= rowbytes + maskrowbytes;
       cached:= not maskcopy and setimagecache(ick_4,source,sourcerect^,varname,
                                                 ar1,mask.canvas);
+       end;                                         
      end;
+
+     if endlab = false then 
+     begin  
+
      mono:= false; //has been converted to color
      str1:= 'gsave ';
      if not cached then begin
@@ -2190,6 +2202,7 @@ begin
      str1:= str1 + ' >> def'+nl+
      '<< /ImageType 3 /DataDict imdict /MaskDict madict /InterleaveType 2 >>'+nl;
      str1:= str1 + 'image';
+     end;
     end
     else begin
      cached:= not maskcopy and getimagecache(ick_2,mask.canvas,sourcerect^,varname);
@@ -2198,8 +2211,10 @@ begin
           source,imagepatname) and
            (cached or (gui_pixmaptoimage(tsimplebitmap1(mask).handle,image,
                                     mask.canvas.gchandle) = gde_ok))) then begin
-      goto endlab;
+      endlab := true
      end;
+     if endlab = false then
+     begin
      gdi_unlock;
      if not cached then begin
       convertmono(sourcerect^,image,ar1,rowbytes);
@@ -2238,6 +2253,7 @@ begin
      streamwrite(str1);
      exit;
     end;
+    end;
    end
    else begin
     cached:= getimagecache(ick_1,source,sourcerect^,varname{,rowbytes});
@@ -2245,10 +2261,14 @@ begin
      with tcanvas1(source).fdrawinfo do begin
       gdi_lock;
       if gui_pixmaptoimage(paintdevice,image,gc.handle) <> gde_ok then begin
-       goto endlab;
+       endlab := true;
       end;
-      gdi_unlock;
+     if endlab = false then gdi_unlock;
      end;
+     
+     if endlab = false then
+     begin
+     
 //     components:= 1;
      if mono{image.monochrome} then begin
       convertmono(sourcerect^,image,ar1,rowbytes);
@@ -2265,7 +2285,11 @@ begin
      gui_freeimagemem(image.pixels);
      cached:= setimagecache(ick_1,source,sourcerect^,varname,
                                                 ar1{,rowbytes});
+     end;                                           
     end;
+    
+    if endlab = false then
+    begin
     str1:= 'gsave ';
     if not cached then begin
      str1:= str1 + '/picstr '+inttostr(rowbytes)+' string def ';
@@ -2324,6 +2348,10 @@ begin
      end;
     end;
    end;
+   end;
+ 
+ if endlab = false then
+   begin  
    streamwrite(str1+nl);
    if cached then begin
     str1:= '';
@@ -2338,7 +2366,8 @@ begin
    end;
    streamwrite(str1+nl);
    exit;
-endlab:
+  end; 
+   //endlab:
    gdi_unlock;
   finally
    addpoint1(destrect^.pos,origin); //map to origin

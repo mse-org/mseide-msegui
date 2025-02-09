@@ -1196,9 +1196,9 @@ begin
 end;
 
 procedure tparamsourcedatalink.CheckBrowseMode;
-label
- endlab;
+
 var
+ endlab : boolean = false;
  intf: igetdscontroller;
  posted1: boolean;
 begin
@@ -1230,11 +1230,14 @@ begin
        if dataset.modified then begin
         posted1:= true;
         destdataset.post;
-        goto endlab;
+        endlab := true;
        end;
       end;
      end;
     end;
+    
+    if endlab = false then
+    begin
     if (fplo_syncmasterpost in foptions) then begin
      if fplo_delayedsyncmasterpost in foptions then begin
       exit;
@@ -1250,7 +1253,8 @@ begin
      end;
     end;
     inherited;
-   endlab:
+   end; 
+  // endlab:
     if (dataset.state in [dsedit,dsinsert]) and 
       (foptions * [fplo_syncmasteredit,fplo_syncmasterinsert] <> []) and 
                                                             posted1 then begin
@@ -1356,9 +1360,8 @@ begin
 end;
 
 procedure tparamdestdatalink.CheckBrowseMode;
-label
- endlab;
 var
+ endlab : boolean = false;
  intf: igetdscontroller;
  sourceds: tdataset;
  canceling: boolean;
@@ -1385,11 +1388,13 @@ begin
        if dataset.modified then begin
         destdataset.post;
         updatedata;
-        goto endlab;
+        endlab := true;
        end;
       end;
      end;
     end;
+    if endlab = false then
+    begin
     if (fplo_syncslavepost in foptions) and 
                       (dataset.state <> dsbrowse) and not canceling then begin
      if fplo_delayedsyncslavepost in foptions then begin
@@ -1399,7 +1404,9 @@ begin
      updatedata;
     end;
     inherited;
-   endlab:
+   end;
+   //endlab:
+   
     if (dataset.state in [dsedit,dsinsert]) and not canceling and
       (foptions * [fplo_syncslaveedit,fplo_syncslaveinsert] <> []) then begin
      dataset.updaterecord; //synchronize fields
