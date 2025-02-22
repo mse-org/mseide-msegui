@@ -410,7 +410,8 @@ var
  size1: sizety;
  hasnormalitem: boolean;
 
- suppressed : boolean = false;
+label
+ suppressed;
 
 begin
  ar1:= nil; //compiler warning
@@ -633,10 +634,8 @@ begin
        hasnormalitem:= true;
       end;
       if shs_suppressed in state then begin
-       suppressed := true;
+       goto suppressed;
       end;
-      if suppressed = false then
-      begin
       hassubmenu:= hassubmenu or (shs_menuarrow in state);
       if [shs_checkbox,shs_radiobutton] * state <> [] then begin
        hascheckbox:= true;
@@ -698,7 +697,7 @@ begin
      else begin
       dim:= nullrect;
      end;
-     end;
+suppressed:
     end;  //with cells[int1].buttoninfo
    end;   //with cells[int1]
   end;
