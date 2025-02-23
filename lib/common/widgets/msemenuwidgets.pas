@@ -410,8 +410,10 @@ var
  size1: sizety;
  hasnormalitem: boolean;
 
-label
- suppressed;
+////////
+//////// label
+////////  suppressed;
+////////
 
 begin
  ar1:= nil; //compiler warning
@@ -633,71 +635,77 @@ begin
       else begin
        hasnormalitem:= true;
       end;
-      if shs_suppressed in state then begin
-       goto suppressed;
-      end;
-      hassubmenu:= hassubmenu or (shs_menuarrow in state);
-      if [shs_checkbox,shs_radiobutton] * state <> [] then begin
-       hascheckbox:= true;
-       if checkboxheight > atextsize.cy then begin
-        atextsize.cy:= checkboxheight;
+////////
+////////       if shs_suppressed in state then begin
+////////        goto suppressed;
+////////       end;
+////////
+      if NOT (shs_suppressed in state) then begin
+       hassubmenu:= hassubmenu or (shs_menuarrow in state);
+       if [shs_checkbox,shs_radiobutton] * state <> [] then begin
+        hascheckbox:= true;
+        if checkboxheight > atextsize.cy then begin
+         atextsize.cy:= checkboxheight;
+        end;
        end;
-      end;
-      with dim do begin
-       if mlo_horz in layout.options then begin                //horizontal
-        if shs_separator in state then begin
-         if separatorframetemplate <> nil then begin
-          cx:= separatorframetemplate.innerframedim.cx;
+       with dim do begin
+        if mlo_horz in layout.options then begin                //horizontal
+         if shs_separator in state then begin
+          if separatorframetemplate <> nil then begin
+           cx:= separatorframetemplate.innerframedim.cx;
+          end
+          else begin
+           cx:= 2;
+          end;
          end
          else begin
-          cx:= 2;
+          if [shs_checkbox,shs_radiobutton] * state <> [] then begin
+           inc(atextsize.cx,checkboxwidth);
+           dec(tabpos,checkboxwidth);
+          end;
+          cx:= atextsize.cx + 4;
+          if (ashortcutwidth > 0) then begin
+           tabpos:= tabpos + atextsize.cx + shortcutdist;
+           cx:= cx + shortcutdist + ashortcutwidth;
+          end;
          end;
+         x:= ax;
+         y:= ay;
+         if commonwidth then begin
+          atextsize.cx:= cx;
+         end;
+         inc(ax,cx+framewidth);
         end
-        else begin
-         if [shs_checkbox,shs_radiobutton] * state <> [] then begin
-          inc(atextsize.cx,checkboxwidth);
-          dec(tabpos,checkboxwidth);
-         end;
-         cx:= atextsize.cx + 4;
-         if (ashortcutwidth > 0) then begin
-          tabpos:= tabpos + atextsize.cx + shortcutdist;
-          cx:= cx + shortcutdist + ashortcutwidth;
-         end;
-        end;
-        x:= ax;
-        y:= ay;
-        if commonwidth then begin
-         atextsize.cx:= cx;
-        end;
-        inc(ax,cx+framewidth);
-       end
-       else begin                                              //vertical
-        y:= ay;
-        if shs_separator in state then begin
-         if separatorframetemplate <> nil then begin
-          cy:= separatorframetemplate.innerframedim.cy;
+        else begin                                              //vertical
+         y:= ay;
+         if shs_separator in state then begin
+          if separatorframetemplate <> nil then begin
+           cy:= separatorframetemplate.innerframedim.cy;
+          end
+          else begin
+           cy:= 2;
+          end;
          end
          else begin
-          cy:= 2;
+          cy:= atextsize.cy;
          end;
-        end
-        else begin
-         cy:= atextsize.cy;
+         inc(ay,cy+frameheight);
         end;
-        inc(ay,cy+frameheight);
        end;
-      end;
-      if atextsize.cy > maxheight then begin
-       maxheight:= atextsize.cy;
-      end;
-      if atextsize.cx > textwidth then begin
-       textwidth:= atextsize.cx;
+       if atextsize.cy > maxheight then begin
+        maxheight:= atextsize.cy;
+       end;
+       if atextsize.cx > textwidth then begin
+        textwidth:= atextsize.cx;
+       end;
       end;
      end
      else begin
       dim:= nullrect;
      end;
-suppressed:
+////////
+//////// suppressed:
+////////
     end;  //with cells[int1].buttoninfo
    end;   //with cells[int1]
   end;
