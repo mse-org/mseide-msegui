@@ -8,8 +8,12 @@ uses
    {$ifdef darwin}
   {$LinkLib libX11.dylib}
  {$else}
-   {$LinkLib libX11.so.6}
+   {$ifdef openbsd}
+   {$LinkLib libX11.so}
+ {$else}
+  {$LinkLib libX11.so.6}  
  {$endif}
+{$endif}
 {$endif}
 
 {

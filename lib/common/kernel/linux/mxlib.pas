@@ -7,16 +7,23 @@ uses
 
 {$ifndef os2}
   {$LinkLib c}
+  
  {$ifdef darwin}
   {$LinkLib libX11.dylib}
    const
    libX11='libX11.dylib';
-  {$else}
-   {$LinkLib libX11.so.6}
+ {$else}
+  {$ifdef openbsd}
+   {$LinkLib libX11.so}
    const
-   libX11='libX11.so.6';
-  {$endif}
-{$else}
+   libX11='libX11.so';
+    {$else} 
+    {$LinkLib libX11.so.6}
+    const
+    libX11='libX11.so.6';
+    {$endif}
+   {$endif}
+ {$else}
 const
   libX11='X11';
 {$endif}

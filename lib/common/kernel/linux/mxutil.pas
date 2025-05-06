@@ -12,13 +12,18 @@ uses
   {$LinkLib libX11.dylib}
    const
    libX11='libX11.dylib';
-  {$else}
+ {$else}
+  {$ifdef openbsd}
+   {$LinkLib libX11.so}
+   const
+   libX11='libX11.so';
+    {$else}
    {$LinkLib libX11.so.6}
    const
    libX11='libX11.so.6';
   {$endif}
-  
-{$else}
+   {$endif}
+ {$else}
 const
   libX11='X11';
 {$endif}
