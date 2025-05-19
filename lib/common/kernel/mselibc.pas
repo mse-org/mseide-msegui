@@ -3282,7 +3282,7 @@ function connect(__fd:longint; const __addr: sockaddr;
 function connect(__fd:longint; __addr:Psockaddr;
                  __len:socklen_t):longint;cdecl;external clib name 'connect' + LIBC_SUFFIX; overload;
 {$ifdef linux}
-function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len' + LIBC_SUFFIX;
+function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len' + LIBC_SUFFIX2;
 {$else}
   //use len field of FreeBSD struct
 {$endif}
@@ -3297,7 +3297,7 @@ function htons(__hostshort:uint16_t):uint16_t;cdecl;external clib name 'htons' +
 procedure freeaddrinfo(__ai:Paddrinfo);cdecl;external clib name 'freeaddrinfo' + LIBC_SUFFIX;
 function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs' + LIBC_SUFFIX;
 
-function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror' + LIBC_SUFFIX;
+function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror' + LIBC_SUFFIX2;
 function syscall(SysNo: Longint): Integer; cdecl; varargs;
                                     external clib name 'syscall' + LIBC_SUFFIX;
 
