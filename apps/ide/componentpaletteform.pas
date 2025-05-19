@@ -124,7 +124,11 @@ begin
       with componentpalette.buttons.add do begin
        options:= [mao_checkbox,mao_radiobutton];
        imagelist:= registeredcomponents.imagelist;
-       imagelist.options := [bmo_masked];
+        {$if defined(netbsd) or defined(darwin) or defined(nomask)}
+        imagelist.options := [bmo_masked]; 
+        {$else}
+        imagelist.options := [bmo_masked, bmo_graymask];
+        {$endif}
        imagenr:= icon;
        hint:= msestring(classtyp.classname);
        tagpo:= classtyp;
