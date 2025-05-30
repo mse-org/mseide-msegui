@@ -201,7 +201,7 @@ var
  int1: integer;
 begin
  for int1:= low(fsysdndobjects) to high(fsysdndobjects) do begin
-  freeandnil(fsysdndobjects[int1].dragobj);
+  freeandnil(TObject(fsysdndobjects[int1].dragobj));
  end;
  freeandnil(ftimer);
 end;
