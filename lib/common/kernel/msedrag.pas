@@ -186,7 +186,7 @@ begin
  enddrag;
  ftimer.free;
  for int1:= 0 to high(fsysdndobjects) do begin
-  freeandnil(fsysdndobjects[int1]);
+  freeandnil(tobject(fsysdndobjects[int1]));
  end;
  inherited;
 end;
