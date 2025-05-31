@@ -186,7 +186,7 @@ begin
  enddrag;
  ftimer.free;
  for int1:= 0 to high(fsysdndobjects) do begin
-  freeandnil(tobject(fsysdndobjects[int1]));
+  freeandnil(fsysdndobjects[int1].dragobj);
  end;
  inherited;
 end;
@@ -201,7 +201,7 @@ var
  int1: integer;
 begin
  for int1:= low(fsysdndobjects) to high(fsysdndobjects) do begin
-  freeandnil(TObject(fsysdndobjects[int1].dragobj));
+  freeandnil(fsysdndobjects[int1].dragobj);
  end;
  freeandnil(ftimer);
 end;
