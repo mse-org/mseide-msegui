@@ -1,11 +1,11 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2024-04-13 MSEgui Version 5.10.4.
-Copyright (c) 1999-2024 by Martin Schreiber and friends.
+2025-06-02 MSEgui Version 5.10.6.
+Copyright (c) 1999-2025 by Martin Schreiber and friends.
 
 - Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2 or 3.3.1.
 - Compiles with FPC-LLVM 3.3.1.
-- For FreeBSD-x86_64, FreeBSD-i386,
+- For FreeBSD-x86_64, FreeBSD-i386, FreeBSD-aarch64.
   Linux-x86_64, Linux-i386,
   Linux-Rpi-arm32, Linux-Rpi-aarch64,
   NetBSD-x86_64, NetBSD-i386,

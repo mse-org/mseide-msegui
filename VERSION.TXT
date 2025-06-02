@@ -1,5 +1,10 @@
 MSEide+MSEgui changes version history
 **********************************************
+Version 5.10.6
+2025-06-02
+Fixes in mselibc.pas for Linux i386, msedrag.pas. and other fixes.
+New target FreeBSD aarch64, compatible fpc 3.3.1.
+
 Version 5.10.4
 2024-04-13
 Fixes in mselibc.pas for Linux i386 and when fpc used <= version 3.0.2.

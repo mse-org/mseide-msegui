@@ -2688,7 +2688,7 @@ function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll';
                                               
 {$else}
-{$if (defined(linux) or defined(darwin)) and (defined(CPUX86_64) or defined(CPUi386))}
+{$if (defined(linux) or defined(darwin)) and (defined(CPUX86_64) or defined(CPUi386) or defined(CPUaarch64))}
 
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll' + LIBC_SUFFIX;
