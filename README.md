@@ -94,6 +94,20 @@ libX11-devel or libX11-dev package or make a symbolic link
 see
 https://bugs.freepascal.org/view.php?id=32367
 
+## Other installation methods
+
+### Bash installer
+
+There is a Bash installer for Linux that you can find [here](https://github.com/rchastain2/scripts/tree/main/install-mseide).
+
+The script clones the git repository, build the IDE, and creates a desktop shortcut.
+
+The **-b** option allowes to choose installation root directory.
+
+```bash
+sh install-mseide.sh -d $HOME
+```
+
 ## If you want to compile the IDE
 
 1. In 'Project'-'Open' select 'sourcedirectory/apps/ide/mseide.prj'.
