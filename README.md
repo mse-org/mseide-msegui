@@ -102,7 +102,7 @@ There is a Bash installer for Linux that you can find [here](https://github.com/
 
 The script clones the git repository, build the IDE, and creates a desktop shortcut.
 
-The **-b** option allowes to choose installation root directory.
+The **-d** option allows to choose installation root directory.
 
 ```bash
 sh install-mseide.sh -d $HOME
