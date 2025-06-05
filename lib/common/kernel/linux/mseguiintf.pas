@@ -18,6 +18,10 @@ unit mseguiintf; //X11
 {$define glibc-table}
 {$endif}
 
+{$if defined(linux) and defined(cpuaarch64)}
+{$define glibc-table}
+{$endif}
+
 {$if defined(darwin)}
 {$define glibc-table}
 {$endif}
