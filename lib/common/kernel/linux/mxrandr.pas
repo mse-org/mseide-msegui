@@ -30,7 +30,7 @@ unit mxrandr;
 
 interface
 uses
- msectypes,mx,mxlib;
+ msectypes,mxlib;
 
 {$packrecords c}
 

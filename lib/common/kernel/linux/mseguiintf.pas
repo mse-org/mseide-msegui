@@ -57,7 +57,7 @@ uses
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,mxft,mxrender,mxrandr,mshape;
+ msestrings,mxft,mxrandr,mshape;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -6796,7 +6796,8 @@ begin
     red:= ($ffff*(int1 and redm)) div redm ;
     green:= ($ffff*(int1 and greenm)) div greenm ;
     blue:= ($ffff*(int1 and bluem)) div bluem ;
-    {$ifdef FPC}
+    // fred  {$ifdef FPC}
+    {$ifndef FPC}
     flags:= dored or dogreen or doblue;
     pad:= 0;
     {$else}
