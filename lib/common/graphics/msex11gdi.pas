@@ -12,7 +12,7 @@ unit msex11gdi;
 interface
 uses
  {$ifdef FPC}mxlib{$else}Xlib{$endif},mxft,
- {$ifdef FPC}mx,mxutil,dynlibs,{$endif}
+ {$ifdef FPC}dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
  msectypes,mxrender,msefontconfig,msetriaglob;
 

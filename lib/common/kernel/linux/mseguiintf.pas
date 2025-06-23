@@ -55,7 +55,7 @@ interface
 uses
  {$ifdef FPC}mxlib{$else}Xlib{$endif},msetypes,mseapplication,msesys,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
- msethread{$ifdef FPC},mx,mxutil,dynlibs{$endif},
+ msethread{$ifdef FPC},dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
  msestrings,mxft,mxrender,mxrandr,mshape;
 
