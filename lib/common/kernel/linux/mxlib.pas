@@ -3,9 +3,7 @@ unit mxlib;
 interface
 
 uses
-  ctypes,
-  mselibc,
-  msectypes;
+  ctypes;
  
 {$mode objfpc}{$h+}  
 
