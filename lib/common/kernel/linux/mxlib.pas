@@ -3,7 +3,11 @@ unit mxlib;
 interface
 
 uses
-  ctypes, mselibc,msectypes;
+  ctypes,
+  mselibc,
+  msectypes;
+ 
+{$mode objfpc}{$h+}  
 
 {$linklib X11}
 {$linklib Xext}
@@ -179,35 +183,35 @@ const
   DirectColor   = 5;
   NoSymbol      = 0;
   AllocNone     = 0;
-  PictOpOver = 3;
+  PictOpOver    = 3;
   PictStandardA1 = 4;
   PictStandardA8 = 2;
   PictStandardARGB32 = 0;
   PictStandardRGB24 = 1;
-  RepeatNormal = 1;
-  CPRepeat = 1 shl 0;
-  CPAlphaMap = 1 shl 1;
+  RepeatNormal  = 1;
+  CPRepeat      = 1 shl 0;
+  CPAlphaMap    = 1 shl 1;
   CPComponentAlpha = 1 shl 12;
-  PictOpSrc = 1;
+  PictOpSrc     = 1;
   PolyEdgeSmooth = 1;
   PolyModePrecise = 0;
   PolyModeImprecise = 1;
-  CPPolyEdge = 1 shl 9;
-  CPPolyMode = 1 shl 10;
+  CPPolyEdge    = 1 shl 9;
+  CPPolyMode    = 1 shl 10;
   CPClipXOrigin = 1 shl 4;
   CPClipYOrigin = 1 shl 5;
-  CPClipMask = 1 shl 6;
+  CPClipMask    = 1 shl 6;
   CPGraphicsExposure = 1 shl 7;
-           
+
   XNFocusWindow = 'focusWindow';
   XNFilterEvents = 'filterEvents';
   XNResetState  = 'resetState';
   XNInputStyle  = 'inputStyle';
   XNClientWindow = 'clientWindow';
   XNDestroyCallback = 'destroyCallback';
-  
+
 type
-   PBool       = ^TBool;
+  PBool       = ^TBool;
    { We cannot use TBool = LongBool, because Longbool(True)=-1, 
      and that is not handled well by X. So we leave TBool=cint; 
      and make overloaded calls with a boolean parameter. 
@@ -215,7 +219,7 @@ type
      is interpreted as true, so we introduce TBoolResult. }
   TBool       = cint;
   TBoolResult = longbool;
-  
+
   TTime = culong;
   PTime = ^TTime;
 
@@ -523,94 +527,94 @@ type
     same_screen: TBool;
   end;
 
- TPicture = txid;
-     PPicture = ^TPicture;
-     TPictFormat = txid;
-     PPictFormat = ^TPictFormat;
-     
-   TXRenderDirectFormat =  record
-          red : smallint;
-          redMask : smallint;
-          green : smallint;
-          greenMask : smallint;
-          blue : smallint;
-          blueMask : smallint;
-          alpha : smallint;
-          alphaMask : smallint;
-       end;
-      PXRenderDirectFormat = ^TXRenderDirectFormat;
-    
-     
-  TXRenderPictFormat =  record
-          id : TPictFormat;
-          _type : longint;
-          depth : longint;
-          direct : TXRenderDirectFormat;
-          colormap : TColormap;
-       end;
-     PXRenderPictFormat = ^TXRenderPictFormat;
+  TPicture    = txid;
+  PPicture    = ^TPicture;
+  TPictFormat = txid;
+  PPictFormat = ^TPictFormat;
+
+  TXRenderDirectFormat = record
+    red: smallint;
+    redMask: smallint;
+    green: smallint;
+    greenMask: smallint;
+    blue: smallint;
+    blueMask: smallint;
+    alpha: smallint;
+    alphaMask: smallint;
+  end;
+  PXRenderDirectFormat = ^TXRenderDirectFormat;
+
+
+  TXRenderPictFormat = record
+    id: TPictFormat;
+    _type: longint;
+    depth: longint;
+    direct: TXRenderDirectFormat;
+    colormap: TColormap;
+  end;
+  PXRenderPictFormat = ^TXRenderPictFormat;
 
   TXRenderColor = record
-          red : word;
-          green : word;
-          blue : word;
-          alpha : word;
-       end;
-       PXRenderColor = ^TXRenderColor;
+    red: word;
+    green: word;
+    blue: word;
+    alpha: word;
+  end;
+  PXRenderColor = ^TXRenderColor;
 
-  TXGlyphInfo =  record
-          width : word;
-          height : word;
-          x : smallint;
-          y : smallint;
-          xOff : smallint;
-          yOff : smallint;
-       end;
+  TXGlyphInfo = record
+    Width: word;
+    Height: word;
+    x: smallint;
+    y: smallint;
+    xOff: smallint;
+    yOff: smallint;
+  end;
   PXGlyphInfo = ^TXGlyphInfo;
-  
-     TXRenderPictureAttributes =  record
-          _repeat : TBool;
-          alpha_map : TPicture;
-          alpha_x_origin : longint;
-          alpha_y_origin : longint;
-          clip_x_origin : longint;
-          clip_y_origin : longint;
-          clip_mask : TPixmap;
-          graphics_exposures : TBool;
-          subwindow_mode : longint;
-          poly_edge : longint;
-          poly_mode : longint;
-          dither : TAtom;
-          component_alpha : TBool;
-       end;
-     PXRenderPictureAttributes = ^TXRenderPictureAttributes;
-     
-     TXFixed = integer;
-     PXFixed = ^TXFixed;
 
-  TXTransform =  array[0..2]             //row
-            of array[0..2] of TXFixed;      //col
-        //m00,m01,0
-        //m10,m11,0     x' = m00 * x + m01 * y + dx
-        //dx, dy, 1     y' = m11 * y + m10 * x + dy
+  TXRenderPictureAttributes = record
+    _repeat: TBool;
+    alpha_map: TPicture;
+    alpha_x_origin: longint;
+    alpha_y_origin: longint;
+    clip_x_origin: longint;
+    clip_y_origin: longint;
+    clip_mask: TPixmap;
+    graphics_exposures: TBool;
+    subwindow_mode: longint;
+    poly_edge: longint;
+    poly_mode: longint;
+    dither: TAtom;
+    component_alpha: TBool;
+  end;
+  PXRenderPictureAttributes = ^TXRenderPictureAttributes;
 
-     PXTransform = ^TXTransform;
-     
-     TXPointFixed =  record
-          x : TXFixed;
-          y : TXFixed;
-       end;
-     PXPointFixed = ^TXPointFixed;
+  TXFixed = integer;
+  PXFixed = ^TXFixed;
+
+  TXTransform = array[0..2]             //row
+    of array[0..2] of TXFixed;      //col
+  //m00,m01,0
+  //m10,m11,0     x' = m00 * x + m01 * y + dx
+  //dx, dy, 1     y' = m11 * y + m10 * x + dy
+
+  PXTransform = ^TXTransform;
+
+  TXPointFixed = record
+    x: TXFixed;
+    y: TXFixed;
+  end;
+  PXPointFixed = ^TXPointFixed;
 
 
-TXTriangle =  record
-          p1 : TXPointFixed;
-          p2 : TXPointFixed;
-          p3 : TXPointFixed;
-       end;
-     PXTriangle = ^TXTriangle;
-     
-  
+  TXTriangle = record
+    p1: TXPointFixed;
+    p2: TXPointFixed;
+    p3: TXPointFixed;
+  end;
+  PXTriangle = ^TXTriangle;
+
+
   PXKeyReleasedEvent = ^TXKeyReleasedEvent;
   TXKeyReleasedEvent = TXKeyEvent;
 
@@ -933,16 +937,17 @@ TXTriangle =  record
     state: cint;
   end;
 
-   PXSelectionClearEvent = ^TXSelectionClearEvent;
-   TXSelectionClearEvent = record
-        _type : cint;
-        serial : culong;
-        send_event : TBool;
-        display : PDisplay;
-        window : TWindow;
-        selection : TAtom;
-        time : longword;
-     end;
+  PXSelectionClearEvent = ^TXSelectionClearEvent;
+
+  TXSelectionClearEvent = record
+    _type: cint;
+    serial: culong;
+    send_event: TBool;
+    display: PDisplay;
+    window: TWindow;
+    selection: TAtom;
+    time: longword;
+  end;
 
   PXSelectionRequestEvent = ^TXSelectionRequestEvent;
 
@@ -1327,8 +1332,7 @@ function XOpenDisplay(display_name: PChar): PDisplay; cdecl; external libX11;
 procedure XCloseDisplay(display: PDisplay); cdecl; external libX11;
 function XDefaultScreen(display: PDisplay): cint; cdecl; external libX11;
 function XDefaultVisual(display: PDisplay; screen_number: cint): PVisual; cdecl; external libX11;
-function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, border_width: cuint; depth: cint; window_class: cuint; visual: PVisual; valuemask: culong;
-  attributes: PXSetWindowAttributes): Window; cdecl; external libX11;
+function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, border_width: cuint; depth: cint; window_class: cuint; visual: PVisual; valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl; external libX11;
 procedure XMapWindow(display: PDisplay; w: Window); cdecl; external libX11;
 procedure XSelectInput(display: PDisplay; w: Window; event_mask: clong); cdecl; external libX11;
 procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl; external libX11;
@@ -1531,3 +1535,4 @@ begin
 end;
 
 end.
+

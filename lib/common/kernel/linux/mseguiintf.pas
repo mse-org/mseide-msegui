@@ -6796,14 +6796,9 @@ begin
     red:= ($ffff*(int1 and redm)) div redm ;
     green:= ($ffff*(int1 and greenm)) div greenm ;
     blue:= ($ffff*(int1 and bluem)) div bluem ;
-    // fred  {$ifdef FPC}
-    {$ifndef FPC}
-    flags:= dored or dogreen or doblue;
-    pad:= 0;
-    {$else}
     flags:= char(dored or dogreen or doblue);
     pad:= #0;
-    {$endif}
+    
    end;
   end;
   with map1[$f6] do begin //value for cl_background

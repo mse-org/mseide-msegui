@@ -16,11 +16,11 @@ unit mCairoXlib;
 
  Translation of cairo-xlib.h version 1.4
  by Jeffrey Pohlmeyer 
- updated to version 1.4 by Luiz Am?rico Pereira C?mara 2007
+ updated to version 1.4 by Luiz Americo Pereira Camara 2007
  
  - Translation and addition of cairo-xlib-xrender.h
  - updated to version 1.12
- by Valdinilson Louren?o da Cunha 2012
+ by Valdinilson Lourenco da Cunha 2012
 
  As per original authors wish, this file is dual licensed LGPL-MPL see the original file
   cairo.pp for the full license.
