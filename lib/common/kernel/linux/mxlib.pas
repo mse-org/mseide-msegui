@@ -1,11 +1,10 @@
 unit mxlib;
+ {$mode objfpc}{$h+}
 
 interface
 
 uses
   ctypes;
- 
-{$mode objfpc}{$h+}  
 
 {$linklib X11}
 {$linklib Xext}
