@@ -6796,8 +6796,8 @@ begin
     red:= ($ffff*(int1 and redm)) div redm ;
     green:= ($ffff*(int1 and greenm)) div greenm ;
     blue:= ($ffff*(int1 and bluem)) div bluem ;
-    flags:= char(dored or dogreen or doblue);
-    pad:= #0;
+    flags:= dored or dogreen or doblue;
+    pad:= 0;
     
    end;
   end;
