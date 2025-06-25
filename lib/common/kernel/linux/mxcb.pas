@@ -55,6 +55,13 @@ type
 
   Display = Pointer; // Maps to xcb_connection_t*
 
+  _XIM = record
+  end;
+  XIM  = ^_XIM;
+  _XIC = record
+  end;
+  XIC  = ^_XIC;
+
   // XID type for mxrandr.pas
   txid = culong;
   pxid = ^txid;
@@ -117,7 +124,6 @@ type
 
   Atom      = cuint;      // Maps to xcb_atom_t
   PAtom     = ^Atom;
-  VisualID  = cuint;      // Maps to xcb_visualid_t
   Colormap  = cuint;      // Maps to xcb_colormap_t
   TColormap = Colormap;   // For mseguiintf.pas
   Pixmap    = cuint;      // Maps to xcb_pixmap_t
@@ -129,15 +135,6 @@ type
   PPcuchar  = ^Pcuchar;
   Picture   = culong;  // Maps to xcb_render_picture_t
   TPicture  = Picture; // For msex11gdi.pas
-
-  Visual = record
-    visualid: VisualID;
-    visual_class: cint; // Renamed from class
-    red_mask, green_mask, blue_mask: culong;
-    bits_per_rgb: cint;
-    map_entries: cint;
-  end;
-  PVisual = ^Visual;
 
   XSizeHints = record
     flags: clong;
@@ -159,6 +156,29 @@ type
     res_class: PChar;
   end;
   PXClassHint = ^XClassHint;
+
+  XExtData = record
+    number: cint;
+    Next: Pointer;
+    free_private: procedure(Data: Pointer); cdecl;
+    private_data: PChar;
+  end;
+  PXExtData = ^XExtData;
+
+  VisualID = culong;
+
+  Visual = record
+    ext_data: PXExtData;  { hook for extension to hang data  }
+    visualid: VisualID;   { visual id of this visual  }
+    _class: cint;
+    red_mask: culong;
+    green_mask: culong;
+    blue_mask: culong;
+    bits_per_rgb: cint;
+    map_entries: cint;
+  end;
+  msepvisual = ^visual;
+  pvisual    = ^visual;
 
   XVisualInfo = record
     visual: PVisual;
@@ -182,14 +202,6 @@ type
 
   XrmHashBucketRec  = Pointer;
   PXrmHashBucketRec = ^XrmHashBucketRec;
-
-  XExtData = record
-    number: cint;
-    Next: Pointer;
-    free_private: procedure(Data: Pointer); cdecl;
-    private_data: PChar;
-  end;
-  PXExtData = ^XExtData;
 
   XWMHints = record
     flags: clong;
@@ -973,6 +985,8 @@ type
     root_input_mask: clong;
   end;
 
+  XID = type culong;
+
   PScreenFormat = ^TScreenFormat;
 
   TScreenFormat = record
@@ -1178,6 +1192,8 @@ type
   TXErrorHandler = function(para1: PDisplay; para2: PXErrorEvent): cint; cdecl;
 
 const
+  MWM_HINTS_DECORATIONS = 1 shl 1;
+  WindowGroupHint = 1 shl 6;
   KeyPressMask  = 1 shl 0;
   ExposureMask  = 1 shl 15;
   KeyPress      = 2;
@@ -1549,6 +1565,32 @@ function XUnionRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cde
 function XOffsetRegion(para1: TRegion; para2: cint; para3: cint): cint; cdecl;
 function XSubtractRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
 function XIntersectRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword; Format: longint; Offset: longint; Data: PChar; Width, Height: longword; BitmapPad: longint; BytesPerLine: longint): PXImage; cdecl;
+
+// Todo from libX11 and mseguiintf
+function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
+function XSetForeground(Display: PDisplay; GC: TGC; Foreground: culong): cint; cdecl;
+procedure XDrawImageString(Display: PDisplay; D: TDrawable; GC: TGC; X, Y: integer; S: PChar; Len: integer); cdecl;
+procedure XDrawImageString16(Display: PDisplay; D: TDrawable; GC: TGC; X, Y: integer; S: Pxchar2b; Len: integer); cdecl;
+function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
+function XCloseIM(IM: XIM): TStatus; cdecl;
+
+function XCreateIC(IM: XIM; inputstyle: PChar; status: longint; pt: Pointer): XIC; cdecl;
+
+procedure XDestroyIC(IC: XIC); cdecl;
+function XSetLocaleModifiers(modifier_list: PChar): PChar; cdecl;
+
+function XSetICValues(IC: XIC; focusw: PChar; id: longint; pnt: Pointer): PChar; cdecl;
+function XSetICValues(IC: XIC; nreset: PChar; impreserv: PChar; pnt: Pointer): PChar; cdecl;
+function XSetIMValues(IC: XIM; destroycb: PChar; ximcb: Pointer; pt: Pointer): PChar; cdecl;
+
+function XGetICValues(IC: XIC; filterev: PChar; icmask: Pointer; pnt: Pointer): PChar; cdecl;
+
+procedure XSetICFocus(IC: XIC); cdecl;
+procedure XUnsetICFocus(IC: XIC); cdecl;
+function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent; BufferReturn: PChar; CharsBuffer: longint; KeySymReturn: PKeySym; StatusReturn: PStatus): longint; cdecl;
+function Xutf8TextListToTextProperty(para1: PDisplay; para2: PPchar; para3: integer; para4: integer{TXICCEncodingStyle}; para5: PXTextProperty): integer; cdecl;
+function Xutf8TextPropertyToTextList(para1: PDisplay; para2: PXTextProperty; para3: PPPchar; para4: pinteger): integer; cdecl;
 
 // Todo from libXrandr 
 function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
@@ -1777,6 +1819,7 @@ var
   wid: xcb_window_t;
   value_list: array[0..3] of cuint32;
 begin
+  writeln('XCreateWindow');
   wid           := cuint(xcb_generate_id(display));
   value_list[0] := attributes^.background_pixel;
   value_list[1] := attributes^.event_mask;
@@ -2068,7 +2111,7 @@ end;
 
 procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
 begin
- 
+
 end;
 
 function XPending(display: PDisplay): cint; cdecl;
@@ -2546,6 +2589,12 @@ begin
 
 end;
 
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword; Format: longint; Offset: longint; Data: PChar; Width, Height: longword; BitmapPad: longint; BytesPerLine: longint): PXImage; cdecl;
+begin
+
+end;
+
+
 // Todo from Xrandr
 function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
 begin
@@ -2596,6 +2645,97 @@ function getxrandrlib: Boolean;
 begin
   Result := True;
 end;
+
+function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
+begin
+
+end;
+
+function XSetForeground(Display: PDisplay; GC: TGC; Foreground: culong): cint; cdecl;
+begin
+
+end;
+
+procedure XDrawImageString(Display: PDisplay; D: TDrawable; GC: TGC; X, Y: integer; S: PChar; Len: integer); cdecl;
+begin
+
+end;
+
+procedure XDrawImageString16(Display: PDisplay; D: TDrawable; GC: TGC; X, Y: integer; S: Pxchar2b; Len: integer); cdecl;
+begin
+
+end;
+
+function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
+begin
+
+end;
+
+function XCloseIM(IM: XIM): TStatus; cdecl;
+begin
+
+end;
+
+function XCreateIC(IM: XIM; inputstyle: PChar; status: longint; pt: Pointer): XIC; cdecl;
+begin
+
+end;
+
+procedure XDestroyIC(IC: XIC); cdecl;
+begin
+
+end;
+
+function XSetLocaleModifiers(modifier_list: PChar): PChar; cdecl;
+begin
+
+end;
+
+function XSetICValues(IC: XIC; focusw: PChar; id: longint; pnt: Pointer): PChar; cdecl;
+begin
+
+end;
+
+function XSetICValues(IC: XIC; nreset: PChar; impreserv: PChar; pnt: Pointer): PChar; cdecl;
+begin
+
+end;
+
+function XSetIMValues(IC: XIM; destroycb: PChar; ximcb: Pointer; pt: Pointer): PChar; cdecl;
+begin
+
+end;
+
+function XGetICValues(IC: XIC; filterev: PChar; icmask: Pointer; pnt: Pointer): PChar; cdecl;
+begin
+
+end;
+
+procedure XSetICFocus(IC: XIC); cdecl;
+begin
+
+end;
+
+procedure XUnsetICFocus(IC: XIC); cdecl;
+begin
+
+end;
+
+function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent; BufferReturn: PChar; CharsBuffer: longint; KeySymReturn: PKeySym; StatusReturn: PStatus): longint; cdecl;
+begin
+
+end;
+
+function Xutf8TextListToTextProperty(para1: PDisplay; para2: PPchar; para3: integer; para4: integer{TXICCEncodingStyle}; para5: PXTextProperty): integer; cdecl;
+begin
+
+end;
+
+function Xutf8TextPropertyToTextList(para1: PDisplay; para2: PXTextProperty; para3: PPPchar; para4: pinteger): integer; cdecl;
+begin
+
+end;
+
 
 // Macros
 function ScreenOfDisplay(dpy: PDisplay; scr: cint): PScreen;

@@ -385,7 +385,8 @@ function msedefaultscreenno: integer;
  {$MINENUMSIZE 4}
 {$endif}
 
-type
+ {$ifndef use_xcb}
+ type
  _XIM = record end;
  XIM = ^_XIM;
  _XIC = record end;
@@ -393,7 +394,7 @@ type
  ppucs4char = ^pucs4char;
 
  dword= longword;
-  
+ 
  VisualID = culong;
  Visual = record
   ext_data: PXExtData;  { hook for extension to hang data  }
@@ -406,6 +407,7 @@ type
   map_entries: cint;
  end;
  msepvisual = ^visual;
+ 
 
 (*
  VisualID = dword;
@@ -472,6 +474,7 @@ type
    TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
   }
+  
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
                               external sXLib name 'XSetWMHints';
 function XSetForeground(Display: PDisplay; GC: TGC;
@@ -537,6 +540,8 @@ function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar;
 function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
+
+{$endif}
 
 implementation
 uses
@@ -6998,15 +7003,20 @@ begin
   if appdisp = nil then begin
    goto error;
   end;
-
+  
+  // writeln('appdisp:= xopendisplay(nil) = OK');
+  
   if not createim then begin
    result:= gue_inputmanager;
    goto error;
   end;
   setlocale(lc_all,po1); //restore original
+  
+  // writeln('setlocale(lc_all,po1) = OK');
 
 //  defscreenid:= xdefaultscreen(appdisp);
   defscreen:= xdefaultscreenofdisplay(appdisp);
+   
   rootid:= xrootwindowofscreen(defscreen);
   defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
   defdepth:= xdefaultdepthofscreen(defscreen);
