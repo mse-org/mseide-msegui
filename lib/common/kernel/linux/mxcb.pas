@@ -31,7 +31,13 @@ type
   end;
   Pxcb_generic_error_t = ^xcb_generic_error_t;
   PPxcb_generic_error_t = ^Pxcb_generic_error_t;
-  
+
+  xcb_void_cookie_t = record
+   sequence: cuint;
+  end;
+
+  Pxcb_void_cookie_t = ^xcb_void_cookie_t;
+ 
   PBool       = ^TBool;
   TBool       = cint;
   TBoolResult = cint;
@@ -51,6 +57,7 @@ type
  
   Window = cuint; // Maps to xcb_window_t
   TWindow = Window; // For mshape.pas
+  xcb_drawable_t = cuint32;
   Drawable = cuint; // Maps to xcb_drawable_t
   TDrawable = Drawable; // For mseguiintf.pas
   GC = Pointer; // Maps to xcb_gcontext_t
@@ -291,9 +298,7 @@ type
 
   // XCB-specific types
   xcb_window_t = cuint;
-  xcb_drawable_t = cuint;
   xcb_gcontext_t = cuint;
-  xcb_void_cookie_t = cuint;
   xcb_visualid_t = cuint;
   xcb_colormap_t = cuint;
   xcb_pixmap_t = cuint;
@@ -1152,6 +1157,12 @@ const
   KeyPress = 2;
   Expose = 12;
   ClientMessage = 33;
+  XCB_IMAGE_FORMAT_XY_BITMAP = 1;
+  XCB_IMAGE_FORMAT_XY_PIXMAP = 2;
+  XCB_IMAGE_FORMAT_Z_PIXMAP = 2;
+  XCB_KEY_PRESS = 2;
+  XCB_KEY_RELEASE = 3;
+  XCB_EXPOSE = 12;
   InputOnly = 2;
   InputOutput = 1;
   CopyFromParent = 0;
@@ -1341,6 +1352,8 @@ const
   XNClientWindow = 'clientWindow';
   XNDestroyCallback = 'destroyCallback';
 
+var
+GlobalXCBConnection: PDisplay;
 
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
 procedure XCloseDisplay(display: PDisplay); cdecl;
@@ -1546,7 +1559,7 @@ function xcb_poly_text_16(c: pxcb_connection_t; drawable: xcb_drawable_t; gc: xc
 
 // fred
 
-function xcb_put_image(c: xcb_connection_t; format: cuint8; drawable: xcb_drawable_t;
+function xcb_put_image(c: pxcb_connection_t; format: cuint8; drawable: xcb_drawable_t;
     gc: xcb_gcontext_t; width, height: cuint16; dst_x, dst_y: cint16; left_pad: cuint8;
     depth: cuint8; data_len: cuint32; data: PByte): xcb_void_cookie_t; cdecl; external libxcb;
 
@@ -1557,17 +1570,17 @@ function xcb_put_image(c: xcb_connection_t; format: cuint8; drawable: xcb_drawab
 // function xcb_shape_query_extension_reply(c: xcb_connection_t; cookie: Pointer; e: Pointer): xcb_shape_query_extension_reply_t; cdecl; external libxcb_shape;
 // function xcb_shape_combine_region(c: xcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; region: xcb_region_t): Pointer; cdecl; external libxcb_shape;
 
-function xcb_create_colormap(c: xcb_connection_t; alloc: cuint8; mid: xcb_colormap_t; window: xcb_window_t; visual: xcb_visualid_t): Pointer; cdecl; external libxcb;
-function xcb_free_colormap(c: xcb_connection_t; cmap: xcb_colormap_t): Pointer; cdecl; external libxcb;
-function xcb_create_pixmap(c: xcb_connection_t; depth: cuint8; pid: xcb_pixmap_t; drawable: xcb_drawable_t; width, height: cuint16): Pointer; cdecl; external libxcb;
-function xcb_render_create_picture(c: xcb_connection_t; pid: xcb_render_picture_t; drawable: xcb_drawable_t; format: xcb_render_pictformat_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb_render;
-function xcb_render_free_picture(c: xcb_connection_t; picture: xcb_render_picture_t): Pointer; cdecl; external libxcb_render;
-function xcb_render_composite(c: xcb_connection_t; op: cuint8; src: xcb_render_picture_t; mask: xcb_render_picture_t; dst: xcb_render_picture_t; src_x, src_y, mask_x, mask_y, dst_x, dst_y: cint16; width, height: cuint16): Pointer; cdecl; external libxcb_render;
+function xcb_create_colormap(c: pxcb_connection_t; alloc: cuint8; mid: xcb_colormap_t; window: xcb_window_t; visual: xcb_visualid_t): Pointer; cdecl; external libxcb;
+function xcb_free_colormap(c: pxcb_connection_t; cmap: xcb_colormap_t): Pointer; cdecl; external libxcb;
+function xcb_create_pixmap(c: pxcb_connection_t; depth: cuint8; pid: xcb_pixmap_t; drawable: xcb_drawable_t; width, height: cuint16): Pointer; cdecl; external libxcb;
+function xcb_render_create_picture(c: pxcb_connection_t; pid: xcb_render_picture_t; drawable: xcb_drawable_t; format: xcb_render_pictformat_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb_render;
+function xcb_render_free_picture(c: pxcb_connection_t; picture: xcb_render_picture_t): Pointer; cdecl; external libxcb_render;
+function xcb_render_composite(c: pxcb_connection_t; op: cuint8; src: xcb_render_picture_t; mask: xcb_render_picture_t; dst: xcb_render_picture_t; src_x, src_y, mask_x, mask_y, dst_x, dst_y: cint16; width, height: cuint16): Pointer; cdecl; external libxcb_render;
 
-function xcb_shape_combine(c: xcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; source: xcb_window_t; source_kind: cuint8): Pointer; cdecl; external libxcb_shape;
+function xcb_shape_combine(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; source: xcb_window_t; source_kind: cuint8): Pointer; cdecl; external libxcb_shape;
 
-function xcb_shape_rectangles(c: xcb_connection_t; operation: cuint8; destination_kind: cuint8; ordering: cuint8; destination: xcb_window_t; x, y: cint16; rectangles_len: cuint32; rectangles: PXRectangle): Pointer; cdecl; external libxcb_shape;
-function xcb_shape_mask(c: xcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; mask: xcb_pixmap_t): Pointer; cdecl; external libxcb_shape;
+function xcb_shape_rectangles(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; ordering: cuint8; destination: xcb_window_t; x, y: cint16; rectangles_len: cuint32; rectangles: PXRectangle): Pointer; cdecl; external libxcb_shape;
+function xcb_shape_mask(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; mask: xcb_pixmap_t): Pointer; cdecl; external libxcb_shape;
 
 // Implementation
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
