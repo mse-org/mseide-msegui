@@ -1563,6 +1563,7 @@ function xcb_put_image(c: pxcb_connection_t; format: cuint8; drawable: xcb_drawa
     gc: xcb_gcontext_t; width, height: cuint16; dst_x, dst_y: cint16; left_pad: cuint8;
     depth: cuint8; data_len: cuint32; data: PByte): xcb_void_cookie_t; cdecl; external libxcb;
 
+function xcb_request_check(c: Pxcb_connection_t; cookie: xcb_void_cookie_t): Pxcb_generic_error_t; cdecl; external 'libxcb';
 // function xcb_put_image(c: xcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; image: Pointer; x, y: cint16; width, height: cuint16): Pointer; cdecl; external libxcb;
 // function xcb_get_next_event(c: xcb_connection_t): pxcb_generic_event_t; cdecl; external libxcb;
 // function xcb_events_queued(c: xcb_connection_t; mode: cint): cint; cdecl; external libxcb;
