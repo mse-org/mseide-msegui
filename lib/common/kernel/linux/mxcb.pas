@@ -1574,9 +1574,7 @@ procedure XDrawImageString(Display: PDisplay; D: TDrawable; GC: TGC; X, Y: integ
 procedure XDrawImageString16(Display: PDisplay; D: TDrawable; GC: TGC; X, Y: integer; S: Pxchar2b; Len: integer); cdecl;
 function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
 function XCloseIM(IM: XIM): TStatus; cdecl;
-
 function XCreateIC(IM: XIM; inputstyle: PChar; status: longint; pt: Pointer): XIC; cdecl;
-
 procedure XDestroyIC(IC: XIC); cdecl;
 function XSetLocaleModifiers(modifier_list: PChar): PChar; cdecl;
 
@@ -1585,14 +1583,13 @@ function XSetICValues(IC: XIC; nreset: PChar; impreserv: PChar; pnt: Pointer): P
 function XSetIMValues(IC: XIM; destroycb: PChar; ximcb: Pointer; pt: Pointer): PChar; cdecl;
 
 function XGetICValues(IC: XIC; filterev: PChar; icmask: Pointer; pnt: Pointer): PChar; cdecl;
-
 procedure XSetICFocus(IC: XIC); cdecl;
 procedure XUnsetICFocus(IC: XIC); cdecl;
 function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent; BufferReturn: PChar; CharsBuffer: longint; KeySymReturn: PKeySym; StatusReturn: PStatus): longint; cdecl;
 function Xutf8TextListToTextProperty(para1: PDisplay; para2: PPchar; para3: integer; para4: integer{TXICCEncodingStyle}; para5: PXTextProperty): integer; cdecl;
 function Xutf8TextPropertyToTextList(para1: PDisplay; para2: PXTextProperty; para3: PPPchar; para4: pinteger): integer; cdecl;
 
-// Todo from libXrandr 
+// Todo from libXrandr
 function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
 function XRRGetScreenResources(dpy: pDisplay; window: Window): pXRRScreenResources; cdecl;
 procedure XRRFreeScreenResources(resources: pXRRScreenResources); cdecl;
@@ -1819,7 +1816,6 @@ var
   wid: xcb_window_t;
   value_list: array[0..3] of cuint32;
 begin
-  writeln('XCreateWindow');
   wid           := cuint(xcb_generate_id(display));
   value_list[0] := attributes^.background_pixel;
   value_list[1] := attributes^.event_mask;
