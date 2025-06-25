@@ -11,7 +11,7 @@ unit msex11gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
- {$ifdef FPC}mxlib{$else}Xlib{$endif},mxft,
+ {$ifdef use_xcb}mxcb{$else}mxlib{$endif},mxft,
  {$ifdef FPC}dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
  msectypes,msefontconfig,msetriaglob;
@@ -1050,7 +1050,7 @@ begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   if xftdraw = nil then begin
    xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,
-                                                 mxlib.pvisual(defvisual),0);
+                                                 pvisual(defvisual),0);
    xftdrawpic:= xftdrawpicture(xftdraw);
    attr.poly_edge:= polyedgesmooth;
    attr.poly_mode:= polymodeprecise;

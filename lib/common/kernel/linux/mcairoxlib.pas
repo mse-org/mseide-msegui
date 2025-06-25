@@ -31,7 +31,7 @@ unit mCairoXlib;
 interface
 
 uses
-  Cairo, mxlib;
+  Cairo, {$ifdef use_xcb}mxcb{$else}mxlib{$endif};
   
 function  cairo_xlib_surface_create(dpy: PDisplay; drawable: TDrawable; visual: PVisual; width, height: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;
 function  cairo_xlib_surface_create_for_bitmap(dpy: PDisplay; bitmap: TPixmap; screen: PScreen; width, height: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;

@@ -30,7 +30,7 @@ unit mxrandr;
 
 interface
 uses
- msectypes,mxlib;
+ msectypes,{$ifdef use_xcb}mxcb{$else}mxlib{$endif};
 
 {$packrecords c}
 
