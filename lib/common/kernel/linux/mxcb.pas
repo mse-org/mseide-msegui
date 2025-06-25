@@ -16,6 +16,7 @@ const
 type
   xcb_connection_t = record end; // Opaque structure
   Pxcb_connection_t = ^xcb_connection_t;
+  PDisplay = Pxcb_connection_t; // Alias for XCB connection
   
   type
   xcb_generic_error_t = record
@@ -44,7 +45,10 @@ type
   PXRectangle = ^XRectangle;
 
   Display = Pointer; // Maps to xcb_connection_t*
-  PDisplay = ^Display;
+ // PDisplay = ^Display;
+  
+ // PDisplay = ^Pointer; // Opaque pointer (simulating Xlib's Display)
+ 
   Window = cuint; // Maps to xcb_window_t
   TWindow = Window; // For mshape.pas
   Drawable = cuint; // Maps to xcb_drawable_t
@@ -1508,37 +1512,37 @@ type
   end;
 
 // XCB functions
-function xcb_generate_id(c: xcb_connection_t): cuint32; cdecl; external libxcb;
-function xcb_connect(displayname: PChar; screenp: Pcint): xcb_connection_t; cdecl; external libxcb;
-procedure xcb_disconnect(c: xcb_connection_t); cdecl; external libxcb;
-function xcb_get_setup(c: xcb_connection_t): Pointer; cdecl; external libxcb;
+function xcb_generate_id(c: pxcb_connection_t): cuint32; cdecl; external libxcb;
+function xcb_connect(displayname: PChar; screenp: Pcint): pxcb_connection_t; cdecl; external libxcb;
+procedure xcb_disconnect(c: pxcb_connection_t); cdecl; external libxcb;
+function xcb_get_setup(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
 function xcb_setup_roots_iterator(setup: Pointer): xcb_setup_roots_iterator_t; cdecl; external libxcb;
-function xcb_create_window(c: xcb_connection_t; depth: cuint8; wid: xcb_window_t; parent: xcb_window_t;
+function xcb_create_window(c: pxcb_connection_t; depth: cuint8; wid: xcb_window_t; parent: xcb_window_t;
                           x, y: cint16; width, height, border_width: cuint16; _class: cuint16; visual: xcb_visualid_t;
                           value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
-function xcb_map_window(c: xcb_connection_t; window: xcb_window_t): Pointer; cdecl; external libxcb;
-function xcb_change_window_attributes(c: xcb_connection_t; window: xcb_window_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
-function xcb_get_input_focus(c: xcb_connection_t): Pointer; cdecl; external libxcb;
-function xcb_get_input_focus_reply(c: xcb_connection_t; cookie: Pointer; e: Pointer): Pointer; cdecl; external libxcb;
-function xcb_intern_atom(c: xcb_connection_t; only_if_exists: cuint8; length: cuint16; name: PChar): Pointer; cdecl; external libxcb;
-function xcb_intern_atom_reply(c: xcb_connection_t; cookie: Pointer; e: Pointer): xcb_intern_atom_reply_t; cdecl; external libxcb;
-function xcb_get_property(c: xcb_connection_t; delete: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; offset, length: cuint32): Pointer; cdecl; external libxcb;
-function xcb_get_property_reply(c: xcb_connection_t; cookie: Pointer; e: Pointer): xcb_get_property_reply_t; cdecl; external libxcb;
-function xcb_change_property(c: xcb_connection_t; mode: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; data: Pointer): Pointer; cdecl; external libxcb;
-function xcb_send_event(c: xcb_connection_t; propagate: cuint8; destination: xcb_window_t; event_mask: cuint32; event: Pointer): Pointer; cdecl; external libxcb;
-procedure xcb_flush(c: xcb_connection_t); cdecl; external libxcb;
-function xcb_get_atom_name(c: xcb_connection_t; atom: xcb_atom_t): Pointer; cdecl; external libxcb;
-function xcb_get_atom_name_reply(c: xcb_connection_t; cookie: Pointer; e: Pointer): xcb_get_atom_name_reply_t; cdecl; external libxcb;
-function xcb_create_gc(c: xcb_connection_t; cid: xcb_gcontext_t; drawable: xcb_drawable_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
-function xcb_free_gc(c: xcb_connection_t; gc: xcb_gcontext_t): Pointer; cdecl; external libxcb;
-function xcb_change_gc(c: xcb_connection_t; gc: xcb_gcontext_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
-function xcb_poly_line(c: xcb_connection_t; coordinate_mode: cuint8; drawable: xcb_drawable_t; gc: xcb_gcontext_t; points_len: cuint32; points: Pointer): Pointer; cdecl; external libxcb;
-function xcb_open_font(c: xcb_connection_t; fid: xcb_font_t; name_len: cuint32; name: PChar): Pointer; cdecl; external libxcb;
-function xcb_query_font(c: xcb_connection_t; font: xcb_font_t): Pointer; cdecl; external libxcb;
-function xcb_query_font_reply(c: xcb_connection_t; cookie: Pointer; e: Pointer): xcb_query_font_reply_t; cdecl; external libxcb;
-function xcb_close_font(c: xcb_connection_t; font: xcb_font_t): Pointer; cdecl; external libxcb;
-function xcb_poly_text_8(c: xcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; x, y: cint16; items_len: cuint32; items: PChar): Pointer; cdecl; external libxcb;
-function xcb_poly_text_16(c: xcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; x, y: cint16; items_len: cuint32; items: PXChar2b): Pointer; cdecl; external libxcb;
+function xcb_map_window(c: pxcb_connection_t; window: xcb_window_t): Pointer; cdecl; external libxcb;
+function xcb_change_window_attributes(c: pxcb_connection_t; window: xcb_window_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
+function xcb_get_input_focus(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
+function xcb_get_input_focus_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): Pointer; cdecl; external libxcb;
+function xcb_intern_atom(c: pxcb_connection_t; only_if_exists: cuint8; length: cuint16; name: PChar): Pointer; cdecl; external libxcb;
+function xcb_intern_atom_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_intern_atom_reply_t; cdecl; external libxcb;
+function xcb_get_property(c: pxcb_connection_t; delete: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; offset, length: cuint32): Pointer; cdecl; external libxcb;
+function xcb_get_property_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_get_property_reply_t; cdecl; external libxcb;
+function xcb_change_property(c: pxcb_connection_t; mode: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; data: Pointer): Pointer; cdecl; external libxcb;
+function xcb_send_event(c: pxcb_connection_t; propagate: cuint8; destination: xcb_window_t; event_mask: cuint32; event: Pointer): Pointer; cdecl; external libxcb;
+procedure xcb_flush(c: pxcb_connection_t); cdecl; external libxcb;
+function xcb_get_atom_name(c: pxcb_connection_t; atom: xcb_atom_t): Pointer; cdecl; external libxcb;
+function xcb_get_atom_name_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_get_atom_name_reply_t; cdecl; external libxcb;
+function xcb_create_gc(c: pxcb_connection_t; cid: xcb_gcontext_t; drawable: xcb_drawable_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
+function xcb_free_gc(c: pxcb_connection_t; gc: xcb_gcontext_t): Pointer; cdecl; external libxcb;
+function xcb_change_gc(c: pxcb_connection_t; gc: xcb_gcontext_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
+function xcb_poly_line(c: pxcb_connection_t; coordinate_mode: cuint8; drawable: xcb_drawable_t; gc: xcb_gcontext_t; points_len: cuint32; points: Pointer): Pointer; cdecl; external libxcb;
+function xcb_open_font(c: pxcb_connection_t; fid: xcb_font_t; name_len: cuint32; name: PChar): Pointer; cdecl; external libxcb;
+function xcb_query_font(c: pxcb_connection_t; font: xcb_font_t): Pointer; cdecl; external libxcb;
+function xcb_query_font_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_query_font_reply_t; cdecl; external libxcb;
+function xcb_close_font(c: pxcb_connection_t; font: xcb_font_t): Pointer; cdecl; external libxcb;
+function xcb_poly_text_8(c: pxcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; x, y: cint16; items_len: cuint32; items: PChar): Pointer; cdecl; external libxcb;
+function xcb_poly_text_16(c: pxcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; x, y: cint16; items_len: cuint32; items: PXChar2b): Pointer; cdecl; external libxcb;
 
 // fred
 
