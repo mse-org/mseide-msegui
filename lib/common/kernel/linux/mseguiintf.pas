@@ -53,11 +53,11 @@ interface
  {$define mse_debug}
 {$endif}
 uses
- {$ifdef use_xcb}mxcb{$else}mxlib{$endif},msetypes,mseapplication,msesys,
+ {$ifdef use_xcb}mxcb{$else}mxlib,mxrandr{$endif},msetypes,mseapplication,msesys,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,mxft,mxrandr,mshape;
+ msestrings,mxft,mshape;
 
 {$ifdef FPC}
  {$define xbooleanresult}
