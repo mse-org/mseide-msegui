@@ -10,8 +10,8 @@ uses
 const
   libxcb = 'libxcb.so.1';
   libxcb_shape = 'libxcb-shape.so.0';
-  libxcb_render = 'libxcb-render.so';
-  libxcb_randr = 'libxcb-randr.so';
+  libxcb_render = 'libxcb-render.so.0';
+  libxcb_randr = 'libxcb-randr.so.0';
 
 type
   xcb_connection_t = record end; // Opaque structure
@@ -51,9 +51,6 @@ type
   PXRectangle = ^XRectangle;
 
   Display = Pointer; // Maps to xcb_connection_t*
- // PDisplay = ^Display;
-  
- // PDisplay = ^Pointer; // Opaque pointer (simulating Xlib's Display)
  
   Window = cuint; // Maps to xcb_window_t
   TWindow = Window; // For mshape.pas
@@ -62,10 +59,6 @@ type
   TDrawable = Drawable; // For mseguiintf.pas
   GC = Pointer; // Maps to xcb_gcontext_t
   TGC = GC;
- 
- // fred
- // Screen = Pointer; // Maps to xcb_screen_t*
- // PScreen = ^Screen;
  
   Atom = cuint; // Maps to xcb_atom_t
   PAtom = ^Atom;
@@ -91,32 +84,6 @@ type
   end;
   PVisual = ^Visual;
 
-{ fred
-  XWindowAttributes = record
-    x, y: cint;
-    width, height: cint;
-    border_width: cint;
-    depth: cint;
-    visual: PVisual;
-    root: Window;
-    visual_class: cint; // Renamed from class
-    bit_gravity: cint;
-    win_gravity: cint;
-    backing_store: cint;
-    backing_planes: culong;
-    backing_pixel: culong;
-    save_under: boolean;
-    colormap: Colormap;
-    map_installed: boolean;
-    map_state: cint;
-    all_event_masks: clong;
-    your_event_mask: clong;
-    do_not_propagate_mask: clong;
-    override_redirect: boolean;
-    screen: PScreen;
-  end;
-  PXWindowAttributes = ^XWindowAttributes;
-}
   XSizeHints = record
     flags: clong;
     x, y: cint;
@@ -198,68 +165,6 @@ type
   end;
   PXKeyPressedEvent = ^XKeyEvent;
 
-{ fred
-  XImage = record
-    width, height: cint;
-    xoffset: cint;
-    format: cint;
-    data: PChar;
-    byte_order: cint;
-    bitmap_unit: cint;
-    bitmap_bit_order: cint;
-    bitmap_pad: cint;
-    depth: cint;
-    bytes_per_line: cint;
-    bits_per_pixel: cint;
-    red_mask: culong;
-    green_mask: culong;
-    blue_mask: culong;
-    obdata: PChar;
-    funcs: record
-      create_image: function: Pointer; cdecl;
-      destroy_image: function(image: Pointer): cint; cdecl;
-      get_pixel: function(image: Pointer; x, y: cint): culong; cdecl;
-      put_pixel: function(image: Pointer; x, y: cint; pixel: culong): cint; cdecl;
-      sub_image: function(image: Pointer; x, y: cint; width, height: cuint): Pointer; cdecl;
-      add_pixel: function(image: Pointer; value: clong): cint; cdecl;
-    end;
-  end;
-  PXImage = ^XImage;
-
-  XEvent = record
-    case integer of
-      0: (type_: cint);
-      2: (xkey: XKeyEvent);
-      12: (xexpose: record
-            type_: cint;
-            serial: culong;
-            send_event: boolean;
-            display: PDisplay;
-            window: Window;
-            x, y: cint;
-            width, height: cuint;
-            count: cint;
-          end);
-      33: (xclient: record
-            type_: cint;
-            serial: culong;
-            send_event: boolean;
-            display: PDisplay;
-            window: Window;
-            message_type: Atom;
-            format: cint;
-            data: record
-              case integer of
-                0: (l: array[0..4] of clong);
-                1: (s: array[0..9] of cshort);
-                2: (b: array[0..19] of cchar);
-            end;
-          end);
-  end;
-  PXEvent = ^XEvent;
-  txevent = XEvent;
-  }
-
   XSetWindowAttributes = record
     background_pixel: culong;
     event_mask: clong;
@@ -274,22 +179,6 @@ type
   end;
   PXGCValues = ^XGCValues;
 
-{ fred
-  XFontStruct = record
-    fid: Font;
-    ascent: cint;
-    descent: cint;
-  end;
-  PXFontStruct = ^XFontStruct;
-
-  XTextProperty = record
-    value: Pcuchar;
-    encoding: Atom;
-    format: cint;
-    nitems: culong;
-  end;
-  PXTextProperty = ^XTextProperty;
-}
   XModifierKeymap = record
     max_keypermod: cint;
     modifiermap: Pcuchar;
@@ -344,8 +233,6 @@ type
   txid = culong;
   pxid = ^txid;
   
-// fred begin
-
   TXGlyphInfo = record
     Width: word;
     Height: word;
@@ -510,7 +397,7 @@ PXTextProperty = ^TXTextProperty;
   end; 
   
  TTime = culong;
-  PTime = ^TTime;  
+ PTime = ^TTime;  
   
  PXAnyEvent = ^TXAnyEvent;
 
@@ -1115,9 +1002,6 @@ PXKeymapEvent = ^TXKeymapEvent;
    PKeyCode = ^TKeyCode;
   TKeyCode = cuchar;
 
-  
-// fred end  
-
     // XRandR types for mxrandr.pas
   Rotation = cushort;
   SizeID = cushort;
@@ -1373,9 +1257,6 @@ function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; l
 function XSendEvent(display: PDisplay; w: Window; propagate: TBool; event_mask: clong;
  event_send: PXEvent): cint; cdecl;
 
-//function XSendEvent(para1: PDisplay; para2: TWindow; para3: TBool;
-// para4: clong; para5: PXEvent): TStatus; cdecl; external libX11;
-
 function XChangeProperty(display: PDisplay; w: Window; atom_property:
  Atom; type_: Atom; format: cint; mode: cint; data: Pcuchar; nelements: cint): cint; cdecl;
 procedure XFlush(display: PDisplay); cdecl;
@@ -1557,19 +1438,11 @@ function xcb_close_font(c: pxcb_connection_t; font: xcb_font_t): Pointer; cdecl;
 function xcb_poly_text_8(c: pxcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; x, y: cint16; items_len: cuint32; items: PChar): Pointer; cdecl; external libxcb;
 function xcb_poly_text_16(c: pxcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; x, y: cint16; items_len: cuint32; items: PXChar2b): Pointer; cdecl; external libxcb;
 
-// fred
-
 function xcb_put_image(c: pxcb_connection_t; format: cuint8; drawable: xcb_drawable_t;
     gc: xcb_gcontext_t; width, height: cuint16; dst_x, dst_y: cint16; left_pad: cuint8;
     depth: cuint8; data_len: cuint32; data: PByte): xcb_void_cookie_t; cdecl; external libxcb;
 
 function xcb_request_check(c: Pxcb_connection_t; cookie: xcb_void_cookie_t): Pxcb_generic_error_t; cdecl; external 'libxcb';
-// function xcb_put_image(c: xcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; image: Pointer; x, y: cint16; width, height: cuint16): Pointer; cdecl; external libxcb;
-// function xcb_get_next_event(c: xcb_connection_t): pxcb_generic_event_t; cdecl; external libxcb;
-// function xcb_events_queued(c: xcb_connection_t; mode: cint): cint; cdecl; external libxcb;
-// function xcb_shape_query_extension(c: xcb_connection_t): Pointer; cdecl; external libxcb_shape;
-// function xcb_shape_query_extension_reply(c: xcb_connection_t; cookie: Pointer; e: Pointer): xcb_shape_query_extension_reply_t; cdecl; external libxcb_shape;
-// function xcb_shape_combine_region(c: xcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; region: xcb_region_t): Pointer; cdecl; external libxcb_shape;
 
 function xcb_create_colormap(c: pxcb_connection_t; alloc: cuint8; mid: xcb_colormap_t; window: xcb_window_t; visual: xcb_visualid_t): Pointer; cdecl; external libxcb;
 function xcb_free_colormap(c: pxcb_connection_t; cmap: xcb_colormap_t): Pointer; cdecl; external libxcb;
@@ -1995,6 +1868,7 @@ end;
 
 function XShapeCombineRegion(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; region: TRegion; op: cint): TStatus; cdecl;
 begin
+  // fred
   // xcb_shape_combine_region(display, op, dest_kind, dest, x, y, region);
   Result := 0; // Success
 end;
