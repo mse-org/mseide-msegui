@@ -58,8 +58,8 @@ type
   // XID type for mxrandr.pas
   txid = culong;
   pxid = ^txid;
-  
-  Time = culong;
+
+  Time  = culong;
   TTime = culong;
   PTime = ^TTime;
 
@@ -67,48 +67,47 @@ type
   PPWindow = ^PWindow;
   PWindow  = ^TWindow;
   TWindow  = TXID;
-  
-  RROutput = txid;
- pRROutput = ^RROutput;
- RRCrtc = txid;
- pRRCrtc = ^RRCrtc;
- RRMode = txid;
- pRRMode = ^RRMode;
- RRProvider = txid;
- pRRProvider = ^RRProvider;
- 
+
+  RROutput    = txid;
+  pRROutput   = ^RROutput;
+  RRCrtc      = txid;
+  pRRCrtc     = ^RRCrtc;
+  RRMode      = txid;
+  pRRMode     = ^RRMode;
+  RRProvider  = txid;
+  pRRProvider = ^RRProvider;
+
   XRRModeFlags = culong;
 
- XRRModeInfo = record
-  id: RRMode;
-  width: cuint;
-  height: cuint;
-  dotClock: culong;
-  hSyncStart: cuint;
-  hSyncEnd: cuint;
-  hTotal: cuint;
-  hSkew: cuint;
-  vSyncStart: cuint;
-  vSyncEnd: cuint;
-  vTotal: cuint;
-  name: pchar;
-  nameLength: cuint;
-  modeFlags: XRRModeFlags;
- end;
- pXRRModeInfo = ^XRRModeInfo;
-  
-  XRRScreenResources = record
-  timestamp: Time;
-  configTimestamp:Time;
-  ncrtc: cint;
-  crtcs: pRRCrtc;
-  noutput: cint;
-  outputs:  pRROutput;
-  nmode:  cint;
-  modes:  pXRRModeInfo;
- end;
- pXRRScreenResources = ^XRRScreenResources;
+  XRRModeInfo = record
+    id: RRMode;
+    Width: cuint;
+    Height: cuint;
+    dotClock: culong;
+    hSyncStart: cuint;
+    hSyncEnd: cuint;
+    hTotal: cuint;
+    hSkew: cuint;
+    vSyncStart: cuint;
+    vSyncEnd: cuint;
+    vTotal: cuint;
+    Name: PChar;
+    nameLength: cuint;
+    modeFlags: XRRModeFlags;
+  end;
+  pXRRModeInfo = ^XRRModeInfo;
 
+  XRRScreenResources = record
+    timestamp: Time;
+    configTimestamp: Time;
+    ncrtc: cint;
+    crtcs: pRRCrtc;
+    noutput: cint;
+    outputs: pRROutput;
+    nmode: cint;
+    modes: pXRRModeInfo;
+  end;
+  pXRRScreenResources = ^XRRScreenResources;
 
   xcb_drawable_t = cuint32;
   Drawable       = cuint; // Maps to xcb_drawable_t
@@ -894,7 +893,6 @@ type
     key_vector: array[0..31] of cchar;
   end;
 
-
   PXEvent = ^TXEvent;
   TXEvent = record
     case longint of
@@ -936,6 +934,7 @@ type
   end;
 
   PXSegment = ^TXSegment;
+
   TXSegment = record
     x1, y1, x2, y2: cshort;
   end;
@@ -945,6 +944,7 @@ type
   end;
 
   PDepth = ^TDepth;
+
   TDepth = record
     depth: cint;
     nvisuals: cint;
@@ -974,6 +974,7 @@ type
   end;
 
   PScreenFormat = ^TScreenFormat;
+
   TScreenFormat = record
     ext_data: PXExtData;
     depth: cint;
@@ -1034,6 +1035,7 @@ type
   end;
 
   PXWindowAttributes = ^TXWindowAttributes;
+
   TXWindowAttributes = record
     x, y: cint;
     Width, Height: cint;
@@ -1059,6 +1061,7 @@ type
   end;
 
   PXImage = ^TXImage;
+
   TXImage = record
     Width, Height: cint;
     xoffset: cint;
@@ -1086,6 +1089,7 @@ type
   end;
 
   PXWindowChanges = ^TXWindowChanges;
+
   TXWindowChanges = record
     x, y: cint;
     Width, Height: cint;
@@ -1095,6 +1099,7 @@ type
   end;
 
   PXColor = ^TXColor;
+
   TXColor = record
     pixel: culong;
     red, green, blue: cushort;
@@ -1129,7 +1134,7 @@ type
   // XRandR types for mxrandr.pas
   Rotation = cushort;
   SizeID   = cushort;
- 
+
   XRRScreenSize = record
     Width, Height: cint;
     mwidth, mheight: cint;
@@ -1147,29 +1152,28 @@ type
     noutput: cint;
   end;
   PXRRCrtcInfo = ^XRRCrtcInfo;
-  
-  Connection = cushort;
- SubpixelOrder = cushort;
-  
+
+  Connection    = cushort;
+  SubpixelOrder = cushort;
+
   XRROutputInfo = record
-  timestamp: Time;
-  crtc: RRCrtc;
-  name: pcchar;
-  nameLen: cint;
-  mm_width: culong;
-  mm_height: culong;
-  connection: Connection;
-  subpixel_order: SubpixelOrder;
-  ncrtc: cint ;
-  crtcs: pRRCrtc;
-  nclone: cint;
-  clones: pRROutput;
-  nmode: cint;
-  npreferred: cint;
-  modes: pRRMode;
- end;
- pXRROutputInfo = ^XRROutputInfo;
-  
+    timestamp: Time;
+    crtc: RRCrtc;
+    Name: pcchar;
+    nameLen: cint;
+    mm_width: culong;
+    mm_height: culong;
+    connection: Connection;
+    subpixel_order: SubpixelOrder;
+    ncrtc: cint;
+    crtcs: pRRCrtc;
+    nclone: cint;
+    clones: pRROutput;
+    nmode: cint;
+    npreferred: cint;
+    modes: pRRMode;
+  end;
+  pXRROutputInfo = ^XRROutputInfo;
 
   TXErrorHandler = function(para1: PDisplay; para2: PXErrorEvent): cint; cdecl;
 
@@ -1366,44 +1370,40 @@ const
   Button3       = 3;
   Button4       = 4;
   Button5       = 5;
-  
+
   //* Event selection bits */
- RRScreenChangeNotifyMask = 1 shl 0;
-///* V1.2 additions */
- RRCrtcChangeNotifyMask = 1 shl 1;
- RROutputChangeNotifyMask = 1 shl 2;
- RROutputPropertyNotifyMask = 1 shl 3;
-//* V1.4 additions */
- RRProviderChangeNotifyMask = 1 shl 4;
- RRProviderPropertyNotifyMask = 1 shl 5;
- RRResourceChangeNotifyMask = 1 shl 6;
+  RRScreenChangeNotifyMask = 1 shl 0;
+  ///* V1.2 additions */
+  RRCrtcChangeNotifyMask = 1 shl 1;
+  RROutputChangeNotifyMask = 1 shl 2;
+  RROutputPropertyNotifyMask = 1 shl 3;
+  //* V1.4 additions */
+  RRProviderChangeNotifyMask = 1 shl 4;
+  RRProviderPropertyNotifyMask = 1 shl 5;
+  RRResourceChangeNotifyMask = 1 shl 6;
 
-//* Event codes */
- RRScreenChangeNotify = 0;
-//* V1.2 additions */
- RRNotify = 1;
-//* RRNotify Subcodes */
- RRNotify_CrtcChange = 0;
- RRNotify_OutputChange = 0;
- RRNotify_OutputProperty = 2;
- RRNotify_ProviderChange = 3;
- RRNotify_ProviderProperty = 4;
- RRNotify_ResourceChange = 5;
- rrlastnotify = RRNotify + 5;
+  //* Event codes */
+  RRScreenChangeNotify = 0;
+  //* V1.2 additions */
+  RRNotify      = 1;
+  //* RRNotify Subcodes */
+  RRNotify_CrtcChange = 0;
+  RRNotify_OutputChange = 0;
+  RRNotify_OutputProperty = 2;
+  RRNotify_ProviderChange = 3;
+  RRNotify_ProviderProperty = 4;
+  RRNotify_ResourceChange = 5;
+  rrlastnotify  = RRNotify + 5;
 
-//* used in the rotation field; rotation and reflection in 0.1 proto. */
- RR_Rotate_0 = 1;
- RR_Rotate_90 = 2;
- RR_Rotate_180 = 4;
- RR_Rotate_270 = 8;
+  //* used in the rotation field; rotation and reflection in 0.1 proto. */
+  RR_Rotate_0   = 1;
+  RR_Rotate_90  = 2;
+  RR_Rotate_180 = 4;
+  RR_Rotate_270 = 8;
 
-//* new in 1.0 protocol, to allow reflection of screen */
-
- RR_Reflect_X = 16;
- RR_Reflect_Y = 32;
-
-  
-  
+  //* new in 1.0 protocol, to allow reflection of screen */
+  RR_Reflect_X  = 16;
+  RR_Reflect_Y  = 32;
 
   XNFocusWindow = 'focusWindow';
   XNFilterEvents = 'filterEvents';
@@ -1426,11 +1426,9 @@ procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
 function XPending(display: PDisplay): cint; cdecl;
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
 function XInternAtoms(para1: PDisplay; para2: PPchar; para3: cint; para4: TBool; para5: PAtom): TStatus; cdecl;
-function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom;
-  actual_format_return: Pcint; nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
-
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
+  nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
 function XSendEvent(display: PDisplay; w: Window; propagate: TBool; event_mask: clong; event_send: PXEvent): cint; cdecl;
-
 function XChangeProperty(display: PDisplay; w: Window; atom_property: Atom; type_: Atom; format: cint; mode: cint; Data: Pcuchar; nelements: cint): cint; cdecl;
 procedure XFlush(display: PDisplay); cdecl;
 function XGetAtomName(display: PDisplay; atom: Atom): PChar; cdecl;
@@ -1459,7 +1457,7 @@ function XShapeCombineRegion(display: PDisplay; dest: Window; dest_kind: cint; x
 procedure XShapeCombineRectangles(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; rectangles: PXRectangle; n_rects: cint; op: cint; ordering: cint); cdecl;
 procedure XShapeCombineMask(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; mask: TPixmap; op: cint); cdecl;
 
-// Todo 
+// Todo from libX11
 function XwcTextListToTextProperty(para1: PDisplay; para2: PPWideChar; para3: cint; para4: TXICCEncodingStyle; para5: PXTextProperty): cint; cdecl;
 function XSetSelectionOwner(para1: PDisplay; para2: TAtom; para3: TWindow; para4: TTime): cint; cdecl;
 function XDeleteProperty(para1: PDisplay; para2: TWindow; para3: TAtom): cint; cdecl;
@@ -1552,22 +1550,17 @@ function XOffsetRegion(para1: TRegion; para2: cint; para3: cint): cint; cdecl;
 function XSubtractRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
 function XIntersectRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
 
-// Todo from Xrandr 
-function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint;
-                                      error_base_return: pcint): tBool cdecl;
-function XRRGetScreenResources(dpy: pDisplay;
-                                 window: Window): pXRRScreenResources cdecl;
-procedure XRRFreeScreenResources(resources: pXRRScreenResources) cdecl;
-function XRRGetCrtcInfo(dpy: pDisplay; resources: pXRRScreenResources;
-                                 crtc: RRCrtc): pXRRCrtcInfo cdecl;
-procedure XRRFreeCrtcInfo(crtcInfo: pXRRCrtcInfo) cdecl;
-function XRRGetOutputInfo(dpy: pDisplay; resources: pXRRScreenResources;
-                                     output: RROutput): pXRROutputInfo cdecl;
-procedure XRRFreeOutputInfo(outputInfo: pXRROutputInfo) cdecl;
-
-procedure XRRSelectInput(dpy: pDisplay; window: Window; mask: cint) cdecl;
-function XRRUpdateConfiguration(event: pXEvent): cint cdecl;
-function getxrandrlib: boolean;
+// Todo from libXrandr 
+function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
+function XRRGetScreenResources(dpy: pDisplay; window: Window): pXRRScreenResources; cdecl;
+procedure XRRFreeScreenResources(resources: pXRRScreenResources); cdecl;
+function XRRGetCrtcInfo(dpy: pDisplay; resources: pXRRScreenResources; crtc: RRCrtc): pXRRCrtcInfo; cdecl;
+procedure XRRFreeCrtcInfo(crtcInfo: pXRRCrtcInfo); cdecl;
+function XRRGetOutputInfo(dpy: pDisplay; resources: pXRRScreenResources; output: RROutput): pXRROutputInfo; cdecl;
+procedure XRRFreeOutputInfo(outputInfo: pXRROutputInfo); cdecl;
+procedure XRRSelectInput(dpy: pDisplay; window: Window; mask: cint); cdecl;
+function XRRUpdateConfiguration(event: pXEvent): cint; cdecl;
+function getxrandrlib: Boolean;
 
 // Macro
 function WhitePixel(dpy: PDisplay; scr: cint): culong;
@@ -1704,8 +1697,8 @@ function xcb_connect(displayname: PChar; screenp: Pcint): pxcb_connection_t; cde
 procedure xcb_disconnect(c: pxcb_connection_t); cdecl; external libxcb;
 function xcb_get_setup(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
 function xcb_setup_roots_iterator(setup: Pointer): xcb_setup_roots_iterator_t; cdecl; external libxcb;
-function xcb_create_window(c: pxcb_connection_t; depth: cuint8; wid: xcb_window_t; parent: xcb_window_t; x, y: cint16; Width, Height, border_width: cuint16; _class: cuint16;
-  visual: xcb_visualid_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
+function xcb_create_window(c: pxcb_connection_t; depth: cuint8; wid: xcb_window_t; parent: xcb_window_t; x, y: cint16; Width, Height, border_width: cuint16; _class: cuint16; visual: xcb_visualid_t;
+  value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
 function xcb_map_window(c: pxcb_connection_t; window: xcb_window_t): Pointer; cdecl; external libxcb;
 function xcb_change_window_attributes(c: pxcb_connection_t; window: xcb_window_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
 function xcb_get_input_focus(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
@@ -1805,75 +1798,6 @@ begin
   xcb_change_window_attributes(display, w, CWEventMask, @value_list);
 end;
 
-procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
-var
-  ev: pxcb_generic_event_t;
-  key_ev: pxcb_key_press_event_t;
-  expose_ev: pxcb_expose_event_t;
-  client_ev: pxcb_client_message_event_t;
-begin
-  // fred
-  // ev := xcb_get_next_event(display);
-  if ev <> nil then
-  begin
-    case ev^.response_type and $7F of
-      2: // KeyPress
-      begin
-        event_return^._type := KeyPress;
-        key_ev := pxcb_key_press_event_t(ev);
-        event_return^.xkey._type := key_ev^.response_type;
-        event_return^.xkey.serial := key_ev^.sequence;
-        event_return^.xkey.send_event := (key_ev^.response_type and $80);
-        event_return^.xkey.display := display;
-        event_return^.xkey.window := key_ev^.event;
-        event_return^.xkey.root := key_ev^.root;
-        event_return^.xkey.subwindow := key_ev^.child;
-        event_return^.xkey.time := key_ev^.time;
-        event_return^.xkey.x := key_ev^.event_x;
-        event_return^.xkey.y := key_ev^.event_y;
-        event_return^.xkey.x_root := key_ev^.root_x;
-        event_return^.xkey.y_root := key_ev^.root_y;
-        event_return^.xkey.state := key_ev^.state;
-        event_return^.xkey.keycode := key_ev^.detail;
-        event_return^.xkey.same_screen := key_ev^.same_screen;
-      end;
-      12: // Expose
-      begin
-        event_return^._type := Expose;
-        expose_ev           := pxcb_expose_event_t(ev);
-        event_return^.xexpose._type := expose_ev^.response_type;
-        event_return^.xexpose.serial := expose_ev^.sequence;
-        event_return^.xexpose.send_event := (expose_ev^.response_type and $80);
-        event_return^.xexpose.display := display;
-        event_return^.xexpose.window := expose_ev^.window;
-        event_return^.xexpose.x := expose_ev^.x;
-        event_return^.xexpose.y := expose_ev^.y;
-        event_return^.xexpose.Width := expose_ev^.Width;
-        event_return^.xexpose.Height := expose_ev^.Height;
-        event_return^.xexpose.Count := expose_ev^.Count;
-      end;
-      33: // ClientMessage
-      begin
-        event_return^._type := ClientMessage;
-        client_ev           := pxcb_client_message_event_t(ev);
-        event_return^.xclient._type := client_ev^.response_type;
-        event_return^.xclient.serial := client_ev^.sequence;
-        event_return^.xclient.send_event := (client_ev^.response_type and $80);
-        event_return^.xclient.display := display;
-        event_return^.xclient.window := client_ev^.window;
-        event_return^.xclient.message_type := client_ev^.type_;
-        event_return^.xclient.format := client_ev^.format;
-        case client_ev^.format of
-          8: Move(client_ev^.Data.data8, event_return^.xclient.Data.b, 20);
-          16: Move(client_ev^.Data.data16, event_return^.xclient.Data.s, 10);
-          32: Move(client_ev^.Data.data32, event_return^.xclient.Data.l, 5);
-        end;
-      end;
-    end;
-    FreeMem(ev);
-  end;
-end;
-
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
 var
   cookie: Pointer;
@@ -1884,8 +1808,8 @@ begin
   Result := reply.atom;
 end;
 
-function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom;
-  actual_format_return: Pcint; nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
+  nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
 var
   cookie: Pointer;
   reply: xcb_get_property_reply_t;
@@ -2081,12 +2005,7 @@ begin
   err := xcb_request_check(c, cookie);
   if err <> nil then
     Freemem(err);// Optionally log error
-  
-end;
 
-function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; bytes_buffer: cint; keysym_return: Pculong; status_in_out: Pointer): cint; cdecl;
-begin
- 
 end;
 
 function XCreateColormap(display: PDisplay; w: Window; visual: PVisual; alloc: cint): TColormap; cdecl;
@@ -2142,6 +2061,16 @@ begin
 end;
 
 // Todo
+function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; bytes_buffer: cint; keysym_return: Pculong; status_in_out: Pointer): cint; cdecl;
+begin
+
+end;
+
+procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
+begin
+ 
+end;
+
 function XPending(display: PDisplay): cint; cdecl;
 begin
 
@@ -2618,57 +2547,54 @@ begin
 end;
 
 // Todo from Xrandr
-function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint;
-                                      error_base_return: pcint): tBool cdecl;
+function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
 begin
 
 end;
 
-function XRRGetScreenResources(dpy: pDisplay;
-                                 window: Window): pXRRScreenResources cdecl;
+function XRRGetScreenResources(dpy: pDisplay; window: Window): pXRRScreenResources; cdecl;
 begin
 
 end;
 
-procedure XRRFreeScreenResources(resources: pXRRScreenResources) cdecl;
+procedure XRRFreeScreenResources(resources: pXRRScreenResources); cdecl;
 begin
 
 end;
 
-function XRRGetCrtcInfo(dpy: pDisplay; resources: pXRRScreenResources;
-                                 crtc: RRCrtc): pXRRCrtcInfo cdecl;
+function XRRGetCrtcInfo(dpy: pDisplay; resources: pXRRScreenResources; crtc: RRCrtc): pXRRCrtcInfo; cdecl;
 begin
 
 end;
 
-procedure XRRFreeCrtcInfo(crtcInfo: pXRRCrtcInfo) cdecl;
-begin
-
-end;
-function XRRGetOutputInfo(dpy: pDisplay; resources: pXRRScreenResources;
-                                     output: RROutput): pXRROutputInfo cdecl;
+procedure XRRFreeCrtcInfo(crtcInfo: pXRRCrtcInfo); cdecl;
 begin
 
 end;
 
-procedure XRRFreeOutputInfo(outputInfo: pXRROutputInfo) cdecl;
+function XRRGetOutputInfo(dpy: pDisplay; resources: pXRRScreenResources; output: RROutput): pXRROutputInfo; cdecl;
 begin
 
 end;
 
-procedure XRRSelectInput(dpy: pDisplay; window: Window; mask: cint) cdecl;
+procedure XRRFreeOutputInfo(outputInfo: pXRROutputInfo); cdecl;
 begin
 
 end;
 
-function XRRUpdateConfiguration(event: pXEvent): cint cdecl;
+procedure XRRSelectInput(dpy: pDisplay; window: Window; mask: cint); cdecl;
 begin
 
 end;
 
-function getxrandrlib: boolean;
+function XRRUpdateConfiguration(event: pXEvent): cint; cdecl;
 begin
-result := true;
+
+end;
+
+function getxrandrlib: Boolean;
+begin
+  Result := True;
 end;
 
 // Macros
@@ -2676,6 +2602,7 @@ function ScreenOfDisplay(dpy: PDisplay; scr: cint): PScreen;
 begin
   ScreenOfDisplay := @(((PXPrivDisplay(dpy))^.screens)[scr]);
 end;
+
 function WhitePixel(dpy: PDisplay; scr: cint): culong;
 begin
   WhitePixel := (ScreenOfDisplay(dpy, scr))^.white_pixel;
@@ -2712,3 +2639,4 @@ begin
 end;
 
 end.
+
