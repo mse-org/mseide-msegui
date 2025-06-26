@@ -2590,7 +2590,6 @@ begin
 
 end;
 
-
 // Todo from Xrandr
 function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
 begin
@@ -2635,11 +2634,6 @@ end;
 function XRRUpdateConfiguration(event: pXEvent): cint; cdecl;
 begin
 
-end;
-
-function getxrandrlib: Boolean;
-begin
-  Result := True;
 end;
 
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
@@ -2732,7 +2726,6 @@ begin
 
 end;
 
-
 // Macros
 function ScreenOfDisplay(dpy: PDisplay; scr: cint): PScreen;
 begin
@@ -2774,5 +2767,9 @@ begin
   XDestroyImage := ximage^.f.destroy_image(ximage);
 end;
 
-end.
+function getxrandrlib: Boolean;
+begin
+  Result := True;
+end;
 
+end.
