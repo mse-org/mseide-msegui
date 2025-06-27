@@ -1039,18 +1039,26 @@ begin
  checkgdilock;
 {$endif}
  result:= false;
+// writeln('readatomproperty 0');
  if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
    atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
+ //  writeln('readatomproperty 1');
   if (actualtype = atomatom) and (actualformat = 32) then begin
+ //  writeln('readatomproperty 2');
    setlength(value,nitems);
    if nitems > 0 then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
     move(prop^,value[0],nitems*sizeof(value[0]));
  {$ifdef FPC} {$checkpointer default} {$endif}
    end;
+   // writeln('readatomproperty fin');
    result:= true;
   end;
-  xfree(prop);
+ // writeln('readatomproperty bad');
+  {$ifndef use_xcb}
+   xfree(prop);
+  {$endif} 
+//  writeln('readatomproperty fin');
  end;
 end;
 
@@ -6935,6 +6943,7 @@ var
  buf1: clipboardbufferty;
 
 begin
+//writeln('gui_init 0');
  gdi_lock;
  try
   getmem(pollinf,sizeof(pollinfty));
@@ -6999,12 +7008,14 @@ begin
   sigaddset(sigset1,sigchld);
   pthread_sigmask(sig_unblock,@sigset1,@sigset2);
 
+  //writeln('gui_init 1');
+  
   appdisp:= xopendisplay(nil);
   if appdisp = nil then begin
    goto error;
   end;
   
-  // writeln('appdisp:= xopendisplay(nil) = OK');
+ // writeln('gui_init 2');
   
   if not createim then begin
    result:= gue_inputmanager;
@@ -7012,27 +7023,59 @@ begin
   end;
   setlocale(lc_all,po1); //restore original
   
-  // writeln('setlocale(lc_all,po1) = OK');
+ // writeln('setlocale(lc_all,po1) = OK');
+ // defscreenid:= xdefaultscreen(appdisp);
 
-//  defscreenid:= xdefaultscreen(appdisp);
+  //writeln('gui_init 3');
+
+defscreen := nil;
   defscreen:= xdefaultscreenofdisplay(appdisp);
+
+// if defscreen = nil then writeln('defscreen = nil') else writeln('defscreen = ok');
+
+// writeln('gui_init 4');
    
   rootid:= xrootwindowofscreen(defscreen);
+
+//writeln('gui_init 4+');  
+  
   defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
-  defdepth:= xdefaultdepthofscreen(defscreen);
+ 
+//writeln('gui_init 4.1');  
+
+ defdepth:= xdefaultdepthofscreen(defscreen);
+
+{
+ writeln();
+ writeln('defvisual^.visualid ',defvisual^.visualid);
+ writeln('defvisual^._class ',defvisual^._class);
+ writeln('defvisual^.red_mask ',defvisual^.red_mask);
+ writeln('defvisual^.green_mask ',defvisual^.green_mask);
+ writeln('defvisual^.blue_mask ',defvisual^.blue_mask);
+ writeln('defvisual^.bits_per_rgb ',defvisual^.bits_per_rgb);
+ writeln('defdepth ',defdepth);  
+ }
+ 
   msex11gdi.init(appdisp,defvisual,defdepth);
   attrib.event_mask:= propertychangemask;
   appid:= xcreatewindow(appdisp,rootid,0,0,200,200,0,
                0,inputonly,pvisual(copyfromparent),cweventmask,@attrib);
+ 
   if appid = 0 then begin
    result:= gue_createwindow;
    goto error;
   end;
 
+  //writeln('gui_init 5');
+
+  {$ifdef use_xcb}
+  hasxrandrlib := false;
+  {$endif}
+  
   if hasxrandrlib then begin
    hasxrandr:= xrrqueryextension(
                     appdisp,@xrandreventbase,@xrandrerrorbase) <> 0;
-   if hasxrandr then begin
+     if hasxrandr then begin
     xrrselectinput(appdisp,rootid, RRScreenChangeNotifyMask or
                  RRCrtcChangeNotifyMask or RROutputChangeNotifyMask);
    end;
@@ -7041,16 +7084,20 @@ begin
    hasxrandr:= false;
   end;
 
+  // writeln('gui_init 6');
   if not createappic then begin
    result:= gue_inputcontext;
    goto error;
   end;
+  // writeln('gui_init 7');  
+  
   {$ifdef FPC}
   is8bitcolor:= defaultdepthofscreen(defscreen) = 8;
   {$else}
   is8bitcolor:= defscreen^.root_depth = 8;
   {$endif}
   if (defvisual^._class = pseudocolor) and is8bitcolor then begin
+  writeln('gui_init 7.1');  
    istruecolor:= false;
    initcolormap;
    if msecolormap = 0 then begin
@@ -7059,12 +7106,17 @@ begin
    end;
   end
   else begin
-   istruecolor:= (defvisual^._class = truecolor) or
-                                            (defvisual^._class = directcolor);
+  
+  //writeln('gui_init 7.1.1');  
+ 
+  istruecolor:= (defvisual^._class = truecolor) or (defvisual^._class = directcolor);
+   //  writeln('gui_init 7.1.2'); 
    if istruecolor then begin
+    // writeln('gui_init 7.1.3');
     xredmask:= defvisual^.red_mask;
     xgreenmask:= defvisual^.green_mask;
     xbluemask:= defvisual^.blue_mask;
+    //writeln('gui_init 7.1.4'); 
     xredshiftbase:= highestbit(xredmask)-7;
     xgreenshiftbase:= highestbit(xgreenmask)-7;
     xblueshiftbase:= highestbit(xbluemask)-7;
@@ -7094,19 +7146,33 @@ begin
     end;
    end
    else begin
+    writeln('gui_init 7.1.3.1'); 
     result:= gue_notruecolor;
     goto error;
    end;
   end;
+  
+  // writeln('gui_init 8'); 
 
   defcolormap:= xdefaultcolormapofscreen(defscreen);
+  
+  // writeln('gui_init 9'); 
 
   atomatom:= xinternatom(appdisp,'ATOM',
            {$ifdef xboolean}true{$else}1{$endif});
+       
+  writeln('atomatom ', atomatom); 
+           
   mseclientmessageatom:= xinternatom(appdisp,'mseclientmessage',
            {$ifdef xboolean}false{$else}0{$endif});
+           
+  writeln('mseclientmessageatom ', mseclientmessageatom); 
+            
   wmprotocolsatom:= xinternatom(appdisp,'WM_PROTOCOLS',
             {$ifdef xboolean}false{$else}0{$endif});
+ 
+  writeln('wmprotocolsatom ', wmprotocolsatom); 
+           
   wmnameatom:= xinternatom(appdisp,'WM_NAME',
             {$ifdef xboolean}false{$else}0{$endif});
   wmclassatom:= xinternatom(appdisp,'WM_CLASS',
@@ -7151,9 +7217,10 @@ begin
             {$ifdef xboolean}false{$else}0{$endif});
   convertselectionpropertyatom:= xinternatom(appdisp,'mseconvselprop',
             {$ifdef xboolean}false{$else}0{$endif});
-
   netsupportedatom:= xinternatom(appdisp,'_NET_SUPPORTED',
             {$ifdef xboolean}false{$else}0{$endif});
+  
+   writeln('gui_init 9.1');
 
   fillchar(xdndatoms,sizeof(xdndatoms),0);      //get or create xdnd atoms
   xinternatoms(appdisp,@xdndatomnames[low(xdndatomty)],
@@ -7166,16 +7233,29 @@ begin
 
   fillchar(netatoms,sizeof(netatoms),0);               //check _net_
   xinternatoms(appdisp,@netatomnames[low(netatomty)],
-              integer(firstonlyifexistatom),false,@netatoms[low(netatomty)]);
+              integer(firstonlyifexistatom),{$ifdef xboolean}false{$else}0{$endif},@netatoms[low(netatomty)]);
   xinternatoms(appdisp,@netatomnames[firstonlyifexistatom],
               integer(high(netatomty))-integer(firstonlyifexistatom),
-                                       true,@netatoms[firstonlyifexistatom]);
-
-  netsupported:= netsupportedatom <> 0;
+                                       {$ifdef xboolean}true{$else}1{$endif},@netatoms[firstonlyifexistatom]);
+  
+ writeln('gui_init 9.2');
+ 
+    netsupported:= netsupportedatom <> 0;
   if netsupported then begin
+   writeln('gui_init 9.3 netsupported ', netsupported);
+  
    netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
+   
+    writeln('gui_init 9.4 netsupported ', netsupported);
+    
+     
+    writeln('firstcheckedatom ', firstcheckedatom);
+    writeln('lastcheckedatom ', lastcheckedatom);
+  
    for netnum:= firstcheckedatom to lastcheckedatom do begin
     atom1:= netatoms[netnum];
+    writeln('atom1 ', atom1);
+  
     netatoms[netnum]:= 0;
     for int1:= 0 to high(atomar) do begin
      if atomar[int1] = atom1 then begin
@@ -7184,7 +7264,11 @@ begin
      end;
     end;
    end;
+   
   end;
+  
+ writeln('gui_init 9.5');
+  
   for netnum:= low(netatomty) to needednetatom do begin
    if netatoms[netnum] = 0 then begin
     netsupported:= false;
@@ -7265,7 +7349,9 @@ begin
   deinit;
  finally
   gdi_unlock;
+  writeln('gui_init last'); 
  end;
+ 
 end;
 
 function gui_deinit: guierrorty;

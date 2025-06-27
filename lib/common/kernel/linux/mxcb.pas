@@ -5,7 +5,7 @@ unit mxcb;
 interface
 
 uses
-  ctypes; // For culong, cint, cuint, cshort, cchar, cuchar
+ mseguiglob, ctypes; // For culong, cint, cuint, cshort, cchar, cuchar
 
 {$PACKRECORDS C}
 const
@@ -261,12 +261,8 @@ type
   xcb_font_t     = cuint;
   xcb_atom_t     = cuint;
   xcb_region_t   = Pointer;
-
-  xcb_setup_roots_iterator_t = record
-    iterator: Pointer;
-  end;
-
-  xcb_get_atom_name_reply_t = record
+ 
+   xcb_get_atom_name_reply_t = record
     name_len: cuint16;
     Name: PChar;
   end;
@@ -964,10 +960,9 @@ type
   end;
 
   PScreen = ^TScreen;
-
   TScreen = record
     ext_data: PXExtData;
-    display: PXDisplay;
+    display: Pxcb_connection_t;
     root: TWindow;
     Width, Height: cint;
     mwidth, mheight: cint;
@@ -985,10 +980,70 @@ type
     root_input_mask: clong;
   end;
 
+   Pxcb_screen_t = ^xcb_screen_t;
+  xcb_screen_t = record
+    root: xcb_window_t;
+    default_colormap: xcb_colormap_t;
+    white_pixel: cuint32;
+    black_pixel: cuint32;
+    current_input_masks: cuint32;
+    width_in_pixels: cuint16;
+    height_in_pixels: cuint16;
+    width_in_millimeters: cuint16;
+    height_in_millimeters: cuint16;
+    min_installed_maps: cuint16;
+    max_installed_maps: cuint16;
+    root_visual: xcb_visualid_t;
+    backing_stores: cuint8;
+    save_unders: cuint8;
+    root_depth: cuint8;
+    allowed_depths_len: cuint8;
+  end;
+  
+   xcb_setup_roots_iterator_t = record
+    data: Pxcb_screen_t;
+    rem: cint;
+    index: cint;
+  end;
+  
+    Pxcb_visualtype_t = ^xcb_visualtype_t;
+    xcb_visualtype_t = record
+    visual_id: xcb_visualid_t;
+    _class: cuint8;
+    bits_per_rgb_value: cuint8;
+    colormap_entries: cuint16;
+    red_mask: cuint32;
+    green_mask: cuint32;
+    blue_mask: cuint32;
+    pad0: array[0..3] of cuint8;
+  end;
+  
+   Pxcb_depth_t = ^xcb_depth_t;
+  xcb_depth_t = record
+    depth: cuint8;
+    pad0: cuint8;
+    visuals_len: cuint16;
+    pad1: array[0..3] of cuint8;
+  end;
+
+  Pxcb_depth_iterator_t = ^xcb_depth_iterator_t;
+  xcb_depth_iterator_t = record
+    data: Pxcb_depth_t;
+    rem: cint;
+    index: cint;
+  end;
+
+  Pxcb_visualtype_iterator_t = ^xcb_visualtype_iterator_t;
+  xcb_visualtype_iterator_t = record
+    data: Pxcb_visualtype_t;
+    rem: cint;
+    index: cint;
+  end;
+  
+
   XID = type culong;
 
   PScreenFormat = ^TScreenFormat;
-
   TScreenFormat = record
     ext_data: PXExtData;
     depth: cint;
@@ -1123,7 +1178,7 @@ type
 
   PCursor = ^TCursor;
   TCursor = TXID;
-
+  
   TXSetWindowAttributes = record
     background_pixmap: TPixmap;
     background_pixel: culong;
@@ -1430,17 +1485,33 @@ const
 
 var
   GlobalXCBConnection: PDisplay;
+  g_screen: TScreen; // Global to store screen data
+  g_randreventbase: cint = 0;
+  g_randrerrorbase: cint = 0;
+  //g_errorhandler: XErrorHandler = nil;
+  g_errorhandler: pointer = nil;
+  g_root_visual: Visual;
+
 
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
 procedure XCloseDisplay(display: PDisplay); cdecl;
 function XDefaultScreen(display: PDisplay): cint; cdecl;
 function XDefaultVisual(display: PDisplay; screen_number: cint): PVisual; cdecl;
-function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, border_width: cuint; depth: cint; window_class: cuint; visual: PVisual; valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
+
+function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, 
+          border_width: cuint; depth: cint; window_class: cuint; visual: PVisual;
+           valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
+
+//function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; width, height, 
+//border_width: cuint; depth: cint; _class: cuint; visual: PVisual; valuemask: culong; values: Pointer): Window;
+
+
 procedure XMapWindow(display: PDisplay; w: Window); cdecl;
 procedure XSelectInput(display: PDisplay; w: Window; event_mask: clong); cdecl;
 procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
 function XPending(display: PDisplay): cint; cdecl;
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
+
 function XInternAtoms(para1: PDisplay; para2: PPchar; para3: cint; para4: TBool; para5: PAtom): TStatus; cdecl;
 function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
   nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
@@ -1463,9 +1534,38 @@ function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; by
 function XCreateColormap(display: PDisplay; w: Window; visual: PVisual; alloc: cint): TColormap; cdecl;
 procedure XFreeColormap(display: PDisplay; cmap: TColormap); cdecl;
 function XCreatePixmap(display: PDisplay; d: Drawable; Width, Height, depth: cuint): TPixmap; cdecl;
+
+// from XRender
 function XRenderCreatePicture(display: PDisplay; d: Drawable; format: PXRenderPictFormat; valuemask: culong; attributes: Pointer): TPicture; cdecl;
 procedure XRenderFreePicture(display: PDisplay; picture: TPicture); cdecl;
 procedure XRenderComposite(display: PDisplay; op: cint; src: TPicture; mask: TPicture; dst: TPicture; src_x, src_y, mask_x, mask_y, dst_x, dst_y: cint; Width, Height: cuint); cdecl;
+
+procedure XRenderSetPictureClipRectangles(dpy:PDisplay; picture:TPicture;
+            xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint); cdecl;
+procedure XRenderSetPictureClipRegion(dpy: pDisplay; picture: TPicture; r: regionty); cdecl;
+//function XRenderCreatePicture(dpy:PDisplay; drawable:TDrawable; format: PXRenderPictFormat; valuemask: culong;
+//            attributes: PXRenderPictureAttributes): TPicture; cdecl;
+procedure XRenderFillRectangle(dpy: PDisplay; op: longint; dst: TPicture; color: PXRenderColor; x: longint;
+                           y: longint; width: dword; height: dword);cdecl;
+procedure XRenderSetPictureTransform(dpy:PDisplay; picture:TPicture; transform:PXTransform); cdecl;
+procedure XRenderSetPictureFilter(dpy:PDisplay; picture:TPicture; filter: pchar; params: pinteger; nparams: integer); cdecl;
+function XRenderCreateSolidFill(dpy: pDisplay; color: pXRenderColor): TPicture; cdecl;
+
+//procedure XRenderFreePicture(dpy:PDisplay; picture:TPicture);  cdecl;
+//procedure XRenderComposite(dpy:PDisplay; op:longint; src:TPicture;  mask:TPicture; dst:TPicture; src_x:longint; src_y:longint;
+//          mask_x:longint; mask_y:longint; dst_x:longint; dst_y:longint; width:dword; height:dword);cdecl;
+function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool;cdecl;
+function XRenderFindVisualFormat(dpy: PDisplay; visual: PVisual): PXRenderPictFormat;cdecl;
+function XRenderFindStandardFormat(dpy: PDisplay; format: longint): PXRenderPictFormat; cdecl;
+function XRenderFindFormat(dpy: PDisplay; mask: culong; templ: PXRenderPictFormat; count: longint): PXRenderPictFormat; cdecl;
+procedure XRenderCompositeTriangles(dpy: pDisplay; op: cint; src: tPicture; dst: tPicture; maskFormat: pXRenderPictFormat;
+                  xSrc: cint; ySrc: cint; triangles: pXTriangle; ntriangle: cint); cdecl;
+procedure XRenderCompositeTriStrip(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
+procedure XRenderCompositeTriFan(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
+procedure XRenderChangePicture(dpy: pdisplay; picture: tpicture; valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
+
 
 // Shape extension for mshape.pas
 function XShapeQueryExtension(display: PDisplay; event_base, error_base: Pcint): TBoolResult; cdecl;
@@ -1532,16 +1632,15 @@ function XGetErrorText(para1: PDisplay; para2: cint; para3: PChar; para4: cint):
 function XCreateColormap(para1: PDisplay; para2: TWindow; para3: PVisual; para4: cint): TColormap; cdecl;
 function XStoreColors(para1: PDisplay; para2: TColormap; para3: PXColor; para4: cint): cint; cdecl;
 function XSupportsLocale: TBool; cdecl;
-function XDefaultScreenOfDisplay(para1: PDisplay): PScreen; cdecl;
-function XRootWindowOfScreen(para1: PScreen): TWindow; cdecl;
-function XDefaultVisualOfScreen(para1: PScreen): PVisual; cdecl;
+function XDefaultScreenOfDisplay(display: PDisplay): PScreen; cdecl;
+function XRootWindowOfScreen(screen: PScreen): Window; cdecl;
+function XDefaultVisualOfScreen(screen: PScreen): PVisual; cdecl;
 function XDefaultDepthOfScreen(para1: PScreen): cint; cdecl;
 function XDefaultColormapOfScreen(para1: PScreen): TColormap; cdecl;
 function XKeysymToKeycode(para1: PDisplay; para2: TKeySym): TKeyCode; cdecl;
 function XGetModifierMapping(para1: PDisplay): PXModifierKeymap; cdecl;
 function XFreeModifiermap(para1: PXModifierKeymap): cint; cdecl;
 function XConnectionNumber(para1: PDisplay): cint; cdecl;
-function XInternAtom(para1: PDisplay; para2: PChar; para3: TBool): TAtom; cdecl;
 function XSetErrorHandler(para1: TXErrorHandler): TXErrorHandler; cdecl;
 function XSetClipRectangles(para1: PDisplay; para2: TGC; para3: cint; para4: cint; para5: PXRectangle; para6: cint; para7: cint): cint; cdecl;
 function XSetDashes(para1: PDisplay; para2: TGC; para3: cint; para4: PChar; para5: cint): cint; cdecl;
@@ -1599,16 +1698,15 @@ function XRRGetOutputInfo(dpy: pDisplay; resources: pXRRScreenResources; output:
 procedure XRRFreeOutputInfo(outputInfo: pXRROutputInfo); cdecl;
 procedure XRRSelectInput(dpy: pDisplay; window: Window; mask: cint); cdecl;
 function XRRUpdateConfiguration(event: pXEvent): cint; cdecl;
-function getxrandrlib: Boolean;
 
-// Macro
+// Macros
 function WhitePixel(dpy: PDisplay; scr: cint): culong;
 function DefaultScreen(dpy: PDisplay): cint;
 function XSync(para1: PDisplay; para2: Boolean): cint;
 function XSendEvent(para1: PDisplay; para2: TWindow; para3: Boolean; para4: clong; para5: PXEvent): TStatus;
-function XInternAtoms(para1: PDisplay; para2: PPchar; para3: cint; para4: Boolean; para5: PAtom): TStatus;
 function DefaultDepthOfScreen(s: PScreen): cint;
 function XDestroyImage(ximage: PXImage): cint;
+function getxrandrlib: Boolean;
 
 implementation
 
@@ -1617,21 +1715,9 @@ uses
 
 // XCB-specific types
 type
-  xcb_screen_t = record
-    root: xcb_window_t;
-    default_colormap: xcb_colormap_t;
-    white_pixel, black_pixel: cuint;
-    current_input_masks: cuint;
-    width_in_pixels, height_in_pixels: cuint;
-    width_in_millimeters, height_in_millimeters: cuint;
-    min_installed_maps, max_installed_maps: cuint;
-    root_visual: xcb_visualid_t;
-    backing_stores: cchar;
-    save_unders: cchar;
-    root_depth: cchar;
-    allowed_depths_len: cchar;
-  end;
-
+ xcb_setup_t = record end;
+  Pxcb_setup_t = ^xcb_setup_t;
+ 
   xcb_generic_event_t = record
     response_type: cuint8;
     pad0: cuint8;
@@ -1640,7 +1726,8 @@ type
     full_sequence: cuint32;
   end;
   pxcb_generic_event_t = ^xcb_generic_event_t;
-
+  
+  
   xcb_key_press_event_t = record
     response_type: cuint8;
     detail: cuint8;
@@ -1681,8 +1768,9 @@ type
         2: (data32: array[0..4] of cuint32);
     end;
   end;
-  pxcb_client_message_event_t = ^xcb_client_message_event_t;
 
+  pxcb_client_message_event_t = ^xcb_client_message_event_t;
+  Pxcb_intern_atom_reply_t = ^xcb_intern_atom_reply_t;
   xcb_intern_atom_reply_t = record
     response_type: cuint8;
     pad0: cuint8;
@@ -1690,19 +1778,12 @@ type
     length: cuint32;
     atom: xcb_atom_t;
   end;
-
-  xcb_get_property_reply_t = record
-    response_type: cuint8;
-    format: cuint8;
-    sequence: cuint16;
-    length: cuint32;
-    type_: xcb_atom_t;
-    bytes_after: cuint32;
-    value_len: cuint32;
-    Value: array[0..0] of cchar; // Variable length
+  
+  xcb_intern_atom_cookie_t = record
+    sequence: cuint;
   end;
 
-  xcb_query_font_reply_t = record
+   xcb_query_font_reply_t = record
     response_type: cuint8;
     pad0: cuint8;
     sequence: cuint16;
@@ -1720,6 +1801,20 @@ type
     major_version, minor_version: cuint8;
     event_base, error_base: cuint8;
   end;
+  
+ 
+  
+   xcb_get_property_reply_t = record
+    response_type: cuint8;
+    format: cuint8;
+    sequence: cuint16;
+    length: cuint32;
+    type_: xcb_atom_t;
+    bytes_after: cuint32;
+    value_len: cuint32;
+    Value: array[0..0] of char; // Variable length
+  end;
+
 
   // XRandR-specific types for mxrandr.pas
   xcb_randr_crtc_t = cuint32;
@@ -1729,12 +1824,49 @@ type
     Width, Height: cuint16;
     mwidth, mheight: cuint16;
   end;
+  
+   xcb_query_extension_cookie_t = record
+    sequence: cuint;
+  end;
+  Pxcb_query_extension_cookie_t = ^xcb_query_extension_cookie_t;
+
+  xcb_query_extension_reply_t = record
+    response_type: cuint8;
+    pad0: cuint8;
+    sequence: cuint16;
+    length: cuint32;
+    present: cuint8;
+    major_opcode: cuint8;
+    first_event: cuint8;
+    first_error: cuint8;
+  end;
+  Pxcb_query_extension_reply_t = ^xcb_query_extension_reply_t;
+
+  Pxcb_screen_iterator_t = ^xcb_screen_iterator_t;
+  xcb_screen_iterator_t = record
+    data: Pxcb_screen_t;
+    rem: cint;
+    index: cint;
+  end;
+  
+  xcb_get_property_cookie_t = record
+    sequence: Cardinal;  // Cardinal is equivalent to c_uint (unsigned 32-bit)
+  end;
+  Pxcb_get_property_cookie_t = ^xcb_get_property_cookie_t;
+
+
+function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external 'libxcb';
+function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_setup_roots_iterator_t; cdecl; external 'libxcb';
 
 // XCB functions
+function xcb_randr_query_version(c: Pxcb_connection_t; major_version, minor_version: cuint32): xcb_void_cookie_t; cdecl; external 'libxcb-randr';
+function xcb_randr_query_version_reply(c: Pxcb_connection_t; cookie: xcb_void_cookie_t; e: PPxcb_generic_error_t): Pointer; cdecl; external 'libxcb-randr';
+function xcb_query_extension(c: Pxcb_connection_t; name_len: cuint; name: PChar): xcb_query_extension_cookie_t; cdecl; external libxcb;
+function xcb_query_extension_reply(c: Pxcb_connection_t; cookie: xcb_query_extension_cookie_t; e: PPxcb_generic_error_t): Pxcb_query_extension_reply_t; cdecl; external libxcb;
 function xcb_generate_id(c: pxcb_connection_t): cuint32; cdecl; external libxcb;
 function xcb_connect(displayname: PChar; screenp: Pcint): pxcb_connection_t; cdecl; external libxcb;
 procedure xcb_disconnect(c: pxcb_connection_t); cdecl; external libxcb;
-function xcb_get_setup(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
+// function xcb_get_setup(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
 function xcb_setup_roots_iterator(setup: Pointer): xcb_setup_roots_iterator_t; cdecl; external libxcb;
 function xcb_create_window(c: pxcb_connection_t; depth: cuint8; wid: xcb_window_t; parent: xcb_window_t; x, y: cint16; Width, Height, border_width: cuint16; _class: cuint16; visual: xcb_visualid_t;
   value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
@@ -1742,9 +1874,14 @@ function xcb_map_window(c: pxcb_connection_t; window: xcb_window_t): Pointer; cd
 function xcb_change_window_attributes(c: pxcb_connection_t; window: xcb_window_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
 function xcb_get_input_focus(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
 function xcb_get_input_focus_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): Pointer; cdecl; external libxcb;
-function xcb_intern_atom(c: pxcb_connection_t; only_if_exists: cuint8; length: cuint16; Name: PChar): Pointer; cdecl; external libxcb;
-function xcb_intern_atom_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_intern_atom_reply_t; cdecl; external libxcb;
-function xcb_get_property(c: pxcb_connection_t; Delete: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; offset, length: cuint32): Pointer; cdecl; external libxcb;
+
+//function xcb_intern_atom(c: pxcb_connection_t; only_if_exists: cuint8; length: cuint16; Name: PChar): Pointer; cdecl; external libxcb;
+//function xcb_intern_atom_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_intern_atom_reply_t; cdecl; external libxcb;
+
+function xcb_intern_atom(c: Pxcb_connection_t; only_if_exists: cuint8; name_len: cuint16; name: PChar): xcb_intern_atom_cookie_t; cdecl; external libxcb;
+function xcb_intern_atom_reply(c: Pxcb_connection_t; cookie: xcb_intern_atom_cookie_t; e: PPxcb_generic_error_t): Pxcb_intern_atom_reply_t; cdecl; external libxcb;
+
+function xcb_get_property(c: pxcb_connection_t; Delete: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; offset, length: cuint32): xcb_get_property_cookie_t; cdecl; external libxcb;
 function xcb_get_property_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_get_property_reply_t; cdecl; external libxcb;
 function xcb_change_property(c: pxcb_connection_t; mode: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; Data: Pointer): Pointer; cdecl; external libxcb;
 function xcb_send_event(c: pxcb_connection_t; propagate: cuint8; destination: xcb_window_t; event_mask: cuint32; event: Pointer): Pointer; cdecl; external libxcb;
@@ -1763,7 +1900,7 @@ function xcb_poly_text_8(c: pxcb_connection_t; drawable: xcb_drawable_t; gc: xcb
 function xcb_poly_text_16(c: pxcb_connection_t; drawable: xcb_drawable_t; gc: xcb_gcontext_t; x, y: cint16; items_len: cuint32; items: PXChar2b): Pointer; cdecl; external libxcb;
 function xcb_put_image(c: pxcb_connection_t; format: cuint8; drawable: xcb_drawable_t; gc: xcb_gcontext_t; Width, Height: cuint16; dst_x, dst_y: cint16; left_pad: cuint8; depth: cuint8;
   data_len: cuint32; Data: PByte): xcb_void_cookie_t; cdecl; external libxcb;
-function xcb_request_check(c: Pxcb_connection_t; cookie: xcb_void_cookie_t): Pxcb_generic_error_t; cdecl; external 'libxcb';
+function xcb_request_check(c: Pxcb_connection_t; cookie: xcb_void_cookie_t): Pxcb_generic_error_t; cdecl; external libxcb;
 function xcb_create_colormap(c: pxcb_connection_t; alloc: cuint8; mid: xcb_colormap_t; window: xcb_window_t; visual: xcb_visualid_t): Pointer; cdecl; external libxcb;
 function xcb_free_colormap(c: pxcb_connection_t; cmap: xcb_colormap_t): Pointer; cdecl; external libxcb;
 function xcb_create_pixmap(c: pxcb_connection_t; depth: cuint8; pid: xcb_pixmap_t; drawable: xcb_drawable_t; Width, Height: cuint16): Pointer; cdecl; external libxcb;
@@ -1774,6 +1911,18 @@ function xcb_render_composite(c: pxcb_connection_t; op: cuint8; src: xcb_render_
 function xcb_shape_combine(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; Source: xcb_window_t; source_kind: cuint8): Pointer; cdecl; external libxcb_shape;
 function xcb_shape_rectangles(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; ordering: cuint8; destination: xcb_window_t; x, y: cint16; rectangles_len: cuint32; rectangles: PXRectangle): Pointer; cdecl; external libxcb_shape;
 function xcb_shape_mask(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; mask: xcb_pixmap_t): Pointer; cdecl; external libxcb_shape;
+function xcb_create_window_checked(c: Pxcb_connection_t; depth: cint; wid: xcb_window_t;
+  parent: xcb_window_t; x, y: cint; width, height, border_width: cuint; _class: cuint;
+  visual: xcb_visualid_t; value_mask: cuint32; value_list: Pcuint32): xcb_void_cookie_t; cdecl; external libxcb;
+// function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external libxcb;
+//function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_screen_iterator_t; cdecl; external libxcb;
+// function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external 'libxcb';
+function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_screen_iterator_t; cdecl; external libxcb;
+function xcb_screen_allowed_depths_iterator(screen: Pxcb_screen_t): xcb_depth_iterator_t; cdecl; external libxcb;
+function xcb_depth_visuals_iterator(depth: Pxcb_depth_t): xcb_visualtype_iterator_t; cdecl; external libxcb;
+function xcb_visualtype_next(iterator: Pxcb_visualtype_iterator_t): Pxcb_visualtype_iterator_t; cdecl; external libxcb;
+procedure xcb_depth_next(iterator: Pxcb_depth_iterator_t); cdecl; external libxcb;
+procedure xcb_screen_next(iterator: Pxcb_screen_iterator_t); cdecl; external libxcb;
 
 // Implementation
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
@@ -1805,23 +1954,75 @@ var
 begin
   setup         := xcb_get_setup(display);
   iter          := xcb_setup_roots_iterator(setup);
-  screen        := iter.iterator;
+  screen        := iter.data;
   New(vis);
   vis^.visualid := screen^.root_visual;
   Result        := vis;
 end;
 
-function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, border_width: cuint; depth: cint; window_class: cuint; visual: PVisual; valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
+function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, border_width: cuint;
+      depth: cint; window_class: cuint; visual: PVisual; valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
 var
   wid: xcb_window_t;
-  value_list: array[0..3] of cuint32;
+  cookie: xcb_void_cookie_t;
+  error: Pxcb_generic_error_t;
+  screen: Pxcb_screen_t;
+  setup: Pxcb_setup_t;
+  iter: xcb_setup_roots_iterator_t;
+  default_visual: xcb_visualid_t;
 begin
-  wid           := cuint(xcb_generate_id(display));
-  value_list[0] := attributes^.background_pixel;
-  value_list[1] := attributes^.event_mask;
-  value_list[2] := attributes^.colormap;
-  xcb_create_window(display, depth, wid, parent, x, y, Width, Height, border_width, window_class, visual^.visualid, valuemask, @value_list);
-  Result        := wid;
+  Result := 0;
+  WriteLn('XCreateWindow: display=', PtrInt(display), ' visual=', PtrInt(visual), ' attributes=', PtrInt(attributes));
+  
+   if display = nil then
+    WriteLn('XCreateWindow: display is null');
+  if attributes = nil then
+    WriteLn('XCreateWindow: attributes is null');
+  if (display = nil) or (attributes = nil) then
+  begin
+    WriteLn('XCreateWindow: Invalid parameters, exiting');
+    Exit;
+  end;
+    
+  // Get default visual if visual is null
+  if visual = nil then
+  begin
+    WriteLn('XCreateWindow: visual is null, using default visual');
+    setup := xcb_get_setup(display);
+    if setup = nil then
+    begin
+      WriteLn('XCreateWindow: Failed to get setup');
+      Exit;
+    end;
+    iter := xcb_setup_roots_iterator(setup);
+    screen := iter.data;
+    if screen = nil then
+    begin
+      WriteLn('XCreateWindow: Failed to get screen');
+      Exit;
+    end;
+    default_visual := screen^.root_visual;
+  end
+  else
+    default_visual := visual^.visualid;
+
+  wid := xcb_generate_id(display);
+  WriteLn('wind ', wid);
+
+  cookie := xcb_create_window_checked(display, depth, wid, parent, x, y, Width, Height, border_width,
+                                     window_class, default_visual, valuemask, Pcuint32(attributes));
+  error := xcb_request_check(display, cookie);
+  if error <> nil then
+  begin
+    WriteLn('Error creating window: ', error^.error_code);
+    freeandnil(error);
+    Result := 0;
+  end
+  else
+  begin
+    WriteLn('windo OK');
+    Result := wid;
+  end;
 end;
 
 procedure XMapWindow(display: PDisplay; w: Window); cdecl;
@@ -1837,30 +2038,75 @@ begin
   xcb_change_window_attributes(display, w, CWEventMask, @value_list);
 end;
 
+
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
 var
-  cookie: Pointer;
-  reply: xcb_intern_atom_reply_t;
+  cookie: xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+  error: Pxcb_generic_error_t;
 begin
+  Result := 0;
+  if (display = nil) or (atom_name = nil) then
+  begin
+    WriteLn('XInternAtom: display or atom_name is null');
+    Exit;
+  end;
+
+  WriteLn('XInternAtom: atom_name=', atom_name);
   cookie := xcb_intern_atom(display, Ord(only_if_exists), Length(atom_name), atom_name);
-  reply  := xcb_intern_atom_reply(display, cookie, nil);
-  Result := reply.atom;
+  if cookie.sequence = 0 then
+    WriteLn('XInternAtom: cookie = nil')
+  else
+    WriteLn('XInternAtom: cookie.sequence=', cookie.sequence);
+
+  reply := xcb_intern_atom_reply(display, cookie, @error);
+  if error <> nil then
+  begin
+    WriteLn('XInternAtom: error code=', error^.error_code);
+    FreeAndNil(error);
+    Exit;
+  end;
+  if reply = nil then
+  begin
+    WriteLn('XInternAtom: reply is null');
+    Exit;
+  end;
+ 
+  WriteLn('XInternAtom: response_type=', reply^.response_type);
+  WriteLn('XInternAtom: sequence=', reply^.sequence);
+  WriteLn('XInternAtom: length=', reply^.length);
+  WriteLn('XInternAtom: atom=', reply^.atom);
+  WriteLn();
+  
+  Result := reply^.atom;
+  // FreeAndNil(reply);
 end;
 
 function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
   nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
 var
-  cookie: Pointer;
+  cookie: xcb_get_property_cookie_t;
   reply: xcb_get_property_reply_t;
+  i : integer;
 begin
-  cookie         := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, long_length);
-  reply          := xcb_get_property_reply(display, cookie, nil);
+  writeln('xgetwindowproperty 0 ');
+  cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, long_length);
+  reply  := xcb_get_property_reply(display, @cookie, nil);
+  writeln('xgetwindowproperty 2 ');
+
   actual_type_return^ := reply.type_;
   actual_format_return^ := reply.format;
   nitems_return^ := reply.value_len;
   bytes_after_return^ := reply.bytes_after;
   prop_return^   := @reply.Value;
   Result         := 0; // Success
+ 
+  writeln('reply.type_ ', reply.type_);
+  writeln('reply.format ', reply.format);
+  writeln('reply.value_len ', reply.value_len);
+  writeln('reply.bytes_after ', reply.bytes_after);
+  writeln('result ', result);
+  
 end;
 
 function XSendEvent(display: PDisplay; w: Window; propagate: tbool; event_mask: clong; event_send: PXEvent): cint; cdecl;
@@ -2415,24 +2661,176 @@ begin
 
 end;
 
-function XDefaultScreenOfDisplay(para1: PDisplay): PScreen; cdecl;
+function find_visual_type(screen: Pxcb_screen_t; visual_id: xcb_visualid_t): Pxcb_visualtype_t;
+var
+  depth_iter: xcb_depth_iterator_t;
+  visual_iter: xcb_visualtype_iterator_t;
 begin
-
+  Result := nil;
+  // Optional: Add a nil check for safety
+  if screen = nil then
+  begin
+    WriteLn('Error: screen is nil in find_visual_type');
+    Exit;
+  end;
+  depth_iter := xcb_screen_allowed_depths_iterator(screen);
+  while depth_iter.rem > 0 do
+  begin
+    visual_iter := xcb_depth_visuals_iterator(depth_iter.data);
+    while visual_iter.rem > 0 do
+    begin
+      if visual_iter.data^.visual_id = visual_id then
+      begin
+        Result := visual_iter.data;
+        Exit;
+      end;
+      xcb_visualtype_next(@visual_iter);
+    end;
+    xcb_depth_next(@depth_iter);
+  end;
 end;
 
-function XRootWindowOfScreen(para1: PScreen): TWindow; cdecl;
+function XDefaultScreenOfDisplay(display: PDisplay): PScreen; cdecl;
+var
+  setup: Pxcb_setup_t;
+  iterator: xcb_setup_roots_iterator_t;
+  visual_type: Pxcb_visualtype_t;
 begin
+  // Get setup from XCB connection
+  setup := xcb_get_setup(display);
+  if setup = nil then
+  begin
+    WriteLn('Error: Failed to get setup from display');
+    Exit(nil);
+  end;
 
+  // Get iterator for screens
+  iterator := xcb_setup_roots_iterator(setup);
+  if iterator.data = nil then
+  begin
+    WriteLn('Error: No screens found in setup');
+    Exit(nil);
+  end;
+
+  // Populate g_screen
+  g_screen.ext_data := nil;           // Not used in this context
+  g_screen.display := display;        // Associate with display
+  g_screen.root := iterator.data^.root;
+  g_screen.width := iterator.data^.width_in_pixels;
+  g_screen.height := iterator.data^.height_in_pixels;
+  g_screen.mwidth := iterator.data^.width_in_millimeters;
+  g_screen.mheight := iterator.data^.height_in_millimeters;
+  g_screen.ndepths := 0;              // Simplified, adjust if needed
+  g_screen.depths := nil;             // Simplified, adjust if needed
+  g_screen.root_depth := iterator.data^.root_depth;
+
+  // Find and populate root visual
+  visual_type := find_visual_type(iterator.data, iterator.data^.root_visual);
+  if visual_type <> nil then
+  begin
+    g_root_visual.visualid := visual_type^.visual_id;
+    g_root_visual._class := visual_type^._class;
+    g_root_visual.red_mask := visual_type^.red_mask;
+    g_root_visual.green_mask := visual_type^.green_mask;
+    g_root_visual.blue_mask := visual_type^.blue_mask;
+    g_root_visual.bits_per_rgb := visual_type^.bits_per_rgb_value;
+    g_root_visual.map_entries := visual_type^.colormap_entries;
+    g_screen.root_visual := @g_root_visual;
+  end
+  else
+  begin
+    WriteLn('Warning: Could not find visual type for root visual');
+    g_screen.root_visual := nil;    // Handle gracefully if required
+  end;
+
+  g_screen.default_gc := nil;         // Adjust if MSEgui needs it
+  g_screen.cmap := iterator.data^.default_colormap;
+  g_screen.white_pixel := iterator.data^.white_pixel;
+  g_screen.black_pixel := iterator.data^.black_pixel;
+  g_screen.max_maps := iterator.data^.max_installed_maps;
+  g_screen.min_maps := iterator.data^.min_installed_maps;
+  g_screen.backing_store := iterator.data^.backing_stores;
+  g_screen.save_unders := iterator.data^.save_unders;
+  g_screen.root_input_mask := 0;      // Adjust if needed
+
+  Result := @g_screen;
 end;
 
-function XDefaultVisualOfScreen(para1: PScreen): PVisual; cdecl;
+function XRootWindowOfScreen(screen: PScreen): Window; cdecl;
 begin
+  Result := screen^.root;
+end;
 
+function XDefaultVisualOfScreen(screen: PScreen): PVisual; cdecl;
+var
+  setup: Pxcb_setup_t;
+  screen_iter: xcb_setup_roots_iterator_t;
+  depth_iter: xcb_depth_iterator_t;
+  visual_iter: xcb_visualtype_iterator_t;
+  visual_type: Pxcb_visualtype_t;
+  visual: PVisual;
+begin
+   WriteLn('XDefaultVisualOfScreen: init');
+   if screen = nil then
+  begin
+    WriteLn('XDefaultVisualOfScreen: screen is null');
+    Exit;
+  end;
+
+  // Allocate Visual structure
+  New(visual);
+  FillChar(visual^, SizeOf(Visual), 0);
+
+  // Get setup and screen
+  setup := xcb_get_setup(Pxcb_connection_t(screen^.display));
+ 
+  if setup = nil then
+  begin
+    WriteLn('XDefaultVisualOfScreen: Failed to get setup');
+    Dispose(visual);
+    Exit;
+  end;
+
+  screen_iter := xcb_setup_roots_iterator(setup);
+  while screen_iter.rem > 0 do
+  begin
+    if screen_iter.data^.root = screen^.root then
+    begin
+      // Iterate through depths and visuals
+      depth_iter := xcb_screen_allowed_depths_iterator(screen_iter.data);
+      while depth_iter.rem > 0 do
+      begin
+        visual_iter := xcb_depth_visuals_iterator(depth_iter.data);
+        while visual_iter.rem > 0 do
+        begin
+          visual_type := visual_iter.data;
+          if visual_type^.visual_id = screen^.root_visual^.visualid then
+          begin
+            visual^.visualid := visual_type^.visual_id;
+            visual^._class := visual_type^._class;
+            visual^.red_mask := visual_type^.red_mask;
+            visual^.green_mask := visual_type^.green_mask;
+            visual^.blue_mask := visual_type^.blue_mask;
+            visual^.bits_per_rgb := visual_type^.bits_per_rgb_value;
+            visual^.map_entries := visual_type^.colormap_entries;
+            Result := visual;
+            WriteLn('XDefaultVisualOfScreen: visualid=', visual^.visualid);
+            Exit;
+          end;
+          xcb_visualtype_next(@visual_iter);
+        end;
+        xcb_depth_next(@depth_iter);
+      end;
+    end;
+    xcb_screen_next(@screen_iter);
+  end;
+  WriteLn('XDefaultVisualOfScreen: No matching visual found');
+  Dispose(visual);
 end;
 
 function XDefaultDepthOfScreen(para1: PScreen): cint; cdecl;
 begin
-
+Result := para1^.root_depth;
 end;
 
 function XDefaultColormapOfScreen(para1: PScreen): TColormap; cdecl;
@@ -2460,14 +2858,9 @@ begin
 
 end;
 
-function XInternAtom(para1: PDisplay; para2: PChar; para3: TBool): TAtom; cdecl;
-begin
-
-end;
-
 function XInternAtoms(para1: PDisplay; para2: PPchar; para3: cint; para4: TBool; para5: PAtom): TStatus; cdecl;
 begin
-
+result := 0;
 end;
 
 function XSetErrorHandler(para1: TXErrorHandler): TXErrorHandler; cdecl;
@@ -2591,10 +2984,35 @@ begin
 end;
 
 // Todo from Xrandr
-function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
-begin
 
+function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
+var
+  cookie: xcb_void_cookie_t;
+  reply: Pointer;
+  error: Pxcb_generic_error_t;
+begin
+  cookie := xcb_randr_query_version(dpy, 1, 2); // Query RandR version 1.2
+  reply := xcb_randr_query_version_reply(dpy, cookie, @error);
+  if error <> nil then
+  begin
+    freeandnil(error);
+    Result := 0;
+  end
+  else if reply <> nil then
+  begin
+    Result := 1; // Assume RandR is present
+    event_base_return^ := 0; // Placeholder, may affect RandR events
+    error_base_return^ := 0;
+    g_randreventbase := 0;
+    g_randrerrorbase := 0;
+    freeandnil(reply);
+  end
+  else
+    Result := 0;
 end;
+  
+// function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
+
 
 function XRRGetScreenResources(dpy: pDisplay; window: Window): pXRRScreenResources; cdecl;
 begin
@@ -2726,7 +3144,91 @@ begin
 
 end;
 
+
+procedure XRenderSetPictureClipRectangles(dpy:PDisplay; picture:TPicture;
+            xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint); cdecl;
+begin
+
+end;
+
+procedure XRenderSetPictureClipRegion(dpy: pDisplay; picture: TPicture; r: regionty); cdecl;
+begin
+
+end;
+
+
+//function XRenderCreatePicture(dpy:PDisplay; drawable:TDrawable; format: PXRenderPictFormat; valuemask: culong;
+//            attributes: PXRenderPictureAttributes): TPicture; cdecl;
+procedure XRenderFillRectangle(dpy: PDisplay; op: longint; dst: TPicture; color: PXRenderColor; x: longint;
+                           y: longint; width: dword; height: dword);cdecl;
+begin
+
+end;
+                           
+procedure XRenderSetPictureTransform(dpy:PDisplay; picture:TPicture; transform:PXTransform); cdecl;
+begin
+
+end;
+
+procedure XRenderSetPictureFilter(dpy:PDisplay; picture:TPicture; filter: pchar; params: pinteger; nparams: integer); cdecl;
+begin
+
+end;
+
+function XRenderCreateSolidFill(dpy: pDisplay; color: pXRenderColor): TPicture; cdecl;
+begin
+
+end;
+
+function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool;cdecl;
+begin
+
+end;
+
+//procedure XRenderFreePicture(dpy:PDisplay; picture:TPicture);  cdecl;//procedure XRenderComposite(dpy:PDisplay; op:longint; src:TPicture;  mask:TPicture; dst:TPicture; src_x:longint; src_y:longint;
+//          mask_x:longint; mask_y:longint; dst_x:longint; dst_y:longint; width:dword; height:dword);cdecl;function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool;cdecl;
+function XRenderFindVisualFormat(dpy: PDisplay; visual: PVisual): PXRenderPictFormat;cdecl;
+begin
+
+end;
+
+
+function XRenderFindStandardFormat(dpy: PDisplay; format: longint): PXRenderPictFormat; cdecl;
+begin
+
+end;
+
+function XRenderFindFormat(dpy: PDisplay; mask: culong; templ: PXRenderPictFormat; count: longint): PXRenderPictFormat; cdecl;
+begin
+
+end;
+
+procedure XRenderCompositeTriangles(dpy: pDisplay; op: cint; src: tPicture; dst: tPicture; maskFormat: pXRenderPictFormat;
+                  xSrc: cint; ySrc: cint; triangles: pXTriangle; ntriangle: cint); cdecl;
+begin
+
+end;
+
+procedure XRenderCompositeTriStrip(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
+begin
+
+end;
+
+procedure XRenderCompositeTriFan(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
+begin
+
+end;
+
+procedure XRenderChangePicture(dpy: pdisplay; picture: tpicture; valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
+begin
+
+end;
+
+
 // Macros
+
 function ScreenOfDisplay(dpy: PDisplay; scr: cint): PScreen;
 begin
   ScreenOfDisplay := @(((PXPrivDisplay(dpy))^.screens)[scr]);
@@ -2744,17 +3246,12 @@ end;
 
 function XSync(para1: PDisplay; para2: Boolean): cint;
 begin
-  Result := XSync(Para1, Ord(Para2));
+  Result := XSync(Para1, (Para2));
 end;
 
 function XSendEvent(para1: PDisplay; para2: TWindow; para3: Boolean; para4: clong; para5: PXEvent): TStatus;
 begin
-  Result := XSendEvent(para1, para2, Ord(Para3), para4, para5);
-end;
-
-function XInternAtoms(para1: PDisplay; para2: PPchar; para3: cint; para4: Boolean; para5: PAtom): TStatus;
-begin
-  Result := XInternAtoms(para1, para2, para3, Ord(para4), para5);
+  Result := XSendEvent(para1, para2, (Para3), para4, para5);
 end;
 
 function DefaultDepthOfScreen(s: PScreen): cint;

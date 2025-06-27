@@ -103,7 +103,6 @@ type
    1: (_bufferspace: fontdatapty;);
  end;
 
-
 {$ifndef staticxft}
 var //xft functions
  XftDrawDestroy: procedure(draw:PXftDraw); cdecl;
@@ -144,6 +143,7 @@ var //xft functions
  XftDrawSrcPicture: function(draw: pXftDraw; color: pXftColor): tpicture; cdecl;
 {$endif}
 
+{$ifndef use_xcb}
 var
  XRenderSetPictureClipRectangles: procedure(dpy:PDisplay; picture:TPicture;
             xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint);
@@ -195,6 +195,8 @@ var
                npoint: cint); cdecl;
  XRenderChangePicture: procedure(dpy: pdisplay; picture: tpicture;
              valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
+
+{$endif}
 
 implementation
 uses
@@ -398,7 +400,11 @@ begin
   argbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardargb32);
  end;
  if not noxft then begin
+  {$ifndef use_xcb}
   fhasxft:= fhasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
+  {$else}
+  fhasxft := true;
+  {$endif}
   if fhasxft then begin
    fhasxft:= xftinit(nil);
    if fhasxft then begin
@@ -3221,6 +3227,7 @@ begin
  result:= true;
 end;
 
+{$ifndef use_xcb}
 function getxrenderlib: boolean;
 const
  funcs: array[0..14] of funcinfoty = (
@@ -3258,7 +3265,7 @@ const
   (n: 'XRenderSetPictureClipRegion';
                      d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRegion)
   );
-
+  
 var
  handle: tlibhandle;
 begin
@@ -3274,6 +3281,16 @@ begin
   end;
  end;
 end;
+
+{$else}
+
+function getxrenderlib: boolean;
+begin
+   createcolorpic:= @createcolorpic2;
+   result := true;
+end;
+
+{$endif}
 
 const
  gdifunctions: gdifunctionaty = (
