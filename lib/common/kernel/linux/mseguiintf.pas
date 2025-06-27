@@ -7008,14 +7008,14 @@ begin
   sigaddset(sigset1,sigchld);
   pthread_sigmask(sig_unblock,@sigset1,@sigset2);
 
-  //writeln('gui_init 1');
+  writeln('gui_init 1');
   
   appdisp:= xopendisplay(nil);
   if appdisp = nil then begin
    goto error;
   end;
   
- // writeln('gui_init 2');
+  writeln('gui_init 2');
   
   if not createim then begin
    result:= gue_inputmanager;
@@ -7026,12 +7026,11 @@ begin
  // writeln('setlocale(lc_all,po1) = OK');
  // defscreenid:= xdefaultscreen(appdisp);
 
-  //writeln('gui_init 3');
+ writeln('gui_init 3');
 
-defscreen := nil;
   defscreen:= xdefaultscreenofdisplay(appdisp);
 
-// if defscreen = nil then writeln('defscreen = nil') else writeln('defscreen = ok');
+  if defscreen = nil then writeln('defscreen = nil') else writeln('defscreen = ok');
 
 // writeln('gui_init 4');
    
@@ -7045,7 +7044,6 @@ defscreen := nil;
 
  defdepth:= xdefaultdepthofscreen(defscreen);
 
-{
  writeln();
  writeln('defvisual^.visualid ',defvisual^.visualid);
  writeln('defvisual^._class ',defvisual^._class);
@@ -7054,7 +7052,6 @@ defscreen := nil;
  writeln('defvisual^.blue_mask ',defvisual^.blue_mask);
  writeln('defvisual^.bits_per_rgb ',defvisual^.bits_per_rgb);
  writeln('defdepth ',defdepth);  
- }
  
   msex11gdi.init(appdisp,defvisual,defdepth);
   attrib.event_mask:= propertychangemask;

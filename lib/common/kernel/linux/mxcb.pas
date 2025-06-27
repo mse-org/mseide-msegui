@@ -2340,9 +2340,207 @@ begin
   xcb_shape_rectangles(display, op, dest_kind, ordering, dest, x, y, n_rects, rectangles);
 end;
 
+function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
+var
+  cookie: xcb_void_cookie_t;
+  reply: Pointer;
+  error: Pxcb_generic_error_t;
+begin
+  cookie := xcb_randr_query_version(dpy, 1, 2); // Query RandR version 1.2
+  reply := xcb_randr_query_version_reply(dpy, cookie, @error);
+  if error <> nil then
+  begin
+    freeandnil(error);
+    Result := 0;
+  end
+  else if reply <> nil then
+  begin
+    Result := 1; // Assume RandR is present
+    event_base_return^ := 0; // Placeholder, may affect RandR events
+    error_base_return^ := 0;
+    g_randreventbase := 0;
+    g_randrerrorbase := 0;
+    freeandnil(reply);
+  end
+  else
+    Result := 0;
+end;
+
 procedure XShapeCombineMask(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; mask: TPixmap; op: cint); cdecl;
 begin
   xcb_shape_mask(display, op, dest_kind, dest, x, y, mask);
+end;
+
+function find_visual_type(screen: Pxcb_screen_t; visual_id: xcb_visualid_t): Pxcb_visualtype_t;
+var
+  depth_iter: xcb_depth_iterator_t;
+  visual_iter: xcb_visualtype_iterator_t;
+begin
+  Result := nil;
+  // Optional: Add a nil check for safety
+  if screen = nil then
+  begin
+    WriteLn('Error: screen is nil in find_visual_type');
+    Exit;
+  end;
+  depth_iter := xcb_screen_allowed_depths_iterator(screen);
+  while depth_iter.rem > 0 do
+  begin
+    visual_iter := xcb_depth_visuals_iterator(depth_iter.data);
+    while visual_iter.rem > 0 do
+    begin
+      if visual_iter.data^.visual_id = visual_id then
+      begin
+        Result := visual_iter.data;
+        Exit;
+      end;
+      xcb_visualtype_next(@visual_iter);
+    end;
+    xcb_depth_next(@depth_iter);
+  end;
+end;
+
+function XDefaultScreenOfDisplay(display: PDisplay): PScreen; cdecl;
+var
+  setup: Pxcb_setup_t;
+  iterator: xcb_setup_roots_iterator_t;
+  visual_type: Pxcb_visualtype_t;
+begin
+  // Get setup from XCB connection
+  setup := xcb_get_setup(display);
+  if setup = nil then
+  begin
+    WriteLn('Error: Failed to get setup from display');
+    Exit(nil);
+  end;
+
+  // Get iterator for screens
+  iterator := xcb_setup_roots_iterator(setup);
+  if iterator.data = nil then
+  begin
+    WriteLn('Error: No screens found in setup');
+    Exit(nil);
+  end;
+
+  // Populate g_screen
+  g_screen.ext_data := nil;           // Not used in this context
+  g_screen.display := display;        // Associate with display
+  g_screen.root := iterator.data^.root;
+  g_screen.width := iterator.data^.width_in_pixels;
+  g_screen.height := iterator.data^.height_in_pixels;
+  g_screen.mwidth := iterator.data^.width_in_millimeters;
+  g_screen.mheight := iterator.data^.height_in_millimeters;
+  g_screen.ndepths := 0;              // Simplified, adjust if needed
+  g_screen.depths := nil;             // Simplified, adjust if needed
+  g_screen.root_depth := iterator.data^.root_depth;
+
+  // Find and populate root visual
+  visual_type := find_visual_type(iterator.data, iterator.data^.root_visual);
+  if visual_type <> nil then
+  begin
+    g_root_visual.visualid := visual_type^.visual_id;
+    g_root_visual._class := visual_type^._class;
+    g_root_visual.red_mask := visual_type^.red_mask;
+    g_root_visual.green_mask := visual_type^.green_mask;
+    g_root_visual.blue_mask := visual_type^.blue_mask;
+    g_root_visual.bits_per_rgb := visual_type^.bits_per_rgb_value;
+    g_root_visual.map_entries := visual_type^.colormap_entries;
+    g_screen.root_visual := @g_root_visual;
+  end
+  else
+  begin
+    WriteLn('Warning: Could not find visual type for root visual');
+    g_screen.root_visual := nil;    // Handle gracefully if required
+  end;
+
+  g_screen.default_gc := nil;         // Adjust if MSEgui needs it
+  g_screen.cmap := iterator.data^.default_colormap;
+  g_screen.white_pixel := iterator.data^.white_pixel;
+  g_screen.black_pixel := iterator.data^.black_pixel;
+  g_screen.max_maps := iterator.data^.max_installed_maps;
+  g_screen.min_maps := iterator.data^.min_installed_maps;
+  g_screen.backing_store := iterator.data^.backing_stores;
+  g_screen.save_unders := iterator.data^.save_unders;
+  g_screen.root_input_mask := 0;      // Adjust if needed
+
+  Result := @g_screen;
+end;
+
+function XRootWindowOfScreen(screen: PScreen): Window; cdecl;
+begin
+  Result := screen^.root;
+end;
+
+function XDefaultVisualOfScreen(screen: PScreen): PVisual; cdecl;
+var
+  setup: Pxcb_setup_t;
+  screen_iter: xcb_setup_roots_iterator_t;
+  depth_iter: xcb_depth_iterator_t;
+  visual_iter: xcb_visualtype_iterator_t;
+  visual_type: Pxcb_visualtype_t;
+  visual: PVisual;
+begin
+   WriteLn('XDefaultVisualOfScreen: init');
+   if screen = nil then
+  begin
+    WriteLn('XDefaultVisualOfScreen: screen is null');
+    Exit;
+  end;
+
+  // Allocate Visual structure
+  New(visual);
+  FillChar(visual^, SizeOf(Visual), 0);
+
+  // Get setup and screen
+  setup := xcb_get_setup(Pxcb_connection_t(screen^.display));
+ 
+  if setup = nil then
+  begin
+    WriteLn('XDefaultVisualOfScreen: Failed to get setup');
+    Dispose(visual);
+    Exit;
+  end;
+
+  screen_iter := xcb_setup_roots_iterator(setup);
+  while screen_iter.rem > 0 do
+  begin
+    if screen_iter.data^.root = screen^.root then
+    begin
+      // Iterate through depths and visuals
+      depth_iter := xcb_screen_allowed_depths_iterator(screen_iter.data);
+      while depth_iter.rem > 0 do
+      begin
+        visual_iter := xcb_depth_visuals_iterator(depth_iter.data);
+        while visual_iter.rem > 0 do
+        begin
+          visual_type := visual_iter.data;
+          if visual_type^.visual_id = screen^.root_visual^.visualid then
+          begin
+            visual^.visualid := visual_type^.visual_id;
+            visual^._class := visual_type^._class;
+            visual^.red_mask := visual_type^.red_mask;
+            visual^.green_mask := visual_type^.green_mask;
+            visual^.blue_mask := visual_type^.blue_mask;
+            visual^.bits_per_rgb := visual_type^.bits_per_rgb_value;
+            visual^.map_entries := visual_type^.colormap_entries;
+            Result := visual;
+            WriteLn('XDefaultVisualOfScreen: visualid=', visual^.visualid);
+            Exit;
+          end;
+          xcb_visualtype_next(@visual_iter);
+        end;
+        xcb_depth_next(@depth_iter);
+      end;
+    end;
+    xcb_screen_next(@screen_iter);
+  end;
+  WriteLn('XDefaultVisualOfScreen: No matching visual found');
+  Dispose(visual);
+end;
+
+function XDefaultDepthOfScreen(para1: PScreen): cint; cdecl;
+begin
+Result := para1^.root_depth;
 end;
 
 // Todo
@@ -2661,178 +2859,6 @@ begin
 
 end;
 
-function find_visual_type(screen: Pxcb_screen_t; visual_id: xcb_visualid_t): Pxcb_visualtype_t;
-var
-  depth_iter: xcb_depth_iterator_t;
-  visual_iter: xcb_visualtype_iterator_t;
-begin
-  Result := nil;
-  // Optional: Add a nil check for safety
-  if screen = nil then
-  begin
-    WriteLn('Error: screen is nil in find_visual_type');
-    Exit;
-  end;
-  depth_iter := xcb_screen_allowed_depths_iterator(screen);
-  while depth_iter.rem > 0 do
-  begin
-    visual_iter := xcb_depth_visuals_iterator(depth_iter.data);
-    while visual_iter.rem > 0 do
-    begin
-      if visual_iter.data^.visual_id = visual_id then
-      begin
-        Result := visual_iter.data;
-        Exit;
-      end;
-      xcb_visualtype_next(@visual_iter);
-    end;
-    xcb_depth_next(@depth_iter);
-  end;
-end;
-
-function XDefaultScreenOfDisplay(display: PDisplay): PScreen; cdecl;
-var
-  setup: Pxcb_setup_t;
-  iterator: xcb_setup_roots_iterator_t;
-  visual_type: Pxcb_visualtype_t;
-begin
-  // Get setup from XCB connection
-  setup := xcb_get_setup(display);
-  if setup = nil then
-  begin
-    WriteLn('Error: Failed to get setup from display');
-    Exit(nil);
-  end;
-
-  // Get iterator for screens
-  iterator := xcb_setup_roots_iterator(setup);
-  if iterator.data = nil then
-  begin
-    WriteLn('Error: No screens found in setup');
-    Exit(nil);
-  end;
-
-  // Populate g_screen
-  g_screen.ext_data := nil;           // Not used in this context
-  g_screen.display := display;        // Associate with display
-  g_screen.root := iterator.data^.root;
-  g_screen.width := iterator.data^.width_in_pixels;
-  g_screen.height := iterator.data^.height_in_pixels;
-  g_screen.mwidth := iterator.data^.width_in_millimeters;
-  g_screen.mheight := iterator.data^.height_in_millimeters;
-  g_screen.ndepths := 0;              // Simplified, adjust if needed
-  g_screen.depths := nil;             // Simplified, adjust if needed
-  g_screen.root_depth := iterator.data^.root_depth;
-
-  // Find and populate root visual
-  visual_type := find_visual_type(iterator.data, iterator.data^.root_visual);
-  if visual_type <> nil then
-  begin
-    g_root_visual.visualid := visual_type^.visual_id;
-    g_root_visual._class := visual_type^._class;
-    g_root_visual.red_mask := visual_type^.red_mask;
-    g_root_visual.green_mask := visual_type^.green_mask;
-    g_root_visual.blue_mask := visual_type^.blue_mask;
-    g_root_visual.bits_per_rgb := visual_type^.bits_per_rgb_value;
-    g_root_visual.map_entries := visual_type^.colormap_entries;
-    g_screen.root_visual := @g_root_visual;
-  end
-  else
-  begin
-    WriteLn('Warning: Could not find visual type for root visual');
-    g_screen.root_visual := nil;    // Handle gracefully if required
-  end;
-
-  g_screen.default_gc := nil;         // Adjust if MSEgui needs it
-  g_screen.cmap := iterator.data^.default_colormap;
-  g_screen.white_pixel := iterator.data^.white_pixel;
-  g_screen.black_pixel := iterator.data^.black_pixel;
-  g_screen.max_maps := iterator.data^.max_installed_maps;
-  g_screen.min_maps := iterator.data^.min_installed_maps;
-  g_screen.backing_store := iterator.data^.backing_stores;
-  g_screen.save_unders := iterator.data^.save_unders;
-  g_screen.root_input_mask := 0;      // Adjust if needed
-
-  Result := @g_screen;
-end;
-
-function XRootWindowOfScreen(screen: PScreen): Window; cdecl;
-begin
-  Result := screen^.root;
-end;
-
-function XDefaultVisualOfScreen(screen: PScreen): PVisual; cdecl;
-var
-  setup: Pxcb_setup_t;
-  screen_iter: xcb_setup_roots_iterator_t;
-  depth_iter: xcb_depth_iterator_t;
-  visual_iter: xcb_visualtype_iterator_t;
-  visual_type: Pxcb_visualtype_t;
-  visual: PVisual;
-begin
-   WriteLn('XDefaultVisualOfScreen: init');
-   if screen = nil then
-  begin
-    WriteLn('XDefaultVisualOfScreen: screen is null');
-    Exit;
-  end;
-
-  // Allocate Visual structure
-  New(visual);
-  FillChar(visual^, SizeOf(Visual), 0);
-
-  // Get setup and screen
-  setup := xcb_get_setup(Pxcb_connection_t(screen^.display));
- 
-  if setup = nil then
-  begin
-    WriteLn('XDefaultVisualOfScreen: Failed to get setup');
-    Dispose(visual);
-    Exit;
-  end;
-
-  screen_iter := xcb_setup_roots_iterator(setup);
-  while screen_iter.rem > 0 do
-  begin
-    if screen_iter.data^.root = screen^.root then
-    begin
-      // Iterate through depths and visuals
-      depth_iter := xcb_screen_allowed_depths_iterator(screen_iter.data);
-      while depth_iter.rem > 0 do
-      begin
-        visual_iter := xcb_depth_visuals_iterator(depth_iter.data);
-        while visual_iter.rem > 0 do
-        begin
-          visual_type := visual_iter.data;
-          if visual_type^.visual_id = screen^.root_visual^.visualid then
-          begin
-            visual^.visualid := visual_type^.visual_id;
-            visual^._class := visual_type^._class;
-            visual^.red_mask := visual_type^.red_mask;
-            visual^.green_mask := visual_type^.green_mask;
-            visual^.blue_mask := visual_type^.blue_mask;
-            visual^.bits_per_rgb := visual_type^.bits_per_rgb_value;
-            visual^.map_entries := visual_type^.colormap_entries;
-            Result := visual;
-            WriteLn('XDefaultVisualOfScreen: visualid=', visual^.visualid);
-            Exit;
-          end;
-          xcb_visualtype_next(@visual_iter);
-        end;
-        xcb_depth_next(@depth_iter);
-      end;
-    end;
-    xcb_screen_next(@screen_iter);
-  end;
-  WriteLn('XDefaultVisualOfScreen: No matching visual found');
-  Dispose(visual);
-end;
-
-function XDefaultDepthOfScreen(para1: PScreen): cint; cdecl;
-begin
-Result := para1^.root_depth;
-end;
-
 function XDefaultColormapOfScreen(para1: PScreen): TColormap; cdecl;
 begin
 
@@ -2985,35 +3011,6 @@ end;
 
 // Todo from Xrandr
 
-function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
-var
-  cookie: xcb_void_cookie_t;
-  reply: Pointer;
-  error: Pxcb_generic_error_t;
-begin
-  cookie := xcb_randr_query_version(dpy, 1, 2); // Query RandR version 1.2
-  reply := xcb_randr_query_version_reply(dpy, cookie, @error);
-  if error <> nil then
-  begin
-    freeandnil(error);
-    Result := 0;
-  end
-  else if reply <> nil then
-  begin
-    Result := 1; // Assume RandR is present
-    event_base_return^ := 0; // Placeholder, may affect RandR events
-    error_base_return^ := 0;
-    g_randreventbase := 0;
-    g_randrerrorbase := 0;
-    freeandnil(reply);
-  end
-  else
-    Result := 0;
-end;
-  
-// function XRRQueryExtension(dpy: pDisplay; event_base_return: pcint; error_base_return: pcint): tBool; cdecl;
-
-
 function XRRGetScreenResources(dpy: pDisplay; window: Window): pXRRScreenResources; cdecl;
 begin
 
@@ -3144,7 +3141,6 @@ begin
 
 end;
 
-
 procedure XRenderSetPictureClipRectangles(dpy:PDisplay; picture:TPicture;
             xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint); cdecl;
 begin
@@ -3156,9 +3152,6 @@ begin
 
 end;
 
-
-//function XRenderCreatePicture(dpy:PDisplay; drawable:TDrawable; format: PXRenderPictFormat; valuemask: culong;
-//            attributes: PXRenderPictureAttributes): TPicture; cdecl;
 procedure XRenderFillRectangle(dpy: PDisplay; op: longint; dst: TPicture; color: PXRenderColor; x: longint;
                            y: longint; width: dword; height: dword);cdecl;
 begin
@@ -3185,13 +3178,10 @@ begin
 
 end;
 
-//procedure XRenderFreePicture(dpy:PDisplay; picture:TPicture);  cdecl;//procedure XRenderComposite(dpy:PDisplay; op:longint; src:TPicture;  mask:TPicture; dst:TPicture; src_x:longint; src_y:longint;
-//          mask_x:longint; mask_y:longint; dst_x:longint; dst_y:longint; width:dword; height:dword);cdecl;function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool;cdecl;
 function XRenderFindVisualFormat(dpy: PDisplay; visual: PVisual): PXRenderPictFormat;cdecl;
 begin
 
 end;
-
 
 function XRenderFindStandardFormat(dpy: PDisplay; format: longint): PXRenderPictFormat; cdecl;
 begin
@@ -3225,7 +3215,6 @@ procedure XRenderChangePicture(dpy: pdisplay; picture: tpicture; valuemask: culo
 begin
 
 end;
-
 
 // Macros
 
