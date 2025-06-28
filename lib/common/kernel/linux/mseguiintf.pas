@@ -7284,7 +7284,9 @@ WriteLn('gui_init: After createappic, result=', result);
   end;
   
  writeln('gui_init 9.5');
+  i := 0;
    for netnum:= low(netatomty) to needednetatom do begin
+    writeln(netnum, ' netatoms num ', netatoms[netnum]);
    if netatoms[netnum] = 0 then begin
     netsupported:= false;
     break;
