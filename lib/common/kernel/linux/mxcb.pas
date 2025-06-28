@@ -2575,6 +2575,191 @@ begin
 Result := para1^.root_depth;
 end;
 
+function XSetICValues(IC: XIC; focusw: PChar; id: longint; pnt: Pointer): PChar; cdecl;
+var
+  pic: PXIC;
+begin
+  Result := nil;
+  if IC = nil then
+  begin
+    WriteLn('XSetICValues: Invalid input context');
+    Result := PChar('Invalid IC');
+    Exit;
+  end;
+
+  pic := PXIC(IC);
+  if focusw = XNClientWindow then
+  begin
+    pic^.client_window := id;
+    WriteLn('XSetICValues: client_window=', id);
+  end
+  else if focusw = XNFocusWindow then
+  begin
+    pic^.focus_window := id;
+    WriteLn('XSetICValues: focus_window=', id);
+  end
+  else
+  begin
+    WriteLn('XSetICValues: Unknown property ', focusw);
+    Result := PChar('Unknown property');
+  end;
+
+  WriteLn('XSetICValues: Success');
+end;
+
+function XSetICValues(IC: XIC; nreset: PChar; impreserv: PChar; pnt: Pointer): PChar; cdecl;
+begin
+  Result := nil;
+  if IC = nil then
+  begin
+    WriteLn('XSetICValues: Invalid input context');
+    Result := PChar('Invalid IC');
+    Exit;
+  end;
+
+  if nreset = XNResetState then
+    WriteLn('XSetICValues: reset_state=', impreserv)
+  else if nreset = XNIMPreeditState then
+    WriteLn('XSetICValues: preedit_state=', impreserv)
+  else
+  begin
+    WriteLn('XSetICValues: Unknown property ', nreset);
+    Result := PChar('Unknown property');
+  end;
+
+  WriteLn('XSetICValues: Success');
+end;
+
+function XSetIMValues(IC: XIM; destroycb: PChar; ximcb: Pointer; pt: Pointer): PChar; cdecl;
+begin
+  Result := nil;
+  if IC = nil then
+  begin
+    WriteLn('XSetIMValues: Invalid input method');
+    Result := PChar('Invalid IM');
+    Exit;
+  end;
+
+  if destroycb = XNDestroyCallback then
+    WriteLn('XSetIMValues: destroy_callback=', PtrInt(ximcb))
+  else
+  begin
+    WriteLn('XSetIMValues: Unknown property ', destroycb);
+    Result := PChar('Unknown property');
+  end;
+
+  WriteLn('XSetIMValues: Success');
+end;
+
+function XGetICValues(IC: XIC; filterev: PChar; icmask: Pointer; pnt: Pointer): PChar; cdecl;
+var
+  pic: PXIC;
+begin
+  Result := nil;
+  if IC = nil then
+  begin
+    WriteLn('XGetICValues: Invalid input context');
+    Result := PChar('Invalid IC');
+    Exit;
+  end;
+
+  pic := PXIC(IC);
+  if filterev = XNFilterEvents then
+  begin
+    PLongint(icmask)^ := XCB_EVENT_MASK_KEY_PRESS or XCB_EVENT_MASK_KEY_RELEASE;
+    WriteLn('XGetICValues: filter_events=', PLongint(icmask)^);
+  end
+  else
+  begin
+    WriteLn('XGetICValues: Unknown property ', filterev);
+    Result := PChar('Unknown property');
+  end;
+
+  WriteLn('XGetICValues: Success');
+end;
+
+function XDefaultColormapOfScreen(para1: PScreen): Colormap; cdecl;
+begin
+  Result := 0;
+  if para1 = nil then
+  begin
+    WriteLn('XDefaultColormapOfScreen: para1 is nil');
+    Exit;
+  end;
+
+  WriteLn('XDefaultColormapOfScreen: colormap=', para1^.cmap);
+  Result := para1^.cmap;
+end;
+
+function XCreateIC(IM: XIM; inputstyle: PChar; status: longint; pt: Pointer): XIC; cdecl;
+var
+  ic: PXIC;
+begin
+  Result := nil;
+  if (IM = nil) or (inputstyle = nil) then
+  begin
+    WriteLn('XCreateIC: Invalid parameters: IM=', PtrInt(IM), ' inputstyle=', inputstyle);
+    Exit;
+  end;
+
+  New(ic);
+  ic^.im := PXIM(IM);
+  ic^.client_window := 0;
+  ic^.focus_window := 0;
+  ic^.input_style := status; // Store XIMPreeditNothing | XIMStatusNothing
+  ic^.filter_events := 0;
+
+  WriteLn('XCreateIC: Created input context, style=', status);
+  Result := XIC(ic);
+end;
+
+function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
+var
+  cookies: array of xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+  error: Pxcb_generic_error_t;
+  i: Integer;
+ begin
+  Result := 1; // Assume success
+  SetLength(cookies, n);
+
+  for i := 0 to n - 1 do
+  begin
+    cookies[i] := xcb_intern_atom(dpy, Ord(only_if_exists), Length(names[i]), names[i]);
+  end;
+
+  for i := 0 to n - 1 do
+  begin
+    reply := xcb_intern_atom_reply(dpy, cookies[i], @error);
+    if reply = nil then
+    begin
+      Result := 0;
+      atoms_return[i] := 0;
+    end
+    else
+    begin
+      atoms_return[i] := reply^.atom;
+    end;
+  end;
+end;
+
+function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
+var
+  im: PXIM;
+begin
+  Result := nil;
+  if Display = nil then
+  begin
+    WriteLn('XOpenIM: Invalid display');
+    Exit;
+  end;
+
+  New(im);
+  im^.connection := Display;
+  WriteLn('XOpenIM: Created input method, connection=', PtrInt(display));
+  Result := im;
+end;
+
 // Todo
 function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; bytes_buffer: cint; keysym_return: Pculong; status_in_out: Pointer): cint; cdecl;
 begin
@@ -2891,19 +3076,6 @@ begin
 
 end;
 
-function XDefaultColormapOfScreen(para1: PScreen): Colormap; cdecl;
-begin
-  Result := 0;
-  if para1 = nil then
-  begin
-    WriteLn('XDefaultColormapOfScreen: para1 is nil');
-    Exit;
-  end;
-
-  WriteLn('XDefaultColormapOfScreen: colormap=', para1^.cmap);
-  Result := para1^.cmap;
-end;
-
 function XKeysymToKeycode(para1: PDisplay; para2: TKeySym): TKeyCode; cdecl;
 begin
 
@@ -2922,36 +3094,6 @@ end;
 function XConnectionNumber(para1: PDisplay): cint; cdecl;
 begin
 
-end;
-
-function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
-var
-  cookies: array of xcb_intern_atom_cookie_t;
-  reply: Pxcb_intern_atom_reply_t;
-  error: Pxcb_generic_error_t;
-  i: Integer;
- begin
-  Result := 1; // Assume success
-  SetLength(cookies, n);
-
-  for i := 0 to n - 1 do
-  begin
-    cookies[i] := xcb_intern_atom(dpy, Ord(only_if_exists), Length(names[i]), names[i]);
-  end;
-
-  for i := 0 to n - 1 do
-  begin
-    reply := xcb_intern_atom_reply(dpy, cookies[i], @error);
-    if reply = nil then
-    begin
-      Result := 0;
-      atoms_return[i] := 0;
-    end
-    else
-    begin
-      atoms_return[i] := reply^.atom;
-    end;
-  end;
 end;
  
 function XSetErrorHandler(para1: TXErrorHandler): TXErrorHandler; cdecl;
@@ -3136,50 +3278,10 @@ begin
 
 end;
 
-function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
-var
-  im: PXIM;
-begin
-  Result := nil;
-  if Display = nil then
-  begin
-    WriteLn('XOpenIM: Invalid display');
-    Exit;
-  end;
-
-  New(im);
-  im^.connection := Display;
-  WriteLn('XOpenIM: Created input method, connection=', PtrInt(display));
-  Result := im;
-end;
-
 function XCloseIM(IM: XIM): TStatus; cdecl;
 begin
 
 end;
-
-function XCreateIC(IM: XIM; inputstyle: PChar; status: longint; pt: Pointer): XIC; cdecl;
-var
-  ic: PXIC;
-begin
-  Result := nil;
-  if (IM = nil) or (inputstyle = nil) then
-  begin
-    WriteLn('XCreateIC: Invalid parameters: IM=', PtrInt(IM), ' inputstyle=', inputstyle);
-    Exit;
-  end;
-
-  New(ic);
-  ic^.im := PXIM(IM);
-  ic^.client_window := 0;
-  ic^.focus_window := 0;
-  ic^.input_style := status; // Store XIMPreeditNothing | XIMStatusNothing
-  ic^.filter_events := 0;
-
-  WriteLn('XCreateIC: Created input context, style=', status);
-  Result := XIC(ic);
-end;
-
 
 procedure XDestroyIC(IC: XIC); cdecl;
 begin
@@ -3187,114 +3289,6 @@ begin
 end;
 
 function XSetLocaleModifiers(modifier_list: PChar): PChar; cdecl;
-begin
-
-end;
-
-function XSetICValues(IC: XIC; focusw: PChar; id: longint; pnt: Pointer): PChar; cdecl;
-var
-  pic: PXIC;
-begin
-  Result := nil;
-  if IC = nil then
-  begin
-    WriteLn('XSetICValues: Invalid input context');
-    Result := PChar('Invalid IC');
-    Exit;
-  end;
-
-  pic := PXIC(IC);
-  if focusw = XNClientWindow then
-  begin
-    pic^.client_window := id;
-    WriteLn('XSetICValues: client_window=', id);
-  end
-  else if focusw = XNFocusWindow then
-  begin
-    pic^.focus_window := id;
-    WriteLn('XSetICValues: focus_window=', id);
-  end
-  else
-  begin
-    WriteLn('XSetICValues: Unknown property ', focusw);
-    Result := PChar('Unknown property');
-  end;
-
-  WriteLn('XSetICValues: Success');
-end;
-
-function XSetICValues(IC: XIC; nreset: PChar; impreserv: PChar; pnt: Pointer): PChar; cdecl;
-begin
-  Result := nil;
-  if IC = nil then
-  begin
-    WriteLn('XSetICValues: Invalid input context');
-    Result := PChar('Invalid IC');
-    Exit;
-  end;
-
-  if nreset = XNResetState then
-    WriteLn('XSetICValues: reset_state=', impreserv)
-  else if nreset = XNIMPreeditState then
-    WriteLn('XSetICValues: preedit_state=', impreserv)
-  else
-  begin
-    WriteLn('XSetICValues: Unknown property ', nreset);
-    Result := PChar('Unknown property');
-  end;
-
-  WriteLn('XSetICValues: Success');
-end;
-
-function XSetIMValues(IC: XIM; destroycb: PChar; ximcb: Pointer; pt: Pointer): PChar; cdecl;
-begin
-  Result := nil;
-  if IC = nil then
-  begin
-    WriteLn('XSetIMValues: Invalid input method');
-    Result := PChar('Invalid IM');
-    Exit;
-  end;
-
-  if destroycb = XNDestroyCallback then
-    WriteLn('XSetIMValues: destroy_callback=', PtrInt(ximcb))
-  else
-  begin
-    WriteLn('XSetIMValues: Unknown property ', destroycb);
-    Result := PChar('Unknown property');
-  end;
-
-  WriteLn('XSetIMValues: Success');
-end;
-
-function XGetICValues(IC: XIC; filterev: PChar; icmask: Pointer; pnt: Pointer): PChar; cdecl;
-var
-  pic: PXIC;
-begin
-  Result := nil;
-  if IC = nil then
-  begin
-    WriteLn('XGetICValues: Invalid input context');
-    Result := PChar('Invalid IC');
-    Exit;
-  end;
-
-  pic := PXIC(IC);
-  if filterev = XNFilterEvents then
-  begin
-    PLongint(icmask)^ := XCB_EVENT_MASK_KEY_PRESS or XCB_EVENT_MASK_KEY_RELEASE;
-    WriteLn('XGetICValues: filter_events=', PLongint(icmask)^);
-  end
-  else
-  begin
-    WriteLn('XGetICValues: Unknown property ', filterev);
-    Result := PChar('Unknown property');
-  end;
-
-  WriteLn('XGetICValues: Success');
-end;
-
-procedure XSetICFocus(IC: XIC); cdecl;
 begin
 
 end;
@@ -3390,6 +3384,11 @@ begin
 end;
 
 procedure XRenderChangePicture(dpy: pdisplay; picture: tpicture; valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
+begin
+
+end;
+
+procedure XSetICFocus(IC: XIC); cdecl;
 begin
 
 end;
