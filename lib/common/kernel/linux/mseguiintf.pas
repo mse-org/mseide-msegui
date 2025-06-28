@@ -1039,26 +1039,26 @@ begin
  checkgdilock;
 {$endif}
  result:= false;
-// writeln('readatomproperty 0');
+ // writeln('readatomproperty 0');
  if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
    atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
  //  writeln('readatomproperty 1');
   if (actualtype = atomatom) and (actualformat = 32) then begin
- //  writeln('readatomproperty 2');
+  // writeln('readatomproperty 2');
    setlength(value,nitems);
    if nitems > 0 then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
     move(prop^,value[0],nitems*sizeof(value[0]));
  {$ifdef FPC} {$checkpointer default} {$endif}
    end;
-   // writeln('readatomproperty fin');
+  //  writeln('readatomproperty fin');
    result:= true;
   end;
  // writeln('readatomproperty bad');
   {$ifndef use_xcb}
    xfree(prop);
   {$endif} 
-//  writeln('readatomproperty fin');
+ // writeln('readatomproperty fin');
  end;
 end;
 
@@ -6838,21 +6838,22 @@ begin
  end;
 end;
 }
+
 function createappic: boolean;
-//var
-// xiccallback: txiccallback;
 begin
- appic:= xcreateic(im,pchar(xninputstyle),ximstatusnothing or ximpreeditnothing,nil);
- result:= appic <> nil;
- if result then begin
- {
-  xiccallback.client_data:= nil;
-  xiccallback.callback:= @icdestroyed;
-  }
-  xseticvalues(appic,pchar(xnclientwindow),appid,
-                         {pchar(xndestroycallback)@,xiccallback,}nil);
-  xgeticvalues(appic,pchar(xnfilterevents),@appicmask,nil);
- end;
+  WriteLn('createappic: Starting, im=', PtrInt(im), ' appdisp=', PtrInt(appdisp));
+  appic := xcreateic(im, pchar(xninputstyle), ximstatusnothing or ximpreeditnothing, nil);
+  WriteLn('createappic: appic=', PtrInt(appic));
+  result := appic <> nil;
+  if result then
+  begin
+    WriteLn('createappic: Calling xseticvalues, xnclientwindow=', xnclientwindow, ' appid=', appid);
+    xseticvalues(appic, pchar(xnclientwindow), appid, nil);
+    WriteLn('createappic: Calling xgeticvalues, xnfilterevents=', xnfilterevents);
+    xgeticvalues(appic, pchar(xnfilterevents), @appicmask, nil);
+    WriteLn('createappic: appicmask=', appicmask);
+  end;
+  WriteLn('createappic: Result=', result);
 end;
 
 function createim: boolean; forward;
@@ -6941,7 +6942,7 @@ var
  modmap: pxmodifierkeymap;
  numlockcode: cuint;
  buf1: clipboardbufferty;
-
+ i : integer = 0;
 begin
 //writeln('gui_init 0');
  gdi_lock;
@@ -7032,17 +7033,19 @@ begin
 
   if defscreen = nil then writeln('defscreen = nil') else writeln('defscreen = ok');
 
-// writeln('gui_init 4');
+ writeln('gui_init 4');
    
   rootid:= xrootwindowofscreen(defscreen);
 
-//writeln('gui_init 4+');  
+ writeln('gui_init 4+');  
   
-  defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
+ defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
  
-//writeln('gui_init 4.1');  
+ writeln('gui_init 4.1');  
 
  defdepth:= xdefaultdepthofscreen(defscreen);
+
+  writeln('gui_init 4.1.0');  
 
  writeln();
  writeln('defvisual^.visualid ',defvisual^.visualid);
@@ -7053,17 +7056,26 @@ begin
  writeln('defvisual^.bits_per_rgb ',defvisual^.bits_per_rgb);
  writeln('defdepth ',defdepth);  
  
-  msex11gdi.init(appdisp,defvisual,defdepth);
+ msex11gdi.init(appdisp,defvisual,defdepth);
+
+writeln('gui_init 4.1.1');  
+
   attrib.event_mask:= propertychangemask;
+  
+
+writeln('gui_init 4.1.2');
+  
   appid:= xcreatewindow(appdisp,rootid,0,0,200,200,0,
                0,inputonly,pvisual(copyfromparent),cweventmask,@attrib);
+ 
+writeln('gui_init 4.1.3');
  
   if appid = 0 then begin
    result:= gue_createwindow;
    goto error;
   end;
 
-  //writeln('gui_init 5');
+  writeln('gui_init 5');
 
   {$ifdef use_xcb}
   hasxrandrlib := false;
@@ -7081,12 +7093,14 @@ begin
    hasxrandr:= false;
   end;
 
-  // writeln('gui_init 6');
-  if not createappic then begin
-   result:= gue_inputcontext;
-   goto error;
-  end;
-  // writeln('gui_init 7');  
+ WriteLn('gui_init: Before createappic, im=', PtrInt(im), ' appdisp=', PtrInt(appdisp));
+if not createappic then
+begin
+  WriteLn('gui_init: createappic failed, setting result=gue_inputcontext');
+  result := gue_inputcontext;
+  goto error;
+end;
+WriteLn('gui_init: After createappic, result=', result);
   
   {$ifdef FPC}
   is8bitcolor:= defaultdepthofscreen(defscreen) = 8;
@@ -7104,16 +7118,18 @@ begin
   end
   else begin
   
-  //writeln('gui_init 7.1.1');  
+  writeln('gui_init 7.1.1');  
  
   istruecolor:= (defvisual^._class = truecolor) or (defvisual^._class = directcolor);
-   //  writeln('gui_init 7.1.2'); 
+  
+  writeln('gui_init 7.1.2 istruecolor', istruecolor); 
+  
    if istruecolor then begin
-    // writeln('gui_init 7.1.3');
+     writeln('gui_init 7.1.3');
     xredmask:= defvisual^.red_mask;
     xgreenmask:= defvisual^.green_mask;
     xbluemask:= defvisual^.blue_mask;
-    //writeln('gui_init 7.1.4'); 
+    writeln('gui_init 7.1.4'); 
     xredshiftbase:= highestbit(xredmask)-7;
     xgreenshiftbase:= highestbit(xgreenmask)-7;
     xblueshiftbase:= highestbit(xbluemask)-7;
@@ -7143,17 +7159,17 @@ begin
     end;
    end
    else begin
-    writeln('gui_init 7.1.3.1'); 
+    writeln('gui_init 7.1.3.1 gue_notruecolor'); 
     result:= gue_notruecolor;
     goto error;
    end;
   end;
   
-  // writeln('gui_init 8'); 
+  writeln('gui_init 8'); 
 
   defcolormap:= xdefaultcolormapofscreen(defscreen);
   
-  // writeln('gui_init 9'); 
+  writeln('gui_init 9'); 
 
   atomatom:= xinternatom(appdisp,'ATOM',
            {$ifdef xboolean}true{$else}1{$endif});
@@ -7223,19 +7239,19 @@ begin
   xinternatoms(appdisp,@xdndatomnames[low(xdndatomty)],
            integer(high(xdndatomty))+1,{$ifdef xboolean}false{$else}0{$endif},
            @xdndatoms[low(xdndatomty)]);
+  
   fillchar(xdndactionatoms,sizeof(xdndactionatoms),0);      //get or create xdnd atoms
   xinternatoms(appdisp,@xdndactionatomnames[firstdndaction],
            integer(high(dndactionty)),{$ifdef xboolean}false{$else}0{$endif},
            @xdndactionatoms[firstdndaction]); //first = 0
-
   fillchar(netatoms,sizeof(netatoms),0);               //check _net_
   xinternatoms(appdisp,@netatomnames[low(netatomty)],
               integer(firstonlyifexistatom),{$ifdef xboolean}false{$else}0{$endif},@netatoms[low(netatomty)]);
+
   xinternatoms(appdisp,@netatomnames[firstonlyifexistatom],
               integer(high(netatomty))-integer(firstonlyifexistatom),
                                        {$ifdef xboolean}true{$else}1{$endif},@netatoms[firstonlyifexistatom]);
-  
- writeln('gui_init 9.2');
+  writeln('gui_init 9.2');
  
     netsupported:= netsupportedatom <> 0;
   if netsupported then begin
@@ -7244,18 +7260,21 @@ begin
    netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
    
     writeln('gui_init 9.4 netsupported ', netsupported);
-    
-     
+         
     writeln('firstcheckedatom ', firstcheckedatom);
     writeln('lastcheckedatom ', lastcheckedatom);
   
    for netnum:= firstcheckedatom to lastcheckedatom do begin
     atom1:= netatoms[netnum];
-    writeln('atom1 ', atom1);
-  
+    
+    writeln(i, ' atom num ', atom1);
+    inc(i);
+    
     netatoms[netnum]:= 0;
+   
     for int1:= 0 to high(atomar) do begin
      if atomar[int1] = atom1 then begin
+      writeln('B atom num ', atom1);
       netatoms[netnum]:= atom1;
       break;
      end;
@@ -7265,18 +7284,22 @@ begin
   end;
   
  writeln('gui_init 9.5');
-  
-  for netnum:= low(netatomty) to needednetatom do begin
+   for netnum:= low(netatomty) to needednetatom do begin
    if netatoms[netnum] = 0 then begin
     netsupported:= false;
     break;
    end;
   end;
 
+ writeln('gui_init 9.6 netsupported ', netsupported);                  
+ 
   netsupported:= netsupported and
                    readcardinalproperty(rootid,netatoms[net_workarea],4,rect1);
+ writeln('gui_init 9.7 readcardinalproperty netsupported ', netsupported);                  
   canframeextents:= netatoms[net_frame_extents] <> 0;
+ writeln('gui_init 9.8 canframeextents ', canframeextents);
   canfullscreen:= netatoms[net_wm_state_fullscreen] <> 0;
+ writeln('gui_init 9.9 canfullscreen ', canfullscreen);
   if netsupported and not canfullscreen then begin
    netatoms[net_wm_state_fullscreen]:= xinternatom(appdisp,
            @netatomnames[net_wm_state_fullscreen],
@@ -7286,7 +7309,14 @@ begin
   numlockstate:= 0;
   numlockcode:= xkeysymtokeycode(appdisp,xk_num_lock);
   if numlockcode <> nosymbol then begin  //return numlock state
+  
+  writeln('gui_init 10.0 numlockcode <> nosymbol');
+
    modmap:= xgetmodifiermapping(appdisp);
+   
+   writeln('gui_init 10.1 modmap ');
+ 
+   
  {$ifdef FPC} {$checkpointer off} {$endif}
    po2:= modmap^.modifiermap;
    for int1:= 0 to 7 do begin
@@ -7301,7 +7331,11 @@ begin
      break;
     end;
    end;
+   writeln('gui_init 10.2 ');   
+ 
    xfreemodifiermap(modmap);
+ 
+   writeln('gui_init 10.3 xfreemodifiermap');
  {$ifdef FPC} {$checkpointer default} {$endif}
   end;
 
@@ -7309,10 +7343,19 @@ begin
 //  pollcount:= 2;
   pollinf^.pollinfo:= nil;
   gui_addpollfd(int1,xconnectionnumber(appdisp),[pf_in,pf_pri]); //0
+ 
+  writeln('gui_init 10.4 xconnectionnumber(appdisp) = ', xconnectionnumber(appdisp));
+     
   gui_addpollfd(int1,connectpipe.readdes,[pf_in,pf_pri]);        //1
+  
+   writeln('gui_init 10.5 gui_addpollfd');
+ 
  {$ifdef with_sm}
-  if hassm and (sminfo.fd > 0) then begin
+  writeln('gui_init 10.6');
+   if hassm and (sminfo.fd > 0) then begin
    gui_addpollfd(int1,sminfo.fd,[pf_in,pf_pri]);                 //2
+ 
+   writeln('gui_init 10.7');
   end;
  {$endif}
 (*

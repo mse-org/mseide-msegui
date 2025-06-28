@@ -55,13 +55,14 @@ type
 
   Display = Pointer; // Maps to xcb_connection_t*
 
+{
   _XIM = record
   end;
   XIM  = ^_XIM;
   _XIC = record
   end;
   XIC  = ^_XIC;
-
+}
   // XID type for mxrandr.pas
   txid = culong;
   pxid = ^txid;
@@ -124,7 +125,7 @@ type
 
   Atom      = cuint;      // Maps to xcb_atom_t
   PAtom     = ^Atom;
-  Colormap  = cuint;      // Maps to xcb_colormap_t
+  Colormap  = cuint32;       // Maps to xcb_colormap_t
   TColormap = Colormap;   // For mseguiintf.pas
   Pixmap    = cuint;      // Maps to xcb_pixmap_t
   TPixmap   = Pixmap;     // For mshape.pas
@@ -431,14 +432,35 @@ type
     ascent: cint;
     descent: cint;
   end;
+  
+  {
+  _XIM = record
+  end;
+  XIM  = ^_XIM;
+  _XIC = record
+  end;
+  XIC  = ^_XIC;
+}
 
+  type
   PXIM = ^TXIM;
   TXIM = record
+    connection: Pxcb_connection_t;
+    // Opaque data for XIM
   end;
-
+  XIM  = PXIM;
+  
   PXIC = ^TXIC;
   TXIC = record
+    im: PXIM;
+    client_window: xcb_window_t;
+    focus_window: xcb_window_t;
+    input_style: clong;
+    filter_events: clong;
   end;
+  XIC  = PXIC;
+  XIMStyle = clong;
+  PXIMStyles = Pointer;
 
   PXErrorEvent = ^TXErrorEvent;
 
@@ -1260,6 +1282,9 @@ const
   XCB_KEY_PRESS = 2;
   XCB_KEY_RELEASE = 3;
   XCB_EXPOSE    = 12;
+  const
+  XCB_EVENT_MASK_KEY_PRESS = 1 shl 0;   // $00000001
+  XCB_EVENT_MASK_KEY_RELEASE = 1 shl 1; // $00000002
   InputOnly     = 2;
   InputOutput   = 1;
   CopyFromParent = 0;
@@ -1482,6 +1507,7 @@ const
   XNInputStyle  = 'inputStyle';
   XNClientWindow = 'clientWindow';
   XNDestroyCallback = 'destroyCallback';
+  XNIMPreeditState = 'preeditState';
 
 var
   GlobalXCBConnection: PDisplay;
@@ -1512,7 +1538,7 @@ procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
 function XPending(display: PDisplay): cint; cdecl;
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
 
-function XInternAtoms(para1: PDisplay; para2: PPchar; para3: cint; para4: TBool; para5: PAtom): TStatus; cdecl;
+function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
 function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
   nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
 function XSendEvent(display: PDisplay; w: Window; propagate: TBool; event_mask: clong; event_send: PXEvent): cint; cdecl;
@@ -1680,8 +1706,8 @@ function XSetLocaleModifiers(modifier_list: PChar): PChar; cdecl;
 function XSetICValues(IC: XIC; focusw: PChar; id: longint; pnt: Pointer): PChar; cdecl;
 function XSetICValues(IC: XIC; nreset: PChar; impreserv: PChar; pnt: Pointer): PChar; cdecl;
 function XSetIMValues(IC: XIM; destroycb: PChar; ximcb: Pointer; pt: Pointer): PChar; cdecl;
-
 function XGetICValues(IC: XIC; filterev: PChar; icmask: Pointer; pnt: Pointer): PChar; cdecl;
+
 procedure XSetICFocus(IC: XIC); cdecl;
 procedure XUnsetICFocus(IC: XIC); cdecl;
 function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent; BufferReturn: PChar; CharsBuffer: longint; KeySymReturn: PKeySym; StatusReturn: PStatus): longint; cdecl;
@@ -1812,8 +1838,9 @@ type
     type_: xcb_atom_t;
     bytes_after: cuint32;
     value_len: cuint32;
-    Value: array[0..0] of char; // Variable length
+    Value: array[0..11] of char; // Variable length
   end;
+  Pxcb_get_property_reply_t = ^xcb_get_property_reply_t;
 
 
   // XRandR-specific types for mxrandr.pas
@@ -1849,7 +1876,7 @@ type
     index: cint;
   end;
   
-  xcb_get_property_cookie_t = record
+  xcb_get_property_cookie_t = packed record
     sequence: Cardinal;  // Cardinal is equivalent to c_uint (unsigned 32-bit)
   end;
   Pxcb_get_property_cookie_t = ^xcb_get_property_cookie_t;
@@ -1882,7 +1909,9 @@ function xcb_intern_atom(c: Pxcb_connection_t; only_if_exists: cuint8; name_len:
 function xcb_intern_atom_reply(c: Pxcb_connection_t; cookie: xcb_intern_atom_cookie_t; e: PPxcb_generic_error_t): Pxcb_intern_atom_reply_t; cdecl; external libxcb;
 
 function xcb_get_property(c: pxcb_connection_t; Delete: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; offset, length: cuint32): xcb_get_property_cookie_t; cdecl; external libxcb;
-function xcb_get_property_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_get_property_reply_t; cdecl; external libxcb;
+function xcb_get_property_reply(c: pxcb_connection_t; cookie: xcb_get_property_cookie_t; e: Pointer): pxcb_get_property_reply_t; cdecl; external libxcb;
+
+
 function xcb_change_property(c: pxcb_connection_t; mode: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; Data: Pointer): Pointer; cdecl; external libxcb;
 function xcb_send_event(c: pxcb_connection_t; propagate: cuint8; destination: xcb_window_t; event_mask: cuint32; event: Pointer): Pointer; cdecl; external libxcb;
 procedure xcb_flush(c: pxcb_connection_t); cdecl; external libxcb;
@@ -2082,29 +2111,32 @@ begin
   // FreeAndNil(reply);
 end;
 
-function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
-  nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; 
+         Delete: TBool; req_type: Atom;  actual_type_return: PAtom; actual_format_return: Pcint;
+          nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
 var
   cookie: xcb_get_property_cookie_t;
-  reply: xcb_get_property_reply_t;
+  reply: pxcb_get_property_reply_t;
   i : integer;
 begin
   writeln('xgetwindowproperty 0 ');
   cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, long_length);
-  reply  := xcb_get_property_reply(display, @cookie, nil);
-  writeln('xgetwindowproperty 2 ');
+ 
+   writeln('xgetwindowproperty 2 ');
+  reply  := xcb_get_property_reply(display, cookie, nil);
+   if reply = nil then writeln('xgetwindowproperty 3 = nil');
 
-  actual_type_return^ := reply.type_;
-  actual_format_return^ := reply.format;
-  nitems_return^ := reply.value_len;
-  bytes_after_return^ := reply.bytes_after;
-  prop_return^   := @reply.Value;
+  actual_type_return^ := reply^.type_;
+  actual_format_return^ := reply^.format;
+  nitems_return^ := reply^.value_len;
+  bytes_after_return^ := reply^.bytes_after;
+  prop_return^   := @reply^.Value;
   Result         := 0; // Success
  
-  writeln('reply.type_ ', reply.type_);
-  writeln('reply.format ', reply.format);
-  writeln('reply.value_len ', reply.value_len);
-  writeln('reply.bytes_after ', reply.bytes_after);
+  writeln('reply.type_ ', reply^.type_);
+  writeln('reply.format ', reply^.format);
+  writeln('reply.value_len ', reply^.value_len);
+  writeln('reply.bytes_after ', reply^.bytes_after);
   writeln('result ', result);
   
 end;
@@ -2859,9 +2891,17 @@ begin
 
 end;
 
-function XDefaultColormapOfScreen(para1: PScreen): TColormap; cdecl;
+function XDefaultColormapOfScreen(para1: PScreen): Colormap; cdecl;
 begin
+  Result := 0;
+  if para1 = nil then
+  begin
+    WriteLn('XDefaultColormapOfScreen: para1 is nil');
+    Exit;
+  end;
 
+  WriteLn('XDefaultColormapOfScreen: colormap=', para1^.cmap);
+  Result := para1^.cmap;
 end;
 
 function XKeysymToKeycode(para1: PDisplay; para2: TKeySym): TKeyCode; cdecl;
@@ -2884,11 +2924,36 @@ begin
 
 end;
 
-function XInternAtoms(para1: PDisplay; para2: PPchar; para3: cint; para4: TBool; para5: PAtom): TStatus; cdecl;
-begin
-result := 0;
-end;
+function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
+var
+  cookies: array of xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+  error: Pxcb_generic_error_t;
+  i: Integer;
+ begin
+  Result := 1; // Assume success
+  SetLength(cookies, n);
 
+  for i := 0 to n - 1 do
+  begin
+    cookies[i] := xcb_intern_atom(dpy, Ord(only_if_exists), Length(names[i]), names[i]);
+  end;
+
+  for i := 0 to n - 1 do
+  begin
+    reply := xcb_intern_atom_reply(dpy, cookies[i], @error);
+    if reply = nil then
+    begin
+      Result := 0;
+      atoms_return[i] := 0;
+    end
+    else
+    begin
+      atoms_return[i] := reply^.atom;
+    end;
+  end;
+end;
+ 
 function XSetErrorHandler(para1: TXErrorHandler): TXErrorHandler; cdecl;
 begin
 
@@ -3072,8 +3137,20 @@ begin
 end;
 
 function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
+var
+  im: PXIM;
 begin
+  Result := nil;
+  if Display = nil then
+  begin
+    WriteLn('XOpenIM: Invalid display');
+    Exit;
+  end;
 
+  New(im);
+  im^.connection := Display;
+  WriteLn('XOpenIM: Created input method, connection=', PtrInt(display));
+  Result := im;
 end;
 
 function XCloseIM(IM: XIM): TStatus; cdecl;
@@ -3082,9 +3159,27 @@ begin
 end;
 
 function XCreateIC(IM: XIM; inputstyle: PChar; status: longint; pt: Pointer): XIC; cdecl;
+var
+  ic: PXIC;
 begin
+  Result := nil;
+  if (IM = nil) or (inputstyle = nil) then
+  begin
+    WriteLn('XCreateIC: Invalid parameters: IM=', PtrInt(IM), ' inputstyle=', inputstyle);
+    Exit;
+  end;
 
+  New(ic);
+  ic^.im := PXIM(IM);
+  ic^.client_window := 0;
+  ic^.focus_window := 0;
+  ic^.input_style := status; // Store XIMPreeditNothing | XIMStatusNothing
+  ic^.filter_events := 0;
+
+  WriteLn('XCreateIC: Created input context, style=', status);
+  Result := XIC(ic);
 end;
+
 
 procedure XDestroyIC(IC: XIC); cdecl;
 begin
@@ -3097,23 +3192,106 @@ begin
 end;
 
 function XSetICValues(IC: XIC; focusw: PChar; id: longint; pnt: Pointer): PChar; cdecl;
+var
+  pic: PXIC;
 begin
+  Result := nil;
+  if IC = nil then
+  begin
+    WriteLn('XSetICValues: Invalid input context');
+    Result := PChar('Invalid IC');
+    Exit;
+  end;
 
+  pic := PXIC(IC);
+  if focusw = XNClientWindow then
+  begin
+    pic^.client_window := id;
+    WriteLn('XSetICValues: client_window=', id);
+  end
+  else if focusw = XNFocusWindow then
+  begin
+    pic^.focus_window := id;
+    WriteLn('XSetICValues: focus_window=', id);
+  end
+  else
+  begin
+    WriteLn('XSetICValues: Unknown property ', focusw);
+    Result := PChar('Unknown property');
+  end;
+
+  WriteLn('XSetICValues: Success');
 end;
 
 function XSetICValues(IC: XIC; nreset: PChar; impreserv: PChar; pnt: Pointer): PChar; cdecl;
 begin
+  Result := nil;
+  if IC = nil then
+  begin
+    WriteLn('XSetICValues: Invalid input context');
+    Result := PChar('Invalid IC');
+    Exit;
+  end;
 
+  if nreset = XNResetState then
+    WriteLn('XSetICValues: reset_state=', impreserv)
+  else if nreset = XNIMPreeditState then
+    WriteLn('XSetICValues: preedit_state=', impreserv)
+  else
+  begin
+    WriteLn('XSetICValues: Unknown property ', nreset);
+    Result := PChar('Unknown property');
+  end;
+
+  WriteLn('XSetICValues: Success');
 end;
 
 function XSetIMValues(IC: XIM; destroycb: PChar; ximcb: Pointer; pt: Pointer): PChar; cdecl;
 begin
+  Result := nil;
+  if IC = nil then
+  begin
+    WriteLn('XSetIMValues: Invalid input method');
+    Result := PChar('Invalid IM');
+    Exit;
+  end;
 
+  if destroycb = XNDestroyCallback then
+    WriteLn('XSetIMValues: destroy_callback=', PtrInt(ximcb))
+  else
+  begin
+    WriteLn('XSetIMValues: Unknown property ', destroycb);
+    Result := PChar('Unknown property');
+  end;
+
+  WriteLn('XSetIMValues: Success');
 end;
 
 function XGetICValues(IC: XIC; filterev: PChar; icmask: Pointer; pnt: Pointer): PChar; cdecl;
+var
+  pic: PXIC;
 begin
+  Result := nil;
+  if IC = nil then
+  begin
+    WriteLn('XGetICValues: Invalid input context');
+    Result := PChar('Invalid IC');
+    Exit;
+  end;
 
+  pic := PXIC(IC);
+  if filterev = XNFilterEvents then
+  begin
+    PLongint(icmask)^ := XCB_EVENT_MASK_KEY_PRESS or XCB_EVENT_MASK_KEY_RELEASE;
+    WriteLn('XGetICValues: filter_events=', PLongint(icmask)^);
+  end
+  else
+  begin
+    WriteLn('XGetICValues: Unknown property ', filterev);
+    Result := PChar('Unknown property');
+  end;
+
+  WriteLn('XGetICValues: Success');
 end;
 
 procedure XSetICFocus(IC: XIC); cdecl;
@@ -3175,7 +3353,7 @@ end;
 
 function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool;cdecl;
 begin
-
+result := 0;
 end;
 
 function XRenderFindVisualFormat(dpy: PDisplay; visual: PVisual): PXRenderPictFormat;cdecl;

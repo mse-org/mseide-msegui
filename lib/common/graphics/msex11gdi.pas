@@ -399,12 +399,17 @@ begin
   rgbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardrgb24);
   argbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardargb32);
  end;
- if not noxft then begin
+ 
+  {$ifdef use_xcb}
+  noxft := true;
+  {$endif}
+  if not noxft then begin
   {$ifndef use_xcb}
   fhasxft:= fhasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
   {$else}
   fhasxft := true;
   {$endif}
+ 
   if fhasxft then begin
    fhasxft:= xftinit(nil);
    if fhasxft then begin
@@ -418,6 +423,7 @@ begin
  else begin
   fhasxft:= false;
  end;
+
   for propnum:= low(fontpropertiesty) to high(fontpropertiesty) do begin
    fontpropnames[propnum]:= fontpropertynames[propnum].name;
   end;
