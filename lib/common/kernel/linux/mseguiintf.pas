@@ -7270,7 +7270,9 @@ WriteLn('gui_init: After createappic, result=', result);
     writeln(i, ' atom num ', atom1);
     inc(i);
     
-    netatoms[netnum]:= 0;
+     netatoms[netnum]:= 0;
+    
+    writeln('length(atomar) = ', length(atomar)); 
    
     for int1:= 0 to high(atomar) do begin
      if atomar[int1] = atom1 then begin
@@ -7311,9 +7313,10 @@ WriteLn('gui_init: After createappic, result=', result);
 
   numlockstate:= 0;
   numlockcode:= xkeysymtokeycode(appdisp,xk_num_lock);
+  
   if numlockcode <> nosymbol then begin  //return numlock state
   
-  writeln('gui_init 10.0 numlockcode <> nosymbol');
+  writeln('gui_init 10.0 numlockcode <> nosymbol = ', numlockcode );
 
    modmap:= xgetmodifiermapping(appdisp);
    
@@ -7383,6 +7386,8 @@ WriteLn('gui_init: After createappic, result=', result);
 {$endif}
 *)
   result:= gue_ok;
+  
+  writeln('result: ', result); 
  {$ifdef mse_flushgdi}
   xsynchronize(appdisp,1);
  {$endif}
