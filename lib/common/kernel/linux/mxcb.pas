@@ -13,6 +13,7 @@ const
   libxcb_shape  = 'libxcb-shape.so.0';
   libxcb_render = 'libxcb-render.so.0';
   libxcb_randr  = 'libxcb-randr.so.0';
+  libxcb_keysyms = 'libxcb-keysyms.so.1';
 
 type
   xcb_connection_t  = record
@@ -463,7 +464,6 @@ type
   PXIMStyles = Pointer;
 
   PXErrorEvent = ^TXErrorEvent;
-
   TXErrorEvent = record
     _type: cint;
     display: PDisplay;
@@ -1265,9 +1265,24 @@ type
     modes: pRRMode;
   end;
   pXRROutputInfo = ^XRROutputInfo;
+  
+   TXErrorHandler = function(display: PDisplay; error_event: PXErrorEvent): cint; cdecl;
+ 
+ {
+   PXErrorEvent = ^XErrorEvent;
+  XErrorEvent = record
+    type: cint;
+    display: PDisplay;
+    resourceid: culong;
+    serial: culong;
+    error_code: cuchar;
+    request_code: cuchar;
+    minor_code: cuchar;
+  end;
 
   TXErrorHandler = function(para1: PDisplay; para2: PXErrorEvent): cint; cdecl;
-
+ }
+ 
 const
   MWM_HINTS_DECORATIONS = 1 shl 1;
   WindowGroupHint = 1 shl 6;
@@ -1511,12 +1526,14 @@ const
 
 var
   GlobalXCBConnection: PDisplay;
+  global_error_handler: TXErrorHandler = nil;
   g_screen: TScreen; // Global to store screen data
   g_randreventbase: cint = 0;
   g_randrerrorbase: cint = 0;
   //g_errorhandler: XErrorHandler = nil;
   g_errorhandler: pointer = nil;
   g_root_visual: Visual;
+  
 
 
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
@@ -1663,10 +1680,11 @@ function XRootWindowOfScreen(screen: PScreen): Window; cdecl;
 function XDefaultVisualOfScreen(screen: PScreen): PVisual; cdecl;
 function XDefaultDepthOfScreen(para1: PScreen): cint; cdecl;
 function XDefaultColormapOfScreen(para1: PScreen): TColormap; cdecl;
-function XKeysymToKeycode(para1: PDisplay; para2: TKeySym): TKeyCode; cdecl;
-function XGetModifierMapping(para1: PDisplay): PXModifierKeymap; cdecl;
+function XKeysymToKeycode(display: PDisplay; keysym: TKeySym): TKeyCode; cdecl;
+function XGetModifierMapping(display: PDisplay): PXModifierKeymap; cdecl;
+
 function XFreeModifiermap(para1: PXModifierKeymap): cint; cdecl;
-function XConnectionNumber(para1: PDisplay): cint; cdecl;
+function XConnectionNumber(display: PDisplay): cint; cdecl;
 function XSetErrorHandler(para1: TXErrorHandler): TXErrorHandler; cdecl;
 function XSetClipRectangles(para1: PDisplay; para2: TGC; para3: cint; para4: cint; para5: PXRectangle; para6: cint; para7: cint): cint; cdecl;
 function XSetDashes(para1: PDisplay; para2: TGC; para3: cint; para4: PChar; para5: cint): cint; cdecl;
@@ -1880,10 +1898,39 @@ type
     sequence: Cardinal;  // Cardinal is equivalent to c_uint (unsigned 32-bit)
   end;
   Pxcb_get_property_cookie_t = ^xcb_get_property_cookie_t;
+  
+  Pxcb_key_symbols_t = ^xcb_key_symbols_t;
+  xcb_key_symbols_t = record end; // Opaque structure
+  Pxcb_keycode_t = ^xcb_keycode_t;
+  xcb_keycode_t = cuchar; // Matches Xlib's KeyCode (unsigned char)
+  KeySym = culong; // Matches Xlib's KeySym (unsigned long)
+  KeyCode = cuchar; // Matches Xlib's KeyCode
+ 
+  Pxcb_get_modifier_mapping_reply_t = ^xcb_get_modifier_mapping_reply_t;
+  xcb_get_modifier_mapping_reply_t = record
+    response_type: cuint8;
+    extension: cuint8;
+    sequence: cuint16;
+    length: cuint32;
+    keycodes_per_modifier: cuint8;
+    pad0: array[0..23] of cuint8; // Padding to match XCB structure
+  end;
+  
+  xcb_get_modifier_mapping_cookie_t = record
+    sequence: cuint;
+  end;
 
+function xcb_get_file_descriptor(c: Pxcb_connection_t): cint; cdecl; external libxcb;
 
-function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external 'libxcb';
-function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_setup_roots_iterator_t; cdecl; external 'libxcb';
+function xcb_get_modifier_mapping(c: Pxcb_connection_t): xcb_get_modifier_mapping_cookie_t; cdecl; external libxcb;
+function xcb_get_modifier_mapping_reply(c: Pxcb_connection_t; cookie: xcb_get_modifier_mapping_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_modifier_mapping_reply_t; cdecl; external libxcb;
+function xcb_get_modifier_mapping_keycodes(reply: Pxcb_get_modifier_mapping_reply_t): PKeyCode; cdecl; external libxcb;
+
+function xcb_key_symbols_alloc(c: Pxcb_connection_t): Pxcb_key_symbols_t; cdecl; external libxcb_keysyms;
+function xcb_key_symbols_get_keycode(syms: Pxcb_key_symbols_t; keysym: KeySym): Pxcb_keycode_t; cdecl; external libxcb_keysyms;
+procedure xcb_key_symbols_free(syms: Pxcb_key_symbols_t); cdecl; external libxcb_keysyms;  
+function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external libxcb;
+function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_setup_roots_iterator_t; cdecl; external libxcb;
 
 // XCB functions
 function xcb_randr_query_version(c: Pxcb_connection_t; major_version, minor_version: cuint32): xcb_void_cookie_t; cdecl; external 'libxcb-randr';
@@ -3076,29 +3123,78 @@ begin
 
 end;
 
-function XKeysymToKeycode(para1: PDisplay; para2: TKeySym): TKeyCode; cdecl;
+//function XKeysymToKeycode(para1: PDisplay; para2: TKeySym): TKeyCode; cdecl;
+function XKeysymToKeycode(display: PDisplay; keysym: KeySym): TKeyCode; cdecl;
+var
+  syms: Pxcb_key_symbols_t;
+  keycodes: Pxcb_keycode_t;
+  result_keycode: KeyCode;
 begin
-
+  syms := xcb_key_symbols_alloc(display); // Remove cast if PDisplay = Pxcb_connection_t
+  if syms = nil then begin
+    writeln('XKeysymToKeycode: Failed to allocate key symbols');
+    Result := 0;
+    Exit;
+  end;
+  keycodes := xcb_key_symbols_get_keycode(syms, keysym);
+  if keycodes = nil then begin
+    writeln('XKeysymToKeycode: No keycode for keysym ', keysym);
+    result_keycode := 0;
+  end else begin
+    result_keycode := keycodes^;
+    writeln('XKeysymToKeycode: keysym ', keysym, ' -> keycode ', result_keycode);
+    //free(keycodes);
+  end;
+  xcb_key_symbols_free(syms);
+  Result := result_keycode;
 end;
 
-function XGetModifierMapping(para1: PDisplay): PXModifierKeymap; cdecl;
+function XGetModifierMapping(display: PDisplay): PXModifierKeymap; cdecl;
+var
+  reply: Pxcb_get_modifier_mapping_reply_t;
+  modmap: PXModifierKeymap;
+  cookie: xcb_get_modifier_mapping_cookie_t;
 begin
-
+  cookie := xcb_get_modifier_mapping(display);
+  reply := xcb_get_modifier_mapping_reply(display, cookie, nil);
+  if reply = nil then begin
+    writeln('XGetModifierMapping: Failed to get reply');
+    Result := nil;
+    Exit;
+  end;
+  GetMem(modmap, SizeOf(XModifierKeymap));
+  if modmap = nil then begin
+    writeln('XGetModifierMapping: Failed to allocate modmap');
+    FreeMem(reply);
+    Result := nil;
+    Exit;
+  end;
+  modmap^.max_keypermod := reply^.keycodes_per_modifier;
+  modmap^.modifiermap := PKeyCode(xcb_get_modifier_mapping_keycodes(reply));
+  writeln('XGetModifierMapping: max_keypermod = ', modmap^.max_keypermod);
+  Result := modmap;
+  FreeMem(reply);
 end;
 
-function XFreeModifiermap(para1: PXModifierKeymap): cint; cdecl;
+function XFreeModifierMap(para1: PXModifierKeymap): cint; cdecl;
 begin
-
+  if para1 <> nil then begin
+    // modifiermap is managed by XCB reply, already freed in XGetModifierMapping
+    freeandnil(para1);
+  end;
+  Result := 1; // Success
 end;
 
-function XConnectionNumber(para1: PDisplay): cint; cdecl;
+function XConnectionNumber(display: PDisplay): cint; cdecl;
 begin
-
+  Result := xcb_get_file_descriptor(Pxcb_connection_t(display));
 end;
  
 function XSetErrorHandler(para1: TXErrorHandler): TXErrorHandler; cdecl;
 begin
-
+  // Store the handler globally (requires global variable in mxcb.pas)
+  global_error_handler := para1;
+  Result := nil; // Xlib returns previous handler, but we don’t store it yet
 end;
 
 function XSetClipRectangles(para1: PDisplay; para2: TGC; para3: cint; para4: cint; para5: PXRectangle; para6: cint; para7: cint): cint; cdecl;
