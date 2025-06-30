@@ -2807,9 +2807,7 @@ var
   value_len_bytes: Cardinal; // Length of the value in bytes
   allocated_mem: PByte; // For memory we explicitly allocate to mimic Xlib's behavior
   i : integer;
-  pRawData: PByte;     // Declared here, correctly
-  pAtomData: PCardinal; // Declared here, correctly
-begin
+ begin
    cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, long_length);
    reply := xcb_get_property_reply(display, cookie, nil);
    if reply = nil then begin
@@ -2846,18 +2844,13 @@ begin
     GetMem(allocated_mem, value_len_bytes); // Allocate memory
     Move(value_ptr^, allocated_mem^, value_len_bytes); // Copy data from xcb reply to allocated memory
     prop_return^ := allocated_mem; // Assign the pointer to the newly allocated memory
-
-    pRawData := PByte(allocated_mem);
-    pAtomData := PCardinal(allocated_mem);
   end else begin
     prop_return^ := nil; // No data, return nil
-    // Ensure debug pointers are nil if no data
-    pRawData := nil;
-    pAtomData := nil;
   end;
   Result := 0;
 
   // TODO Free the XCB reply structure after processing it.
+  
   // xcb_aux_release(reply); 
 end;
 
