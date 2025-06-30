@@ -7254,16 +7254,45 @@ WriteLn('gui_init: After createappic, result=', result);
   writeln('gui_init 9.2');
  
     netsupported:= netsupportedatom <> 0;
+ 
   if netsupported then begin
+ 
    writeln('gui_init 9.3 netsupported ', netsupported);
   
    netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
-   
+ 
+ {  
+   if xgetwindowproperty(display,rootwin,netatoms[net_supported],
+     0,1024,false,xa_atom,@actual_type,@actual_format,
+     @nitems,@bytes_after,@prop) = success then begin
+  writeln('gui_init 9.3 netsupported TRUE');
+  if (actual_type = xa_atom) and (actual_format = 32) then begin
+    setlength(atomar,nitems);
+    atoms:= patom(prop);
+    for int1:= 0 to nitems - 1 do begin
+      atomar[int1]:= atoms[int1];
+    end;
+  end;
+  xfree(prop);
+end else begin
+  writeln('gui_init 9.3 netsupported FALSE, using fallback atoms');
+  netsupported := False;
+  netatoms[net_workarea] := xinternatom(display, '_NET_WORKAREA', true);
+  netatoms[net_wm_state] := xinternatom(display, '_NET_WM_STATE', true);
+  netatoms[net_wm_state_fullscreen] := xinternatom(display, '_NET_WM_STATE_FULLSCREEN', true);
+end;
+  } 
     writeln('gui_init 9.4 netsupported ', netsupported);
          
     writeln('firstcheckedatom ', firstcheckedatom);
     writeln('lastcheckedatom ', lastcheckedatom);
-  
+    writeln('length(xdndatoms) = ', length(xdndatoms)); 
+    writeln('length(xdndactionatoms) = ', length(xdndactionatoms)); 
+    writeln('length(netatoms) = ', length(netatoms)); 
+    writeln('length(atomar) = ', length(atomar)); 
+      
+  //  atomar :=   netatoms;
+    
    for netnum:= firstcheckedatom to lastcheckedatom do begin
     atom1:= netatoms[netnum];
     
@@ -7272,9 +7301,7 @@ WriteLn('gui_init: After createappic, result=', result);
     
      netatoms[netnum]:= 0;
     
-    writeln('length(atomar) = ', length(atomar)); 
-   
-    for int1:= 0 to high(atomar) do begin
+     for int1:= 0 to high(atomar) do begin
      if atomar[int1] = atom1 then begin
       writeln('B atom num ', atom1);
       netatoms[netnum]:= atom1;
@@ -7284,6 +7311,11 @@ WriteLn('gui_init: After createappic, result=', result);
    end;
    
   end;
+  
+    writeln();
+ 
+    writeln('length(netatoms) = ', length(netatoms)); 
+    writeln('length(atomar) = ', length(atomar)); 
   
  writeln('gui_init 9.5');
   i := 0;

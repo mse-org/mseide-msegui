@@ -16,11 +16,13 @@ const
   libxcb_keysyms = 'libxcb-keysyms.so.1';
 
 type
-  xcb_connection_t  = record
-  end; // Opaque structure
-  Pxcb_connection_t = ^xcb_connection_t;
-  PDisplay          = Pxcb_connection_t; // Alias for XCB connection
-
+ 
+  Pxcb_connection_t = Pointer;
+  xcb_atom_t = culong;
+  xcb_window_t = cuint32;
+  xcb_colormap_t = cuint32;
+  xcb_visualid_t = cuint32;
+  
   xcb_generic_error_t = record
     response_type: cuint8;
     error_code: cuint8;
@@ -30,9 +32,13 @@ type
     major_code: cuint8;
     pad0: cuint8;
     pad: array[0..4] of cuint32;
+    full_sequence: cuint32;
   end;
-  Pxcb_generic_error_t  = ^xcb_generic_error_t;
-  PPxcb_generic_error_t = ^Pxcb_generic_error_t;
+  Pxcb_generic_error_t = ^xcb_generic_error_t;
+  PPxcb_generic_error_t = ^pxcb_generic_error_t;
+ 
+ 
+  PDisplay          = Pxcb_connection_t; // Alias for XCB connection
 
   xcb_void_cookie_t = record
     sequence: cuint;
@@ -124,8 +130,9 @@ type
   GC  = Pointer;          // Maps to xcb_gcontext_t
   TGC = GC;
 
-  Atom      = cuint;      // Maps to xcb_atom_t
-  PAtom     = ^Atom;
+  Atom = xcb_atom_t;
+  PAtom = ^Atom;
+ 
   Colormap  = cuint32;       // Maps to xcb_colormap_t
   TColormap = Colormap;   // For mseguiintf.pas
   Pixmap    = cuint;      // Maps to xcb_pixmap_t
@@ -133,8 +140,13 @@ type
   Font      = cuint;      // Maps to xcb_font_t
   TKeySym   = culong;
   PKeySym   = ^TKeySym;
+  
   Pcuchar   = ^cuchar;
   PPcuchar  = ^Pcuchar;
+
+//  Tcuchar = Array[0..11] Of Char;
+//  PPcuchar  = ^Tcuchar;
+
   Picture   = culong;  // Maps to xcb_render_picture_t
   TPicture  = Picture; // For msex11gdi.pas
 
@@ -255,20 +267,17 @@ type
   PXModifierKeymap = ^XModifierKeymap;
 
   // XCB-specific types
-  xcb_window_t   = cuint;
   xcb_gcontext_t = cuint;
-  xcb_visualid_t = cuint;
-  xcb_colormap_t = cuint;
   xcb_pixmap_t   = cuint;
   xcb_font_t     = cuint;
-  xcb_atom_t     = cuint;
   xcb_region_t   = Pointer;
  
+ {
    xcb_get_atom_name_reply_t = record
     name_len: cuint16;
     Name: PChar;
   end;
-
+}
   // XRender-specific types for msex11gdi.pas and mxft.pas
   xcb_render_color_t = record
     red, green, blue, alpha: cuint16;
@@ -1002,8 +1011,7 @@ type
     root_input_mask: clong;
   end;
 
-   Pxcb_screen_t = ^xcb_screen_t;
-  xcb_screen_t = record
+ xcb_screen_t = record
     root: xcb_window_t;
     default_colormap: xcb_colormap_t;
     white_pixel: cuint32;
@@ -1021,6 +1029,7 @@ type
     root_depth: cuint8;
     allowed_depths_len: cuint8;
   end;
+  Pxcb_screen_t = ^xcb_screen_t;
   
    xcb_setup_roots_iterator_t = record
     data: Pxcb_screen_t;
@@ -1231,7 +1240,7 @@ type
     mwidth, mheight: cint;
   end;
   PXRRScreenSize = ^XRRScreenSize;
-
+  
   XRRCrtcInfo = record
     timestamp: culong;
     x, y: cint; // Fixed: Removed "Shel x"
@@ -1297,7 +1306,7 @@ const
   XCB_KEY_PRESS = 2;
   XCB_KEY_RELEASE = 3;
   XCB_EXPOSE    = 12;
-  const
+  XCB_NONE = 0;
   XCB_EVENT_MASK_KEY_PRESS = 1 shl 0;   // $00000001
   XCB_EVENT_MASK_KEY_RELEASE = 1 shl 1; // $00000002
   InputOnly     = 2;
@@ -1556,8 +1565,17 @@ function XPending(display: PDisplay): cint; cdecl;
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
 
 function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
-function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
-  nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+
+{
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: clong; 
+         Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
+         nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPPChar): TStatus; cdecl;
+}
+
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: clong; 
+         Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
+         nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+                  
 function XSendEvent(display: PDisplay; w: Window; propagate: TBool; event_mask: clong; event_send: PXEvent): cint; cdecl;
 function XChangeProperty(display: PDisplay; w: Window; atom_property: Atom; type_: Atom; format: cint; mode: cint; Data: Pcuchar; nelements: cint): cint; cdecl;
 procedure XFlush(display: PDisplay); cdecl;
@@ -1759,15 +1777,38 @@ uses
 
 // XCB-specific types
 type
- xcb_setup_t = record end;
-  Pxcb_setup_t = ^xcb_setup_t;
- 
-  xcb_generic_event_t = record
-    response_type: cuint8;
+  xcb_setup_t = record
+    status: cuint8;
     pad0: cuint8;
-    sequence: cuint16;
-    pad: array[0..6] of cuint32;
-    full_sequence: cuint32;
+    protocol_major_version: cuint16;
+    protocol_minor_version: cuint16;
+    length: cuint16;
+    release_number: cuint32;
+    resource_id_base: cuint32;
+    resource_id_mask: cuint32;
+    motion_buffer_size: cuint32;
+    vendor_len: cuint16;
+    maximum_request_length: cuint16;
+    roots_len: cuint8;
+    pixmap_formats_len: cuint8;
+    image_byte_order: cuint8;
+    bitmap_format_bit_order: cuint8;
+    bitmap_format_scanline_unit: cuint8;
+    bitmap_format_scanline_pad: cuint8;
+    min_keycode: cuint8;
+    max_keycode: cuint8;
+    pad1: array[0..3] of cuint8;
+  end;
+  Pxcb_setup_t = ^xcb_setup_t;
+  
+  xcb_generic_event_t = packed record
+    response_type: Byte;
+    extension: Byte;
+    sequence: Word;
+    length: LongWord;
+    event_type: Word;
+    pad0: array[0..21] of Byte;  // 22 bytes
+    full_sequence: LongWord;
   end;
   pxcb_generic_event_t = ^xcb_generic_event_t;
   
@@ -1823,9 +1864,12 @@ type
     atom: xcb_atom_t;
   end;
   
+  
   xcb_intern_atom_cookie_t = record
     sequence: cuint;
   end;
+  pxcb_intern_atom_cookie_t = ^xcb_intern_atom_cookie_t;
+
 
    xcb_query_font_reply_t = record
     response_type: cuint8;
@@ -1846,9 +1890,8 @@ type
     event_base, error_base: cuint8;
   end;
   
- 
-  
-   xcb_get_property_reply_t = record
+ {
+    xcb_get_property_reply_t = record
     response_type: cuint8;
     format: cuint8;
     sequence: cuint16;
@@ -1859,7 +1902,19 @@ type
     Value: array[0..11] of char; // Variable length
   end;
   Pxcb_get_property_reply_t = ^xcb_get_property_reply_t;
-
+  }
+  
+  xcb_get_property_reply_t = record
+    response_type: cuint8;
+    format: cuint8;
+    sequence: cuint16;
+    length: cuint32;
+    type_: xcb_atom_t;
+    bytes_after: cuint32;
+    value_len: cuint32;
+    pad0: array[0..11] of cuint8;
+  end;
+  Pxcb_get_property_reply_t = ^xcb_get_property_reply_t;
 
   // XRandR-specific types for mxrandr.pas
   xcb_randr_crtc_t = cuint32;
@@ -1887,16 +1942,32 @@ type
   end;
   Pxcb_query_extension_reply_t = ^xcb_query_extension_reply_t;
 
-  Pxcb_screen_iterator_t = ^xcb_screen_iterator_t;
+  
   xcb_screen_iterator_t = record
     data: Pxcb_screen_t;
     rem: cint;
     index: cint;
   end;
-  
-  xcb_get_property_cookie_t = packed record
-    sequence: Cardinal;  // Cardinal is equivalent to c_uint (unsigned 32-bit)
+  Pxcb_screen_iterator_t = ^xcb_screen_iterator_t;
+    
+   xcb_get_atom_name_cookie_t = record
+    sequence: cunsigned;
   end;
+  
+  xcb_get_atom_name_reply_t = record
+    response_type: cuint8;
+    pad0: cuint8;
+    sequence: cuint16;
+    length: cuint32;
+    name_len: cuint16;
+    name: array[0..21] of cuint8;
+  end;
+  Pxcb_get_atom_name_reply_t = ^xcb_get_atom_name_reply_t;
+
+  xcb_get_property_cookie_t = record
+    sequence: cunsigned;
+  end;
+  
   Pxcb_get_property_cookie_t = ^xcb_get_property_cookie_t;
   
   Pxcb_key_symbols_t = ^xcb_key_symbols_t;
@@ -1920,6 +1991,7 @@ type
     sequence: cuint;
   end;
 
+function xcb_get_property_value(reply: Pxcb_get_property_reply_t): Pointer; cdecl; external libxcb;
 function xcb_get_file_descriptor(c: Pxcb_connection_t): cint; cdecl; external libxcb;
 
 function xcb_get_modifier_mapping(c: Pxcb_connection_t): xcb_get_modifier_mapping_cookie_t; cdecl; external libxcb;
@@ -1930,7 +2002,7 @@ function xcb_key_symbols_alloc(c: Pxcb_connection_t): Pxcb_key_symbols_t; cdecl;
 function xcb_key_symbols_get_keycode(syms: Pxcb_key_symbols_t; keysym: KeySym): Pxcb_keycode_t; cdecl; external libxcb_keysyms;
 procedure xcb_key_symbols_free(syms: Pxcb_key_symbols_t); cdecl; external libxcb_keysyms;  
 function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external libxcb;
-function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_setup_roots_iterator_t; cdecl; external libxcb;
+function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_screen_iterator_t; cdecl; external libxcb;
 
 // XCB functions
 function xcb_randr_query_version(c: Pxcb_connection_t; major_version, minor_version: cuint32): xcb_void_cookie_t; cdecl; external 'libxcb-randr';
@@ -1962,8 +2034,11 @@ function xcb_get_property_reply(c: pxcb_connection_t; cookie: xcb_get_property_c
 function xcb_change_property(c: pxcb_connection_t; mode: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; Data: Pointer): Pointer; cdecl; external libxcb;
 function xcb_send_event(c: pxcb_connection_t; propagate: cuint8; destination: xcb_window_t; event_mask: cuint32; event: Pointer): Pointer; cdecl; external libxcb;
 procedure xcb_flush(c: pxcb_connection_t); cdecl; external libxcb;
-function xcb_get_atom_name(c: pxcb_connection_t; atom: xcb_atom_t): Pointer; cdecl; external libxcb;
-function xcb_get_atom_name_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): xcb_get_atom_name_reply_t; cdecl; external libxcb;
+
+function xcb_get_atom_name(c: Pxcb_connection_t; atom: xcb_atom_t): xcb_get_atom_name_cookie_t; cdecl; external libxcb;
+
+function xcb_get_atom_name_reply(c: Pxcb_connection_t; cookie: xcb_get_atom_name_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_atom_name_reply_t; cdecl; external libxcb;
+
 function xcb_create_gc(c: pxcb_connection_t; cid: xcb_gcontext_t; drawable: xcb_drawable_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
 function xcb_free_gc(c: pxcb_connection_t; gc: xcb_gcontext_t): Pointer; cdecl; external libxcb;
 function xcb_change_gc(c: pxcb_connection_t; gc: xcb_gcontext_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
@@ -1993,7 +2068,7 @@ function xcb_create_window_checked(c: Pxcb_connection_t; depth: cint; wid: xcb_w
 // function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external libxcb;
 //function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_screen_iterator_t; cdecl; external libxcb;
 // function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external 'libxcb';
-function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_screen_iterator_t; cdecl; external libxcb;
+//function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_screen_iterator_t; cdecl; external libxcb;
 function xcb_screen_allowed_depths_iterator(screen: Pxcb_screen_t): xcb_depth_iterator_t; cdecl; external libxcb;
 function xcb_depth_visuals_iterator(depth: Pxcb_depth_t): xcb_visualtype_iterator_t; cdecl; external libxcb;
 function xcb_visualtype_next(iterator: Pxcb_visualtype_iterator_t): Pxcb_visualtype_iterator_t; cdecl; external libxcb;
@@ -2044,7 +2119,7 @@ var
   error: Pxcb_generic_error_t;
   screen: Pxcb_screen_t;
   setup: Pxcb_setup_t;
-  iter: xcb_setup_roots_iterator_t;
+  iter: xcb_screen_iterator_t;
   default_visual: xcb_visualid_t;
 begin
   Result := 0;
@@ -2115,6 +2190,50 @@ begin
 end;
 
 
+function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: TBool): Atom; cdecl;
+var
+  cookie: xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+begin
+  cookie := xcb_intern_atom(Pxcb_connection_t(display), only_if_exists, strlen(atom_name), atom_name);
+  reply := xcb_intern_atom_reply(Pxcb_connection_t(display), cookie, nil);
+  if reply = nil then
+   begin
+    writeln('XInternAtom: Failed for ', atom_name, ' (only_if_exists=', ord(only_if_exists), ')');
+    Result := 0;
+    end
+  else begin
+    writeln('XInternAtom: ', atom_name, ' = ', reply^.atom); // Debug
+    Result := reply^.atom;
+    // free(reply);
+  end;
+end;
+
+
+{
+function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: TBool): Atom; cdecl;
+var
+  cookie: xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+  name_str: string;
+begin
+  name_str := StrPas(atom_name);
+  cookie := xcb_intern_atom(display, 1, strlen(atom_name), atom_name);
+  reply := xcb_intern_atom_reply(display, cookie, nil);
+  if reply = nil then begin
+    writeln('XInternAtom: Failed for ', name_str, ' (only_if_exists=', ord(only_if_exists), ')');
+    Result := 0;
+  end else begin
+    writeln('XInternAtom: ', name_str, ' = ', reply^.atom, ' (only_if_exists=', ord(only_if_exists), ')');
+    Result := reply^.atom;
+    FreeMem(reply);
+  end;
+end;
+}
+
+
+
+{
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
 var
   cookie: xcb_intern_atom_cookie_t;
@@ -2157,7 +2276,9 @@ begin
   Result := reply^.atom;
   // FreeAndNil(reply);
 end;
+}
 
+{
 function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; 
          Delete: TBool; req_type: Atom;  actual_type_return: PAtom; actual_format_return: Pcint;
           nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
@@ -2167,7 +2288,7 @@ var
   i : integer;
 begin
   writeln('xgetwindowproperty 0 ');
-  cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, long_length);
+  cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, 1024);
  
    writeln('xgetwindowproperty 2 ');
   reply  := xcb_get_property_reply(display, cookie, nil);
@@ -2186,6 +2307,423 @@ begin
   writeln('reply.bytes_after ', reply^.bytes_after);
   writeln('result ', result);
   
+end;
+
+
+if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
+   atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
+ 
+
+}
+
+{
+
+//function XGetWindowProperty(display: PDisplay; w: Window; property: Atom; long_offset, long_length: clong; delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint; nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPPChar): TStatus; cdecl;
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; 
+         Delete: TBool; req_type: Atom;  actual_type_return: PAtom; actual_format_return: Pcint;
+          nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+
+var
+  cookie: xcb_get_property_cookie_t;
+  reply: Pxcb_get_property_reply_t;
+  value: Pointer;
+  total_bytes: culong;
+  i : integer;
+begin
+  writeln('XGetWindowProperty init');
+  writeln();
+  // Use a large long_length to fetch all data
+  cookie := xcb_get_property(display, ord(delete), w, atom_property, req_type, long_offset, 1024);
+  reply := xcb_get_property_reply(display, cookie, nil);
+
+  if reply = nil then begin
+   writeln('XGetWindowProperty reply = nil');
+    actual_type_return^ := 0;
+    actual_format_return^ := 0;
+    nitems_return^ := 0;
+    bytes_after_return^ := 0;
+    prop_return^ := nil;
+    Result := 0;
+    Exit;
+  end;
+  
+  writeln('XGetWindowProperty init');
+   
+  actual_type_return^ := reply^.type_;
+  actual_format_return^ := reply^.format;
+  nitems_return^ := reply^.value_len;
+  bytes_after_return^ := reply^.bytes_after;
+  prop_return^   := @reply^.Value;
+  
+  if prop_return = nil then writeln('prop_return = nil');
+  
+  writeln('length(reply^.Value) = ',length(reply^.Value));
+  for i := 0 to length(reply^.Value) -1 do
+  writeln(i, 'reply^.Value[i] = ', reply^.Value[i]);
+  
+  writeln('reply.type_ ', reply^.type_);
+  writeln('reply.type_ ', reply^.type_);
+  writeln('reply.format ', reply^.format);
+  writeln('reply.value_len ', reply^.value_len);
+  writeln('reply.bytes_after ', reply^.bytes_after);
+  writeln();
+  
+  Result := 1;
+end;
+}
+
+{
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: clong; 
+         Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
+         nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+var
+  cookie: xcb_get_property_cookie_t;
+  reply: Pxcb_get_property_reply_t;
+  value: Pointer;
+  total_bytes: culong;
+  error: Pxcb_generic_error_t;
+  retries: integer;
+  i: integer;
+begin
+  retries := 0;
+  repeat
+    writeln('XGetWindowProperty: window=', w, ' property=', atom_property, ' req_type=', req_type, ' offset=', long_offset, ' length=', long_length, ' retry=', retries);
+    cookie := xcb_get_property(display, ord(Delete), w, atom_property, req_type, long_offset, long_length);
+    reply := xcb_get_property_reply(display, cookie, @error);
+    if reply = nil then begin
+      if error <> nil then begin
+        writeln('XGetWindowProperty: Error code=', error^.error_code, ' major=', error^.major_code, ' minor=', error^.minor_code);
+       // FreeMem(error);
+      end;
+      actual_type_return^ := 0;
+      actual_format_return^ := 0;
+      nitems_return^ := 0;
+      bytes_after_return^ := 0;
+      prop_return^ := nil;
+      Result := 0;
+      Exit;
+    end;
+    actual_type_return^ := reply^.type_;
+    actual_format_return^ := reply^.format;
+    nitems_return^ := reply^.value_len;
+    bytes_after_return^ := reply^.bytes_after;
+    if (reply^.value_len > 0) or (reply^.bytes_after = 0) then begin
+      if reply^.value_len > 0 then begin
+        total_bytes := reply^.value_len * (reply^.format div 8);
+        GetMem(prop_return^, total_bytes);
+        value := xcb_get_property_value(reply);
+        Move(value^, prop_return^^, total_bytes);
+        for i := 0 to reply^.value_len - 1 do
+          writeln('value[', i, '] = ', PAtom(value)[i]);
+      end else begin
+        prop_return^ := nil;
+      end;
+      writeln('xgetwindowproperty: type=', reply^.type_, ' format=', reply^.format, ' value_len=', reply^.value_len, ' bytes_after=', reply^.bytes_after);
+     // FreeMem(reply);
+      Result := 1;
+      Exit;
+    end;
+   // FreeMem(reply);
+    inc(retries);
+    sleep(100);
+  until retries >= 5;
+  writeln('XGetWindowProperty: Failed after ', retries, ' retries');
+  actual_type_return^ := 0;
+  actual_format_return^ := 0;
+  nitems_return^ := 0;
+  bytes_after_return^ := 0;
+  prop_return^ := nil;
+  Result := 0;
+end;
+}
+
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: clong; 
+         Delete: TBool; req_type: Atom; actual_type_return: PAtom; actual_format_return: Pcint;
+         nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+var
+  cookie: xcb_get_property_cookie_t;
+  reply: Pxcb_get_property_reply_t;
+  value: Pointer;
+  total_bytes: culong;
+  error: Pxcb_generic_error_t;
+  i: integer;
+  atom_cookie: xcb_intern_atom_cookie_t;
+  atom_reply: Pxcb_intern_atom_reply_t;
+  prop_data: Pcuchar;
+  wm_check_atom, wm_name_atom, window_atom, utf8_string_atom, string_atom: xcb_atom_t;
+  wm_cookie: xcb_get_property_cookie_t;
+  wm_reply: Pxcb_get_property_reply_t;
+  setup: Pxcb_setup_t;
+  screen_iter: xcb_screen_iterator_t;
+  atom_name_cookie: xcb_get_atom_name_cookie_t;
+  atom_name_reply: Pxcb_get_atom_name_reply_t;
+  current_offset: culong;
+  remaining_bytes: culong;
+  retry_count: integer;
+begin
+  if display = nil then begin
+    writeln('XGetWindowProperty: display is nil');
+    actual_type_return^ := XCB_NONE;
+    actual_format_return^ := 0;
+    nitems_return^ := 0;
+    bytes_after_return^ := 0;
+    prop_return^ := nil;
+    Result := 0;
+    Exit
+  end;
+  // Verify root window
+  setup := xcb_get_setup(display);
+  if setup <> nil then begin
+    screen_iter := xcb_setup_roots_iterator(setup);
+    if screen_iter.data <> nil then
+      writeln('XGetWindowProperty: Root window=', screen_iter.data^.root, ' requested window=', w)
+    else
+      writeln('XGetWindowProperty: No screens found in setup')
+  end else
+    writeln('XGetWindowProperty: Failed to get setup');
+  // Validate atoms
+  writeln('XGetWindowProperty: Validating atoms');
+  atom_cookie := xcb_intern_atom(display, 1, Length('_NET_SUPPORTED'), '_NET_SUPPORTED');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, @error);
+  if (atom_reply = nil) or (atom_reply^.atom <> atom_property) then begin
+    if atom_reply = nil then begin
+      if error <> nil then
+        writeln('XGetWindowProperty: _NET_SUPPORTED atom not found, error code=', error^.error_code)
+      else
+        writeln('XGetWindowProperty: _NET_SUPPORTED atom not found, no error')
+    end else
+      writeln('XGetWindowProperty: Invalid _NET_SUPPORTED atom, expected=', atom_property, ' got=', atom_reply^.atom);
+    actual_type_return^ := XCB_NONE;
+    actual_format_return^ := 0;
+    nitems_return^ := 0;
+    bytes_after_return^ := 0;
+    prop_return^ := nil;
+    Result := 0;
+    Exit
+  end;
+  atom_cookie := xcb_intern_atom(display, 1, Length('ATOM'), 'ATOM');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, @error);
+  if (atom_reply = nil) or (atom_reply^.atom <> req_type) then begin
+    if atom_reply = nil then begin
+      if error <> nil then
+        writeln('XGetWindowProperty: ATOM req_type not found, error code=', error^.error_code)
+      else
+        writeln('XGetWindowProperty: ATOM req_type not found, no error')
+    end else
+      writeln('XGetWindowProperty: Invalid ATOM req_type, expected=', req_type, ' got=', atom_reply^.atom);
+    actual_type_return^ := XCB_NONE;
+    actual_format_return^ := 0;
+    nitems_return^ := 0;
+    bytes_after_return^ := 0;
+    prop_return^ := nil;
+    Result := 0;
+    Exit
+  end;
+  writeln('XGetWindowProperty: Atoms validated, property=', atom_property, ' req_type=', req_type);
+  // Get WINDOW, UTF8_STRING, and STRING atoms
+  atom_cookie := xcb_intern_atom(display, 1, Length('WINDOW'), 'WINDOW');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, @error);
+  if atom_reply = nil then begin
+    if error <> nil then
+      writeln('XGetWindowProperty: WINDOW atom not found, error code=', error^.error_code)
+    else
+      writeln('XGetWindowProperty: WINDOW atom not found, no error');
+    actual_type_return^ := XCB_NONE;
+    actual_format_return^ := 0;
+    nitems_return^ := 0;
+    bytes_after_return^ := 0;
+    prop_return^ := nil;
+    Result := 0;
+    Exit
+  end;
+  window_atom := atom_reply^.atom;
+  atom_cookie := xcb_intern_atom(display, 1, Length('UTF8_STRING'), 'UTF8_STRING');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, @error);
+  if atom_reply = nil then begin
+    if error <> nil then
+      writeln('XGetWindowProperty: UTF8_STRING atom not found, error code=', error^.error_code)
+    else
+      writeln('XGetWindowProperty: UTF8_STRING atom not found, no error');
+    actual_type_return^ := XCB_NONE;
+    actual_format_return^ := 0;
+    nitems_return^ := 0;
+    bytes_after_return^ := 0;
+    prop_return^ := nil;
+    Result := 0;
+    Exit
+  end;
+  utf8_string_atom := atom_reply^.atom;
+  atom_cookie := xcb_intern_atom(display, 1, Length('STRING'), 'STRING');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, @error);
+  if atom_reply = nil then begin
+    if error <> nil then
+      writeln('XGetWindowProperty: STRING atom not found, error code=', error^.error_code)
+    else
+      writeln('XGetWindowProperty: STRING atom not found, no error');
+    actual_type_return^ := XCB_NONE;
+    actual_format_return^ := 0;
+    nitems_return^ := 0;
+    bytes_after_return^ := 0;
+    prop_return^ := nil;
+    Result := 0;
+    Exit
+  end;
+  string_atom := atom_reply^.atom;
+  // Check WM support
+  atom_cookie := xcb_intern_atom(display, 1, Length('_NET_SUPPORTING_WM_CHECK'), '_NET_SUPPORTING_WM_CHECK');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, @error);
+  if atom_reply <> nil then begin
+    wm_check_atom := atom_reply^.atom;
+    writeln('XGetWindowProperty: _NET_SUPPORTING_WM_CHECK atom=', wm_check_atom);
+    wm_cookie := xcb_get_property(display, 0, w, wm_check_atom, window_atom, 0, 1);
+    xcb_flush(display);
+    wm_reply := xcb_get_property_reply(display, wm_cookie, @error);
+    if wm_reply <> nil then begin
+      if wm_reply^.value_len > 0 then begin
+        writeln('XGetWindowProperty: WM check window=', Pculong(xcb_get_property_value(wm_reply))^);
+        // Get WM name
+        atom_cookie := xcb_intern_atom(display, 1, Length('_NET_WM_NAME'), '_NET_WM_NAME');
+        atom_reply := xcb_intern_atom_reply(display, atom_cookie, @error);
+        if atom_reply <> nil then begin
+          wm_name_atom := atom_reply^.atom;
+          writeln('XGetWindowProperty: _NET_WM_NAME atom=', wm_name_atom);
+          wm_cookie := xcb_get_property(display, 0, Pculong(xcb_get_property_value(wm_reply))^, wm_name_atom, utf8_string_atom, 0, 1024);
+          xcb_flush(display);
+          wm_reply := xcb_get_property_reply(display, wm_cookie, @error);
+          if wm_reply <> nil then begin
+            if wm_reply^.value_len > 0 then
+              writeln('XGetWindowProperty: WM name=', StrPas(PChar(xcb_get_property_value(wm_reply))))
+            else
+              writeln('XGetWindowProperty: WM name not found, value_len=0')
+          end else if error <> nil then
+            writeln('XGetWindowProperty: WM name check failed, error code=', error^.error_code)
+          else
+            writeln('XGetWindowProperty: WM name check failed, no error')
+        end else if error <> nil then
+          writeln('XGetWindowProperty: _NET_WM_NAME atom not found, error code=', error^.error_code)
+        else
+          writeln('XGetWindowProperty: _NET_WM_NAME atom not found, no error')
+      end else begin
+        writeln('XGetWindowProperty: No WM support detected, value_len=0');
+        // Try WM name on root window with UTF8_STRING
+        atom_cookie := xcb_intern_atom(display, 1, Length('_NET_WM_NAME'), '_NET_WM_NAME');
+        atom_reply := xcb_intern_atom_reply(display, atom_cookie, @error);
+        if atom_reply <> nil then begin
+          wm_name_atom := atom_reply^.atom;
+          writeln('XGetWindowProperty: Root _NET_WM_NAME atom=', wm_name_atom);
+          wm_cookie := xcb_get_property(display, 0, w, wm_name_atom, utf8_string_atom, 0, 1024);
+          xcb_flush(display);
+          wm_reply := xcb_get_property_reply(display, wm_cookie, @error);
+          if wm_reply <> nil then begin
+            if wm_reply^.value_len > 0 then
+              writeln('XGetWindowProperty: Root WM name=', StrPas(PChar(xcb_get_property_value(wm_reply))))
+            else begin
+              writeln('XGetWindowProperty: Root WM name not found, value_len=0');
+              // Try with STRING
+              wm_cookie := xcb_get_property(display, 0, w, wm_name_atom, string_atom, 0, 1024);
+              xcb_flush(display);
+              wm_reply := xcb_get_property_reply(display, wm_cookie, @error);
+              if wm_reply <> nil then begin
+                if wm_reply^.value_len > 0 then
+                  writeln('XGetWindowProperty: Root WM name (STRING)=', StrPas(PChar(xcb_get_property_value(wm_reply))))
+                else
+                  writeln('XGetWindowProperty: Root WM name (STRING) not found, value_len=0')
+              end else if error <> nil then
+                writeln('XGetWindowProperty: Root WM name (STRING) check failed, error code=', error^.error_code)
+              else
+                writeln('XGetWindowProperty: Root WM name (STRING) check failed, no error')
+            end
+          end else if error <> nil then
+            writeln('XGetWindowProperty: Root WM name check failed, error code=', error^.error_code)
+          else
+            writeln('XGetWindowProperty: Root WM name check failed, no error')
+        end else if error <> nil then
+          writeln('XGetWindowProperty: _NET_WM_NAME atom not found, error code=', error^.error_code)
+        else
+          writeln('XGetWindowProperty: _NET_WM_NAME atom not found, no error')
+      end
+    end else if error <> nil then
+      writeln('XGetWindowProperty: WM check failed, error code=', error^.error_code)
+    else
+      writeln('XGetWindowProperty: WM check failed, no error')
+  end else if error <> nil then
+    writeln('XGetWindowProperty: _NET_SUPPORTING_WM_CHECK atom not found, error code=', error^.error_code)
+  else
+    writeln('XGetWindowProperty: _NET_SUPPORTING_WM_CHECK atom not found, no error');
+  // Delay for WM readiness
+  sleep(10000); // 10s
+  // Initial request
+  total_bytes := 1024 * 4; // 1024 atoms * 4 bytes
+  current_offset := long_offset;
+  remaining_bytes := 1024 * 4;
+  retry_count := 0;
+  nitems_return^ := 0;
+  prop_return^ := nil;
+  while (remaining_bytes > 0) and (retry_count < 3) do begin
+    writeln('XGetWindowProperty: window=', w, ' property=', atom_property, ' req_type=', req_type, ' offset=', current_offset, ' length=', remaining_bytes div 4);
+    cookie := xcb_get_property(display, ord(Delete), w, atom_property, req_type, current_offset, remaining_bytes div 4);
+    xcb_flush(display);
+    sleep(2000); // Post-flush delay 2s
+    reply := xcb_get_property_reply(display, cookie, @error);
+    if reply = nil then begin
+      if error <> nil then
+        writeln('XGetWindowProperty: Error code=', error^.error_code, ' major=', error^.major_code, ' minor=', error^.minor_code)
+      else
+        writeln('XGetWindowProperty: Reply is nil, no error');
+      actual_type_return^ := XCB_NONE;
+      actual_format_return^ := 0;
+      nitems_return^ := 0;
+      bytes_after_return^ := 0;
+      prop_return^ := nil;
+      Result := 0;
+      Exit
+    end;
+    actual_type_return^ := reply^.type_;
+    actual_format_return^ := reply^.format;
+    bytes_after_return^ := reply^.bytes_after;
+    writeln('XGetWindowProperty: type=', reply^.type_, ' format=', reply^.format, ' value_len=', reply^.value_len, ' bytes_after=', reply^.bytes_after, ' reply=', PtrInt(reply));
+    if (reply^.type_ <> req_type) or (reply^.format <> 32) then begin
+      writeln('XGetWindowProperty: Invalid type=', reply^.type_, ' or format=', reply^.format);
+      actual_type_return^ := XCB_NONE;
+      actual_format_return^ := 0;
+      nitems_return^ := 0;
+      bytes_after_return^ := reply^.bytes_after;
+      prop_return^ := nil;
+      Result := 0;
+      Exit
+    end;
+    if reply^.value_len > 0 then begin
+      total_bytes := reply^.value_len * (reply^.format div 8);
+      GetMem(prop_data, total_bytes);
+      value := xcb_get_property_value(reply);
+      Move(value^, prop_data^, total_bytes);
+      prop_return^ := prop_data;
+      nitems_return^ := reply^.value_len;
+      // Log atom names
+      for i := 0 to reply^.value_len - 1 do begin
+        writeln('value[', i, '] = ', PAtom(value)[i]);
+        atom_name_cookie := xcb_get_atom_name(display, PAtom(value)[i]);
+        atom_name_reply := xcb_get_atom_name_reply(display, atom_name_cookie, @error);
+        if atom_name_reply <> nil then begin
+         // writeln('  Atom name = ', StrPas(PChar(xcb_get_atom_name_name(atom_name_reply))))
+        end else
+          writeln('  Failed to get atom name, error=', error <> nil)
+      end;
+      Result := 1;
+      Exit
+    end;
+    // Update for next iteration
+    current_offset := current_offset + (remaining_bytes div 4);
+    remaining_bytes := reply^.bytes_after;
+    retry_count := retry_count + 1;
+    writeln('XGetWindowProperty: Retrying with offset=', current_offset, ' length=', remaining_bytes div 4, ' retry=', retry_count);
+  end;
+  // No data retrieved
+  prop_return^ := nil;
+  nitems_return^ := 0;
+  bytes_after_return^ := remaining_bytes;
+  Result := 1;
+  Exit
 end;
 
 function XSendEvent(display: PDisplay; w: Window; propagate: tbool; event_mask: clong; event_send: PXEvent): cint; cdecl;
@@ -2219,12 +2757,13 @@ end;
 
 function XGetAtomName(display: PDisplay; atom: Atom): PChar; cdecl;
 var
-  cookie: Pointer;
-  reply: xcb_get_atom_name_reply_t;
+  cookie: xcb_get_atom_name_cookie_t;
+  reply: Pxcb_get_atom_name_reply_t;
 begin
   cookie := xcb_get_atom_name(display, atom);
   reply  := xcb_get_atom_name_reply(display, cookie, nil);
-  Result := StrNew(reply.Name);
+  writeln('reply.response_type ', reply^.response_type);
+  //Result := pchar(reply.name);
 end;
 
 function XSetWMHints(display: PDisplay; w: Window; wmhints: PXWMHints): cint; cdecl;
@@ -2246,7 +2785,7 @@ end;
 
 procedure XFree(Data: Pointer); cdecl;
 begin
-  FreeMem(Data);
+ // FreeMem(Data);
 end;
 
 function XCreateGC(display: PDisplay; d: Drawable; valuemask: culong; values: PXGCValues): GC; cdecl;
@@ -2367,8 +2906,8 @@ begin
 
   // Check for errors
   err := xcb_request_check(c, cookie);
-  if err <> nil then
-    Freemem(err);// Optionally log error
+ // if err <> nil then
+   // Freemem(err);// Optionally log error
 
 end;
 
@@ -2482,7 +3021,7 @@ end;
 function XDefaultScreenOfDisplay(display: PDisplay): PScreen; cdecl;
 var
   setup: Pxcb_setup_t;
-  iterator: xcb_setup_roots_iterator_t;
+  iterator: xcb_screen_iterator_t;
   visual_type: Pxcb_visualtype_t;
 begin
   // Get setup from XCB connection
@@ -2553,7 +3092,7 @@ end;
 function XDefaultVisualOfScreen(screen: PScreen): PVisual; cdecl;
 var
   setup: Pxcb_setup_t;
-  screen_iter: xcb_setup_roots_iterator_t;
+  screen_iter: xcb_screen_iterator_t;
   depth_iter: xcb_depth_iterator_t;
   visual_iter: xcb_visualtype_iterator_t;
   visual_type: Pxcb_visualtype_t;
@@ -2760,6 +3299,7 @@ begin
   Result := XIC(ic);
 end;
 
+{
 function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
 var
   cookies: array of xcb_intern_atom_cookie_t;
@@ -2789,6 +3329,30 @@ var
     end;
   end;
 end;
+}
+
+function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
+//function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: TBool; atoms: PAtom): TStatus; cdecl;
+var
+  i: cint;
+  cookie: xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+begin
+  Result := 1;
+  for i := 0 to n - 1 do begin
+    cookie := xcb_intern_atom(Pxcb_connection_t(dpy), only_if_exists, strlen(names[i]), names[i]);
+    reply := xcb_intern_atom_reply(Pxcb_connection_t(dpy), cookie, nil);
+    if reply = nil then begin
+      atoms_return[i] := 0;
+      Result := 0;
+    end else begin
+      writeln('XInternAtoms: ', names[i], ' = ', reply^.atom); // Debug
+      atoms_return[i] := reply^.atom;
+      //free(reply);
+    end;
+  end;
+end;
+
 
 function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
 var
@@ -3165,7 +3729,7 @@ begin
   GetMem(modmap, SizeOf(XModifierKeymap));
   if modmap = nil then begin
     writeln('XGetModifierMapping: Failed to allocate modmap');
-    FreeMem(reply);
+    //FreeMem(reply);
     Result := nil;
     Exit;
   end;
@@ -3173,16 +3737,13 @@ begin
   modmap^.modifiermap := PKeyCode(xcb_get_modifier_mapping_keycodes(reply));
   writeln('XGetModifierMapping: max_keypermod = ', modmap^.max_keypermod);
   Result := modmap;
-  FreeMem(reply);
+  //FreeMem(reply);
 end;
 
 function XFreeModifierMap(para1: PXModifierKeymap): cint; cdecl;
 begin
-  if para1 <> nil then begin
     // modifiermap is managed by XCB reply, already freed in XGetModifierMapping
-    freeandnil(para1);
-  end;
-  Result := 1; // Success
+    Result := 1; // Success
 end;
 
 function XConnectionNumber(display: PDisplay): cint; cdecl;
