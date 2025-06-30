@@ -786,7 +786,6 @@ type
        net_restack_window,net_close_window,net_active_window,
        //not supports checked below
        net_wm_pid,net_wm_desktop,
-
        net_wm_window_type_desktop,
        net_wm_window_type_dock,
        net_wm_window_type_toolbar,
@@ -803,7 +802,6 @@ type
        net_wm_window_type_normal,
        net_wm_icon,
        net_wm_name,
-
        net_frame_extents,
        net_request_frame_extents,
        net_system_tray_s0,net_system_tray_opcode,net_system_tray_message_data,
@@ -811,7 +809,6 @@ type
        //onlyifexist below
        net_wm_window_opacity,
        net_wm_alwaystofront,
-
        net_none //dummy
 );
  netwmstateoperationty = (nso_remove,nso_add,nso_toggle);
@@ -830,7 +827,6 @@ const
        '_NET_WM_STATE_SKIP_TASKBAR','_NET_WM_STATE_DEMANDS_ATTENTION',
        '_NET_RESTACK_WINDOW','_NET_CLOSE_WINDOW','_NET_ACTIVE_WINDOW',
        '_NET_WM_PID','_NET_WM_DESKTOP',
-
        '_NET_WM_WINDOW_TYPE_DESKTOP',
        '_NET_WM_WINDOW_TYPE_DOCK',
        '_NET_WM_WINDOW_TYPE_TOOLBAR',
@@ -847,7 +843,6 @@ const
        '_NET_WM_WINDOW_TYPE_NORMAL',
        '_NET_WM_ICON',
        '_NET_WM_NAME',
-
        '_NET_FRAME_EXTENTS',
        '_NET_REQUEST_FRAME_EXTENTS',
        '_NET_SYSTEM_TRAY_S0','_NET_SYSTEM_TRAY_OPCODE',
@@ -1042,9 +1037,10 @@ begin
  // writeln('readatomproperty 0');
  if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
    atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
- //  writeln('readatomproperty 1');
+  // writeln('readatomproperty 1');
   if (actualtype = atomatom) and (actualformat = 32) then begin
-  // writeln('readatomproperty 2');
+  // writeln('readatomproperty nitems ',nitems );
+   // nitems := 85;
    setlength(value,nitems);
    if nitems > 0 then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
@@ -7260,35 +7256,9 @@ WriteLn('gui_init: After createappic, result=', result);
    writeln('gui_init 9.3 netsupported ', netsupported);
   
    netsupported:= readatomproperty(rootid,netsupportedatom,atomar);
- 
- {  
-   if xgetwindowproperty(display,rootwin,netatoms[net_supported],
-     0,1024,false,xa_atom,@actual_type,@actual_format,
-     @nitems,@bytes_after,@prop) = success then begin
-  writeln('gui_init 9.3 netsupported TRUE');
-  if (actual_type = xa_atom) and (actual_format = 32) then begin
-    setlength(atomar,nitems);
-    atoms:= patom(prop);
-    for int1:= 0 to nitems - 1 do begin
-      atomar[int1]:= atoms[int1];
-    end;
-  end;
-  xfree(prop);
-end else begin
-  writeln('gui_init 9.3 netsupported FALSE, using fallback atoms');
-  netsupported := False;
-  netatoms[net_workarea] := xinternatom(display, '_NET_WORKAREA', true);
-  netatoms[net_wm_state] := xinternatom(display, '_NET_WM_STATE', true);
-  netatoms[net_wm_state_fullscreen] := xinternatom(display, '_NET_WM_STATE_FULLSCREEN', true);
-end;
-  } 
+
     writeln('gui_init 9.4 netsupported ', netsupported);
          
-    writeln('firstcheckedatom ', firstcheckedatom);
-    writeln('lastcheckedatom ', lastcheckedatom);
-    writeln('length(xdndatoms) = ', length(xdndatoms)); 
-    writeln('length(xdndactionatoms) = ', length(xdndactionatoms)); 
-    writeln('length(netatoms) = ', length(netatoms)); 
     writeln('length(atomar) = ', length(atomar)); 
       
   //  atomar :=   netatoms;
