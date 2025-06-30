@@ -53,7 +53,7 @@ interface
  {$define mse_debug}
 {$endif}
 uses
- {$ifdef use_xcb}mxcb{$else}mxlib,mxrandr{$endif},msetypes,mseapplication,msesys,
+  {$ifdef use_xcb}mxcb{$else}mxlib,mxrandr{$endif},msetypes,mseapplication,msesys,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
@@ -359,8 +359,6 @@ type
 //     XStdICCTextStyle,XUTF8StringStyle);
 {$ifdef FPC}
  Colormap = TXID;
- Atom = type culong;
-// Atom = type longword;
  Cursor = TXID;
  ppwchar_t = ^pwchar_t;
 {$endif}
@@ -1028,34 +1026,40 @@ var
  actualformat: cint;
  nitems: clong;
  bytesafter: culong;
+ {$ifndef use_xcb}
  prop: pchar;
+ {$else}
+ prop: PByte;
+ {$endif}
+ 
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif}
  result:= false;
- // writeln('readatomproperty 0');
+  // writeln('readatomproperty 0');
  if xgetwindowproperty(appdisp,id,name,0,10000,{$ifdef xboolean}false{$else}0{$endif},
    atomatom,@actualtype,@actualformat,@nitems,@bytesafter,@prop) = success then begin
   // writeln('readatomproperty 1');
   if (actualtype = atomatom) and (actualformat = 32) then begin
   // writeln('readatomproperty nitems ',nitems );
-   // nitems := 85;
-   setlength(value,nitems);
+     setlength(value,nitems);
    if nitems > 0 then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
-    move(prop^,value[0],nitems*sizeof(value[0]));
+//    move(prop^,value[0],nitems*sizeof(value[0]));
+{$ifndef use_xcb}
+ move(prop^,value[0],nitems*sizeof(value[0]));
+ {$else}
+ move(prop^, PByte(@value[0])^, nitems * sizeof(value[0])); // <--- CHANGE THIS LINE
+ {$endif}
+
  {$ifdef FPC} {$checkpointer default} {$endif}
    end;
   //  writeln('readatomproperty fin');
    result:= true;
   end;
- // writeln('readatomproperty bad');
-  {$ifndef use_xcb}
-   xfree(prop);
-  {$endif} 
- // writeln('readatomproperty fin');
- end;
+  xfree(prop);
+  end;
 end;
 
 procedure setatomproperty(id: winidty; prop: atom; value: atom);
@@ -5904,14 +5908,18 @@ begin
   event1.time:= time;
   bo1:= false;
   if isclipboard(selection,buffer) then begin
+  
+  // fred
    bo1:= getclipboarddata(aevent,buffer,str1,
               event1.{$ifdef FPC}_property{$else}xproperty{$endif});
+  
   end
   else begin
    if (selection = xdndatoms[xdnd_selection]) and
                               (sysdndwriter <> nil) then begin
-    bo1:= sysdndwriter.getdata(aevent,str1,
-                      {$ifdef FPC}_property{$else}xproperty{$endif});
+  // fred
+   bo1:= sysdndwriter.getdata(aevent,str1,
+                     {$ifdef FPC}_property{$else}xproperty{$endif});
    end
    else begin
     {$ifdef FPC}_property{$else}xproperty{$endif}:= none;
@@ -7283,6 +7291,10 @@ WriteLn('gui_init: After createappic, result=', result);
   end;
   
     writeln();
+    
+      for int1:= 0 to high(atomar) do begin
+           writeln(int1, 'B atom num ', atomar[int1]);
+       end;
  
     writeln('length(netatoms) = ', length(netatoms)); 
     writeln('length(atomar) = ', length(atomar)); 

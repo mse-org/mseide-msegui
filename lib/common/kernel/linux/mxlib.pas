@@ -336,7 +336,7 @@ type
 
   PPAtom = ^PAtom;
   TAtom  = culong;
-
+ 
   PXFontProp = ^TXFontProp;
 
   TXFontProp = record

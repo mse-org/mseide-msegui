@@ -5,7 +5,7 @@ unit mxcb;
 interface
 
 uses
- mseguiglob, ctypes; // For culong, cint, cuint, cshort, cchar, cuchar
+ mseguiglob, math, ctypes; // For culong, cint, cuint, cshort, cchar, cuchar
 
 {$PACKRECORDS C}
 const
@@ -18,8 +18,7 @@ const
 type
  
   Pxcb_connection_t = Pointer;
-  xcb_atom_t = culong;
-  xcb_window_t = cuint32;
+   xcb_window_t = cuint32;
   xcb_colormap_t = cuint32;
   xcb_visualid_t = cuint32;
   
@@ -121,8 +120,9 @@ type
   TDrawable = Drawable;   // For mseguiintf.pas
   GC  = Pointer;          // Maps to xcb_gcontext_t
   TGC = GC;
-
-  Atom = xcb_atom_t;
+  
+  xcb_atom_t = Cardinal; // Cardinal is guaranteed 32-bit unsigned
+  Atom = Cardinal;        // Make sure Atom also uses Cardinal directly
   PAtom = ^Atom;
  
   Colormap  = cuint32;       // Maps to xcb_colormap_t
@@ -301,7 +301,7 @@ type
   PXGlyphInfo = ^TXGlyphInfo;
 
   PPAtom  = ^PAtom;
-  TAtom   = culong;
+  TAtom   = cardinal;
   TXFixed = integer;
   PXFixed = ^TXFixed;
 
@@ -2175,7 +2175,7 @@ end;
 
 procedure XFree(Data: Pointer); cdecl;
 begin
-  // Freeandnil(Data);
+// todo
 end;
 
 function XCreateGC(display: PDisplay; d: Drawable; valuemask: culong; values: PXGCValues): GC; cdecl;
@@ -2797,31 +2797,68 @@ begin
   //FreeMem(reply);
 end;
 
-function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; 
-         Delete: TBool; req_type: Atom;  actual_type_return: PAtom; actual_format_return: Pcint;
-          nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong;
+           Delete: TBool; req_type: Atom;  actual_type_return: PAtom; actual_format_return: Pcint;
+           nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
 var
   cookie: xcb_get_property_cookie_t;
   reply: pxcb_get_property_reply_t;
+  value_ptr: Pcuchar; // Pointer to the raw value data within the reply
+  value_len_bytes: Cardinal; // Length of the value in bytes
+  allocated_mem: PByte; // For memory we explicitly allocate to mimic Xlib's behavior
   i : integer;
+  pRawData: PByte;     // Declared here, correctly
+  pAtomData: PCardinal; // Declared here, correctly
 begin
-   cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, 1024);
-   reply  := xcb_get_property_reply(display, cookie, nil);
-   if reply = nil then writeln('xgetwindowproperty reply = nil');
+   cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, long_length);
+   reply := xcb_get_property_reply(display, cookie, nil);
+   if reply = nil then begin
+    actual_type_return^ := 0; // Indicate no type
+    actual_format_return^ := 0; // Indicate no format
+    nitems_return^ := 0;
+    bytes_after_return^ := 0;
+    prop_return^ := nil; 
+    Result := 0;
+    Exit;
+  end;
 
   actual_type_return^ := reply^.type_;
   actual_format_return^ := reply^.format;
-  nitems_return^ := reply^.value_len;
   bytes_after_return^ := reply^.bytes_after;
-  prop_return^   := reply^.pad0;
-  Result         := 0; // Success
- 
-  writeln('reply.type_ ', reply^.type_);
-  writeln('reply.format ', reply^.format);
-  writeln('reply.value_len ', reply^.value_len);
-  writeln('reply.bytes_after ', reply^.bytes_after);
-  writeln('result ', result);
-  
+
+  // Get a pointer to the value data within the reply structure
+  value_ptr := xcb_get_property_value(reply);
+  // Get the length of the value data in bytes
+
+  // value_len_bytes := xcb_get_property_value_length(reply); // Commented out as it's not defined
+  value_len_bytes := reply^.length * 4; // Correctly using reply^.length for total bytes
+
+  // Calculate nitems_return based on format and byte length
+  // Format is 8, 16, or 32 bits per item.
+  case actual_format_return^ of
+    8: nitems_return^ := value_len_bytes; // 8-bit items, so length in bytes is number of items
+    16: nitems_return^ := value_len_bytes div 2; // 16-bit items, 2 bytes per item
+    32: nitems_return^ := value_len_bytes div 4; // 32-bit items, 4 bytes per item
+    else nitems_return^ := 0; // Unknown format, or invalid
+  end;
+
+   if value_len_bytes > 0 then begin
+    GetMem(allocated_mem, value_len_bytes); // Allocate memory
+    Move(value_ptr^, allocated_mem^, value_len_bytes); // Copy data from xcb reply to allocated memory
+    prop_return^ := allocated_mem; // Assign the pointer to the newly allocated memory
+
+    pRawData := PByte(allocated_mem);
+    pAtomData := PCardinal(allocated_mem);
+  end else begin
+    prop_return^ := nil; // No data, return nil
+    // Ensure debug pointers are nil if no data
+    pRawData := nil;
+    pAtomData := nil;
+  end;
+  Result := 0;
+
+  // TODO Free the XCB reply structure after processing it.
+  // xcb_aux_release(reply); 
 end;
 
 // Todo
