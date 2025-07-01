@@ -234,6 +234,29 @@ type
   PXICCEncodingStyle = ^TXICCEncodingStyle;
   TXICCEncodingStyle = (XStringStyle, XCompoundTextStyle, XTextStyle,
     XStdICCTextStyle, XUTF8StringStyle);
+    
+  XExtData = record
+    number: cint;
+    Next: Pointer;
+    free_private: procedure(Data: Pointer); cdecl;
+    private_data: PChar;
+  end;
+  PXExtData = ^XExtData;
+
+  VisualID = culong;
+
+  Visual = record
+    ext_data: PXExtData;  { hook for extension to hang data  }
+    visualid: VisualID;   { visual id of this visual  }
+    _class: cint;
+    red_mask: culong;
+    green_mask: culong;
+    blue_mask: culong;
+    bits_per_rgb: cint;
+    map_entries: cint;
+  end;
+  msepvisual = ^visual;
+  pvisual    = ^visual; 
 
   Display  = Pointer;
   PDisplay = ^Display;
@@ -243,7 +266,6 @@ type
   TGC      = GC;      // For mseguiintf.pas
   Atom     = culong;
   PAtom    = ^Atom;
-  VisualID = culong;
   Colormap = culong;
   Pixmap   = culong;
   Font     = culong;
@@ -258,23 +280,6 @@ type
 
   XrmHashBucketRec  = Pointer; // For mseguiintf.pas
   PXrmHashBucketRec = ^XrmHashBucketRec;
-
-  XExtData = record // For mseguiintf.pas
-    number: cint;
-    Next: Pointer;  // PXExtData
-    free_private: procedure(Data: Pointer); cdecl;
-    private_data: PChar;
-  end;
-  PXExtData = ^XExtData;
-
-  Visual = record
-    visualid: VisualID;
-    visual_class: cint;
-    red_mask, green_mask, blue_mask: culong;
-    bits_per_rgb: cint;
-    map_entries: cint;
-  end;
-  PVisual = ^Visual;
 
   PXCharStruct = ^TXCharStruct;
 

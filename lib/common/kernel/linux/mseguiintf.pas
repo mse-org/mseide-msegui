@@ -53,7 +53,7 @@ interface
  {$define mse_debug}
 {$endif}
 uses
-  {$ifdef use_xcb}mxcb{$else}mxlib,mxrandr{$endif},msetypes,mseapplication,msesys,
+ {$ifdef use_xcb}mxcb{$else}mxlib,mxrandr{$endif},msetypes,mseapplication,msesys,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
@@ -354,7 +354,7 @@ const
  pixel1 = $ffffff;
 type
   Bool = cint;
-  XID = type culong;
+  XID = culong;
 //  TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
 //     XStdICCTextStyle,XUTF8StringStyle);
 {$ifdef FPC}
@@ -383,7 +383,7 @@ function msedefaultscreenno: integer;
  {$MINENUMSIZE 4}
 {$endif}
 
- {$ifndef use_xcb}
+ {$if not defined(use_xcb)}
  type
  _XIM = record end;
  XIM = ^_XIM;
@@ -392,35 +392,7 @@ function msedefaultscreenno: integer;
  ppucs4char = ^pucs4char;
 
  dword= longword;
- 
- VisualID = culong;
- Visual = record
-  ext_data: PXExtData;  { hook for extension to hang data  }
-  visualid: VisualID;   { visual id of this visual  }
-  _class: cint;
-  red_mask: culong;
-  green_mask: culong;
-  blue_mask: culong;
-  bits_per_rgb: cint;
-  map_entries: cint;
- end;
- msepvisual = ^visual;
- 
 
-(*
- VisualID = dword;
- Visual = record
-   ext_data: PXExtData;  { hook for extension to hang data  }
-   visualid: VisualID;   { visual id of this visual  }
-   _class: Longint;
-   red_mask: longword;
-   green_mask: longword;
-   blue_mask: longword;
-   bits_per_rgb: Longint;
-   map_entries: Longint;
- end;
- msepvisual = ^visual;
-*)
   PXWMHints = ^XWMHints;
   XWMHints = record
     flags: clong;  { marks which fields in this structure are defined  }
@@ -467,12 +439,7 @@ const
  MWM_FUNC_MINIMIZE = 1 shl 3;
  MWM_FUNC_MAXIMIZE = 1 shl 4;
  MWM_FUNC_CLOSE = 1 shl 5;
-{
-type
-   TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
-     XStdICCTextStyle,XUTF8StringStyle);
-  }
-  
+
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
                               external sXLib name 'XSetWMHints';
 function XSetForeground(Display: PDisplay; GC: TGC;
@@ -502,30 +469,17 @@ function XSetICValues(IC: XIC): PChar; cdecl; varargs;
                               external sXLib name 'XSetICValues';
 function XSetIMValues(IC: XIM): PChar; cdecl; varargs;
                               external sXLib name 'XSetIMValues';
-//function XSetICValues(para1:XIC; dotdotdot:array of const):Pchar;cdecl;
-//                              external sXLib name 'XSetICValues';
+                     
 function XGetICValues(IC: XIC): PChar; cdecl; varargs;
                               external sXLib name 'XGetICValues';
 procedure XSetICFocus(IC: XIC); cdecl;
                               external sXLib name 'XSetICFocus';
 procedure XUnsetICFocus(IC: XIC); cdecl;
                               external sXLib name 'XUnsetICFocus';
-{
-function XwcLookupString(IC: XIC; Event: PXKeyPressedEvent;
-  BufferReturn: Pucs4char; WCharsBuffer: Longint; KeySymReturn: PKeySym;
-  StatusReturn: PStatus): Longint; cdecl;
-                              external sXLib name 'XwcLookupString';
-}
 function Xutf8LookupString(IC: XIC; Event: PXKeyPressedEvent;
   BufferReturn: Pchar; CharsBuffer: Longint; KeySymReturn: PKeySym;
   StatusReturn: PStatus): Longint; cdecl;
                               external sXLib name 'Xutf8LookupString';
-(*
-function XwcTextListToTextProperty(para1:PDisplay; para2:PPucs4Char;
-           para3: integer; para4: integer{TXICCEncodingStyle};
-           para5:PXTextProperty): integer;cdecl;
-                              external sXLib name 'XwcTextListToTextProperty';
-*)
 function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
   Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
   BitmapPad: Longint; BytesPerLine: Longint): PXImage; cdecl;
@@ -1026,12 +980,9 @@ var
  actualformat: cint;
  nitems: clong;
  bytesafter: culong;
- {$ifndef use_xcb}
- prop: pchar;
- {$else}
- prop: PByte;
- {$endif}
- 
+ //prop: pchar;
+ prop: PByte; // <--- CHANGE THIS LINE from pchar to PCardinal
+ temp_prop_as_cardinal: PCardinal; 
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -1043,22 +994,26 @@ begin
   // writeln('readatomproperty 1');
   if (actualtype = atomatom) and (actualformat = 32) then begin
   // writeln('readatomproperty nitems ',nitems );
-     setlength(value,nitems);
+   // nitems := 85;
+   setlength(value,nitems);
    if nitems > 0 then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
 //    move(prop^,value[0],nitems*sizeof(value[0]));
-{$ifndef use_xcb}
- move(prop^,value[0],nitems*sizeof(value[0]));
- {$else}
- move(prop^, PByte(@value[0])^, nitems * sizeof(value[0])); // <--- CHANGE THIS LINE
- {$endif}
+
+     // Cast prop to PCardinal to inspect contents directly
+       temp_prop_as_cardinal := PCardinal(prop);
+
+       move(prop^, PByte(@value[0])^, nitems * sizeof(value[0])); // <--- CHANGE THIS LINE
 
  {$ifdef FPC} {$checkpointer default} {$endif}
    end;
   //  writeln('readatomproperty fin');
    result:= true;
   end;
-  xfree(prop);
+
+    xfree(prop);
+ 
+ // writeln('readatomproperty fin');
   end;
 end;
 
@@ -4096,6 +4051,7 @@ function gui_createwindow(const rect: rectty;
      var options: internalwindowoptionsty; var awindow: windowty): guierrorty;
 var
  attributes: xsetwindowattributes;
+ attributes2: xsetwindowattributes;
  valuemask: longword;
  width,height,x: integer;
  id1: winidty;
@@ -4111,10 +4067,12 @@ var
  win_gc : TGC;
  begin
  gdi_lock;
+  writeln('gui_createwindow init');
+
  with awindow,x11windowty(platformdata).d do begin
   valuemask:= 0;
   if options.options * [wo_popup,wo_overrideredirect] <> [] then begin
-   attributes.override_redirect:= {$ifdef xboolean}true{$else}1{$endif};
+  //  attributes.override_redirect:= {$ifdef xboolean}true{$else}1{$endif};
    valuemask:= valuemask or cwoverrideredirect;
   end;
   if rect.cx <= 0 then begin
@@ -4135,6 +4093,9 @@ var
   else begin
    id1:= rootid;
   end;
+   writeln('gui_createwindow 1');
+
+  
   with x11internalwindowoptionsty(options.platformdata).d do begin
    if colormap <> 0 then begin
     colormap1:= colormap;
@@ -4143,7 +4104,7 @@ var
     colormap1:= msecolormap;
    end;
    if colormap1 <> 0 then begin
-    attributes.colormap:= colormap1;
+   // attributes.colormap:= colormap1;
     valuemask:= valuemask or cwcolormap;
    end;
    if depth = 0 then begin
@@ -4153,18 +4114,32 @@ var
     visual:= pvisual(copyfromparent);
    end;
 //   if nocreatestaticgravity then begin
-    attributes.win_gravity:= northwestgravity;
+
+//    attributes.win_gravity:= northwestgravity;
+
+
 //   end
 //   else begin
 //    attributes.win_gravity:= staticgravity;
 //   end;
-   attributes.bit_gravity:= northwestgravity;
+  // attributes.bit_gravity:= northwestgravity;
    valuemask:= valuemask or cwwingravity or cwbitgravity;
-   
-    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
+     writeln('gui_createwindow 2');
+     
+   { id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
    width,height,0,
     depth,  copyfromparent,visual,
-      valuemask,@attributes);
+      valuemask,@attributes2);  }
+      
+   id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
+   width,height,0,
+    depth,  copyfromparent,visual,
+      cweventmask,@attributes);      
+      
+
+    attributes.event_mask:= propertychangemask;
+ //id:=  xcreatewindow(appdisp,rootid,0,0,200,200,0,
+   //     0,inputonly,pvisual(copyfromparent),cweventmask,@attributes2);
 
 //////////////////////////////////////////////
  if (wo_onalldesktops in options.options) then
@@ -4198,6 +4173,8 @@ var
 
  //* create the pixmap that we'll use for shaping the window */
   pmap := XCreatePixmap(appdisp, id, width, height, 1);
+  
+  writeln('pmap := XCreatePixmap ',pmap);
 
 //* create a graphics context for drawing on the pixmap */
   shape_gc := XCreateGC(appdisp, pmap, 0, @xgcv);
@@ -4357,6 +4334,7 @@ end;
   end;
   with options do begin
    if icon <> 0 then begin
+    // fred
     gui_setwindowicon(id,icon,iconmask);
    end;
   end;
@@ -6845,19 +6823,19 @@ end;
 
 function createappic: boolean;
 begin
-  WriteLn('createappic: Starting, im=', PtrInt(im), ' appdisp=', PtrInt(appdisp));
+  // WriteLn('createappic: Starting, im=', PtrInt(im), ' appdisp=', PtrInt(appdisp));
   appic := xcreateic(im, pchar(xninputstyle), ximstatusnothing or ximpreeditnothing, nil);
   WriteLn('createappic: appic=', PtrInt(appic));
   result := appic <> nil;
   if result then
   begin
-    WriteLn('createappic: Calling xseticvalues, xnclientwindow=', xnclientwindow, ' appid=', appid);
+    //WriteLn('createappic: Calling xseticvalues, xnclientwindow=', xnclientwindow, ' appid=', appid);
     xseticvalues(appic, pchar(xnclientwindow), appid, nil);
-    WriteLn('createappic: Calling xgeticvalues, xnfilterevents=', xnfilterevents);
+    //WriteLn('createappic: Calling xgeticvalues, xnfilterevents=', xnfilterevents);
     xgeticvalues(appic, pchar(xnfilterevents), @appicmask, nil);
-    WriteLn('createappic: appicmask=', appicmask);
+    //WriteLn('createappic: appicmask=', appicmask);
   end;
-  WriteLn('createappic: Result=', result);
+  //WriteLn('createappic: Result=', result);
 end;
 
 function createim: boolean; forward;
@@ -7267,24 +7245,25 @@ WriteLn('gui_init: After createappic, result=', result);
 
     writeln('gui_init 9.4 netsupported ', netsupported);
          
-    writeln('length(atomar) = ', length(atomar)); 
+  //  writeln('length(atomar) = ', length(atomar)); 
       
   //  atomar :=   netatoms;
     
    for netnum:= firstcheckedatom to lastcheckedatom do begin
     atom1:= netatoms[netnum];
     
-    writeln(i, ' atom num ', atom1);
-    inc(i);
+  //  writeln(i, ' atom num ', atom1);
+  //  inc(i);
     
      netatoms[netnum]:= 0;
     
      for int1:= 0 to high(atomar) do begin
      if atomar[int1] = atom1 then begin
-      writeln('B atom num ', atom1);
+      // writeln('B atom num ', atom1);
       netatoms[netnum]:= atom1;
       break;
      end;
+ 
     end;
    end;
    
@@ -7292,18 +7271,14 @@ WriteLn('gui_init: After createappic, result=', result);
   
     writeln();
     
-      for int1:= 0 to high(atomar) do begin
-           writeln(int1, 'B atom num ', atomar[int1]);
-       end;
- 
     writeln('length(netatoms) = ', length(netatoms)); 
     writeln('length(atomar) = ', length(atomar)); 
   
  writeln('gui_init 9.5');
   i := 0;
    for netnum:= low(netatomty) to needednetatom do begin
-    writeln(i, ' ', netnum, ' netatoms num ', netatoms[netnum]);
-    inc(i);
+    // writeln(i, ' ', netnum, ' netatoms num ', netatoms[netnum]);
+    // inc(i);
    if netatoms[netnum] = 0 then begin
     netsupported:= false;
     break;

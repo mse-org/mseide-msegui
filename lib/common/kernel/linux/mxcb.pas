@@ -5,25 +5,23 @@ unit mxcb;
 interface
 
 uses
-  Math,
-  ctypes; // For culong, cint, cuint, cshort, cchar, cuchar
-          // mseguiglob
+ mseguiglob, math, ctypes; // For culong, cint, cuint, cshort, cchar, cuchar
 
 {$PACKRECORDS C}
 const
-  libxcb         = 'libxcb.so.1';
-  libxcb_shape   = 'libxcb-shape.so.0';
-  libxcb_render  = 'libxcb-render.so.0';
-  libxcb_randr   = 'libxcb-randr.so.0';
+  libxcb        = 'libxcb.so.1';
+  libxcb_shape  = 'libxcb-shape.so.0';
+  libxcb_render = 'libxcb-render.so.0';
+  libxcb_randr  = 'libxcb-randr.so.0';
   libxcb_keysyms = 'libxcb-keysyms.so.1';
 
 type
-
+ 
   Pxcb_connection_t = Pointer;
-  xcb_window_t      = cuint32;
-  xcb_colormap_t    = cuint32;
-  xcb_visualid_t    = cuint32;
-
+   xcb_window_t = cuint32;
+  xcb_colormap_t = cuint32;
+  xcb_visualid_t = cuint32;
+  
   xcb_generic_error_t = record
     response_type: cuint8;
     error_code: cuint8;
@@ -35,11 +33,11 @@ type
     pad: array[0..4] of cuint32;
     full_sequence: cuint32;
   end;
-  Pxcb_generic_error_t  = ^xcb_generic_error_t;
+  Pxcb_generic_error_t = ^xcb_generic_error_t;
   PPxcb_generic_error_t = ^pxcb_generic_error_t;
-
-
-  PDisplay = Pxcb_connection_t; // Alias for XCB connection
+ 
+ 
+  PDisplay          = Pxcb_connection_t; // Alias for XCB connection
 
   xcb_void_cookie_t = record
     sequence: cuint;
@@ -118,28 +116,28 @@ type
   pXRRScreenResources = ^XRRScreenResources;
 
   xcb_drawable_t = cuint32;
-  Drawable       = cuint;       // Maps to xcb_drawable_t
-  TDrawable = Drawable;         // For mseguiintf.pas
-  GC  = Pointer;                // Maps to xcb_gcontext_t
+  Drawable       = cuint; // Maps to xcb_drawable_t
+  TDrawable = Drawable;   // For mseguiintf.pas
+  GC  = Pointer;          // Maps to xcb_gcontext_t
   TGC = GC;
-
-  xcb_atom_t = cardinal;        // Cardinal is guaranteed 32-bit unsigned
-  Atom       = cardinal;        // Make sure Atom also uses Cardinal directly
-  PAtom      = ^Atom;
-
-  Colormap  = cuint32;          // Maps to xcb_colormap_t
-  TColormap = Colormap;         // For mseguiintf.pas
-  Pixmap    = cuint;            // Maps to xcb_pixmap_t
-  TPixmap   = Pixmap;           // For mshape.pas
-  Font      = cuint;            // Maps to xcb_font_t
+  
+  xcb_atom_t = Cardinal; // Cardinal is guaranteed 32-bit unsigned
+  Atom = Cardinal;        // Make sure Atom also uses Cardinal directly
+  PAtom = ^Atom;
+ 
+  Colormap  = cuint32;       // Maps to xcb_colormap_t
+  TColormap = Colormap;   // For mseguiintf.pas
+  Pixmap    = cuint;      // Maps to xcb_pixmap_t
+  TPixmap   = Pixmap;     // For mshape.pas
+  Font      = cuint;      // Maps to xcb_font_t
   TKeySym   = culong;
   PKeySym   = ^TKeySym;
+  
+  Pcuchar   = ^cuchar;
+  PPcuchar  = ^Pcuchar;
 
-  Pcuchar  = ^cuchar;
-  PPcuchar = ^Pcuchar;
-
-  Picture  = culong;  // Maps to xcb_render_picture_t
-  TPicture = Picture; // For msex11gdi.pas
+  Picture   = culong;  // Maps to xcb_render_picture_t
+  TPicture  = Picture; // For msex11gdi.pas
 
   XSizeHints = record
     flags: clong;
@@ -427,18 +425,16 @@ type
     ascent: cint;
     descent: cint;
   end;
-
-type
+ 
+  type
   PXIM = ^TXIM;
-
   TXIM = record
     connection: Pxcb_connection_t;
     // Opaque data for XIM
   end;
-  XIM = PXIM;
-
+  XIM  = PXIM;
+  
   PXIC = ^TXIC;
-
   TXIC = record
     im: PXIM;
     client_window: xcb_window_t;
@@ -446,12 +442,11 @@ type
     input_style: clong;
     filter_events: clong;
   end;
-  XIC        = PXIC;
-  XIMStyle   = clong;
+  XIC  = PXIC;
+  XIMStyle = clong;
   PXIMStyles = Pointer;
 
   PXErrorEvent = ^TXErrorEvent;
-
   TXErrorEvent = record
     _type: cint;
     display: PDisplay;
@@ -970,7 +965,6 @@ type
   end;
 
   PScreen = ^TScreen;
-
   TScreen = record
     ext_data: PXExtData;
     display: Pxcb_connection_t;
@@ -991,7 +985,7 @@ type
     root_input_mask: clong;
   end;
 
-  xcb_screen_t = record
+ xcb_screen_t = record
     root: xcb_window_t;
     default_colormap: xcb_colormap_t;
     white_pixel: cuint32;
@@ -1010,16 +1004,15 @@ type
     allowed_depths_len: cuint8;
   end;
   Pxcb_screen_t = ^xcb_screen_t;
-
-  xcb_setup_roots_iterator_t = record
-    Data: Pxcb_screen_t;
+  
+   xcb_setup_roots_iterator_t = record
+    data: Pxcb_screen_t;
     rem: cint;
     index: cint;
   end;
-
-  Pxcb_visualtype_t = ^xcb_visualtype_t;
-
-  xcb_visualtype_t = record
+  
+    Pxcb_visualtype_t = ^xcb_visualtype_t;
+    xcb_visualtype_t = record
     visual_id: xcb_visualid_t;
     _class: cuint8;
     bits_per_rgb_value: cuint8;
@@ -1029,9 +1022,8 @@ type
     blue_mask: cuint32;
     pad0: array[0..3] of cuint8;
   end;
-
-  Pxcb_depth_t = ^xcb_depth_t;
-
+  
+   Pxcb_depth_t = ^xcb_depth_t;
   xcb_depth_t = record
     depth: cuint8;
     pad0: cuint8;
@@ -1040,17 +1032,15 @@ type
   end;
 
   Pxcb_depth_iterator_t = ^xcb_depth_iterator_t;
-
   xcb_depth_iterator_t = record
-    Data: Pxcb_depth_t;
+    data: Pxcb_depth_t;
     rem: cint;
     index: cint;
   end;
 
   Pxcb_visualtype_iterator_t = ^xcb_visualtype_iterator_t;
-
   xcb_visualtype_iterator_t = record
-    Data: Pxcb_visualtype_t;
+    data: Pxcb_visualtype_t;
     rem: cint;
     index: cint;
   end;
@@ -1058,7 +1048,6 @@ type
   XID = type culong;
 
   PScreenFormat = ^TScreenFormat;
-
   TScreenFormat = record
     ext_data: PXExtData;
     depth: cint;
@@ -1193,7 +1182,7 @@ type
 
   PCursor = ^TCursor;
   TCursor = TXID;
-
+  
   TXSetWindowAttributes = record
     background_pixmap: TPixmap;
     background_pixel: culong;
@@ -1224,7 +1213,7 @@ type
     mwidth, mheight: cint;
   end;
   PXRRScreenSize = ^XRRScreenSize;
-
+  
   XRRCrtcInfo = record
     timestamp: culong;
     x, y: cint; // Fixed: Removed "Shel x"
@@ -1258,11 +1247,9 @@ type
     modes: pRRMode;
   end;
   pXRROutputInfo = ^XRROutputInfo;
-
-  TXErrorHandler = function(display: PDisplay; error_event: PXErrorEvent): cint; cdecl;
-
-  regionty = ptruint;
-
+  
+   TXErrorHandler = function(display: PDisplay; error_event: PXErrorEvent): cint; cdecl;
+ 
 const
   MWM_HINTS_DECORATIONS = 1 shl 1;
   WindowGroupHint = 1 shl 6;
@@ -1277,7 +1264,7 @@ const
   XCB_KEY_PRESS = 2;
   XCB_KEY_RELEASE = 3;
   XCB_EXPOSE    = 12;
-  XCB_NONE      = 0;
+  XCB_NONE = 0;
   XCB_EVENT_MASK_KEY_PRESS = 1 shl 0;   // $00000001
   XCB_EVENT_MASK_KEY_RELEASE = 1 shl 1; // $00000002
   InputOnly     = 2;
@@ -1511,7 +1498,7 @@ var
   g_randreventbase: cint = 0;
   g_randrerrorbase: cint = 0;
   //g_errorhandler: XErrorHandler = nil;
-  g_errorhandler: Pointer = nil;
+  g_errorhandler: pointer = nil;
   g_root_visual: Visual;
 
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
@@ -1519,7 +1506,9 @@ procedure XCloseDisplay(display: PDisplay); cdecl;
 function XDefaultScreen(display: PDisplay): cint; cdecl;
 function XDefaultVisual(display: PDisplay; screen_number: cint): PVisual; cdecl;
 
-function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, border_width: cuint; depth: cint; window_class: cuint; visual: PVisual; valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
+function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, 
+          border_width: cuint; depth: cint; window_class: cuint; visual: PVisual;
+           valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
 
 procedure XMapWindow(display: PDisplay; w: Window); cdecl;
 procedure XSelectInput(display: PDisplay; w: Window; event_mask: clong); cdecl;
@@ -1529,9 +1518,10 @@ function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool)
 
 function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
 
-function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom;
-  actual_format_return: Pcint; nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
-
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; 
+         Delete: TBool; req_type: Atom;  actual_type_return: PAtom; actual_format_return: Pcint;
+          nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+          
 function XSendEvent(display: PDisplay; w: Window; propagate: TBool; event_mask: clong; event_send: PXEvent): cint; cdecl;
 function XChangeProperty(display: PDisplay; w: Window; atom_property: Atom; type_: Atom; format: cint; mode: cint; Data: Pcuchar; nelements: cint): cint; cdecl;
 procedure XFlush(display: PDisplay); cdecl;
@@ -1557,19 +1547,24 @@ function XRenderCreatePicture(display: PDisplay; d: Drawable; format: PXRenderPi
 procedure XRenderFreePicture(display: PDisplay; picture: TPicture); cdecl;
 procedure XRenderComposite(display: PDisplay; op: cint; src: TPicture; mask: TPicture; dst: TPicture; src_x, src_y, mask_x, mask_y, dst_x, dst_y: cint; Width, Height: cuint); cdecl;
 
-procedure XRenderSetPictureClipRectangles(dpy: PDisplay; picture: TPicture; xOrigin: longint; yOrigin: longint; rects: PXRectangle; n: longint); cdecl;
+procedure XRenderSetPictureClipRectangles(dpy:PDisplay; picture:TPicture;
+            xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint); cdecl;
 procedure XRenderSetPictureClipRegion(dpy: pDisplay; picture: TPicture; r: regionty); cdecl;
-procedure XRenderFillRectangle(dpy: PDisplay; op: longint; dst: TPicture; color: PXRenderColor; x: longint; y: longint; Width: dword; Height: dword); cdecl;
-procedure XRenderSetPictureTransform(dpy: PDisplay; picture: TPicture; transform: PXTransform); cdecl;
-procedure XRenderSetPictureFilter(dpy: PDisplay; picture: TPicture; filter: PChar; params: pinteger; nparams: integer); cdecl;
+procedure XRenderFillRectangle(dpy: PDisplay; op: longint; dst: TPicture; color: PXRenderColor; x: longint;
+                           y: longint; width: dword; height: dword);cdecl;
+procedure XRenderSetPictureTransform(dpy:PDisplay; picture:TPicture; transform:PXTransform); cdecl;
+procedure XRenderSetPictureFilter(dpy:PDisplay; picture:TPicture; filter: pchar; params: pinteger; nparams: integer); cdecl;
 function XRenderCreateSolidFill(dpy: pDisplay; color: pXRenderColor): TPicture; cdecl;
-function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool; cdecl;
-function XRenderFindVisualFormat(dpy: PDisplay; visual: PVisual): PXRenderPictFormat; cdecl;
+function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool;cdecl;
+function XRenderFindVisualFormat(dpy: PDisplay; visual: PVisual): PXRenderPictFormat;cdecl;
 function XRenderFindStandardFormat(dpy: PDisplay; format: longint): PXRenderPictFormat; cdecl;
-function XRenderFindFormat(dpy: PDisplay; mask: culong; templ: PXRenderPictFormat; Count: longint): PXRenderPictFormat; cdecl;
-procedure XRenderCompositeTriangles(dpy: pDisplay; op: cint; src: tPicture; dst: tPicture; maskFormat: pXRenderPictFormat; xSrc: cint; ySrc: cint; triangles: pXTriangle; ntriangle: cint); cdecl;
-procedure XRenderCompositeTriStrip(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat; xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
-procedure XRenderCompositeTriFan(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat; xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
+function XRenderFindFormat(dpy: PDisplay; mask: culong; templ: PXRenderPictFormat; count: longint): PXRenderPictFormat; cdecl;
+procedure XRenderCompositeTriangles(dpy: pDisplay; op: cint; src: tPicture; dst: tPicture; maskFormat: pXRenderPictFormat;
+                  xSrc: cint; ySrc: cint; triangles: pXTriangle; ntriangle: cint); cdecl;
+procedure XRenderCompositeTriStrip(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
+procedure XRenderCompositeTriFan(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
 procedure XRenderChangePicture(dpy: pdisplay; picture: tpicture; valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
 
 // Shape extension for mshape.pas
@@ -1587,7 +1582,7 @@ function XConvertSelection(para1: PDisplay; para2: TAtom; para3: TAtom; para4: T
 function XGetSelectionOwner(para1: PDisplay; para2: TAtom): TWindow; cdecl;
 procedure XFreeStringList(para1: PPchar); cdecl;
 function XGetWindowAttributes(para1: PDisplay; para2: TWindow; para3: PXWindowAttributes): TStatus; cdecl;
-function XGetGeometry(para1: PDisplay; para2: TDrawable; para3: PWindow; para4: Pcint; para5: Pcint; para6: Pcuint; para7: Pcuint; para8: Pcuint; para9: Pcuint): TStatus; cdecl;
+function XGetGeometry(display: PDisplay; d: TDrawable; root: PWindow; x, y: PLongInt; width, height, border_width, depth: PLongWord): LongInt; cdecl;
 function XSync(para1: PDisplay; para2: TBool): cint; cdecl;
 function XIconifyWindow(para1: PDisplay; para2: TWindow; para3: cint): TStatus; cdecl;
 procedure XSetWMName(para1: PDisplay; para2: TWindow; para3: PXTextProperty); cdecl;
@@ -1603,7 +1598,7 @@ function XUngrabPointer(para1: PDisplay; para2: TTime): cint; cdecl;
 function XGrabPointer(para1: PDisplay; para2: TWindow; para3: TBool; para4: cuint; para5: cint; para6: cint; para7: TWindow; para8: TCursor; para9: TTime): cint; cdecl;
 function XGetImage(para1: PDisplay; para2: TDrawable; para3: cint; para4: cint; para5: cuint; para6: cuint; para7: culong; para8: cint): PXImage; cdecl;
 function XSetGraphicsExposures(para1: PDisplay; para2: TGC; para3: TBool): cint; cdecl;
-function XCopyArea(para1: PDisplay; para2: TDrawable; para3: TDrawable; para4: TGC; para5: cint; para6: cint; para7: cuint; para8: cuint; para9: cint; para10: cint): cint; cdecl;
+function XCopyArea(display: PDisplay; src, dest: TDrawable; gc: TGC; src_x, src_y, width, height: LongInt; dest_x, dest_y: LongInt): LongInt; cdecl;
 function XFreePixmap(para1: PDisplay; para2: TPixmap): cint; cdecl;
 function XGetTransientForHint(para1: PDisplay; para2: TWindow; para3: PWindow): TStatus; cdecl;
 function XSetInputFocus(para1: PDisplay; para2: TWindow; para3: cint; para4: TTime): cint; cdecl;
@@ -1670,7 +1665,10 @@ function XUnionRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cde
 function XOffsetRegion(para1: TRegion; para2: cint; para3: cint): cint; cdecl;
 function XSubtractRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
 function XIntersectRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
-function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword; Format: longint; Offset: longint; Data: PChar; Width, Height: longword; BitmapPad: longint; BytesPerLine: longint): PXImage; cdecl;
+
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
+  Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
+  bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
 
 // Todo from libX11 and mseguiintf
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
@@ -1711,7 +1709,7 @@ function DefaultScreen(dpy: PDisplay): cint;
 function XSync(para1: PDisplay; para2: Boolean): cint;
 function XSendEvent(para1: PDisplay; para2: TWindow; para3: Boolean; para4: clong; para5: PXEvent): TStatus;
 function DefaultDepthOfScreen(s: PScreen): cint;
-function XDestroyImage(ximage: PXImage): cint;
+function XDestroyImage(ximage: PXImage): cint; cdecl;
 function getxrandrlib: Boolean;
 
 implementation
@@ -1744,19 +1742,19 @@ type
     pad1: array[0..3] of cuint8;
   end;
   Pxcb_setup_t = ^xcb_setup_t;
-
+  
   xcb_generic_event_t = packed record
-    response_type: byte;
-    extension: byte;
-    sequence: word;
-    length: longword;
-    event_type: word;
-    pad0: array[0..21] of byte;  // 22 bytes
-    full_sequence: longword;
+    response_type: Byte;
+    extension: Byte;
+    sequence: Word;
+    length: LongWord;
+    event_type: Word;
+    pad0: array[0..21] of Byte;  // 22 bytes
+    full_sequence: LongWord;
   end;
   pxcb_generic_event_t = ^xcb_generic_event_t;
-
-
+  
+  
   xcb_key_press_event_t = record
     response_type: cuint8;
     detail: cuint8;
@@ -1799,8 +1797,7 @@ type
   end;
 
   pxcb_client_message_event_t = ^xcb_client_message_event_t;
-  Pxcb_intern_atom_reply_t    = ^xcb_intern_atom_reply_t;
-
+  Pxcb_intern_atom_reply_t = ^xcb_intern_atom_reply_t;
   xcb_intern_atom_reply_t = record
     response_type: cuint8;
     pad0: cuint8;
@@ -1808,14 +1805,14 @@ type
     length: cuint32;
     atom: xcb_atom_t;
   end;
-
+  
   xcb_intern_atom_cookie_t = record
     sequence: cuint;
   end;
   pxcb_intern_atom_cookie_t = ^xcb_intern_atom_cookie_t;
 
 
-  xcb_query_font_reply_t = record
+   xcb_query_font_reply_t = record
     response_type: cuint8;
     pad0: cuint8;
     sequence: cuint16;
@@ -1833,7 +1830,7 @@ type
     major_version, minor_version: cuint8;
     event_base, error_base: cuint8;
   end;
-
+ 
   xcb_get_property_reply_t = packed record
     response_type: cuint8;
     format: cuint8;
@@ -1854,8 +1851,8 @@ type
     Width, Height: cuint16;
     mwidth, mheight: cuint16;
   end;
-
-  xcb_query_extension_cookie_t = record
+  
+   xcb_query_extension_cookie_t = record
     sequence: cuint;
   end;
   Pxcb_query_extension_cookie_t = ^xcb_query_extension_cookie_t;
@@ -1872,44 +1869,42 @@ type
   end;
   Pxcb_query_extension_reply_t = ^xcb_query_extension_reply_t;
 
-
+  
   xcb_screen_iterator_t = record
-    Data: Pxcb_screen_t;
+    data: Pxcb_screen_t;
     rem: cint;
     index: cint;
   end;
   Pxcb_screen_iterator_t = ^xcb_screen_iterator_t;
-
-  xcb_get_atom_name_cookie_t = record
+    
+   xcb_get_atom_name_cookie_t = record
     sequence: cunsigned;
   end;
-
+  
   xcb_get_atom_name_reply_t = record
     response_type: cuint8;
     pad0: cuint8;
     sequence: cuint16;
     length: cuint32;
     name_len: cuint16;
-    Name: array[0..21] of cuint8;
+    name: array[0..21] of cuint8;
   end;
   Pxcb_get_atom_name_reply_t = ^xcb_get_atom_name_reply_t;
 
   xcb_get_property_cookie_t = record
     sequence: cunsigned;
   end;
-
+  
   Pxcb_get_property_cookie_t = ^xcb_get_property_cookie_t;
-
+  
   Pxcb_key_symbols_t = ^xcb_key_symbols_t;
-  xcb_key_symbols_t = record
-  end; // Opaque structure
+  xcb_key_symbols_t = record end; // Opaque structure
   Pxcb_keycode_t = ^xcb_keycode_t;
   xcb_keycode_t = cuchar; // Matches Xlib's KeyCode (unsigned char)
-  KeySym  = culong; // Matches Xlib's KeySym (unsigned long)
+  KeySym = culong; // Matches Xlib's KeySym (unsigned long)
   KeyCode = cuchar; // Matches Xlib's KeyCode
-
+ 
   Pxcb_get_modifier_mapping_reply_t = ^xcb_get_modifier_mapping_reply_t;
-
   xcb_get_modifier_mapping_reply_t = record
     response_type: cuint8;
     extension: cuint8;
@@ -1918,28 +1913,109 @@ type
     keycodes_per_modifier: cuint8;
     pad0: array[0..23] of cuint8; // Padding to match XCB structure
   end;
-
+  
   xcb_get_modifier_mapping_cookie_t = record
     sequence: cuint;
   end;
 
+ xcb_format_t = record
+    depth: cuint8;
+    bits_per_pixel: cuint8;
+    scanline_pad: cuint8;
+    pad0: array[0..4] of cuint8;
+  end;
+  Pxcb_format_t = ^xcb_format_t;
+  xcb_create_pixmap_cookie_t = record
+    sequence: cunsigned;
+  end;
+  xcb_create_gc_cookie_t = record
+    sequence: cunsigned;
+  end;
+  xcb_copy_area_cookie_t = record
+    sequence: cunsigned;
+  end;
+  xcb_put_image_cookie_t = record
+    sequence: cunsigned;
+  end;
+  xcb_get_geometry_cookie_t = record
+    sequence: cunsigned;
+  end;
+  Pxcb_get_geometry_reply_t = ^xcb_get_geometry_reply_t;
+  xcb_get_geometry_reply_t = record
+    response_type: cuint8;
+    depth: cuint8;
+    sequence: cuint16;
+    length: cuint32;
+    root: xcb_window_t;
+    x: cint16;
+    y: cint16;
+    width: cuint16;
+    height: cuint16;
+    border_width: cuint16;
+    pad0: array[0..1] of cuint8;
+  end;
+  xcb_get_window_attributes_cookie_t = record
+    sequence: cunsigned;
+  end;
+  Pxcb_get_window_attributes_reply_t = ^xcb_get_window_attributes_reply_t;
+  xcb_get_window_attributes_reply_t = record
+    response_type: cuint8;
+    backing_store: cuint8;
+    sequence: cuint16;
+    length: cuint32;
+    visual: xcb_visualid_t;
+    _class: cuint16;
+    bit_gravity: cuint8;
+    win_gravity: cuint8;
+    backing_planes: cuint32;
+    backing_pixel: cuint32;
+    save_under: cuint8;
+    map_is_installed: cuint8;
+    map_state: cuint8;
+    override_redirect: cuint8;
+    colormap: xcb_colormap_t;
+    all_event_masks: cuint32;
+    your_event_mask: cuint32;
+    do_not_propagate_mask: cuint16;
+    pad0: array[0..1] of cuint8;
+  end;
+  xcb_map_window_cookie_t = record
+    sequence: cunsigned;
+  end;
+ 
+// XCB function declarations
+function xcb_create_pixmap(c: Pxcb_connection_t; depth: cuint8; pid: Pixmap; drawable: Drawable; width: cuint16; height: cuint16): xcb_create_pixmap_cookie_t; cdecl; external libxcb;
+function xcb_create_pixmap_reply(c: Pxcb_connection_t; cookie: xcb_create_pixmap_cookie_t; e: PPxcb_generic_error_t): Pointer; cdecl; external libxcb;
+function xcb_create_gc(c: Pxcb_connection_t; cid: GC; drawable: Drawable; value_mask: cuint32; value_list: Pointer): xcb_create_gc_cookie_t; cdecl; external libxcb;
+function xcb_create_gc_reply(c: Pxcb_connection_t; cookie: xcb_create_gc_cookie_t; e: PPxcb_generic_error_t): Pointer; cdecl; external libxcb;
+function xcb_copy_area(c: Pxcb_connection_t; src_drawable: Drawable; dst_drawable: Drawable; gc: GC; src_x: cint16; src_y: cint16; dst_x: cint16; dst_y: cint16; width: cuint16; height: cuint16): xcb_copy_area_cookie_t; cdecl; external libxcb;
+function xcb_copy_area_reply(c: Pxcb_connection_t; cookie: xcb_copy_area_cookie_t; e: PPxcb_generic_error_t): Pointer; cdecl; external libxcb;
+function xcb_put_image(c: Pxcb_connection_t; format: cuint8; drawable: Drawable; gc: GC; width: cuint16; height: cuint16; dst_x: cint16; dst_y: cint16; left_pad: cuint8; depth: cuint8; data_len: cuint32; data: PChar): xcb_put_image_cookie_t; cdecl; external libxcb;
+function xcb_put_image_reply(c: Pxcb_connection_t; cookie: xcb_put_image_cookie_t; e: PPxcb_generic_error_t): Pointer; cdecl; external libxcb;
+function xcb_get_geometry(c: Pxcb_connection_t; drawable: Drawable): xcb_get_geometry_cookie_t; cdecl; external libxcb;
+function xcb_get_geometry_reply(c: Pxcb_connection_t; cookie: xcb_get_geometry_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_geometry_reply_t; cdecl; external libxcb;
+function xcb_get_window_attributes(c: Pxcb_connection_t; window: Window): xcb_get_window_attributes_cookie_t; cdecl; external libxcb;
+function xcb_get_window_attributes_reply(c: Pxcb_connection_t; cookie: xcb_get_window_attributes_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_window_attributes_reply_t; cdecl; external libxcb;
+function xcb_map_window(c: Pxcb_connection_t; window: Window): xcb_map_window_cookie_t; cdecl; external libxcb;
+function xcb_map_window_reply(c: Pxcb_connection_t; cookie: xcb_map_window_cookie_t; e: PPxcb_generic_error_t): Pointer; cdecl; external libxcb;
+function xcb_free_pixmap(c: Pxcb_connection_t; pixmap: Pixmap): xcb_void_cookie_t; cdecl; external libxcb;
+function xcb_get_property_reply(c: Pxcb_connection_t; cookie: xcb_get_property_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_property_reply_t; cdecl; external libxcb;
 function xcb_get_property_value(reply: Pxcb_get_property_reply_t): Pointer; cdecl; external libxcb;
 function xcb_get_file_descriptor(c: Pxcb_connection_t): cint; cdecl; external libxcb;
-
 function xcb_get_modifier_mapping(c: Pxcb_connection_t): xcb_get_modifier_mapping_cookie_t; cdecl; external libxcb;
 function xcb_get_modifier_mapping_reply(c: Pxcb_connection_t; cookie: xcb_get_modifier_mapping_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_modifier_mapping_reply_t; cdecl; external libxcb;
 function xcb_get_modifier_mapping_keycodes(reply: Pxcb_get_modifier_mapping_reply_t): PKeyCode; cdecl; external libxcb;
-
 function xcb_key_symbols_alloc(c: Pxcb_connection_t): Pxcb_key_symbols_t; cdecl; external libxcb_keysyms;
 function xcb_key_symbols_get_keycode(syms: Pxcb_key_symbols_t; keysym: KeySym): Pxcb_keycode_t; cdecl; external libxcb_keysyms;
-procedure xcb_key_symbols_free(syms: Pxcb_key_symbols_t); cdecl; external libxcb_keysyms;
+procedure xcb_key_symbols_free(syms: Pxcb_key_symbols_t); cdecl; external libxcb_keysyms;  
 function xcb_get_setup(c: Pxcb_connection_t): Pxcb_setup_t; cdecl; external libxcb;
 function xcb_setup_roots_iterator(setup: Pxcb_setup_t): xcb_screen_iterator_t; cdecl; external libxcb;
 
-// XCB functions
+// xcb_randr functions
 function xcb_randr_query_version(c: Pxcb_connection_t; major_version, minor_version: cuint32): xcb_void_cookie_t; cdecl; external 'libxcb-randr';
 function xcb_randr_query_version_reply(c: Pxcb_connection_t; cookie: xcb_void_cookie_t; e: PPxcb_generic_error_t): Pointer; cdecl; external 'libxcb-randr';
-function xcb_query_extension(c: Pxcb_connection_t; name_len: cuint; Name: PChar): xcb_query_extension_cookie_t; cdecl; external libxcb;
+
+function xcb_query_extension(c: Pxcb_connection_t; name_len: cuint; name: PChar): xcb_query_extension_cookie_t; cdecl; external libxcb;
 function xcb_query_extension_reply(c: Pxcb_connection_t; cookie: xcb_query_extension_cookie_t; e: PPxcb_generic_error_t): Pxcb_query_extension_reply_t; cdecl; external libxcb;
 function xcb_generate_id(c: pxcb_connection_t): cuint32; cdecl; external libxcb;
 function xcb_connect(displayname: PChar; screenp: Pcint): pxcb_connection_t; cdecl; external libxcb;
@@ -1951,15 +2027,14 @@ function xcb_map_window(c: pxcb_connection_t; window: xcb_window_t): Pointer; cd
 function xcb_change_window_attributes(c: pxcb_connection_t; window: xcb_window_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
 function xcb_get_input_focus(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
 function xcb_get_input_focus_reply(c: pxcb_connection_t; cookie: Pointer; e: Pointer): Pointer; cdecl; external libxcb;
-function xcb_intern_atom(c: Pxcb_connection_t; only_if_exists: cuint8; name_len: cuint16; Name: PChar): xcb_intern_atom_cookie_t; cdecl; external libxcb;
+function xcb_intern_atom(c: Pxcb_connection_t; only_if_exists: cuint8; name_len: cuint16; name: PChar): xcb_intern_atom_cookie_t; cdecl; external libxcb;
 function xcb_intern_atom_reply(c: Pxcb_connection_t; cookie: xcb_intern_atom_cookie_t; e: PPxcb_generic_error_t): Pxcb_intern_atom_reply_t; cdecl; external libxcb;
 function xcb_get_property(c: pxcb_connection_t; Delete: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; offset, length: cuint32): xcb_get_property_cookie_t; cdecl; external libxcb;
 function xcb_get_property_reply(c: pxcb_connection_t; cookie: xcb_get_property_cookie_t; e: Pointer): pxcb_get_property_reply_t; cdecl; external libxcb;
 function xcb_change_property(c: pxcb_connection_t; mode: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; Data: Pointer): Pointer; cdecl; external libxcb;
 function xcb_send_event(c: pxcb_connection_t; propagate: cuint8; destination: xcb_window_t; event_mask: cuint32; event: Pointer): Pointer; cdecl; external libxcb;
 procedure xcb_flush(c: pxcb_connection_t); cdecl; external libxcb;
-function xcb_get_atom_name(c: Pxcb_connection_t; atom: xcb_atom_t): xcb_get_atom_name_cookie_t; cdecl; external libxcb;
-function xcb_get_atom_name_reply(c: Pxcb_connection_t; cookie: xcb_get_atom_name_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_atom_name_reply_t; cdecl; external libxcb;
+function xcb_get_atom_name(c: Pxcb_connection_t; atom: xcb_atom_t): xcb_get_atom_name_cookie_t; cdecl; external libxcb;function xcb_get_atom_name_reply(c: Pxcb_connection_t; cookie: xcb_get_atom_name_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_atom_name_reply_t; cdecl; external libxcb;
 function xcb_create_gc(c: pxcb_connection_t; cid: xcb_gcontext_t; drawable: xcb_drawable_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
 function xcb_free_gc(c: pxcb_connection_t; gc: xcb_gcontext_t): Pointer; cdecl; external libxcb;
 function xcb_change_gc(c: pxcb_connection_t; gc: xcb_gcontext_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
@@ -1983,8 +2058,9 @@ function xcb_render_composite(c: pxcb_connection_t; op: cuint8; src: xcb_render_
 function xcb_shape_combine(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; Source: xcb_window_t; source_kind: cuint8): Pointer; cdecl; external libxcb_shape;
 function xcb_shape_rectangles(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; ordering: cuint8; destination: xcb_window_t; x, y: cint16; rectangles_len: cuint32; rectangles: PXRectangle): Pointer; cdecl; external libxcb_shape;
 function xcb_shape_mask(c: pxcb_connection_t; operation: cuint8; destination_kind: cuint8; destination: xcb_window_t; x, y: cint16; mask: xcb_pixmap_t): Pointer; cdecl; external libxcb_shape;
-function xcb_create_window_checked(c: Pxcb_connection_t; depth: cint; wid: xcb_window_t; parent: xcb_window_t; x, y: cint; Width, Height, border_width: cuint; _class: cuint; visual: xcb_visualid_t;
-  value_mask: cuint32; value_list: Pcuint32): xcb_void_cookie_t; cdecl; external libxcb;
+function xcb_create_window_checked(c: Pxcb_connection_t; depth: cint; wid: xcb_window_t;
+  parent: xcb_window_t; x, y: cint; width, height, border_width: cuint; _class: cuint;
+  visual: xcb_visualid_t; value_mask: cuint32; value_list: Pcuint32): xcb_void_cookie_t; cdecl; external libxcb;
 function xcb_screen_allowed_depths_iterator(screen: Pxcb_screen_t): xcb_depth_iterator_t; cdecl; external libxcb;
 function xcb_depth_visuals_iterator(depth: Pxcb_depth_t): xcb_visualtype_iterator_t; cdecl; external libxcb;
 function xcb_visualtype_next(iterator: Pxcb_visualtype_iterator_t): Pxcb_visualtype_iterator_t; cdecl; external libxcb;
@@ -2021,13 +2097,14 @@ var
 begin
   setup         := xcb_get_setup(display);
   iter          := xcb_setup_roots_iterator(setup);
-  screen        := iter.Data;
+  screen        := iter.data;
   New(vis);
   vis^.visualid := screen^.root_visual;
   Result        := vis;
 end;
 
-function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, border_width: cuint; depth: cint; window_class: cuint; visual: PVisual; valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
+function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Height, border_width: cuint;
+      depth: cint; window_class: cuint; visual: PVisual; valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
 var
   wid: xcb_window_t;
   cookie: xcb_void_cookie_t;
@@ -2038,9 +2115,10 @@ var
   default_visual: xcb_visualid_t;
 begin
   Result := 0;
+  error := nil;
   WriteLn('XCreateWindow: display=', PtrInt(display), ' visual=', PtrInt(visual), ' attributes=', PtrInt(attributes));
-
-  if display = nil then
+  
+   if display = nil then
     WriteLn('XCreateWindow: display is null');
   if attributes = nil then
     WriteLn('XCreateWindow: attributes is null');
@@ -2049,7 +2127,7 @@ begin
     WriteLn('XCreateWindow: Invalid parameters, exiting');
     Exit;
   end;
-
+    
   // Get default visual if visual is null
   if visual = nil then
   begin
@@ -2057,11 +2135,11 @@ begin
     setup := xcb_get_setup(display);
     if setup = nil then
     begin
-      WriteLn('XCreateWindow: Failed to get setup');
+     WriteLn('XCreateWindow: Failed to get setup');
       Exit;
     end;
-    iter   := xcb_setup_roots_iterator(setup);
-    screen := iter.Data;
+    iter := xcb_setup_roots_iterator(setup);
+    screen := iter.data;
     if screen = nil then
     begin
       WriteLn('XCreateWindow: Failed to get screen');
@@ -2073,20 +2151,20 @@ begin
     default_visual := visual^.visualid;
 
   wid := xcb_generate_id(display);
-  WriteLn('wind ', wid);
+   WriteLn('wind ', wid);
 
   cookie := xcb_create_window_checked(display, depth, wid, parent, x, y, Width, Height, border_width,
-    window_class, default_visual, valuemask, Pcuint32(attributes));
-  error  := xcb_request_check(display, cookie);
+                                     window_class, default_visual, valuemask, Pcuint32(attributes));
+  error := xcb_request_check(display, cookie);
   if error <> nil then
   begin
-    WriteLn('Error creating window: ', error^.error_code);
-    FreeAndNil(error);
+     WriteLn('Error creating window: ', error^.error_code);
+    freeandnil(error);
     Result := 0;
   end
   else
   begin
-    WriteLn('windo OK');
+     WriteLn('windo OK');
     Result := wid;
   end;
 end;
@@ -2110,15 +2188,14 @@ var
   reply: Pxcb_intern_atom_reply_t;
 begin
   cookie := xcb_intern_atom(Pxcb_connection_t(display), only_if_exists, strlen(atom_name), atom_name);
-  reply  := xcb_intern_atom_reply(Pxcb_connection_t(display), cookie, nil);
+  reply := xcb_intern_atom_reply(Pxcb_connection_t(display), cookie, nil);
   if reply = nil then
-  begin
-    writeln('XInternAtom: Failed for ', atom_name, ' (only_if_exists=', Ord(only_if_exists), ')');
+   begin
+    writeln('XInternAtom: Failed for ', atom_name, ' (only_if_exists=', ord(only_if_exists), ')');
     Result := 0;
-  end
-  else
-  begin
-    writeln('XInternAtom: ', atom_name, ' = ', reply^.atom); // Debug
+    end
+  else begin
+   // writeln('XInternAtom: ', atom_name, ' = ', reply^.atom); // Debug
     Result := reply^.atom;
     // free(reply);
   end;
@@ -2183,7 +2260,7 @@ end;
 
 procedure XFree(Data: Pointer); cdecl;
 begin
-  // todo
+  // Freeandnil(Data);
 end;
 
 function XCreateGC(display: PDisplay; d: Drawable; valuemask: culong; values: PXGCValues): GC; cdecl;
@@ -2304,8 +2381,8 @@ begin
 
   // Check for errors
   err := xcb_request_check(c, cookie);
-  // if err <> nil then
-  // Freemem(err);// Optionally log error
+ // if err <> nil then
+   // Freemem(err);// Optionally log error
 
 end;
 
@@ -2363,20 +2440,20 @@ var
   error: Pxcb_generic_error_t;
 begin
   cookie := xcb_randr_query_version(dpy, 1, 2); // Query RandR version 1.2
-  reply  := xcb_randr_query_version_reply(dpy, cookie, @error);
+  reply := xcb_randr_query_version_reply(dpy, cookie, @error);
   if error <> nil then
   begin
-    FreeAndNil(error);
+    freeandnil(error);
     Result := 0;
   end
   else if reply <> nil then
   begin
-    Result           := 1;   // Assume RandR is present
+    Result := 1; // Assume RandR is present
     event_base_return^ := 0; // Placeholder, may affect RandR events
     error_base_return^ := 0;
     g_randreventbase := 0;
     g_randrerrorbase := 0;
-    FreeAndNil(reply);
+    freeandnil(reply);
   end
   else
     Result := 0;
@@ -2402,12 +2479,12 @@ begin
   depth_iter := xcb_screen_allowed_depths_iterator(screen);
   while depth_iter.rem > 0 do
   begin
-    visual_iter := xcb_depth_visuals_iterator(depth_iter.Data);
+    visual_iter := xcb_depth_visuals_iterator(depth_iter.data);
     while visual_iter.rem > 0 do
     begin
-      if visual_iter.Data^.visual_id = visual_id then
+      if visual_iter.data^.visual_id = visual_id then
       begin
-        Result := visual_iter.Data;
+        Result := visual_iter.data;
         Exit;
       end;
       xcb_visualtype_next(@visual_iter);
@@ -2432,51 +2509,51 @@ begin
 
   // Get iterator for screens
   iterator := xcb_setup_roots_iterator(setup);
-  if iterator.Data = nil then
+  if iterator.data = nil then
   begin
     WriteLn('Error: No screens found in setup');
     Exit(nil);
   end;
 
   // Populate g_screen
-  g_screen.ext_data   := nil;           // Not used in this context
-  g_screen.display    := display;        // Associate with display
-  g_screen.root       := iterator.Data^.root;
-  g_screen.Width      := iterator.Data^.width_in_pixels;
-  g_screen.Height     := iterator.Data^.height_in_pixels;
-  g_screen.mwidth     := iterator.Data^.width_in_millimeters;
-  g_screen.mheight    := iterator.Data^.height_in_millimeters;
-  g_screen.ndepths    := 0;              // Simplified, adjust if needed
-  g_screen.depths     := nil;             // Simplified, adjust if needed
-  g_screen.root_depth := iterator.Data^.root_depth;
+  g_screen.ext_data := nil;           // Not used in this context
+  g_screen.display := display;        // Associate with display
+  g_screen.root := iterator.data^.root;
+  g_screen.width := iterator.data^.width_in_pixels;
+  g_screen.height := iterator.data^.height_in_pixels;
+  g_screen.mwidth := iterator.data^.width_in_millimeters;
+  g_screen.mheight := iterator.data^.height_in_millimeters;
+  g_screen.ndepths := 0;              // Simplified, adjust if needed
+  g_screen.depths := nil;             // Simplified, adjust if needed
+  g_screen.root_depth := iterator.data^.root_depth;
 
   // Find and populate root visual
-  visual_type := find_visual_type(iterator.Data, iterator.Data^.root_visual);
+  visual_type := find_visual_type(iterator.data, iterator.data^.root_visual);
   if visual_type <> nil then
   begin
-    g_root_visual.visualid     := visual_type^.visual_id;
-    g_root_visual._class       := visual_type^._class;
-    g_root_visual.red_mask     := visual_type^.red_mask;
-    g_root_visual.green_mask   := visual_type^.green_mask;
-    g_root_visual.blue_mask    := visual_type^.blue_mask;
+    g_root_visual.visualid := visual_type^.visual_id;
+    g_root_visual._class := visual_type^._class;
+    g_root_visual.red_mask := visual_type^.red_mask;
+    g_root_visual.green_mask := visual_type^.green_mask;
+    g_root_visual.blue_mask := visual_type^.blue_mask;
     g_root_visual.bits_per_rgb := visual_type^.bits_per_rgb_value;
-    g_root_visual.map_entries  := visual_type^.colormap_entries;
-    g_screen.root_visual       := @g_root_visual;
+    g_root_visual.map_entries := visual_type^.colormap_entries;
+    g_screen.root_visual := @g_root_visual;
   end
   else
   begin
-    WriteLn('Warning: Could not find visual type for root visual');
-    g_screen.root_visual := nil;         // Handle gracefully if required
+    // WriteLn('Warning: Could not find visual type for root visual');
+    g_screen.root_visual := nil;    // Handle gracefully if required
   end;
 
-  g_screen.default_gc    := nil;         // Adjust if MSEgui needs it
-  g_screen.cmap          := iterator.Data^.default_colormap;
-  g_screen.white_pixel   := iterator.Data^.white_pixel;
-  g_screen.black_pixel   := iterator.Data^.black_pixel;
-  g_screen.max_maps      := iterator.Data^.max_installed_maps;
-  g_screen.min_maps      := iterator.Data^.min_installed_maps;
-  g_screen.backing_store := iterator.Data^.backing_stores;
-  g_screen.save_unders   := iterator.Data^.save_unders;
+  g_screen.default_gc := nil;         // Adjust if MSEgui needs it
+  g_screen.cmap := iterator.data^.default_colormap;
+  g_screen.white_pixel := iterator.data^.white_pixel;
+  g_screen.black_pixel := iterator.data^.black_pixel;
+  g_screen.max_maps := iterator.data^.max_installed_maps;
+  g_screen.min_maps := iterator.data^.min_installed_maps;
+  g_screen.backing_store := iterator.data^.backing_stores;
+  g_screen.save_unders := iterator.data^.save_unders;
   g_screen.root_input_mask := 0;      // Adjust if needed
 
   Result := @g_screen;
@@ -2496,8 +2573,8 @@ var
   visual_type: Pxcb_visualtype_t;
   visual: PVisual;
 begin
-  WriteLn('XDefaultVisualOfScreen: init');
-  if screen = nil then
+   //WriteLn('XDefaultVisualOfScreen: init');
+   if screen = nil then
   begin
     WriteLn('XDefaultVisualOfScreen: screen is null');
     Exit;
@@ -2509,7 +2586,7 @@ begin
 
   // Get setup and screen
   setup := xcb_get_setup(Pxcb_connection_t(screen^.display));
-
+ 
   if setup = nil then
   begin
     WriteLn('XDefaultVisualOfScreen: Failed to get setup');
@@ -2520,16 +2597,16 @@ begin
   screen_iter := xcb_setup_roots_iterator(setup);
   while screen_iter.rem > 0 do
   begin
-    if screen_iter.Data^.root = screen^.root then
+    if screen_iter.data^.root = screen^.root then
     begin
       // Iterate through depths and visuals
-      depth_iter := xcb_screen_allowed_depths_iterator(screen_iter.Data);
+      depth_iter := xcb_screen_allowed_depths_iterator(screen_iter.data);
       while depth_iter.rem > 0 do
       begin
-        visual_iter := xcb_depth_visuals_iterator(depth_iter.Data);
+        visual_iter := xcb_depth_visuals_iterator(depth_iter.data);
         while visual_iter.rem > 0 do
         begin
-          visual_type := visual_iter.Data;
+          visual_type := visual_iter.data;
           if visual_type^.visual_id = screen^.root_visual^.visualid then
           begin
             visual^.visualid := visual_type^.visual_id;
@@ -2540,7 +2617,7 @@ begin
             visual^.bits_per_rgb := visual_type^.bits_per_rgb_value;
             visual^.map_entries := visual_type^.colormap_entries;
             Result := visual;
-            WriteLn('XDefaultVisualOfScreen: visualid=', visual^.visualid);
+            // WriteLn('XDefaultVisualOfScreen: visualid=', visual^.visualid);
             Exit;
           end;
           xcb_visualtype_next(@visual_iter);
@@ -2550,13 +2627,13 @@ begin
     end;
     xcb_screen_next(@screen_iter);
   end;
-  WriteLn('XDefaultVisualOfScreen: No matching visual found');
+  // WriteLn('XDefaultVisualOfScreen: No matching visual found');
   Dispose(visual);
 end;
 
 function XDefaultDepthOfScreen(para1: PScreen): cint; cdecl;
 begin
-  Result := para1^.root_depth;
+Result := para1^.root_depth;
 end;
 
 function XSetICValues(IC: XIC; focusw: PChar; id: longint; pnt: Pointer): PChar; cdecl;
@@ -2575,20 +2652,20 @@ begin
   if focusw = XNClientWindow then
   begin
     pic^.client_window := id;
-    WriteLn('XSetICValues: client_window=', id);
+    //WriteLn('XSetICValues: client_window=', id);
   end
   else if focusw = XNFocusWindow then
   begin
     pic^.focus_window := id;
-    WriteLn('XSetICValues: focus_window=', id);
+    // WriteLn('XSetICValues: focus_window=', id);
   end
   else
   begin
-    WriteLn('XSetICValues: Unknown property ', focusw);
+   // WriteLn('XSetICValues: Unknown property ', focusw);
     Result := PChar('Unknown property');
   end;
 
-  WriteLn('XSetICValues: Success');
+ // WriteLn('XSetICValues: Success');
 end;
 
 function XSetICValues(IC: XIC; nreset: PChar; impreserv: PChar; pnt: Pointer): PChar; cdecl;
@@ -2602,16 +2679,16 @@ begin
   end;
 
   if nreset = XNResetState then
-    WriteLn('XSetICValues: reset_state=', impreserv)
+    //WriteLn('XSetICValues: reset_state=', impreserv)
   else if nreset = XNIMPreeditState then
-    WriteLn('XSetICValues: preedit_state=', impreserv)
+    //WriteLn('XSetICValues: preedit_state=', impreserv)
   else
   begin
-    WriteLn('XSetICValues: Unknown property ', nreset);
+    //WriteLn('XSetICValues: Unknown property ', nreset);
     Result := PChar('Unknown property');
   end;
 
-  WriteLn('XSetICValues: Success');
+  // WriteLn('XSetICValues: Success');
 end;
 
 function XSetIMValues(IC: XIM; destroycb: PChar; ximcb: Pointer; pt: Pointer): PChar; cdecl;
@@ -2619,20 +2696,20 @@ begin
   Result := nil;
   if IC = nil then
   begin
-    WriteLn('XSetIMValues: Invalid input method');
+    // WriteLn('XSetIMValues: Invalid input method');
     Result := PChar('Invalid IM');
     Exit;
   end;
 
   if destroycb = XNDestroyCallback then
-    WriteLn('XSetIMValues: destroy_callback=', PtrInt(ximcb))
+    // WriteLn('XSetIMValues: destroy_callback=', PtrInt(ximcb))
   else
   begin
-    WriteLn('XSetIMValues: Unknown property ', destroycb);
+    // WriteLn('XSetIMValues: Unknown property ', destroycb);
     Result := PChar('Unknown property');
   end;
 
-  WriteLn('XSetIMValues: Success');
+  // WriteLn('XSetIMValues: Success');
 end;
 
 function XGetICValues(IC: XIC; filterev: PChar; icmask: Pointer; pnt: Pointer): PChar; cdecl;
@@ -2651,15 +2728,15 @@ begin
   if filterev = XNFilterEvents then
   begin
     PLongint(icmask)^ := XCB_EVENT_MASK_KEY_PRESS or XCB_EVENT_MASK_KEY_RELEASE;
-    WriteLn('XGetICValues: filter_events=', PLongint(icmask)^);
+   // WriteLn('XGetICValues: filter_events=', PLongint(icmask)^);
   end
   else
   begin
-    WriteLn('XGetICValues: Unknown property ', filterev);
+   // WriteLn('XGetICValues: Unknown property ', filterev);
     Result := PChar('Unknown property');
   end;
 
-  WriteLn('XGetICValues: Success');
+ // WriteLn('XGetICValues: Success');
 end;
 
 function XDefaultColormapOfScreen(para1: PScreen): Colormap; cdecl;
@@ -2671,7 +2748,7 @@ begin
     Exit;
   end;
 
-  WriteLn('XDefaultColormapOfScreen: colormap=', para1^.cmap);
+  // WriteLn('XDefaultColormapOfScreen: colormap=', para1^.cmap);
   Result := para1^.cmap;
 end;
 
@@ -2687,13 +2764,13 @@ begin
   end;
 
   New(ic);
-  ic^.im           := PXIM(IM);
+  ic^.im := PXIM(IM);
   ic^.client_window := 0;
   ic^.focus_window := 0;
-  ic^.input_style  := status; // Store XIMPreeditNothing | XIMStatusNothing
+  ic^.input_style := status; // Store XIMPreeditNothing | XIMStatusNothing
   ic^.filter_events := 0;
 
-  WriteLn('XCreateIC: Created input context, style=', status);
+  // WriteLn('XCreateIC: Created input context, style=', status);
   Result := XIC(ic);
 end;
 
@@ -2703,19 +2780,15 @@ var
   cookie: xcb_intern_atom_cookie_t;
   reply: Pxcb_intern_atom_reply_t;
 begin
-  Result   := 1;
-  for i    := 0 to n - 1 do
-  begin
+  Result := 1;
+  for i := 0 to n - 1 do begin
     cookie := xcb_intern_atom(Pxcb_connection_t(dpy), only_if_exists, strlen(names[i]), names[i]);
-    reply  := xcb_intern_atom_reply(Pxcb_connection_t(dpy), cookie, nil);
-    if reply = nil then
-    begin
+    reply := xcb_intern_atom_reply(Pxcb_connection_t(dpy), cookie, nil);
+    if reply = nil then begin
       atoms_return[i] := 0;
-      Result          := 0;
-    end
-    else
-    begin
-      writeln('XInternAtoms: ', names[i], ' = ', reply^.atom); // Debug
+      Result := 0;
+    end else begin
+     // writeln('XInternAtoms: ', names[i], ' = ', reply^.atom); // Debug
       atoms_return[i] := reply^.atom;
       //free(reply);
     end;
@@ -2735,21 +2808,21 @@ begin
 
   New(im);
   im^.connection := Display;
-  WriteLn('XOpenIM: Created input method, connection=', PtrInt(display));
-  Result         := im;
+  // WriteLn('XOpenIM: Created input method, connection=', PtrInt(display));
+  Result := im;
 end;
 
 function XFreeModifierMap(para1: PXModifierKeymap): cint; cdecl;
 begin
-  // modifiermap is managed by XCB reply, already freed in XGetModifierMapping
-  Result := 1; // Success
+    // modifiermap is managed by XCB reply, already freed in XGetModifierMapping
+    Result := 1; // Success
 end;
 
 function XConnectionNumber(display: PDisplay): cint; cdecl;
 begin
   Result := xcb_get_file_descriptor(Pxcb_connection_t(display));
 end;
-
+ 
 function XSetErrorHandler(para1: TXErrorHandler): TXErrorHandler; cdecl;
 begin
   // Store the handler globally (requires global variable in mxcb.pas)
@@ -2764,22 +2837,18 @@ var
   result_keycode: KeyCode;
 begin
   syms := xcb_key_symbols_alloc(display); // Remove cast if PDisplay = Pxcb_connection_t
-  if syms = nil then
-  begin
+  if syms = nil then begin
     writeln('XKeysymToKeycode: Failed to allocate key symbols');
     Result := 0;
     Exit;
   end;
   keycodes := xcb_key_symbols_get_keycode(syms, keysym);
-  if keycodes = nil then
-  begin
+  if keycodes = nil then begin
     writeln('XKeysymToKeycode: No keycode for keysym ', keysym);
     result_keycode := 0;
-  end
-  else
-  begin
+  end else begin
     result_keycode := keycodes^;
-    writeln('XKeysymToKeycode: keysym ', keysym, ' -> keycode ', result_keycode);
+    // writeln('XKeysymToKeycode: keysym ', keysym, ' -> keycode ', result_keycode);
     //free(keycodes);
   end;
   xcb_key_symbols_free(syms);
@@ -2793,16 +2862,14 @@ var
   cookie: xcb_get_modifier_mapping_cookie_t;
 begin
   cookie := xcb_get_modifier_mapping(display);
-  reply  := xcb_get_modifier_mapping_reply(display, cookie, nil);
-  if reply = nil then
-  begin
+  reply := xcb_get_modifier_mapping_reply(display, cookie, nil);
+  if reply = nil then begin
     writeln('XGetModifierMapping: Failed to get reply');
     Result := nil;
     Exit;
   end;
   GetMem(modmap, SizeOf(XModifierKeymap));
-  if modmap = nil then
-  begin
+  if modmap = nil then begin
     writeln('XGetModifierMapping: Failed to allocate modmap');
     //FreeMem(reply);
     Result := nil;
@@ -2810,37 +2877,40 @@ begin
   end;
   modmap^.max_keypermod := reply^.keycodes_per_modifier;
   modmap^.modifiermap := PKeyCode(xcb_get_modifier_mapping_keycodes(reply));
-  writeln('XGetModifierMapping: max_keypermod = ', modmap^.max_keypermod);
+  // writeln('XGetModifierMapping: max_keypermod = ', modmap^.max_keypermod);
   Result := modmap;
   //FreeMem(reply);
 end;
 
-function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong; Delete: TBool; req_type: Atom; actual_type_return: PAtom;
-  actual_format_return: Pcint; nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
+function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong;
+           Delete: TBool; req_type: Atom;  actual_type_return: PAtom; actual_format_return: Pcint;
+           nitems_return: Pculong; bytes_after_return: Pculong; prop_return: PPcuchar): cint; cdecl;
 var
   cookie: xcb_get_property_cookie_t;
   reply: pxcb_get_property_reply_t;
-  value_ptr: Pcuchar;        // Pointer to the raw value data within the reply
-  value_len_bytes: cardinal; // Length of the value in bytes
-  allocated_mem: PByte;      // For memory we explicitly allocate to mimic Xlib's behavior
-  i: integer;
+  value_ptr: Pcuchar; // Pointer to the raw value data within the reply
+  value_len_bytes: Cardinal; // Length of the value in bytes
+  allocated_mem: PByte; // For memory we explicitly allocate to mimic Xlib's behavior
+  i : integer;
 begin
-  cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, long_length);
-  reply  := xcb_get_property_reply(display, cookie, nil);
-  if reply = nil then
-  begin
-    actual_type_return^ := 0;   // Indicate no type
+   cookie := xcb_get_property(display, Ord(Delete), w, atom_property, req_type, long_offset, long_length);
+ 
+  reply := xcb_get_property_reply(display, cookie, nil);
+ // writeln('XGetWindowProperty 1');
+  if reply = nil then begin
+    writeln('xgetwindowproperty reply = nil for property: ', atom_property); // Add property info for better debugging
+    actual_type_return^ := 0; // Indicate no type
     actual_format_return^ := 0; // Indicate no format
     nitems_return^ := 0;
     bytes_after_return^ := 0;
-    prop_return^ := nil;
+    prop_return^ := nil; // IMPORTANT: Ensure the pointer is nil if no data
     Result := 0;
     Exit;
   end;
 
-  actual_type_return^   := reply^.type_;
+  actual_type_return^ := reply^.type_;
   actual_format_return^ := reply^.format;
-  bytes_after_return^   := reply^.bytes_after;
+  bytes_after_return^ := reply^.bytes_after;
 
   // Get a pointer to the value data within the reply structure
   value_ptr := xcb_get_property_value(reply);
@@ -2852,26 +2922,24 @@ begin
   // Calculate nitems_return based on format and byte length
   // Format is 8, 16, or 32 bits per item.
   case actual_format_return^ of
-    8: nitems_return^   := value_len_bytes; // 8-bit items, so length in bytes is number of items
-    16: nitems_return^  := value_len_bytes div 2; // 16-bit items, 2 bytes per item
-    32: nitems_return^  := value_len_bytes div 4; // 32-bit items, 4 bytes per item
+    8: nitems_return^ := value_len_bytes; // 8-bit items, so length in bytes is number of items
+    16: nitems_return^ := value_len_bytes div 2; // 16-bit items, 2 bytes per item
+    32: nitems_return^ := value_len_bytes div 4; // 32-bit items, 4 bytes per item
     else nitems_return^ := 0; // Unknown format, or invalid
   end;
 
-  if value_len_bytes > 0 then
-  begin
+   if value_len_bytes > 0 then begin
     GetMem(allocated_mem, value_len_bytes); // Allocate memory
     Move(value_ptr^, allocated_mem^, value_len_bytes); // Copy data from xcb reply to allocated memory
     prop_return^ := allocated_mem; // Assign the pointer to the newly allocated memory
-  end
-  else
-    prop_return^ := nil// No data, return nil
-  ;
-  Result := 0;
 
-  // TODO Free the XCB reply structure after processing it.
-
-  // xcb_aux_release(reply); 
+   end else begin
+    prop_return^ := nil; // No data, return nil
+    // Ensure debug pointers are nil if no data
+  end;
+  
+  
+ // xcb_aux_release(reply); 
 end;
 
 // Todo
@@ -2940,9 +3008,25 @@ begin
 
 end;
 
-function XGetGeometry(para1: PDisplay; para2: TDrawable; para3: PWindow; para4: Pcint; para5: Pcint; para6: Pcuint; para7: Pcuint; para8: Pcuint; para9: Pcuint): TStatus; cdecl;
+function XGetGeometry(display: PDisplay; d: TDrawable; root: PWindow; x, y: PLongInt; width, height, border_width, depth: PLongWord): LongInt; cdecl;
+var
+  cookie: xcb_get_geometry_cookie_t;
+  reply: Pxcb_get_geometry_reply_t;
 begin
-
+  cookie := xcb_get_geometry(display, d);
+  reply := xcb_get_geometry_reply(display, cookie, nil);
+  if reply <> nil then begin
+    if root <> nil then root^ := reply^.root;
+    if x <> nil then x^ := reply^.x;
+    if y <> nil then y^ := reply^.y;
+    if width <> nil then width^ := reply^.width;
+    if height <> nil then height^ := reply^.height;
+    if border_width <> nil then border_width^ := reply^.border_width;
+    if depth <> nil then depth^ := reply^.depth;
+    //free(reply);
+    Result := 1; // Success
+  end else
+    Result := 0; // Failure
 end;
 
 function XSync(para1: PDisplay; para2: TBool): cint; cdecl;
@@ -3020,14 +3104,14 @@ begin
 
 end;
 
-function XCopyArea(para1: PDisplay; para2: TDrawable; para3: TDrawable; para4: TGC; para5: cint; para6: cint; para7: cuint; para8: cuint; para9: cint; para10: cint): cint; cdecl;
+function XCopyArea(display: PDisplay; src, dest: TDrawable; gc: TGC; src_x, src_y, width, height: LongInt; dest_x, dest_y: LongInt): LongInt; cdecl;
 begin
-
+ xcb_copy_area(display, src, dest, gc, src_x, src_y, dest_x, dest_y, width, height);
 end;
 
 function XFreePixmap(para1: PDisplay; para2: TPixmap): cint; cdecl;
 begin
-
+ xcb_free_pixmap(para1, para2);
 end;
 
 function XCreateBitmapFromData(ADiplay: PDisplay; ADrawable: TDrawable; AData: PChar; AWidth: cuint; AHeight: cuint): TPixmap; cdecl;
@@ -3300,9 +3384,82 @@ begin
 
 end;
 
-function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword; Format: longint; Offset: longint; Data: PChar; Width, Height: longword; BitmapPad: longint; BytesPerLine: longint): PXImage; cdecl;
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
+  Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
+  bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
+var
+  image: PXImage;
+  setup: Pxcb_setup_t;
+  screen_iter: xcb_screen_iterator_t;
+  format_iter: Pxcb_format_t;
+  i: integer;
+  formats: Pointer;
 begin
-
+  New(image);
+  if image = nil then begin
+    writeln('XCreateImage: Failed to allocate image');
+    Result := nil;
+    Exit;
+  end;
+  FillChar(image^, SizeOf(TXImage), 0); // Initialize all fields
+  image^.Width := width;
+  image^.Height := height;
+  image^.depth := depth;
+  image^.format := format;
+  image^.Data := data;
+  image^.xoffset := offset;
+  image^.bitmap_pad := bitmap_pad;
+  if bytes_per_line = 0 then begin
+    setup := xcb_get_setup(display); // PDisplay = Pxcb_connection_t
+    if setup = nil then begin
+      writeln('XCreateImage: Failed to get setup');
+      Dispose(image);
+      Result := nil;
+      Exit;
+    end;
+    screen_iter := xcb_setup_roots_iterator(setup);
+    if screen_iter.data = nil then begin
+      writeln('XCreateImage: No screens found in setup');
+      Dispose(image);
+      Result := nil;
+      Exit;
+    end;
+    // Access pixmap formats
+    formats := PChar(setup) + SizeOf(xcb_setup_t);
+    format_iter := Pxcb_format_t(formats);
+    for i := 0 to setup^.pixmap_formats_len - 1 do begin
+      if format_iter^.depth = depth then begin
+        image^.bits_per_pixel := format_iter^.bits_per_pixel;
+        image^.bytes_per_line := (width * format_iter^.bits_per_pixel + 7) div 8;
+        image^.bytes_per_line := ((image^.bytes_per_line + format_iter^.scanline_pad - 1) div format_iter^.scanline_pad) * format_iter^.scanline_pad;
+        Break;
+      end;
+      Inc(format_iter);
+    end;
+    if image^.bytes_per_line = 0 then begin
+      writeln('XCreateImage: No matching pixmap format for depth=', depth);
+      Dispose(image);
+      Result := nil;
+      Exit;
+    end;
+  end else
+    image^.bytes_per_line := bytes_per_line;
+  image^.bitmap_unit := 32; // Matches Xlib default
+  image^.bitmap_bit_order := setup^.bitmap_format_bit_order;
+  image^.byte_order := setup^.image_byte_order;
+  image^.red_mask := visual^.red_mask;
+  image^.green_mask := visual^.green_mask;
+  image^.blue_mask := visual^.blue_mask;
+  image^.obdata := nil;
+  // Set function pointers
+  image^.f.create_image :=  nil;
+  image^.f.destroy_image := @XDestroyImage;
+  image^.f.destroy_image := nil;
+  image^.f.get_pixel := nil;
+  image^.f.put_pixel := nil;
+  image^.f.sub_image := nil;
+  image^.f.add_pixel := nil;
+  Result := image;
 end;
 
 // Todo from Xrandr
@@ -3402,7 +3559,8 @@ begin
 
 end;
 
-procedure XRenderSetPictureClipRectangles(dpy: PDisplay; picture: TPicture; xOrigin: longint; yOrigin: longint; rects: PXRectangle; n: longint); cdecl;
+procedure XRenderSetPictureClipRectangles(dpy:PDisplay; picture:TPicture;
+            xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint); cdecl;
 begin
 
 end;
@@ -3412,17 +3570,18 @@ begin
 
 end;
 
-procedure XRenderFillRectangle(dpy: PDisplay; op: longint; dst: TPicture; color: PXRenderColor; x: longint; y: longint; Width: dword; Height: dword); cdecl;
+procedure XRenderFillRectangle(dpy: PDisplay; op: longint; dst: TPicture; color: PXRenderColor; x: longint;
+                           y: longint; width: dword; height: dword);cdecl;
+begin
+
+end;
+                           
+procedure XRenderSetPictureTransform(dpy:PDisplay; picture:TPicture; transform:PXTransform); cdecl;
 begin
 
 end;
 
-procedure XRenderSetPictureTransform(dpy: PDisplay; picture: TPicture; transform: PXTransform); cdecl;
-begin
-
-end;
-
-procedure XRenderSetPictureFilter(dpy: PDisplay; picture: TPicture; filter: PChar; params: pinteger; nparams: integer); cdecl;
+procedure XRenderSetPictureFilter(dpy:PDisplay; picture:TPicture; filter: pchar; params: pinteger; nparams: integer); cdecl;
 begin
 
 end;
@@ -3432,12 +3591,12 @@ begin
 
 end;
 
-function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool; cdecl;
+function XRenderQueryExtension(dpy: PDisplay; event_basep: Pinteger; error_basep: Pinteger): TBool;cdecl;
 begin
-  Result := 0;
+result := 0;
 end;
 
-function XRenderFindVisualFormat(dpy: PDisplay; visual: PVisual): PXRenderPictFormat; cdecl;
+function XRenderFindVisualFormat(dpy: PDisplay; visual: PVisual): PXRenderPictFormat;cdecl;
 begin
 
 end;
@@ -3447,22 +3606,25 @@ begin
 
 end;
 
-function XRenderFindFormat(dpy: PDisplay; mask: culong; templ: PXRenderPictFormat; Count: longint): PXRenderPictFormat; cdecl;
+function XRenderFindFormat(dpy: PDisplay; mask: culong; templ: PXRenderPictFormat; count: longint): PXRenderPictFormat; cdecl;
 begin
 
 end;
 
-procedure XRenderCompositeTriangles(dpy: pDisplay; op: cint; src: tPicture; dst: tPicture; maskFormat: pXRenderPictFormat; xSrc: cint; ySrc: cint; triangles: pXTriangle; ntriangle: cint); cdecl;
+procedure XRenderCompositeTriangles(dpy: pDisplay; op: cint; src: tPicture; dst: tPicture; maskFormat: pXRenderPictFormat;
+                  xSrc: cint; ySrc: cint; triangles: pXTriangle; ntriangle: cint); cdecl;
 begin
 
 end;
 
-procedure XRenderCompositeTriStrip(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat; xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
+procedure XRenderCompositeTriStrip(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
 begin
 
 end;
 
-procedure XRenderCompositeTriFan(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat; xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
+procedure XRenderCompositeTriFan(dpy: pdisplay; op: cint; src: tpicture; dst: tpicture; maskFormat: PXRenderPictFormat;
+               xSrc: cint; ySrc: cint; points: PXPointFixed; npoint: cint); cdecl;
 begin
 
 end;
@@ -3509,7 +3671,7 @@ begin
   DefaultDepthOfScreen := s^.root_depth;
 end;
 
-function XDestroyImage(ximage: PXImage): cint;
+function XDestroyImage(ximage: PXImage): Longint; cdecl;
 begin
   XDestroyImage := ximage^.f.destroy_image(ximage);
 end;
@@ -3520,4 +3682,3 @@ begin
 end;
 
 end.
-
