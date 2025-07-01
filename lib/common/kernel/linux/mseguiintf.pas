@@ -980,9 +980,13 @@ var
  actualformat: cint;
  nitems: clong;
  bytesafter: culong;
- //prop: pchar;
- prop: PByte; // <--- CHANGE THIS LINE from pchar to PCardinal
+  {$ifndef use_xcb}
+  prop: pchar;
+ {$else}
+ prop: PByte;
  temp_prop_as_cardinal: PCardinal; 
+{$endif}
+ 
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -998,21 +1002,18 @@ begin
    setlength(value,nitems);
    if nitems > 0 then begin
  {$ifdef FPC} {$checkpointer off} {$endif}
-//    move(prop^,value[0],nitems*sizeof(value[0]));
-
-     // Cast prop to PCardinal to inspect contents directly
-       temp_prop_as_cardinal := PCardinal(prop);
-
-       move(prop^, PByte(@value[0])^, nitems * sizeof(value[0])); // <--- CHANGE THIS LINE
+ {$ifndef use_xcb}
+ move(prop^,value[0],nitems*sizeof(value[0]));
+ {$else}
+ move(prop^, PByte(@value[0])^, nitems * sizeof(value[0]));
+ {$endif}
 
  {$ifdef FPC} {$checkpointer default} {$endif}
    end;
   //  writeln('readatomproperty fin');
    result:= true;
   end;
-
     xfree(prop);
- 
  // writeln('readatomproperty fin');
   end;
 end;
@@ -4051,7 +4052,6 @@ function gui_createwindow(const rect: rectty;
      var options: internalwindowoptionsty; var awindow: windowty): guierrorty;
 var
  attributes: xsetwindowattributes;
- attributes2: xsetwindowattributes;
  valuemask: longword;
  width,height,x: integer;
  id1: winidty;
@@ -4072,7 +4072,7 @@ var
  with awindow,x11windowty(platformdata).d do begin
   valuemask:= 0;
   if options.options * [wo_popup,wo_overrideredirect] <> [] then begin
-  //  attributes.override_redirect:= {$ifdef xboolean}true{$else}1{$endif};
+   attributes.override_redirect:= {$ifdef xboolean}true{$else}1{$endif};
    valuemask:= valuemask or cwoverrideredirect;
   end;
   if rect.cx <= 0 then begin
@@ -4094,7 +4094,6 @@ var
    id1:= rootid;
   end;
    writeln('gui_createwindow 1');
-
   
   with x11internalwindowoptionsty(options.platformdata).d do begin
    if colormap <> 0 then begin
@@ -4104,7 +4103,7 @@ var
     colormap1:= msecolormap;
    end;
    if colormap1 <> 0 then begin
-   // attributes.colormap:= colormap1;
+    attributes.colormap:= colormap1;
     valuemask:= valuemask or cwcolormap;
    end;
    if depth = 0 then begin
@@ -4115,38 +4114,33 @@ var
    end;
 //   if nocreatestaticgravity then begin
 
-//    attributes.win_gravity:= northwestgravity;
-
+    attributes.win_gravity:= northwestgravity;
 
 //   end
 //   else begin
 //    attributes.win_gravity:= staticgravity;
 //   end;
-  // attributes.bit_gravity:= northwestgravity;
+  
+   attributes.bit_gravity:= northwestgravity;
    valuemask:= valuemask or cwwingravity or cwbitgravity;
      writeln('gui_createwindow 2');
      
    { id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
    width,height,0,
     depth,  copyfromparent,visual,
-      valuemask,@attributes2);  }
+      cweventmask,@attributes2);  }
       
    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
    width,height,0,
     depth,  copyfromparent,visual,
-      cweventmask,@attributes);      
-      
-
-    attributes.event_mask:= propertychangemask;
- //id:=  xcreatewindow(appdisp,rootid,0,0,200,200,0,
-   //     0,inputonly,pvisual(copyfromparent),cweventmask,@attributes2);
-
+      valuemask,@attributes);      
+     
 //////////////////////////////////////////////
  if (wo_onalldesktops in options.options) then
  begin
 //  options.options := options.options + [wo_dock];
 
-  setlongproperty (id, netatoms [net_wm_desktop], $FFFFFFFF);
+  setlongproperty(id, netatoms [net_wm_desktop], $FFFFFFFF);
 
 //  valall := $FFFFFFFF;
 //  xchangeproperty(appdisp,id,netatoms[NET_WM_DESKTOP],cardinalatom,32,propmodereplace,@valall,1);
