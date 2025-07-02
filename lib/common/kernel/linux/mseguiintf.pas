@@ -43,6 +43,11 @@ interface
  {$endif}
 {$endif}
 
+// fred
+//{$define mse_debuggdisync}
+//{$define mse_debugshow}
+//{$define mse_debugconfigure}
+
 {$ifdef mse_debugwindowfocus}
  {$define mse_debug}
 {$endif}
@@ -1803,7 +1808,7 @@ begin
    end;
   end;
  end;
- gdi_unlock;
+  gdi_unlock;
 end;
 
 procedure freetextproperty(const value: xtextproperty);
@@ -4052,6 +4057,7 @@ function gui_createwindow(const rect: rectty;
      var options: internalwindowoptionsty; var awindow: windowty): guierrorty;
 var
  attributes: xsetwindowattributes;
+ attributes2: xsetwindowattributes;
  valuemask: longword;
  width,height,x: integer;
  id1: winidty;
@@ -4112,29 +4118,25 @@ var
    if visual = nil then begin
     visual:= pvisual(copyfromparent);
    end;
-//   if nocreatestaticgravity then begin
 
-    attributes.win_gravity:= northwestgravity;
+   attributes.win_gravity:= northwestgravity;
 
-//   end
-//   else begin
-//    attributes.win_gravity:= staticgravity;
-//   end;
-  
    attributes.bit_gravity:= northwestgravity;
+  
    valuemask:= valuemask or cwwingravity or cwbitgravity;
-     writeln('gui_createwindow 2');
-     
-   { id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
-   width,height,0,
-    depth,  copyfromparent,visual,
-      cweventmask,@attributes2);  }
-      
+  
+   WriteLn('Avant id:= XCreateWindow: display=', PtrInt(appdisp), ' visual=', PtrInt(visual), ' attributes=', PtrInt(@attributes));
+ 
    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
    width,height,0,
     depth,  copyfromparent,visual,
       valuemask,@attributes);      
-     
+      
+  {$ifdef use_xcb} // fred to test
+    XMapWindow(appdisp, id);
+    XFlush(appdisp);
+  {$endif}
+    
 //////////////////////////////////////////////
  if (wo_onalldesktops in options.options) then
  begin
@@ -4156,8 +4158,9 @@ var
   or (wo_transparentbackground  in options.options) or (wo_transparentbackgroundround  in options.options)
   or (wo_transparentbackgroundellipse in options.options)) then
  begin
+ 
  // shape
-  //* create a graphics context for drawing on the window */
+ //* create a graphics context for drawing on the window */
 
   xgcv.foreground := WhitePixel(appdisp, DefaultScreen(appdisp));
   xgcv.line_width := 1;
@@ -4303,33 +4306,47 @@ XSelectInput(appdisp, id, ButtonPressMask or ExposureMask);
 XMapWindow(appdisp, id);
 XSync(appdisp, False);
 
-//   fin shape  
+//   fin shape 
+
 end;
 
+ writeln('fin shape ');
+ 
    if colormap <> 0 then begin
     xfreecolormap(appdisp,colormap);
     colormap:= 0;
    end;
   end;
+ 
   if id = 0 then begin
    result:= gue_createwindow;
    gdi_unlock;
    exit;
   end;
+  writeln('gue_ok ', gue_ok);
   result:= gue_ok;
   if options.parent <> 0 then begin //embedded window
    xselectinput(appdisp,id,exposuremask); //will be mapped to parent
    gdi_unlock;
    exit;
   end;
+  
+   writeln('options.parent <> 0');
+
+  
   if (options.transientfor <> 0) or
           (options.options * [wo_popup,wo_message] <> []) then begin
    settransientforhint(id,options.transientfor);
   end;
+  
+   writeln('settransientforhint');
+
   with options do begin
    if icon <> 0 then begin
-    // fred
-    gui_setwindowicon(id,icon,iconmask);
+      writeln('gui_setwindowicon avant');
+      // fred
+     // gui_setwindowicon(id,icon,iconmask);
+       writeln('gui_setwindowicon apres');
    end;
   end;
   if options.setgroup then begin
@@ -4349,6 +4366,10 @@ end;
           pchar(xnclientwindow),id,nil);
 }
   icmask:= appicmask;
+  
+   writeln('icmask:= appicmask');
+
+  
   if ic <> nil then begin
    xgeticvalues(ic,pchar(xnfilterevents),@icmask,nil);
    xseticvalues(ic,pchar(xnresetstate),pchar(ximpreservestate),nil);
@@ -4362,11 +4383,16 @@ end;
               FocusChangeMask or PropertyChangeMask or
                        exposuremask or structurenotifymask
                        );
+                   
   xsetwmprotocols(appdisp,id,@wmprotocols[low(wmprotocolty)],
-              integer(high(wmprotocolty))+1);
+            integer(high(wmprotocolty))+1);
   setstringproperty(id,wmclassatom,ansistring(
        filename(sys_getapplicationpath)+#0+application.applicationname));
+       
+       
   setnetcardinal(id,net_wm_pid,getpid);
+   
+  
   if (wo_popup in options.options) and (options.transientfor <> 0) then begin
    gui_raisewindow(options.transientfor);
      //transientforhint not used by overrideredirect
@@ -4405,8 +4431,9 @@ end;
   else begin
    xdeleteproperty(appdisp,id,xdndatoms[xdnd_aware]);
   end;
- end;
  
+ end;
+ writeln('fin window ', gue_ok);
   gdi_unlock;
 end;
 

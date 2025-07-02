@@ -132,6 +132,7 @@ type
   Font      = cuint;      // Maps to xcb_font_t
   TKeySym   = culong;
   PKeySym   = ^TKeySym;
+  Cursor = CULong;
   
   Pcuchar   = ^cuchar;
   PPcuchar  = ^Pcuchar;
@@ -235,10 +236,23 @@ type
   end;
   PXKeyPressedEvent = ^XKeyEvent;
 
+  // XSetWindowAttributes structure from Xlib
   XSetWindowAttributes = record
-    background_pixel: culong;
-    event_mask: clong;
+    background_pixmap: Pixmap;
+    background_pixel: CULong;
+    border_pixmap: Pixmap;
+    border_pixel: CULong;
+    bit_gravity: CInt;
+    win_gravity: CInt;
+    backing_store: CInt;
+    backing_planes: CULong;
+    backing_pixel: CULong;
+    save_under: CUChar; // Bool in C, often 1 byte
+    event_mask: CULong;
+    do_not_propagate_mask: CULong;
+    override_redirect: CUChar; // Bool in C
     colormap: Colormap;
+    cursor: Cursor;
   end;
   PXSetWindowAttributes = ^XSetWindowAttributes;
 
@@ -1248,7 +1262,9 @@ type
   end;
   pXRROutputInfo = ^XRROutputInfo;
   
-   TXErrorHandler = function(display: PDisplay; error_event: PXErrorEvent): cint; cdecl;
+  TXErrorHandler = function(display: PDisplay; error_event: PXErrorEvent): cint; cdecl;
+  
+  xcb_connection_t = Pointer; 
  
 const
   MWM_HINTS_DECORATIONS = 1 shl 1;
@@ -1448,7 +1464,19 @@ const
   Button3       = 3;
   Button4       = 4;
   Button5       = 5;
-
+  CWBackPixmap = $00000001;
+  CWBorderPixmap = $00000004;
+  CWBorderPixel = $00000008;
+  CWBackingStore = $00000040;
+  CWBackingPlanes = $00000080;
+  CWBackingPixel = $00000100;
+  CWSaveUnder = $00000400;
+  CWDontPropagate = $00001000;
+  CWCursor = $00004000;
+  g_xcb_conn: xcb_connection_t = nil;
+  g_default_screen: Pxcb_screen_t = nil;
+  g_default_screen_num: CInt = -1; // -1 indicates not yet initialized
+ 
   //* Event selection bits */
   RRScreenChangeNotifyMask = 1 shl 0;
   ///* V1.2 additions */
@@ -1490,6 +1518,29 @@ const
   XNClientWindow = 'clientWindow';
   XNDestroyCallback = 'destroyCallback';
   XNIMPreeditState = 'preeditState';
+   XCB_CW_BACK_PIXMAP = $00000001;
+  XCB_CW_BACK_PIXEL = $00000002;
+  XCB_CW_BORDER_PIXMAP = $00000004;
+  XCB_CW_BORDER_PIXEL = $00000008;
+  XCB_CW_BIT_GRAVITY = $00000010;
+  XCB_CW_WIN_GRAVITY = $00000020;
+  XCB_CW_BACKING_STORE = $00000040;
+  XCB_CW_BACKING_PLANES = $00000080;
+  XCB_CW_BACKING_PIXEL = $00000100;
+  XCB_CW_OVERRIDE_REDIRECT = $00000200;
+  XCB_CW_SAVE_UNDER = $00000400;
+  XCB_CW_EVENT_MASK = $00000800;
+  XCB_CW_DONT_PROPAGATE = $00001000;
+  XCB_CW_COLORMAP = $00002000;
+  XCB_CW_CURSOR = $00004000;
+
+  // Event Masks (bitmasks for xcb_create_window value_mask)
+  XCB_EVENT_MASK_EXPOSURE = (1 shl 15);
+
+  // Window Class
+  XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
+
+
 
 var
   GlobalXCBConnection: PDisplay;
@@ -2021,8 +2072,13 @@ function xcb_generate_id(c: pxcb_connection_t): cuint32; cdecl; external libxcb;
 function xcb_connect(displayname: PChar; screenp: Pcint): pxcb_connection_t; cdecl; external libxcb;
 procedure xcb_disconnect(c: pxcb_connection_t); cdecl; external libxcb;
 function xcb_setup_roots_iterator(setup: Pointer): xcb_setup_roots_iterator_t; cdecl; external libxcb;
-function xcb_create_window(c: pxcb_connection_t; depth: cuint8; wid: xcb_window_t; parent: xcb_window_t; x, y: cint16; Width, Height, border_width: cuint16; _class: cuint16; visual: xcb_visualid_t;
-  value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
+
+function xcb_create_window(
+  c: xcb_connection_t; depth: CUChar; wid: xcb_window_t; parent: xcb_window_t;
+  x: CShort; y: CShort; width: CUShort; height: CUShort; border_width: CUShort;
+  _class: CUShort; visual: CUInt; value_mask: CUInt; value_list: PCUInt
+): xcb_void_cookie_t; cdecl; external libxcb;
+
 function xcb_map_window(c: pxcb_connection_t; window: xcb_window_t): Pointer; cdecl; external libxcb;
 function xcb_change_window_attributes(c: pxcb_connection_t; window: xcb_window_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
 function xcb_get_input_focus(c: pxcb_connection_t): Pointer; cdecl; external libxcb;
@@ -2066,6 +2122,7 @@ function xcb_depth_visuals_iterator(depth: Pxcb_depth_t): xcb_visualtype_iterato
 function xcb_visualtype_next(iterator: Pxcb_visualtype_iterator_t): Pxcb_visualtype_iterator_t; cdecl; external libxcb;
 procedure xcb_depth_next(iterator: Pxcb_depth_iterator_t); cdecl; external libxcb;
 procedure xcb_screen_next(iterator: Pxcb_screen_iterator_t); cdecl; external libxcb;
+function xcb_get_atom_name_name(reply: Pxcb_get_atom_name_reply_t): PChar; cdecl; external libxcb;
 
 // Implementation
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
@@ -2113,6 +2170,9 @@ var
   setup: Pxcb_setup_t;
   iter: xcb_screen_iterator_t;
   default_visual: xcb_visualid_t;
+  xcb_value_list_idx: CInt;
+  xcb_value_mask: CUInt;
+  xcb_value_list_arr: array[0..14] of CUInt; // Max possible attributes
 begin
   Result := 0;
   error := nil;
@@ -2151,11 +2211,128 @@ begin
     default_visual := visual^.visualid;
 
   wid := xcb_generate_id(display);
+ 
    WriteLn('wind ', wid);
+   
+  xcb_value_list_idx := 0;
+  xcb_value_mask := 0;
+  
+  // Translate Xlib valuemask and attributes to XCB value_mask and value_list
+  if (valuemask and CWBackPixmap) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_BACK_PIXMAP;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.background_pixmap;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWBackPixel) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_BACK_PIXEL;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.background_pixel;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWBorderPixmap) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_BORDER_PIXMAP;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.border_pixmap;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWBorderPixel) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_BORDER_PIXEL;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.border_pixel;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWBitGravity) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_BIT_GRAVITY;
+    xcb_value_list_arr[xcb_value_list_idx] := CUInt(attributes^.bit_gravity);
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWWinGravity) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_WIN_GRAVITY;
+    xcb_value_list_arr[xcb_value_list_idx] := CUInt(attributes^.win_gravity);
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWBackingStore) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_BACKING_STORE;
+    xcb_value_list_arr[xcb_value_list_idx] := CUInt(attributes^.backing_store);
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWBackingPlanes) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_BACKING_PLANES;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.backing_planes;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWBackingPixel) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_BACKING_PIXEL;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.backing_pixel;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWOverrideRedirect) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_OVERRIDE_REDIRECT;
+    xcb_value_list_arr[xcb_value_list_idx] := CUInt(attributes^.override_redirect);
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWSaveUnder) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_SAVE_UNDER;
+    xcb_value_list_arr[xcb_value_list_idx] := CUInt(attributes^.save_under);
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWEventMask) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_EVENT_MASK;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.event_mask;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWDontPropagate) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_DONT_PROPAGATE;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.do_not_propagate_mask;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWColormap) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_COLORMAP;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.colormap;
+    Inc(xcb_value_list_idx);
+  end;
+  if (valuemask and CWCursor) <> 0 then
+  begin
+    xcb_value_mask := xcb_value_mask or XCB_CW_CURSOR;
+    xcb_value_list_arr[xcb_value_list_idx] := attributes^.cursor;
+    Inc(xcb_value_list_idx);
+  end;
 
-  cookie := xcb_create_window_checked(display, depth, wid, parent, x, y, Width, Height, border_width,
-                                     window_class, default_visual, valuemask, Pcuint32(attributes));
+ 
+   cookie := xcb_create_window_checked(display, depth, wid, parent, x, y, Width, Height, border_width,
+                                     window_class, default_visual, xcb_value_mask, @xcb_value_list_arr[0]);
+ 
+   {
+  cookie := xcb_create_window(
+    display,
+    CUChar(depth),
+    wid,
+    CUInt(parent), // Parent is XWindow (QWord), cast to CUInt for xcb_create_window
+    CShort(x),
+    CShort(y),
+    CUShort(Width),
+    CUShort(Height),
+    CUShort(border_width),
+    CUShort(window_class),
+    default_visual, // VisualID is QWord, cast to CUInt
+    xcb_value_mask,
+    @xcb_value_list_arr[0]
+  );
+  }
+ 
   error := xcb_request_check(display, cookie);
+ 
   if error <> nil then
   begin
      WriteLn('Error creating window: ', error^.error_code);
@@ -2234,13 +2411,13 @@ function XGetAtomName(display: PDisplay; atom: Atom): PChar; cdecl;
 var
   cookie: xcb_get_atom_name_cookie_t;
   reply: Pxcb_get_atom_name_reply_t;
-begin
+ begin
   cookie := xcb_get_atom_name(display, atom);
   reply  := xcb_get_atom_name_reply(display, cookie, nil);
-  writeln('reply.response_type ', reply^.response_type);
-  //Result := pchar(reply.name);
+  result := xcb_get_atom_name_name(reply);
+  writeln('Atom name: ', result);
 end;
-
+ 
 function XSetWMHints(display: PDisplay; w: Window; wmhints: PXWMHints): cint; cdecl;
 var
   Data: array[0..8] of cuint32;
@@ -2364,7 +2541,6 @@ begin
     else
       Exit; // Invalid format
   end;
-
             // Get depth and data from XImage
   depth    := image^.depth;
   data_len := image^.bytes_per_line * image^.Height;
@@ -2937,9 +3113,117 @@ begin
     prop_return^ := nil; // No data, return nil
     // Ensure debug pointers are nil if no data
   end;
-  
-  
+  // fred
  // xcb_aux_release(reply); 
+end;
+
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
+  Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
+  bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
+var
+  image: PXImage;
+  setup: Pxcb_setup_t;
+  screen_iter: xcb_screen_iterator_t;
+  format_iter: Pxcb_format_t;
+  i: integer;
+  formats: Pointer;
+begin
+  New(image);
+  if image = nil then begin
+    writeln('XCreateImage: Failed to allocate image');
+    Result := nil;
+    Exit;
+  end;
+  FillChar(image^, SizeOf(TXImage), 0); // Initialize all fields
+  image^.Width := width;
+  image^.Height := height;
+  image^.depth := depth;
+  image^.format := format;
+  image^.Data := data;
+  image^.xoffset := offset;
+  image^.bitmap_pad := bitmap_pad;
+  if bytes_per_line = 0 then begin
+    setup := xcb_get_setup(display); // PDisplay = Pxcb_connection_t
+    if setup = nil then begin
+      writeln('XCreateImage: Failed to get setup');
+      Dispose(image);
+      Result := nil;
+      Exit;
+    end;
+    screen_iter := xcb_setup_roots_iterator(setup);
+    if screen_iter.data = nil then begin
+      writeln('XCreateImage: No screens found in setup');
+      Dispose(image);
+      Result := nil;
+      Exit;
+    end;
+    // Access pixmap formats
+    formats := PChar(setup) + SizeOf(xcb_setup_t);
+    format_iter := Pxcb_format_t(formats);
+    for i := 0 to setup^.pixmap_formats_len - 1 do begin
+      if format_iter^.depth = depth then begin
+        image^.bits_per_pixel := format_iter^.bits_per_pixel;
+        image^.bytes_per_line := (width * format_iter^.bits_per_pixel + 7) div 8;
+        image^.bytes_per_line := ((image^.bytes_per_line + format_iter^.scanline_pad - 1) div format_iter^.scanline_pad) * format_iter^.scanline_pad;
+        Break;
+      end;
+      Inc(format_iter);
+    end;
+    if image^.bytes_per_line = 0 then begin
+      writeln('XCreateImage: No matching pixmap format for depth=', depth);
+      Dispose(image);
+      Result := nil;
+      Exit;
+    end;
+  end else
+    image^.bytes_per_line := bytes_per_line;
+  image^.bitmap_unit := 32; // Matches Xlib default
+  image^.bitmap_bit_order := setup^.bitmap_format_bit_order;
+  image^.byte_order := setup^.image_byte_order;
+  image^.red_mask := visual^.red_mask;
+  image^.green_mask := visual^.green_mask;
+  image^.blue_mask := visual^.blue_mask;
+  image^.obdata := nil;
+  // Set function pointers
+  image^.f.create_image :=  nil;
+  image^.f.destroy_image := @XDestroyImage;
+  image^.f.destroy_image := nil;
+  image^.f.get_pixel := nil;
+  image^.f.put_pixel := nil;
+  image^.f.sub_image := nil;
+  image^.f.add_pixel := nil;
+  Result := image;
+end;
+
+function XGetGeometry(display: PDisplay; d: TDrawable; root: PWindow; x, y: PLongInt; width, height, border_width, depth: PLongWord): LongInt; cdecl;
+var
+  cookie: xcb_get_geometry_cookie_t;
+  reply: Pxcb_get_geometry_reply_t;
+begin
+  cookie := xcb_get_geometry(display, d);
+  reply := xcb_get_geometry_reply(display, cookie, nil);
+  if reply <> nil then begin
+    if root <> nil then root^ := reply^.root;
+    if x <> nil then x^ := reply^.x;
+    if y <> nil then y^ := reply^.y;
+    if width <> nil then width^ := reply^.width;
+    if height <> nil then height^ := reply^.height;
+    if border_width <> nil then border_width^ := reply^.border_width;
+    if depth <> nil then depth^ := reply^.depth;
+    //free(reply);
+    Result := 1; // Success
+  end else
+    Result := 0; // Failure
+end;
+
+function XCopyArea(display: PDisplay; src, dest: TDrawable; gc: TGC; src_x, src_y, width, height: LongInt; dest_x, dest_y: LongInt): LongInt; cdecl;
+begin
+ xcb_copy_area(display, src, dest, gc, src_x, src_y, dest_x, dest_y, width, height);
+end;
+
+function XFreePixmap(para1: PDisplay; para2: TPixmap): cint; cdecl;
+begin
+ xcb_free_pixmap(para1, para2);
 end;
 
 // Todo
@@ -3006,27 +3290,6 @@ end;
 function XGetWindowAttributes(para1: PDisplay; para2: TWindow; para3: PXWindowAttributes): TStatus; cdecl;
 begin
 
-end;
-
-function XGetGeometry(display: PDisplay; d: TDrawable; root: PWindow; x, y: PLongInt; width, height, border_width, depth: PLongWord): LongInt; cdecl;
-var
-  cookie: xcb_get_geometry_cookie_t;
-  reply: Pxcb_get_geometry_reply_t;
-begin
-  cookie := xcb_get_geometry(display, d);
-  reply := xcb_get_geometry_reply(display, cookie, nil);
-  if reply <> nil then begin
-    if root <> nil then root^ := reply^.root;
-    if x <> nil then x^ := reply^.x;
-    if y <> nil then y^ := reply^.y;
-    if width <> nil then width^ := reply^.width;
-    if height <> nil then height^ := reply^.height;
-    if border_width <> nil then border_width^ := reply^.border_width;
-    if depth <> nil then depth^ := reply^.depth;
-    //free(reply);
-    Result := 1; // Success
-  end else
-    Result := 0; // Failure
 end;
 
 function XSync(para1: PDisplay; para2: TBool): cint; cdecl;
@@ -3102,16 +3365,6 @@ end;
 function XSetGraphicsExposures(para1: PDisplay; para2: TGC; para3: TBool): cint; cdecl;
 begin
 
-end;
-
-function XCopyArea(display: PDisplay; src, dest: TDrawable; gc: TGC; src_x, src_y, width, height: LongInt; dest_x, dest_y: LongInt): LongInt; cdecl;
-begin
- xcb_copy_area(display, src, dest, gc, src_x, src_y, dest_x, dest_y, width, height);
-end;
-
-function XFreePixmap(para1: PDisplay; para2: TPixmap): cint; cdecl;
-begin
- xcb_free_pixmap(para1, para2);
 end;
 
 function XCreateBitmapFromData(ADiplay: PDisplay; ADrawable: TDrawable; AData: PChar; AWidth: cuint; AHeight: cuint): TPixmap; cdecl;
@@ -3382,84 +3635,6 @@ end;
 function XIntersectRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
 begin
 
-end;
-
-function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
-  Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
-  bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
-var
-  image: PXImage;
-  setup: Pxcb_setup_t;
-  screen_iter: xcb_screen_iterator_t;
-  format_iter: Pxcb_format_t;
-  i: integer;
-  formats: Pointer;
-begin
-  New(image);
-  if image = nil then begin
-    writeln('XCreateImage: Failed to allocate image');
-    Result := nil;
-    Exit;
-  end;
-  FillChar(image^, SizeOf(TXImage), 0); // Initialize all fields
-  image^.Width := width;
-  image^.Height := height;
-  image^.depth := depth;
-  image^.format := format;
-  image^.Data := data;
-  image^.xoffset := offset;
-  image^.bitmap_pad := bitmap_pad;
-  if bytes_per_line = 0 then begin
-    setup := xcb_get_setup(display); // PDisplay = Pxcb_connection_t
-    if setup = nil then begin
-      writeln('XCreateImage: Failed to get setup');
-      Dispose(image);
-      Result := nil;
-      Exit;
-    end;
-    screen_iter := xcb_setup_roots_iterator(setup);
-    if screen_iter.data = nil then begin
-      writeln('XCreateImage: No screens found in setup');
-      Dispose(image);
-      Result := nil;
-      Exit;
-    end;
-    // Access pixmap formats
-    formats := PChar(setup) + SizeOf(xcb_setup_t);
-    format_iter := Pxcb_format_t(formats);
-    for i := 0 to setup^.pixmap_formats_len - 1 do begin
-      if format_iter^.depth = depth then begin
-        image^.bits_per_pixel := format_iter^.bits_per_pixel;
-        image^.bytes_per_line := (width * format_iter^.bits_per_pixel + 7) div 8;
-        image^.bytes_per_line := ((image^.bytes_per_line + format_iter^.scanline_pad - 1) div format_iter^.scanline_pad) * format_iter^.scanline_pad;
-        Break;
-      end;
-      Inc(format_iter);
-    end;
-    if image^.bytes_per_line = 0 then begin
-      writeln('XCreateImage: No matching pixmap format for depth=', depth);
-      Dispose(image);
-      Result := nil;
-      Exit;
-    end;
-  end else
-    image^.bytes_per_line := bytes_per_line;
-  image^.bitmap_unit := 32; // Matches Xlib default
-  image^.bitmap_bit_order := setup^.bitmap_format_bit_order;
-  image^.byte_order := setup^.image_byte_order;
-  image^.red_mask := visual^.red_mask;
-  image^.green_mask := visual^.green_mask;
-  image^.blue_mask := visual^.blue_mask;
-  image^.obdata := nil;
-  // Set function pointers
-  image^.f.create_image :=  nil;
-  image^.f.destroy_image := @XDestroyImage;
-  image^.f.destroy_image := nil;
-  image^.f.get_pixel := nil;
-  image^.f.put_pixel := nil;
-  image^.f.sub_image := nil;
-  image^.f.add_pixel := nil;
-  Result := image;
 end;
 
 // Todo from Xrandr

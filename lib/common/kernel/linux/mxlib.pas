@@ -1,4 +1,5 @@
 unit mxlib;
+
  {$mode objfpc}{$h+}
 
 interface
@@ -234,7 +235,7 @@ type
   PXICCEncodingStyle = ^TXICCEncodingStyle;
   TXICCEncodingStyle = (XStringStyle, XCompoundTextStyle, XTextStyle,
     XStdICCTextStyle, XUTF8StringStyle);
-    
+
   XExtData = record
     number: cint;
     Next: Pointer;
@@ -256,14 +257,14 @@ type
     map_entries: cint;
   end;
   msepvisual = ^visual;
-  pvisual    = ^visual; 
+  pvisual    = ^visual;
 
   Display  = Pointer;
   PDisplay = ^Display;
   Window   = culong;
   Drawable = culong;
-  GC       = Pointer; // For graphics context
-  TGC      = GC;      // For mseguiintf.pas
+  GC       = Pointer;
+  TGC      = GC;
   Atom     = culong;
   PAtom    = ^Atom;
   Colormap = culong;
@@ -272,13 +273,13 @@ type
   Pcuchar  = ^cuchar;
   PPcuchar = ^Pcuchar;
 
-  XChar2b = record // For mseguiintf.pas
+  XChar2b = record
     byte1: cuchar;
     byte2: cuchar;
   end;
   PXChar2b = ^XChar2b;
 
-  XrmHashBucketRec  = Pointer; // For mseguiintf.pas
+  XrmHashBucketRec  = Pointer;
   PXrmHashBucketRec = ^XrmHashBucketRec;
 
   PXCharStruct = ^TXCharStruct;
@@ -341,7 +342,7 @@ type
 
   PPAtom = ^PAtom;
   TAtom  = culong;
- 
+
   PXFontProp = ^TXFontProp;
 
   TXFontProp = record
@@ -1367,7 +1368,6 @@ function XChangeGC(para1: PDisplay; para2: TGC; para3: culong; para4: PXGCValues
 function XGetImage(para1: PDisplay; para2: TDrawable; para3: cint; para4: cint; para5: cuint; para6: cuint; para7: culong; para8: cint): PXImage; cdecl; external libX11;
 function XCopyArea(para1: PDisplay; para2: TDrawable; para3: TDrawable; para4: TGC; para5: cint; para6: cint; para7: cuint; para8: cuint; para9: cint; para10: cint): cint; cdecl; external libX11;
 function XSetFunction(para1: PDisplay; para2: TGC; para3: cint): cint; cdecl; external libX11;
-
 function XShapeQueryExtension(display: PDisplay; event_base, error_base: Pcint): TBoolResult; cdecl; external libxext;
 function XShapeCombineRegion(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; region: TRegion; op: cint): TStatus; cdecl; external libxext;
 procedure XShapeCombineRectangles(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; rectangles: PXRectangle; n_rects: cint; op: cint; ordering: cint); cdecl; external libxext;
