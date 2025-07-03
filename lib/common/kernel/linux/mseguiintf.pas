@@ -43,11 +43,6 @@ interface
  {$endif}
 {$endif}
 
-// fred
-//{$define mse_debuggdisync}
-//{$define mse_debugshow}
-//{$define mse_debugconfigure}
-
 {$ifdef mse_debugwindowfocus}
  {$define mse_debug}
 {$endif}
@@ -83,8 +78,6 @@ var
   {$endif}
  {$endif}
 {$endif}
-
-{ $define smdebug}
 
 {$include ../mseguiintf.inc}
 
@@ -4027,26 +4020,23 @@ begin
   
  if wmhints = nil then begin
   writeln('gui_setwindowgroup 2');
-  // fred
-  //wmhints:= pxwmhints(xallocwmhints);
+  wmhints:= pxwmhints(xallocwmhints);
   writeln('gui_setwindowgroup 3');
  end;
  
  with wmhints^ do begin
   writeln('gui_setwindowgroup 4');
-  // fred
-  // window_group:= group;
+  window_group:= group;
   writeln('gui_setwindowgroup 4.1');
-  // fred
-  // flags:= flags or windowgrouphint;
+  // fred --- crash
+   // flags:= flags or windowgrouphint;
   writeln('gui_setwindowgroup 4.2');
-  // fred
-  // xsetwmhints(appdisp,id,wmhints);
+   xsetwmhints(appdisp,id,wmhints);
    writeln('gui_setwindowgroup 5');
  end;
    writeln('gui_setwindowgroup 6');
  
- //  xfree(wmhints);
+   xfree(wmhints);
    
    writeln('gui_setwindowgroup 7');
 {$ifdef FPC}{$checkpointer default}{$endif}
@@ -4055,7 +4045,6 @@ begin
  writeln('gui_setwindowgroup 8');
  result:= gue_ok;
  gdi_unlock;
-  // fred sleep
 end;
 
 const
@@ -7301,10 +7290,6 @@ WriteLn('gui_init: After createappic, result=', result);
 
     writeln('gui_init 9.4 netsupported ', netsupported);
          
-  //  writeln('length(atomar) = ', length(atomar)); 
-      
-  //  atomar :=   netatoms;
-    
    for netnum:= firstcheckedatom to lastcheckedatom do begin
     atom1:= netatoms[netnum];
     
