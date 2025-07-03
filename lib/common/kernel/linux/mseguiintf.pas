@@ -344,6 +344,7 @@ const
  XC_watch =              150;
  XC_xterm =              152;
 
+ {$if not defined(use_xcb)}
  {$ifdef darwin}
  Xlibmodulename = 'libX11.dylib';
  {$else}
@@ -353,8 +354,9 @@ const
   Xlibmodulename = 'libX11.so.6';
  {$endif}
  {$endif}
+  sXlib = Xlibmodulename;
+ {$endif}
  
- sXlib = Xlibmodulename;
  pixel0 = $000000;
  pixel1 = $ffffff;
 type
@@ -559,8 +561,8 @@ type
  {$define xtextproperty:= txtextproperty}
  {$define xcolor:= txcolor}
  {$define xpointer:= txpointer}
-   TXIMProc = procedure (para1:PXIM; para2:XPointer; para3:XPointer);cdecl;
 
+   TXIMProc = procedure (para1:PXIM; para2:XPointer; para3:XPointer);cdecl;
    TXICProc = function (para1:PXIC; para2:XPointer; para3:XPointer):TBool;cdecl;
    PXIMCallback = ^TXIMCallback;
    TXIMCallback = record
@@ -583,7 +585,6 @@ type
    TXIC = record
      end;
    TXIMProc = procedure (para1:TXIM; para2:XPointer; para3:XPointer);cdecl;
-
    TXICProc = function (para1:TXIC; para2:XPointer; para3:XPointer):TBool;cdecl;
    PXIMCallback = ^TXIMCallback;
    TXIMCallback = record
@@ -640,7 +641,6 @@ const
  atombits = sizeof(atom)*8;
  mouseeventmask = buttonpressmask or buttonreleasemask or pointermotionmask;
 
-
  {
  cursorshapety = (cr_default,
              cr_none,cr_arrow,cr_cross,cr_wait,cr_ibeam,
@@ -651,6 +651,7 @@ const
              cr_res0,cr_res1,cr_res2,cr_res3,cr_res4,cr_res5,cr_res6,cr_res7,
              cr_user);
   }
+
  defaultshape = xc_left_ptr;
  standardcursors: array[cursorshapety] of longword = (
       defaultshape,defaultshape,defaultshape,
@@ -888,8 +889,6 @@ begin
  if (multipleatom = 0) and (wmnameatom = 0) and (defcolormap = 0) then begin
  end;
 end;
-
-
 
 function getidnum: longword;
 begin
@@ -1766,6 +1765,8 @@ function gui_setwindowstate(id: winidty; size: windowsizety;
 begin
  gdi_lock;
  result:= gue_ok;
+ 
+  
  if visible then begin
 {$ifdef mse_debugshow}
   debugwindow('*gui_setwindowstate xmapwindow ',id);
@@ -1780,6 +1781,7 @@ begin
    xmapwindow(appdisp,id);
   end;
  end;
+ 
  if size in [wsi_fullscreen,wsi_fullscreenvirt] then begin
   if not canfullscreen or
            not changenetwmstate(id,nso_add,net_wm_state_fullscreen) then begin
@@ -3192,7 +3194,7 @@ var
  bo1: boolean;
 begin
  gdi_lock;
- xmapwindow(appdisp,id);
+  xmapwindow(appdisp,id);
 {$ifdef mse_debugshow}
  debugwindow('*gui_showwindow ',id);
 {$endif}
@@ -3603,7 +3605,7 @@ end;
 function gui_hasevent: boolean;
 begin
  gdi_lock;
- result:= ((xpending(appdisp) > 0) or timerevent) and not terminated;
+  result:= ((xpending(appdisp) > 0) or timerevent) and not terminated;
  gdi_unlock;
 end;
 
@@ -4018,21 +4020,42 @@ var
  wmhints: pxwmhints;
 begin
  gdi_lock;
+ writeln('gui_setwindowgroup 0');
 {$ifdef FPC}{$checkpointer off}{$endif}
  wmhints:= pxwmhints(xgetwmhints(appdisp,id));
+  writeln('gui_setwindowgroup 1');
+  
  if wmhints = nil then begin
-  wmhints:= pxwmhints(xallocwmhints);
+  writeln('gui_setwindowgroup 2');
+  // fred
+  //wmhints:= pxwmhints(xallocwmhints);
+  writeln('gui_setwindowgroup 3');
  end;
+ 
  with wmhints^ do begin
-  window_group:= group;
-  flags:= flags or windowgrouphint;
-  xsetwmhints(appdisp,id,wmhints);
+  writeln('gui_setwindowgroup 4');
+  // fred
+  // window_group:= group;
+  writeln('gui_setwindowgroup 4.1');
+  // fred
+  // flags:= flags or windowgrouphint;
+  writeln('gui_setwindowgroup 4.2');
+  // fred
+  // xsetwmhints(appdisp,id,wmhints);
+   writeln('gui_setwindowgroup 5');
  end;
- xfree(wmhints);
+   writeln('gui_setwindowgroup 6');
+ 
+ //  xfree(wmhints);
+   
+   writeln('gui_setwindowgroup 7');
 {$ifdef FPC}{$checkpointer default}{$endif}
- setwinidproperty(id,wmclientleaderatom,group);
+ setwinidproperty(id,wmclientleaderatom,group); 
+   
+ writeln('gui_setwindowgroup 8');
  result:= gue_ok;
  gdi_unlock;
+  // fred sleep
 end;
 
 const
@@ -4132,11 +4155,11 @@ var
     depth,  copyfromparent,visual,
       valuemask,@attributes);      
       
-  {$ifdef use_xcb} // fred to test
-    XMapWindow(appdisp, id);
-    XFlush(appdisp);
+ {$ifdef use_xcb} // fred to test
+    //XMapWindow(appdisp, id);
+    //XFlush(appdisp);
   {$endif}
-    
+  //  sleep(1000);
 //////////////////////////////////////////////
  if (wo_onalldesktops in options.options) then
  begin
@@ -4303,6 +4326,7 @@ XFreePixmap(appdisp, pmap);
 
 XSelectInput(appdisp, id, ButtonPressMask or ExposureMask);
 
+// fred
 XMapWindow(appdisp, id);
 XSync(appdisp, False);
 
@@ -4357,6 +4381,7 @@ end;
     gui_setwindowgroup(id,options.groupleader);
    end;
   end;
+  
   if options.pos <> wp_default then begin
    gui_reposwindow(id,rect);
   end;
@@ -4369,8 +4394,7 @@ end;
   
    writeln('icmask:= appicmask');
 
-  
-  if ic <> nil then begin
+   if ic <> nil then begin
    xgeticvalues(ic,pchar(xnfilterevents),@icmask,nil);
    xseticvalues(ic,pchar(xnresetstate),pchar(ximpreservestate),nil);
   end;
@@ -4415,7 +4439,7 @@ end;
                            (netatoms[motif_wm_hints] <> 0) then begin
    setlongproperty(id,netatoms[motif_wm_hints],[mwm_hints_decorations,0,0,0,0],
                                                      netatoms[motif_wm_hints]);
-  end;
+  end; 
   if (wo_popup in options.options) then begin
    gui_raisewindow(id);
   end
@@ -4433,8 +4457,10 @@ end;
   end;
  
  end;
- writeln('fin window ', gue_ok);
-  gdi_unlock;
+ writeln('fin window', gue_ok);
+ //sleep(3000);
+  gdi_unlock;  
+  
 end;
 
 
@@ -6171,15 +6197,20 @@ type
 label
  eventrestart;
 begin
- result:= nil;
+  result:= nil;
+  // fred sleep
+       
  sigfillset(allsig);
  timeout1.tv_sec:= 10;
  timeout1.tv_nsec:= 0;
  fdwakeup:= false;
+ 
  while not fdwakeup do begin
   if timerevent then begin
-   application.postevent(tmseevent.create(ek_timer));
-   timerevent:= false;
+  
+  application.postevent(tmseevent.create(ek_timer));
+    timerevent:= false;
+   
   end;
   if terminated then begin
    application.postevent(tmseevent.create(ek_terminate));
@@ -6190,9 +6221,10 @@ begin
    handlesigchld;
   end;
   if gui_hasevent then begin
-   break;
+      // fred sleep
+     break;
   end;
-
+  
   pthread_sigmask(sig_block,@allsig,@sig1); //block signals
   if not timerevent and not terminated and not childevent then begin
    repeat
@@ -6454,6 +6486,7 @@ eventrestart:
          end;
         end;
         wms_normal: begin
+       
          if hasminimizeunmapworkaround and
                                  (lastmapwindow <> xwindow) then begin
           lastmapwindow:= 0;
@@ -6614,6 +6647,8 @@ eventrestart:
    xrefreshkeyboardmapping(@xev.xkeymap);
   end;
   mapnotify: begin
+   // fred sleep
+      
    with xev.xmap do begin
     lastmapwindow:= xwindow;
     result:= twindowevent.create(ek_show,xwindow);

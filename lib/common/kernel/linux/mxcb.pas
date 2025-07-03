@@ -1539,8 +1539,8 @@ const
 
   // Window Class
   XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
-
-
+  
+  XCB_PROP_MODE_REPLACE = 0;
 
 var
   GlobalXCBConnection: PDisplay;
@@ -1619,7 +1619,7 @@ procedure XRenderCompositeTriFan(dpy: pdisplay; op: cint; src: tpicture; dst: tp
 procedure XRenderChangePicture(dpy: pdisplay; picture: tpicture; valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
 
 // Shape extension for mshape.pas
-function XShapeQueryExtension(display: PDisplay; event_base, error_base: Pcint): TBoolResult; cdecl;
+function XShapeQueryExtension(display: PDisplay; event_base, error_base: Pcint): TBool; cdecl;
 function XShapeCombineRegion(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; region: TRegion; op: cint): TStatus; cdecl;
 procedure XShapeCombineRectangles(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; rectangles: PXRectangle; n_rects: cint; op: cint; ordering: cint); cdecl;
 procedure XShapeCombineMask(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; mask: TPixmap; op: cint); cdecl;
@@ -1632,7 +1632,7 @@ function XCheckTypedEvent(para1: PDisplay; para2: cint; para3: PXEvent): TBoolRe
 function XConvertSelection(para1: PDisplay; para2: TAtom; para3: TAtom; para4: TAtom; para5: TWindow; para6: TTime): cint; cdecl;
 function XGetSelectionOwner(para1: PDisplay; para2: TAtom): TWindow; cdecl;
 procedure XFreeStringList(para1: PPchar); cdecl;
-function XGetWindowAttributes(para1: PDisplay; para2: TWindow; para3: PXWindowAttributes): TStatus; cdecl;
+function XGetWindowAttributes(display: PDisplay; w: TWindow; window_attributes: PXWindowAttributes): LongInt; cdecl;
 function XGetGeometry(display: PDisplay; d: TDrawable; root: PWindow; x, y: PLongInt; width, height, border_width, depth: PLongWord): LongInt; cdecl;
 function XSync(para1: PDisplay; para2: TBool): cint; cdecl;
 function XIconifyWindow(para1: PDisplay; para2: TWindow; para3: cint): TStatus; cdecl;
@@ -1668,9 +1668,9 @@ function XDrawArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; pa
 function XSetWMProtocols(para1: PDisplay; para2: TWindow; para3: PAtom; para4: cint): TStatus; cdecl;
 function XDestroyWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
 function XAllocSizeHints: PXSizeHints; cdecl;
-function XGetWMNormalHints(para1: PDisplay; para2: TWindow; para3: PXSizeHints; para4: Pclong): TStatus; cdecl;
-procedure XSetWMNormalHints(ADisplay: PDisplay; AWindow: TWindow; AHints: PXSizeHints); cdecl;
-function XConfigureWindow(para1: PDisplay; para2: TWindow; para3: cuint; para4: PXWindowChanges): cint; cdecl;
+function XGetWMNormalHints(display: PDisplay; w: TWindow; hints_return: PXSizeHints; supplied_return: PLongInt): LongInt; cdecl;
+function XSetWMNormalHints(display: PDisplay; w: TWindow; hints: PXSizeHints): LongInt; cdecl;
+function XConfigureWindow(display: PDisplay; w: TWindow; value_mask: LongWord; values: Pointer): LongInt; cdecl;
 function XUnmapWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
 function XReparentWindow(para1: PDisplay; para2: TWindow; para3: TWindow; para4: cint; para5: cint): cint; cdecl;
 function XBell(para1: PDisplay; para2: cint): cint; cdecl;
@@ -2033,8 +2033,11 @@ type
   xcb_map_window_cookie_t = record
     sequence: cunsigned;
   end;
+
+procedure free(ptr: Pointer); cdecl; external 'libc.so';
  
 // XCB function declarations
+function xcb_poll_for_event(c: xcb_connection_t): Pxcb_generic_event_t; cdecl; external libxcb;
 function xcb_create_pixmap(c: Pxcb_connection_t; depth: cuint8; pid: Pixmap; drawable: Drawable; width: cuint16; height: cuint16): xcb_create_pixmap_cookie_t; cdecl; external libxcb;
 function xcb_create_pixmap_reply(c: Pxcb_connection_t; cookie: xcb_create_pixmap_cookie_t; e: PPxcb_generic_error_t): Pointer; cdecl; external libxcb;
 function xcb_create_gc(c: Pxcb_connection_t; cid: GC; drawable: Drawable; value_mask: cuint32; value_list: Pointer): xcb_create_gc_cookie_t; cdecl; external libxcb;
@@ -2123,11 +2126,15 @@ function xcb_visualtype_next(iterator: Pxcb_visualtype_iterator_t): Pxcb_visualt
 procedure xcb_depth_next(iterator: Pxcb_depth_iterator_t); cdecl; external libxcb;
 procedure xcb_screen_next(iterator: Pxcb_screen_iterator_t); cdecl; external libxcb;
 function xcb_get_atom_name_name(reply: Pxcb_get_atom_name_reply_t): PChar; cdecl; external libxcb;
-
+function xcb_wait_for_event(c: Pxcb_connection_t): Pxcb_generic_event_t; cdecl; external libxcb;
+function xcb_configure_window(c: Pxcb_connection_t; window: xcb_window_t; value_mask: cuint16; 
+         value_list: Pointer): xcb_void_cookie_t; cdecl; external libxcb;
+         
 // Implementation
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
 begin
   Result := xcb_connect(display_name, nil);
+  g_xcb_conn := result;
 end;
 
 procedure XCloseDisplay(display: PDisplay); cdecl;
@@ -2336,7 +2343,7 @@ begin
   if error <> nil then
   begin
      WriteLn('Error creating window: ', error^.error_code);
-    freeandnil(error);
+    free(error);
     Result := 0;
   end
   else
@@ -2374,7 +2381,7 @@ begin
   else begin
    // writeln('XInternAtom: ', atom_name, ' = ', reply^.atom); // Debug
     Result := reply^.atom;
-    // free(reply);
+     free(reply);
   end;
 end;
 
@@ -2437,7 +2444,7 @@ end;
 
 procedure XFree(Data: Pointer); cdecl;
 begin
-  // Freeandnil(Data);
+// done by xcb
 end;
 
 function XCreateGC(display: PDisplay; d: Drawable; valuemask: culong; values: PXGCValues): GC; cdecl;
@@ -2619,7 +2626,7 @@ begin
   reply := xcb_randr_query_version_reply(dpy, cookie, @error);
   if error <> nil then
   begin
-    freeandnil(error);
+    free(error);
     Result := 0;
   end
   else if reply <> nil then
@@ -2629,7 +2636,7 @@ begin
     error_base_return^ := 0;
     g_randreventbase := 0;
     g_randrerrorbase := 0;
-    freeandnil(reply);
+    free(reply);
   end
   else
     Result := 0;
@@ -2966,7 +2973,7 @@ begin
     end else begin
      // writeln('XInternAtoms: ', names[i], ' = ', reply^.atom); // Debug
       atoms_return[i] := reply^.atom;
-      //free(reply);
+      free(reply);
     end;
   end;
 end;
@@ -3025,7 +3032,7 @@ begin
   end else begin
     result_keycode := keycodes^;
     // writeln('XKeysymToKeycode: keysym ', keysym, ' -> keycode ', result_keycode);
-    //free(keycodes);
+    free(keycodes);
   end;
   xcb_key_symbols_free(syms);
   Result := result_keycode;
@@ -3037,6 +3044,7 @@ var
   modmap: PXModifierKeymap;
   cookie: xcb_get_modifier_mapping_cookie_t;
 begin
+
   cookie := xcb_get_modifier_mapping(display);
   reply := xcb_get_modifier_mapping_reply(display, cookie, nil);
   if reply = nil then begin
@@ -3047,7 +3055,7 @@ begin
   GetMem(modmap, SizeOf(XModifierKeymap));
   if modmap = nil then begin
     writeln('XGetModifierMapping: Failed to allocate modmap');
-    //FreeMem(reply);
+    free(reply);
     Result := nil;
     Exit;
   end;
@@ -3055,7 +3063,7 @@ begin
   modmap^.modifiermap := PKeyCode(xcb_get_modifier_mapping_keycodes(reply));
   // writeln('XGetModifierMapping: max_keypermod = ', modmap^.max_keypermod);
   Result := modmap;
-  //FreeMem(reply);
+  free(reply);
 end;
 
 function XGetWindowProperty(display: PDisplay; w: Window; atom_property: Atom; long_offset, long_length: culong;
@@ -3175,8 +3183,8 @@ begin
       Result := nil;
       Exit;
     end;
-  end else
-    image^.bytes_per_line := bytes_per_line;
+  end else image^.bytes_per_line := bytes_per_line;
+  
   image^.bitmap_unit := 32; // Matches Xlib default
   image^.bitmap_bit_order := setup^.bitmap_format_bit_order;
   image^.byte_order := setup^.image_byte_order;
@@ -3210,7 +3218,7 @@ begin
     if height <> nil then height^ := reply^.height;
     if border_width <> nil then border_width^ := reply^.border_width;
     if depth <> nil then depth^ := reply^.depth;
-    //free(reply);
+    free(reply);
     Result := 1; // Success
   end else
     Result := 0; // Failure
@@ -3226,23 +3234,160 @@ begin
  xcb_free_pixmap(para1, para2);
 end;
 
-// Todo
-function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; bytes_buffer: cint; keysym_return: Pculong; status_in_out: Pointer): cint; cdecl;
+function XPending(display: PDisplay): cint; cdecl;
+var
+  count: CInt;
+  generic_event: Pxcb_generic_event_t; // This type is already defined in the interface
 begin
+  count := 0;
+  // Ensure the XCB connection is valid before proceeding
+  // g_xcb_conn is a global variable already defined in xcb_types.pas implementation
+  if g_xcb_conn = nil then
+  begin
+    Result := 0; // No connection, so no pending events
+    Exit;
+  end;
+    // Loop to count all pending events without blocking
+  repeat
+    // xcb_poll_for_event checks for an event without blocking.
+    // It returns a pointer to an event if one is available, or nil if not.
+    // It also removes the event from the queue.
+    // xcb_poll_for_event is already declared as external in this implementation section.
+    generic_event := xcb_poll_for_event(g_xcb_conn);
+    if generic_event <> nil then
+    begin
+      Inc(count); // Increment the count of pending events
+      // Free the memory allocated for the event, as XPending only reports the count
+      // and does not pass the event data to the caller.
+      // 'free' is already declared as external in this implementation section.
+      xfree(generic_event);
+    end;
+  until generic_event = nil; // Continue polling until no more events are pending
 
+  Result := count; // Return the total count of pending events
+end;
+
+function XConfigureWindow(display: PDisplay; w: TWindow; value_mask: LongWord; values: Pointer): LongInt; cdecl;
+var
+  changes: PXWindowChanges;
+begin
+  if values = nil then begin
+    writeln('XConfigureWindow: values is nil');
+    Result := 0;
+    Exit;
+  end;
+  changes := PXWindowChanges(values);
+  writeln('XConfigureWindow: x = ', changes^.x, ', y = ', changes^.y, ', width = ', changes^.width, ', height = ', changes^.height, ', mask = ', value_mask);
+  xcb_configure_window(display, w, value_mask, values);
+  Result := 0;
+end;
+
+function XSetWMNormalHints(display: PDisplay; w: TWindow; hints: PXSizeHints): LongInt; cdecl;
+var
+  wm_normal_hints: xcb_atom_t;
+  atom_cookie: xcb_intern_atom_cookie_t;
+  atom_reply: Pxcb_intern_atom_reply_t;
+begin
+  if hints = nil then begin
+    writeln('XSetWMNormalHints: hints is nil');
+    Result := 0;
+    Exit;
+  end;
+  atom_cookie := xcb_intern_atom(display, 0, Length('WM_NORMAL_HINTS'), 'WM_NORMAL_HINTS');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, nil);
+  if atom_reply = nil then begin
+    writeln('XSetWMNormalHints: atom_reply is nil');
+    Result := 0;
+    Exit;
+  end;
+  wm_normal_hints := atom_reply^.atom;
+  free(atom_reply);
+  writeln('XSetWMNormalHints: flags = ', hints^.flags);
+  xcb_change_property(display, XCB_PROP_MODE_REPLACE, w, wm_normal_hints, wm_normal_hints, 32, 18, hints);
+  Result := 1;
+end;
+
+function XAllocSizeHints: PXSizeHints; cdecl;
+begin
+  New(Result);
+  FillChar(Result^, SizeOf(XSizeHints), 0);
+  writeln('XAllocSizeHints: sizehints = ', PtrInt(Result));
+end;
+
+function XGetWindowAttributes(display: PDisplay; w: TWindow; window_attributes: PXWindowAttributes): LongInt; cdecl;
+var
+  cookie: xcb_get_window_attributes_cookie_t;
+  reply: Pxcb_get_window_attributes_reply_t;
+begin
+  if window_attributes = nil then begin
+    writeln('XGetWindowAttributes: window_attributes is nil');
+    Result := 0;
+    Exit;
+  end;
+  cookie := xcb_get_window_attributes(display, w);
+  reply := xcb_get_window_attributes_reply(display, cookie, nil);
+  if reply <> nil then begin
+    FillChar(window_attributes^, SizeOf(TXWindowAttributes), 0);
+    window_attributes^.visual := PVisual(reply^.visual);
+    window_attributes^.c_class := reply^._class;
+    window_attributes^.bit_gravity := reply^.bit_gravity;
+    window_attributes^.win_gravity := reply^.win_gravity;
+    window_attributes^.backing_store := reply^.backing_store;
+    window_attributes^.backing_planes := reply^.backing_planes;
+    window_attributes^.backing_pixel := reply^.backing_pixel;
+    window_attributes^.save_under := reply^.save_under;
+    window_attributes^.colormap := reply^.colormap;
+    window_attributes^.map_installed := reply^.map_is_installed;
+    window_attributes^.map_state := reply^.map_state;
+    window_attributes^.all_event_masks := reply^.all_event_masks;
+    window_attributes^.your_event_mask := reply^.your_event_mask;
+    window_attributes^.do_not_propagate_mask := reply^.do_not_propagate_mask;
+    window_attributes^.override_redirect := reply^.override_redirect;
+    writeln('XGetWindowAttributes: override_redirect = ', window_attributes^.override_redirect, ', reply = ', PtrInt(reply));
+    free(reply); // Use libc's free
+    Result := 1;
+  end else begin
+    FillChar(window_attributes^, SizeOf(TXWindowAttributes), 0);
+    writeln('XGetWindowAttributes: reply is nil');
+    Result := 0;
+  end;
 end;
 
 procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
+var
+  xcb_event: Pxcb_generic_event_t;
 begin
-
+  xcb_event := xcb_wait_for_event(display);
+  if xcb_event <> nil then begin
+    event_return^._type := xcb_event^.response_type and $7F; // Mask high bit for Xlib type
+    // Copy event data (assumes TXEvent is large enough)
+    move(xcb_event^, event_return^, sizeof(xcb_generic_event_t));
+    free(xcb_event);
+  end else
+    FillChar(event_return^, sizeof(TXEvent), 0); // Clear on failure
 end;
 
-function XPending(display: PDisplay): cint; cdecl;
+function XShapeQueryExtension(display: PDisplay; event_base, error_base: Pcint): TBool; cdecl;
+var
+  cookie: xcb_query_extension_cookie_t;
+  reply: Pxcb_query_extension_reply_t;
 begin
-
+  cookie := xcb_query_extension(display, 5, 'SHAPE');
+  reply := xcb_query_extension_reply(display, cookie, nil);
+  if reply <> nil then begin
+    if reply^.present <> 0 then begin
+      if event_base <> nil then event_base^ := reply^.first_event;
+      if error_base <> nil then error_base^ := reply^.first_error;
+      Result := 1; // True, extension is available
+    end else
+      Result := 0; // False, extension not available
+       free(reply);
+  end else
+    Result := 0; // False, no reply
 end;
 
-function XShapeQueryExtension(display: PDisplay; event_base, error_base: Pcint): TBoolResult; cdecl;
+// Todo
+function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; bytes_buffer: cint; keysym_return: Pculong; status_in_out: Pointer): cint; cdecl;
 begin
 
 end;
@@ -3283,11 +3428,6 @@ begin
 end;
 
 procedure XFreeStringList(para1: PPchar); cdecl;
-begin
-
-end;
-
-function XGetWindowAttributes(para1: PDisplay; para2: TWindow; para3: PXWindowAttributes): TStatus; cdecl;
 begin
 
 end;
@@ -3447,22 +3587,7 @@ begin
 
 end;
 
-function XAllocSizeHints: PXSizeHints; cdecl;
-begin
-
-end;
-
-function XGetWMNormalHints(para1: PDisplay; para2: TWindow; para3: PXSizeHints; para4: Pclong): TStatus; cdecl;
-begin
-
-end;
-
-procedure XSetWMNormalHints(ADisplay: PDisplay; AWindow: TWindow; AHints: PXSizeHints); cdecl;
-begin
-
-end;
-
-function XConfigureWindow(para1: PDisplay; para2: TWindow; para3: cuint; para4: PXWindowChanges): cint; cdecl;
+function XGetWMNormalHints(display: PDisplay; w: TWindow; hints_return: PXSizeHints; supplied_return: PLongInt): LongInt; cdecl;
 begin
 
 end;
