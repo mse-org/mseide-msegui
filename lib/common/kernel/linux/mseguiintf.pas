@@ -6347,7 +6347,6 @@ eventrestart:
        writeln('');
    
       actectyp := CUChar(mxev.data[0]) and $7F ; // Mask out the sent_event bit if present
-    // xev.xtype := actual_event_type;
     
      writeln(Format('DEBUG: Main Loop: Received XEvent type: %d', [actectyp]));
  
@@ -6535,6 +6534,7 @@ eventrestart:
               result := nil; // Clear result if not a close/terminate event
             end;
           end
+          
           // Then, check for the standard WM_PROTOCOLS message
           // We need to be flexible here because 'type_' is 0, but Data.data32[0] is 371 (WM_DELETE_WINDOW)
           else if (temp_txclient_event.message_type = wmprotocolsatom) or (temp_txclient_event.message_type = 0) then begin
@@ -6542,6 +6542,9 @@ eventrestart:
             // AND Data.l[0] is WM_DELETE_WINDOW atom
             if longword(temp_txclient_event.data.l[0]) = wmprotocols[wm_delete_window] then begin
               writeln('DEBUG: Standard WM_DELETE_WINDOW protocol message received (XCB). Setting ek_close.');
+              
+              writeln('temp_txclient_event.window ', temp_txclient_event.window);
+              writeln('window ', window);
               result:= twindowevent.create(ek_close,temp_txclient_event.window); // Use mapped window ID
             {$ifdef with_saveyourself}
             end
@@ -6556,34 +6559,7 @@ eventrestart:
             {$endif}
           end
           else begin
-          {$ifdef mse_debugxembed}
-            if (netatoms[xembed] <> 0) and
-               (temp_txclient_event.message_type = netatoms[xembed]) then begin // Use mapped message_type
-              debugwindow('*xembed ',temp_txclient_event.window); // Use mapped window ID
-              writeln(' ',inttohex(temp_txclient_event.data.l[0],8),' ',
-                        inttohex(temp_txclient_event.data.l[1],8),' ',
-                        inttohex(temp_txclient_event.data.l[2],8),' ',
-                        inttohex(temp_txclient_event.data.l[3],8),' ',
-                        inttohex(temp_txclient_event.data.l[4],8));
-            end;
-            if (netatoms[net_system_tray_message_data] <> 0) and
-               (temp_txclient_event.message_type = netatoms[net_system_tray_message_data]) then begin // Use mapped message_type
-              debugwindow(
-               '*net_system_tray_message_data format:'+inttostr(temp_txclient_event.format)+' ',temp_txclient_event.window); // Use mapped format and window
-              writeln(' ',char_0_19(temp_txclient_event.data.b));
-            end;
-            if (netatoms[net_system_tray_opcode] <> 0) and
-               (temp_txclient_event.message_type = netatoms[net_system_tray_opcode]) then begin // Use mapped message_type
-              debugwindow(
-               '*net_system_tray_opcode format:'+inttostr(temp_txclient_event.format)+' ',temp_txclient_event.window); // Use mapped format and window
-              writeln(' ',inttohex(temp_txclient_event.data.l[0],8),' ',
-                        inttohex(temp_txclient_event.data.l[1],8),' ',
-                        inttohex(temp_txclient_event.data.l[2],8),' ',
-                        inttohex(temp_txclient_event.data.l[3],8),' ',
-                        inttohex(temp_txclient_event.data.l[4],8));
-            end;
-          {$endif}
-            // This handlexdnd also expects an Xlib-like TXClientMessageEvent
+               // This handlexdnd also expects an Xlib-like TXClientMessageEvent
             result:= handlexdnd(temp_txclient_event); // Pass the mapped record
           end;
         end;

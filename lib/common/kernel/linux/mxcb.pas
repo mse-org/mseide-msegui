@@ -2364,9 +2364,8 @@ function xcb_wait_for_event(c: Pxcb_connection_t): Pxcb_generic_event_t; cdecl; 
 function xcb_configure_window(c: Pxcb_connection_t; window: xcb_window_t; value_mask: cuint16; 
          value_list: Pointer): xcb_void_cookie_t; cdecl; external libxcb;
 function xcb_destroy_window(c: xcb_connection_t; window: xcb_window_t): xcb_void_cookie_t; cdecl; external libxcb;
-
-         
-         
+     
+      
 // Implementation
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
 begin
@@ -2559,25 +2558,7 @@ begin
    cookie := xcb_create_window_checked(display, depth, wid, parent, x, y, Width, Height, border_width,
                                      window_class, default_visual, xcb_value_mask, @xcb_value_list_arr[0]);
  
-   {
-  cookie := xcb_create_window(
-    display,
-    CUChar(depth),
-    wid,
-    CUInt(parent), // Parent is XWindow (QWord), cast to CUInt for xcb_create_window
-    CShort(x),
-    CShort(y),
-    CUShort(Width),
-    CUShort(Height),
-    CUShort(border_width),
-    CUShort(window_class),
-    default_visual, // VisualID is QWord, cast to CUInt
-    xcb_value_mask,
-    @xcb_value_list_arr[0]
-  );
-  }
- 
-  error := xcb_request_check(display, cookie);
+   error := xcb_request_check(display, cookie);
  
   if error <> nil then
   begin
@@ -2597,34 +2578,12 @@ begin
   xcb_map_window(display, w);
 end;
 
-
 function XSelectInput(para1: PDisplay; para2: TWindow; para3: LongInt): LongInt; cdecl;
 begin
   writeln('XSelectInput: event_mask = ', para3);
   xcb_change_window_attributes(para1, para2, XCB_CW_EVENT_MASK, @para3);
   Result := 0;
 end;
-
-{
-function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: TBool): Atom; cdecl;
-var
-  cookie: xcb_intern_atom_cookie_t;
-  reply: Pxcb_intern_atom_reply_t;
-begin
-  cookie := xcb_intern_atom(Pxcb_connection_t(display), only_if_exists, strlen(atom_name), atom_name);
-  reply := xcb_intern_atom_reply(Pxcb_connection_t(display), cookie, nil);
-  if reply = nil then
-   begin
-    writeln('XInternAtom: Failed for ', atom_name, ' (only_if_exists=', ord(only_if_exists), ')');
-    Result := 0;
-    end
-  else begin
-   // writeln('XInternAtom: ', atom_name, ' = ', reply^.atom); // Debug
-    Result := reply^.atom;
-     free(reply);
-  end;
-end;
-}
 
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
 var
@@ -2667,7 +2626,6 @@ begin
     Result := 0;
   end;
 end;
-
 
 function XSendEvent(display: PDisplay; w: Window; propagate: tbool; event_mask: clong; event_send: PXEvent): cint; cdecl;
 var
@@ -3033,6 +2991,32 @@ begin
   Result := screen^.root;
 end;
 
+function XChangeGC(display: PDisplay; gc: TGC; valuemask: LongWord; values: Pointer): LongInt; cdecl;
+var
+  gc_id: LongWord;
+begin
+  if gc = nil then begin
+    writeln('XChangeGC: gc is nil');
+    Result := 0;
+    Exit;
+  end;
+  if values = nil then begin
+    writeln('XChangeGC: values is nil');
+    Result := 0;
+    Exit;
+  end;
+  try
+    gc_id := PLongWord(gc)^;
+    writeln('XChangeGC: gc_id = ', gc_id, ', valuemask = ', valuemask, ', values = ', PtrInt(values));
+    xcb_change_gc(display, gc_id, valuemask, values);
+  except
+    writeln('XChangeGC: failed, gc = ', PtrInt(gc), ', values = ', PtrInt(values));
+    Result := 0;
+    Exit;
+  end;
+  Result := 0;
+end;
+
 function XDefaultVisualOfScreen(screen: PScreen): PVisual; cdecl;
 var
   setup: Pxcb_setup_t;
@@ -3243,50 +3227,6 @@ begin
   Result := XIC(ic);
 end;
 
-{
-function XInternAtom(display: PDisplay; atom_name: PAnsiChar; only_if_exists: CInt): Atom; cdecl;
-var
-  conn: xcb_connection_t;
-  cookie: xcb_intern_atom_cookie_t;
-  reply: Pxcb_intern_atom_reply_t;
-begin
-  writeln(Format('DEBUG: XInternAtom called for atom: "%s", only_if_exists: %d', [atom_name, only_if_exists]));
-  Result := 0;
-
-  conn := XGetXCBConnection(display);
-  if conn = nil then
-  begin
-    writeln('ERROR: XInternAtom: Could not get XCB connection.');
-    Exit;
-  end;
-
-  cookie := xcb_intern_atom(conn, CUChar(only_if_exists), CUShort(StrLen(atom_name)), atom_name);
-  reply := xcb_intern_atom_reply(conn, cookie, nil); // nil for error means we don't care about the error structure
-  if reply <> nil then
-  begin
-    Result := reply^.atom;
-    writeln(Format('DEBUG: XInternAtom: Atom "%s" interned successfully with ID: %d', [atom_name, Result]));
-    // Update global atoms if they are the ones being interned
-    if AnsiCompareText(atom_name, 'WM_PROTOCOLS') = 0 then
-    begin
-      g_wm_protocols_atom := Result;
-      writeln(Format('DEBUG: XInternAtom: g_wm_protocols_atom set to: %d', [g_wm_protocols_atom]));
-    end
-    else if AnsiCompareText(atom_name, 'WM_DELETE_WINDOW') = 0 then
-    begin
-      g_wm_delete_window_atom := Result;
-      writeln(Format('DEBUG: XInternAtom: g_wm_delete_window_atom set to: %d', [g_wm_delete_window_atom]));
-    end;
-    free(reply);
-  end
-  else
-  begin
-    writeln(Format('ERROR: XInternAtom: Failed to intern atom "%s".', [atom_name]));
-    Result := 0;
-  end;
-end;
-}
-
 function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
 var
   i: cint;
@@ -3307,7 +3247,6 @@ begin
     end;
   end;
 end;
-
 
 function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
 var
@@ -3456,87 +3395,6 @@ begin
  // xcb_aux_release(reply); 
 end;
 
-{
-function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
-  Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
-  bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
-var
-  image: PXImage;
-  setup: Pxcb_setup_t;
-  screen_iter: xcb_screen_iterator_t;
-  format_iter: Pxcb_format_t;
-  i: integer;
-  formats: Pointer;
-begin
-  New(image);
-  if image = nil then begin
-    writeln('XCreateImage: Failed to allocate image');
-    Result := nil;
-    Exit;
-  end;
-  FillChar(image^, SizeOf(TXImage), 0); // Initialize all fields
-  image^.Width := width;
-  image^.Height := height;
-  image^.depth := depth;
-  image^.format := format;
-  image^.Data := data;
-  image^.xoffset := offset;
-  image^.bitmap_pad := bitmap_pad;
-  if bytes_per_line = 0 then begin
-    setup := xcb_get_setup(display); // PDisplay = Pxcb_connection_t
-    if setup = nil then begin
-      writeln('XCreateImage: Failed to get setup');
-      Dispose(image);
-      Result := nil;
-      Exit;
-    end;
-    screen_iter := xcb_setup_roots_iterator(setup);
-    if screen_iter.data = nil then begin
-      writeln('XCreateImage: No screens found in setup');
-      Dispose(image);
-      Result := nil;
-      Exit;
-    end;
-    // Access pixmap formats
-    formats := PChar(setup) + SizeOf(xcb_setup_t);
-    format_iter := Pxcb_format_t(formats);
-    for i := 0 to setup^.pixmap_formats_len - 1 do begin
-      if format_iter^.depth = depth then begin
-        image^.bits_per_pixel := format_iter^.bits_per_pixel;
-        image^.bytes_per_line := (width * format_iter^.bits_per_pixel + 7) div 8;
-        image^.bytes_per_line := ((image^.bytes_per_line + format_iter^.scanline_pad - 1) div format_iter^.scanline_pad) * format_iter^.scanline_pad;
-        Break;
-      end;
-      Inc(format_iter);
-    end;
-    if image^.bytes_per_line = 0 then begin
-      writeln('XCreateImage: No matching pixmap format for depth=', depth);
-      Dispose(image);
-      Result := nil;
-      Exit;
-    end;
-  end else image^.bytes_per_line := bytes_per_line;
-  
-  image^.bitmap_unit := 32; // Matches Xlib default
-  image^.bitmap_bit_order := setup^.bitmap_format_bit_order;
-  image^.byte_order := setup^.image_byte_order;
-  image^.red_mask := visual^.red_mask;
-  image^.green_mask := visual^.green_mask;
-  image^.blue_mask := visual^.blue_mask;
-  image^.obdata := nil;
-  // Set function pointers
-  image^.f.create_image :=  nil;
-  image^.f.destroy_image := @XDestroyImage;
-  image^.f.destroy_image := nil;
-  image^.f.get_pixel := nil;
-  image^.f.put_pixel := nil;
-  image^.f.sub_image := nil;
-  image^.f.add_pixel := nil;
-  writeln('XCreateImage: depth = ', depth, ', format = ', XCB_IMAGE_FORMAT_Z_PIXMAP);
-  Result := image;
-end;
-}
-
 // --- XCreateImage Implementation (moved after helper functions) ---
 function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
   Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
@@ -3594,7 +3452,6 @@ begin
     new_image.bitmap_bit_order := LSBFirst; // Assume common little-endian
     new_image.bitmap_unit := 8; // Assume 8-bit unit
   end;
-
 
   // Calculate bytes_per_line if not provided (bytes_per_line = 0)
   if bytes_per_line = 0 then
@@ -3664,8 +3521,6 @@ begin
   Result^ := new_image;
 end;
 
-
-
 function XGetGeometry(display: PDisplay; d: TDrawable; root: PWindow; x, y: PLongInt; width, height, border_width, depth: PLongWord): LongInt; cdecl;
 var
   cookie: xcb_get_geometry_cookie_t;
@@ -3725,7 +3580,6 @@ begin
   Result := g_event_queue.Count; // Return the count of events in the internal queue
  // writeln(Format('DEBUG: XPending: Found %d pending events in queue.', [Result]));
 end;
-
 
 function XConfigureWindow(display: PDisplay; w: TWindow; value_mask: LongWord; values: Pointer): LongInt; cdecl;
 var
@@ -3812,207 +3666,6 @@ begin
     Result := 0;
   end;
 end;
-
-{
-procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
-var
-  xcb_event: Pxcb_generic_event_t;
-begin
-  xcb_event := xcb_wait_for_event(display);
-  if xcb_event <> nil then begin
-  writeln('event_return^._type = ',event_return^._type);
-    event_return^._type := xcb_event^._type and $7F; // Mask high bit for Xlib type
-    // Copy event data (assumes TXEvent is large enough)
-    move(xcb_event^, event_return^, sizeof(xcb_generic_event_t));
-    free(xcb_event);
-  end else
-    FillChar(event_return^, sizeof(TXEvent), 0); // Clear on failure
-end;
-}
-
-
-//last
-// Implementation for XNextEvent
-{
-function XNextEvent(display: PDisplay; event_return: PXEvent): CInt; cdecl;
-var
-  generic_event: Pxcb_generic_event_t;
-  ge_event: Pxcb_ge_event_t; // For generic events (response_type = 0)
-  conn: xcb_connection_t;
-  xcb_client_msg: Pxcb_client_message_event_t;
-  xcb_key_press_msg: Pxcb_key_press_event_t;
-  xcb_expose_msg: Pxcb_expose_event_t;
-  raw_bytes: array[0..31] of CUChar; // For raw byte inspection
-  j: CInt;
-  temp_event_type_bytes: array[0..3] of CUChar; // For manual extraction
-  manual_event_type: CUInt; // For manual extraction
-begin
-  Result := 0; // Default to failure
-
-  conn := XGetXCBConnection(display);
-  if conn = nil then
-  begin
-    writeln('ERROR: XNextEvent: Could not get XCB connection.');
-    Exit;
-  end;
-
-  // First, try to get an event from the internal queue (filled by XPending)
-  if g_event_queue.Count > 0 then
-  begin
-    generic_event := Pxcb_generic_event_t(g_event_queue.Items[0]);
-    g_event_queue.Delete(0); // Remove from queue
-  end
-  else
-  begin
-    // If queue is empty, wait for a new event (this will block)
-    generic_event := xcb_wait_for_event(conn);
-  end;
-
-
-  if generic_event <> nil then
-  begin
-    FillChar(event_return^, SizeOf(TXEvent), 0);
-
-    // Determine the actual event type, handling generic events (response_type = 0)
-    if (generic_event^._type and $7F) = 0 then // If it's a generic event
-    begin
-      ge_event := Pxcb_ge_event_t(generic_event); // Cast to generic event structure
-
-      // --- Manual extraction of event_type for debugging (only for GE) ---
-      Move(generic_event^, raw_bytes[0], SizeOf(xcb_generic_event_t));
-      Move(raw_bytes[8], temp_event_type_bytes[0], 4); // Copy the 4 bytes at offset 8
-      // Reconstruct CUInt from bytes (assuming little-endian for now, common on x86)
-      manual_event_type := CUInt(temp_event_type_bytes[0]) or
-                           (CUInt(temp_event_type_bytes[1]) shl 8) or
-                           (CUInt(temp_event_type_bytes[2]) shl 16) or
-                           (CUInt(temp_event_type_bytes[3]) shl 24);
-      // --- End manual extraction ---
-
-      event_return^._type := CInt(ge_event^.event_type); // Keep original assignment for comparison
-      // Only print if it's an unexpected generic event type
-      if (event_return^._type <> KeyPress) and (event_return^._type <> ClientMessage) and (event_return^._type <> Expose) then
-      begin
-        writeln(Format('DEBUG: XNextEvent: Detected XCB_GE_GENERIC. Raw response_type: %d. Manual event_type: %d (0x%x). Actual event_type: %d (from ge_event^.event_type)',
-          [generic_event^._type, manual_event_type, manual_event_type, event_return^._type]));
-        write('DEBUG: XNextEvent: Raw event bytes (first 16): ');
-        for j := 0 to 15 do
-          write(Format('%02x ', [raw_bytes[j]]));
-        writeln('');
-      end;
-    end
-    else
-    begin
-      // For standard X events, response_type holds the event type
-      event_return^._type := (generic_event^._type and $7F);
-      // Only print if it's an unexpected standard event type
-      if (event_return^._type <> KeyPress) and (event_return^._type <> ClientMessage) and (event_return^._type <> Expose) then
-      begin
-        writeln(Format('DEBUG: XNextEvent: Detected standard X event. Raw response_type: %d. Type: %d (from generic_event^.response_type)',
-          [generic_event^._type, event_return^._type]));
-      end;
-    end;
-
-    // Corrected access to common fields via xany
-    event_return^.xany.serial := generic_event^.sequence;
-    event_return^.xany.send_event := CInt( (generic_event^._type and $80) <> 0 );
-    event_return^.xany.display := display;
-    // The 'window' field is common, set it in each specific event type case below.
-    // For general events (like XAnyEvent), we can set it here if generic_event has a window field.
-    // Since generic_event doesn't have a direct 'window' field, it's safer to set it in specific event handlers.
-
-
-    case event_return^._type of // Use the determined _type field for dispatch
-      ClientMessage:
-      begin
-        xcb_client_msg := Pxcb_client_message_event_t(generic_event);
-        writeln('DEBUG: XNextEvent: Detected ClientMessage event.');
-        writeln(Format('DEBUG: ClientMessage: Raw response_type: %d, Sequence: %d, Window: %d',
-          [xcb_client_msg^._type, xcb_client_msg^.sequence, xcb_client_msg^.window]));
-
-        event_return^.xclient.message_type := xcb_client_msg^.type_;
-        event_return^.xclient.format := CInt(xcb_client_msg^.format);
-        event_return^.xany.window := TWindow(xcb_client_msg^.window); // Corrected: Set via xany
-
-        // Copy the 20 bytes of data from XCB event to the specific data union within xclient
-        Move(xcb_client_msg^.Data, event_return^.xclient.Data.b[0], SizeOf(xcb_client_msg^.Data));
-
-        writeln(Format('DEBUG: ClientMessage: message_type: %d (expected WM_PROTOCOLS: %d)',
-          [event_return^.xclient.message_type, g_wm_protocols_atom]));
-        writeln(Format('DEBUG: ClientMessage: data.l[0]: %d (expected WM_DELETE_WINDOW: %d)',
-          [event_return^.xclient.Data.l[0], g_wm_delete_window_atom]));
-
-        // Check for WM_DELETE_WINDOW protocol message
-        if (event_return^.xclient.message_type = g_wm_protocols_atom) and
-           (event_return^.xclient.Data.l[0] = g_wm_delete_window_atom) then
-        begin
-          writeln('DEBUG: ClientMessage: WM_DELETE_WINDOW protocol message received. Signalling exit...');
-          // In a real app, this would signal the main loop to exit
-        end;
-
-        Result := 1;
-      end;
-
-      KeyPress:
-      begin
-        xcb_key_press_msg := Pxcb_key_press_event_t(generic_event);
-        writeln('DEBUG: XNextEvent: Detected KeyPress event.');
-        writeln(Format('DEBUG: KeyPress: Raw response_type: %d, Sequence: %d, Window: %d',
-          [xcb_key_press_msg^._type, xcb_key_press_msg^.sequence, xcb_key_press_msg^.event]));
-
-        event_return^.xany.window := TWindow(xcb_key_press_msg^.event); // Corrected: Set via xany
-
-        event_return^.xkey.root := xcb_key_press_msg^.root;
-        event_return^.xkey.subwindow := xcb_key_press_msg^.child;
-        event_return^.xkey.time := xcb_key_press_msg^.time;
-        event_return^.xkey.x := xcb_key_press_msg^.event_x;
-        event_return^.xkey.y := xcb_key_press_msg^.event_y;
-        event_return^.xkey.x_root := xcb_key_press_msg^.root_x;
-        event_return^.xkey.y_root := xcb_key_press_msg^.root_y;
-        event_return^.xkey.state := xcb_key_press_msg^.state;
-        event_return^.xkey.keycode := xcb_key_press_msg^.detail;
-        event_return^.xkey.same_screen := CInt(xcb_key_press_msg^.same_screen);
-
-        writeln(Format('DEBUG: KeyPress: Keycode: %d', [event_return^.xkey.keycode]));
-        Result := 1;
-      end;
-
-      Expose:
-      begin
-        xcb_expose_msg := Pxcb_expose_event_t(generic_event);
-        writeln('DEBUG: XNextEvent: Detected Expose event.');
-        writeln(Format('DEBUG: Expose: Raw response_type: %d, Sequence: %d, Window: %d',
-          [xcb_expose_msg^._type, xcb_expose_msg^.sequence, xcb_expose_msg^.window]));
-
-        event_return^.xany.window := TWindow(xcb_expose_msg^.window); // Corrected: Set via xany
-
-        event_return^.xexpose.x := xcb_expose_msg^.x;
-        event_return^.xexpose.y := xcb_expose_msg^.y;
-        event_return^.xexpose.width := xcb_expose_msg^.width;
-        event_return^.xexpose.height := xcb_expose_msg^.height;
-        event_return^.xexpose.count := xcb_expose_msg^.count;
-
-        writeln(Format('DEBUG: Expose: Window: %d, X: %d, Y: %d, W: %d, H: %d',
-          [event_return^.xany.window, event_return^.xexpose.x, event_return^.xexpose.y,
-           event_return^.xexpose.width, event_return^.xexpose.height]));
-        Result := 1;
-      end;
-
-      else // For any other event type not explicitly handled
-      begin
-        writeln(Format('DEBUG: XNextEvent: Detected unhandled event type: %d', [event_return^._type]));
-        // Removed raw bytes dump for unhandled events to reduce clutter
-        Result := 1;
-      end;
-    end;
-
-    free(generic_event); // Always free the XCB-allocated event after processing
-  end
-  else
-  begin
-    // Suppress this debug message for nil events
-  end;
-end;
-}
 
 function XNextEvent(display: PDisplay; event_return: PmXEvent): CInt; cdecl;
 var
@@ -4114,253 +3767,6 @@ begin
   end;
 end;
 
-{
-function XInternAtom(display: PDisplay; atom_name: PAnsiChar; only_if_exists: CInt): Atom; cdecl;
-var
-  conn: xcb_connection_t;
-  cookie: xcb_intern_atom_cookie_t;
-  reply: Pxcb_intern_atom_reply_t;
-begin
-  writeln(Format('DEBUG: XInternAtom called for atom: %s, only_if_exists: %d', [atom_name, only_if_exists]));
-  Result := 0;
-
-  conn := XGetXCBConnection(display);
-  if conn = nil then
-  begin
-    writeln('ERROR: XInternAtom: Could not get XCB connection.');
-    Exit;
-  end;
-
-  cookie := xcb_intern_atom(conn, CUChar(only_if_exists), CUShort(StrLen(atom_name)), atom_name);
-  writeln('DEBUG: XInternAtom: xcb_intern_atom called.');
-  reply := xcb_intern_atom_reply(conn, cookie, nil); // nil for error means we don't care about the error structure
-  if reply <> nil then
-  begin
-    Result := reply^.atom;
-    writeln(Format('DEBUG: XInternAtom: Atom "%s" interned successfully with ID: %d', [atom_name, Result]));
-    free(reply);
-  end
-  else
-  begin
-    writeln(Format('ERROR: XInternAtom: Failed to intern atom "%s".', [atom_name]));
-    Result := 0;
-  end;
-end;
-}
-{
-function XInternAtom(display: PDisplay; atom_name: PAnsiChar; only_if_exists: CInt): Atom; cdecl;
-var
-  conn: xcb_connection_t;
-  cookie: xcb_intern_atom_cookie_t;
-  reply: Pxcb_intern_atom_reply_t;
-begin
-  writeln(Format('DEBUG: XInternAtom called for atom: "%s", only_if_exists: %d', [atom_name, only_if_exists]));
-  Result := 0;
-
-  conn := XGetXCBConnection(display);
-  if conn = nil then
-  begin
-    writeln('ERROR: XInternAtom: Could not get XCB connection.');
-    Exit;
-  end;
-
-  cookie := xcb_intern_atom(conn, CUChar(only_if_exists), CUShort(StrLen(atom_name)), atom_name);
-  // No need to print xcb_intern_atom called, it's implicit.
-  reply := xcb_intern_atom_reply(conn, cookie, nil); // nil for error means we don't care about the error structure
-  if reply <> nil then
-  begin
-    Result := reply^.atom;
-    writeln(Format('DEBUG: XInternAtom: Atom "%s" interned successfully with ID: %d', [atom_name, Result]));
-    // Update global atoms if they are the ones being interned
-    if AnsiCompareText(atom_name, 'WM_PROTOCOLS') = 0 then
-    begin
-      g_wm_protocols_atom := Result;
-      writeln(Format('DEBUG: XInternAtom: g_wm_protocols_atom set to: %d', [g_wm_protocols_atom]));
-    end
-    else if AnsiCompareText(atom_name, 'WM_DELETE_WINDOW') = 0 then
-    begin
-      g_wm_delete_window_atom := Result;
-      writeln(Format('DEBUG: XInternAtom: g_wm_delete_window_atom set to: %d', [g_wm_delete_window_atom]));
-    end;
-    free(reply);
-  end
-  else
-  begin
-    writeln(Format('ERROR: XInternAtom: Failed to intern atom "%s".', [atom_name]));
-    Result := 0;
-  end;
-end;
-}
-
-{
-// Implementation for XNextEvent
-function XNextEvent(display: PDisplay; event_return: PXEvent): CInt; cdecl;
-var
-  generic_event: Pxcb_generic_event_t;
-  ge_event: Pxcb_ge_event_t; // For generic events (response_type = 0)
-  conn: xcb_connection_t;
-  xcb_client_msg: Pxcb_client_message_event_t;
-  xcb_key_press_msg: Pxcb_key_press_event_t;
-  xcb_expose_msg: Pxcb_expose_event_t;
-  raw_bytes: array[0..31] of CUChar; // For raw byte inspection
-  j: CInt;
-begin
-   writeln('DEBUG: XNextEvent called.');
-  Result := 0; // Default to failure
-
-  conn := XGetXCBConnection(display);
-  if conn = nil then
-  begin
-    writeln('ERROR: XNextEvent: Could not get XCB connection.');
-    Exit;
-  end;
-
-  // First, try to get an event from the internal queue (filled by XPending)
-  if g_event_queue.Count > 0 then
-  begin
-    generic_event := Pxcb_generic_event_t(g_event_queue.Items[0]);
-    g_event_queue.Delete(0); // Remove from queue
-    writeln(Format('DEBUG: XNextEvent: Retrieved event %p from internal queue. Remaining: %d', [generic_event, g_event_queue.Count]));
-  end
-  else
-  begin
-    // If queue is empty, wait for a new event (this will block)
-   // writeln('DEBUG: XNextEvent: Internal queue empty. Waiting for event from XCB...');
-    generic_event := xcb_wait_for_event(conn);
-    writeln(Format('DEBUG: XNextEvent: Received XCB generic event: %p (blocking call)', [generic_event]));
-  end;
-
-
-  if generic_event <> nil then
-  begin
-    // Dump raw bytes for debugging
-      Move(generic_event^, raw_bytes[0], SizeOf(xcb_generic_event_t)); // This copies 32 bytes
-write('DEBUG: XNextEvent: Raw event bytes (first 16): '); // Adjusted label
-for j := 0 to 15 do // Dump more bytes!
-  write(Format('%02x ', [raw_bytes[j]]));
-writeln('');
-  
-   {
-    write('DEBUG: XNextEvent: Raw event bytes (first 8): ');
-    for j := 0 to 7 do
-      write(Format('%02x ', [raw_bytes[j]]));
-    writeln('');
-    writeln(Format('DEBUG: XNextEvent: Raw generic_event^.response_type: %d', [generic_event^._type]));
-    }
-
-    FillChar(event_return^, SizeOf(TXEvent), 0);
-
-    // Determine the actual event type, handling generic events (response_type = 0)
-    if (generic_event^._type and $7F) = 0 then // If it's a generic event
-    begin
-      ge_event := Pxcb_ge_event_t(generic_event); // Cast to generic event structure
-      event_return^._type := CInt(ge_event^.event_type); // Use the event_type field
-      writeln(Format('DEBUG: XNextEvent: Detected XCB_GE_GENERIC. Actual event_type: %d', [event_return^._type]));
-    end
-    else
-    begin
-      // For standard X events, response_type holds the event type
-      event_return^._type := (generic_event^._type and $7F);
-    end;
-
-    event_return^.serial := generic_event^.sequence;
-    event_return^.send_event := CInt( (generic_event^._type and $80) <> 0 );
-    event_return^.display := display;
-    // The 'window' field is common, but its source depends on the specific event type.
-    // We'll set it within the specific event cases.
-
-    writeln(Format('DEBUG: XNextEvent: Processed generic event. Type: %d, Serial: %d, SendEvent: %d',
-      [event_return^._type, event_return^.serial, event_return^.send_event]));
-
-    case event_return^._type of // Use the determined _type field for dispatch
-      ClientMessage:
-      begin
-        xcb_client_msg := Pxcb_client_message_event_t(generic_event);
-        writeln('DEBUG: XNextEvent: Detected ClientMessage event.');
-
-        event_return^.xclient.message_type := xcb_client_msg^.type_;
-        event_return^.xclient.format := CInt(xcb_client_msg^.format);
-        event_return^.window := TWindow(xcb_client_msg^.window); // Set common window field
-
-        // Copy the 20 bytes of data from XCB event to the specific data union within xclient
-        Move(xcb_client_msg^.Data, event_return^.xclient.Data.b[0], SizeOf(xcb_client_msg^.Data));
-       
-       {
-        writeln(Format('DEBUG: ClientMessage: message_type: %d (expected WM_PROTOCOLS: %d)',
-          [event_return^.xclient.message_type, g_wm_protocols_atom]));
-        writeln(Format('DEBUG: ClientMessage: data.l[0]: %d (expected WM_DELETE_WINDOW: %d)',
-          [event_return^.xclient.Data.l[0], g_wm_delete_window_atom]));
-
-        // Check for WM_DELETE_WINDOW protocol message
-        if (event_return^.xclient.message_type = g_wm_protocols_atom) and
-           (event_return^.xclient.Data.l[0] = g_wm_delete_window_atom) then
-        begin
-          writeln('DEBUG: ClientMessage: WM_DELETE_WINDOW protocol message received. Breaking loop...');
-          // In a real app, this would signal the main loop to exit
-        end;
-        }
-
-        Result := 1;
-      end;
-
-      KeyPress:
-      begin
-        xcb_key_press_msg := Pxcb_key_press_event_t(generic_event);
-        writeln('DEBUG: XNextEvent: Detected KeyPress event.');
-
-        event_return^.window := TWindow(xcb_key_press_msg^.event); // Set common window field
-
-        event_return^.xkey.root := xcb_key_press_msg^.root;
-        event_return^.xkey.subwindow := xcb_key_press_msg^.child;
-        event_return^.xkey.time := xcb_key_press_msg^.time;
-        event_return^.xkey.x := xcb_key_press_msg^.event_x;
-        event_return^.xkey.y := xcb_key_press_msg^.event_y;
-        event_return^.xkey.x_root := xcb_key_press_msg^.root_x;
-        event_return^.xkey.y_root := xcb_key_press_msg^.root_y;
-        event_return^.xkey.state := xcb_key_press_msg^.state;
-        event_return^.xkey.keycode := xcb_key_press_msg^.detail;
-        event_return^.xkey.same_screen := CInt(xcb_key_press_msg^.same_screen);
-
-        writeln(Format('DEBUG: KeyPress: Keycode: %d', [event_return^.xkey.keycode]));
-        Result := 1;
-      end;
-
-      Expose:
-      begin
-        xcb_expose_msg := Pxcb_expose_event_t(generic_event);
-        writeln('DEBUG: XNextEvent: Detected Expose event.');
-
-        event_return^.window := TWindow(xcb_expose_msg^.window); // Set common window field
-
-        event_return^.xexpose.x := xcb_expose_msg^.x;
-        event_return^.xexpose.y := xcb_expose_msg^.y;
-        event_return^.xexpose.width := xcb_expose_msg^.width;
-        event_return^.xexpose.height := xcb_expose_msg^.height;
-        event_return^.xexpose.count := xcb_expose_msg^.count;
-
-        writeln(Format('DEBUG: Expose: Window: %d, X: %d, Y: %d, W: %d, H: %d',
-          [event_return^.window, event_return^.xexpose.x, event_return^.xexpose.y,
-           event_return^.xexpose.width, event_return^.xexpose.height]));
-        Result := 1;
-      end;
-
-      else // For any other event type not explicitly handled
-      begin
-      //  writeln(Format('DEBUG: XNextEvent: Detected unhandled event type: %d', [event_return^._type]));
-        Result := 1;
-      end;
-    end;
-
-    free(generic_event); // Always free the XCB-allocated event after processing
-  end
-  else
-  begin
-    writeln('DEBUG: XNextEvent: generic_event was nil after polling/waiting.');
-  end;
-end;
-}
-
-
 function XShapeQueryExtension(display: PDisplay; event_base, error_base: Pcint): TBool; cdecl;
 var
   cookie: xcb_query_extension_cookie_t;
@@ -4379,6 +3785,156 @@ begin
   end else
     Result := 0; // False, no reply
 end;
+
+function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
+var
+  conn: xcb_connection_t;
+  cookie: xcb_void_cookie_t;
+  error_ptr: Pointer;
+  i: CInt;
+begin
+  writeln(Format('DEBUG: XSetWMProtocols called for window ID: %d, count: %d', [w, count]));
+  Result := 0;
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    writeln('ERROR: XSetWMProtocols: Could not get XCB connection.');
+    Exit;
+  end;
+
+  // Intern WM_PROTOCOLS if not already done (it's a property atom)
+  if g_wm_protocols_atom = 0 then
+  begin
+    writeln('DEBUG: XSetWMProtocols: WM_PROTOCOLS atom not yet interned, interning now.');
+    g_wm_protocols_atom := XInternAtom(display, 'WM_PROTOCOLS', 0);
+  end;
+
+  // Store the WM_DELETE_WINDOW atom (which is passed in protocols[0])
+  if (count > 0) and (protocols <> nil) then
+  begin
+    g_wm_delete_window_atom := protocols^; // Corrected: Use protocols^ to dereference the PAtom
+    writeln(Format('DEBUG: XSetWMProtocols: Value of protocols^ (WM_DELETE_WINDOW being set): %d', [protocols^])); // Added debug
+  end;
+
+  writeln(Format('DEBUG: XSetWMProtocols: Using WM_PROTOCOLS_ATOM: %d, WM_DELETE_WINDOW_ATOM: %d for property setting',
+    [g_wm_protocols_atom, g_wm_delete_window_atom]));
+
+
+  // Call xcb_change_property to set the WM_PROTOCOLS property on the window
+  cookie := xcb_change_property(
+    conn,
+    XCB_PROP_MODE_REPLACE, // Replace any existing property
+    CUInt(w),              // Window ID
+    g_wm_protocols_atom,   // The property atom (WM_PROTOCOLS)
+    4,                     // The type of the property value (ATOM) 4
+    32,                    // Format: 32-bit data
+    CUInt(count),          // Number of atoms in the data array
+    protocols              // Pointer to the array of atoms (e.g., WM_DELETE_WINDOW)
+  );
+  writeln('DEBUG: XSetWMProtocols: xcb_change_property called.');
+
+  error_ptr := xcb_request_check(conn, cookie);
+  if error_ptr <> nil then
+  begin
+    writeln('ERROR: XSetWMProtocols: xcb_change_property failed.');
+    free(error_ptr);
+    Result := 0;
+  end
+  else
+  begin
+    writeln('DEBUG: XSetWMProtocols: WM_PROTOCOLS property set successfully.');
+    Result := 1;
+  end;
+end;
+
+
+function XDestroyWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
+var
+  cookie: xcb_void_cookie_t;
+  error_ptr: Pointer;
+begin
+  Result := 0; // Default to failure
+
+  if g_xcb_conn = nil then Exit;
+
+  cookie := xcb_destroy_window(g_xcb_conn, CUInt(AWindow));
+  error_ptr := xcb_request_check(g_xcb_conn, cookie);
+  if error_ptr <> nil then
+  begin
+    free(error_ptr);
+    Result := 0; // Failure
+  end
+  else
+  begin
+    Result := 1; // Success
+  end;
+end;
+
+function XGetWMNormalHints(display: PDisplay; w: TWindow; hints_return: PXSizeHints; supplied_return: PLongInt): LongInt; cdecl;
+var
+  wm_normal_hints: xcb_atom_t;
+  cookie: xcb_get_property_cookie_t;
+  reply: Pxcb_get_property_reply_t;
+  atom_cookie: xcb_intern_atom_cookie_t;
+  atom_reply: Pxcb_intern_atom_reply_t;
+begin
+  if hints_return = nil then begin
+    writeln('XGetWMNormalHints: hints_return is nil');
+    Result := 0;
+    Exit;
+  end;
+  writeln('XGetWMNormalHints: hints_return = ', PtrInt(hints_return));
+  atom_cookie := xcb_intern_atom(display, 0, Length('WM_NORMAL_HINTS'), 'WM_NORMAL_HINTS');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, nil);
+  if atom_reply = nil then begin
+    writeln('XGetWMNormalHints: atom_reply is nil');
+    Result := 0;
+    Exit;
+  end;
+  wm_normal_hints := atom_reply^.atom;
+  writeln('XGetWMNormalHints: wm_normal_hints = ', wm_normal_hints);
+  free(atom_reply);
+  cookie := xcb_get_property(display, 0, w, wm_normal_hints, wm_normal_hints, 0, 18);
+  reply := xcb_get_property_reply(display, cookie, nil);
+  if (reply <> nil) and (reply^.value_len > 0) then begin
+    Move(xcb_get_property_value(reply)^, hints_return^, SizeOf(XSizeHints));
+    if supplied_return <> nil then
+      supplied_return^ := hints_return^.flags;
+    writeln('XGetWMNormalHints: flags = ', hints_return^.flags, ', reply = ', PtrInt(reply), ', value_len = ', reply^.value_len);
+    free(reply);
+    Result := 1;
+  end else begin
+    free(reply);
+    FillChar(hints_return^, SizeOf(XSizeHints), 0);
+    if supplied_return <> nil then
+      supplied_return^ := 0;
+    writeln('XGetWMNormalHints: reply is nil or empty');
+    Result := 0;
+  end;
+end;
+
+function XCheckTypedWindowEvent(para1: PDisplay; para2: TWindow; para3: cint; para4: PXEvent): TBoolResult; cdecl;
+var
+  event: Pxcb_generic_event_t;
+begin
+  event := xcb_poll_for_event(para1);
+  if event = nil then begin
+    writeln('XCheckTypedWindowEvent: no event');
+    Result := false;
+    Exit;
+  end;
+  if (event^.response_type and $7F) = para3 then begin
+    Move(event^, para4^, SizeOf(TXEvent));
+    writeln('XCheckTypedWindowEvent: event_type = ', para3);
+    free(event);
+    Result := true;
+  end else begin
+    free(event);
+    Result := false;
+  end;
+end;
+
 
 // Todo
 function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; bytes_buffer: cint; keysym_return: Pculong; status_in_out: Pointer): cint; cdecl;
@@ -4571,228 +4127,6 @@ begin
 
 end;
 
-{
-function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
-//function XSetWMProtocols(display: PDisplay; w: XWindow; protocols: PAtom; count: CInt): CInt; cdecl;
-var
-  cookie: xcb_void_cookie_t;
-  error_ptr: Pointer;
-begin
-  Result := 0; // Default to failure
-
-  if g_xcb_conn = nil then Exit;
-
-  // Use xcb_change_property to set the WM_PROTOCOLS property.
-  // Property: WM_PROTOCOLS (atom obtained via XInternAtom)
-  // Type: XA_ATOM (standard atom for atom type)
-  // Format: 32 (atoms are 32-bit values on XCB)
-  // Data: protocols (array of Atom IDs)
-  // Data_len: count (number of atoms in the array)
-  cookie := xcb_change_property(
-    g_xcb_conn,
-    PropModeReplace, // Always replace existing protocols
-    CUInt(w),        // Window ID
-    CUInt(XInternAtom(display, 'WM_PROTOCOLS', 0)), // Property atom
-    4,         // Type of data (Atom)
-    32,              // Format (32-bit values)
-    CUInt(count),    // Number of items
-    protocols        // Pointer to the array of Atom IDs
-  );
-
-  error_ptr := xcb_request_check(g_xcb_conn, cookie);
-  if error_ptr <> nil then
-  begin
-    free(error_ptr);
-    Result := 0; // Failure
-  end
-  else
-  begin
-    Result := 1; // Success
-  end;
-end;
-}
-{
-function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
-var
-  cookie: xcb_void_cookie_t;
-  error_ptr: Pointer;
-  i: CInt;
-begin
-  Result := 0; // Default to failure
-   writeln(SysUtils.Format('DEBUG: XSetWMProtocols: Setting protocols for window %x (count: %d)', [w, count]));
-
-  if g_xcb_conn = nil then
-  begin
-     writeln('DEBUG: XSetWMProtocols: g_xcb_conn is NIL. Cannot set protocols.');
-    Exit;
-  end;
-
-  // Debugging protocol list
-  for i := 0 to count - 1 do
-  begin
-   //  writeln(SysUtils.Format('DEBUG: XSetWMProtocols: Protocol[%d]: %d', [i, protocols^[i]]));
-  
-  end;
-
-  // Use xcb_change_property to set the WM_PROTOCOLS property.
-  // Property: WM_PROTOCOLS (atom obtained via XInternAtom)
-  // Type: XA_ATOM (standard atom for atom type)
-  // Format: 32 (atoms are 32-bit values on XCB)
-  // Data: protocols (array of Atom IDs)
-  // Data_len: count (number of items)
-  cookie := xcb_change_property(
-    g_xcb_conn,
-    PropModeReplace, // Always replace existing protocols
-    CUInt(w),        // Window ID
-    CUInt(XInternAtom(display, 'WM_PROTOCOLS', 0)), // Property atom (used 0 for False)
-    4,         // Type of data (Atom)
-    32,              // Format (32-bit values)
-    CUInt(count),    // Number of items
-    protocols        // Pointer to the array of Atom IDs
-  );
-
-  error_ptr := xcb_request_check(g_xcb_conn, cookie);
-  if error_ptr <> nil then
-  begin
-   writeln('DEBUG: XSetWMProtocols: FAILED to set WM_PROTOCOLS property.');
-    free(error_ptr);
-    Result := 0; // Failure
-  end
-  else
-  begin
-     writeln('DEBUG: XSetWMProtocols: Successfully set WM_PROTOCOLS property.');
-    Result := 1; // Success
-  end;
-end;
-}
-
-function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
-var
-  conn: xcb_connection_t;
-  cookie: xcb_void_cookie_t;
-  error_ptr: Pointer;
-  i: CInt;
-begin
-  writeln(Format('DEBUG: XSetWMProtocols called for window ID: %d, count: %d', [w, count]));
-  Result := 0;
-
-  conn := XGetXCBConnection(display);
-  if conn = nil then
-  begin
-    writeln('ERROR: XSetWMProtocols: Could not get XCB connection.');
-    Exit;
-  end;
-
-  // Intern WM_PROTOCOLS if not already done (it's a property atom)
-  if g_wm_protocols_atom = 0 then
-  begin
-    writeln('DEBUG: XSetWMProtocols: WM_PROTOCOLS atom not yet interned, interning now.');
-    g_wm_protocols_atom := XInternAtom(display, 'WM_PROTOCOLS', 0);
-  end;
-
-  // Store the WM_DELETE_WINDOW atom (which is passed in protocols[0])
-  if (count > 0) and (protocols <> nil) then
-  begin
-    g_wm_delete_window_atom := protocols^; // Corrected: Use protocols^ to dereference the PAtom
-    writeln(Format('DEBUG: XSetWMProtocols: Value of protocols^ (WM_DELETE_WINDOW being set): %d', [protocols^])); // Added debug
-  end;
-
-  writeln(Format('DEBUG: XSetWMProtocols: Using WM_PROTOCOLS_ATOM: %d, WM_DELETE_WINDOW_ATOM: %d for property setting',
-    [g_wm_protocols_atom, g_wm_delete_window_atom]));
-
-
-  // Call xcb_change_property to set the WM_PROTOCOLS property on the window
-  cookie := xcb_change_property(
-    conn,
-    XCB_PROP_MODE_REPLACE, // Replace any existing property
-    CUInt(w),              // Window ID
-    g_wm_protocols_atom,   // The property atom (WM_PROTOCOLS)
-    4,                     // The type of the property value (ATOM) 4
-    32,                    // Format: 32-bit data
-    CUInt(count),          // Number of atoms in the data array
-    protocols              // Pointer to the array of atoms (e.g., WM_DELETE_WINDOW)
-  );
-  writeln('DEBUG: XSetWMProtocols: xcb_change_property called.');
-
-  error_ptr := xcb_request_check(conn, cookie);
-  if error_ptr <> nil then
-  begin
-    writeln('ERROR: XSetWMProtocols: xcb_change_property failed.');
-    free(error_ptr);
-    Result := 0;
-  end
-  else
-  begin
-    writeln('DEBUG: XSetWMProtocols: WM_PROTOCOLS property set successfully.');
-    Result := 1;
-  end;
-end;
-
-
-function XDestroyWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
-var
-  cookie: xcb_void_cookie_t;
-  error_ptr: Pointer;
-begin
-  Result := 0; // Default to failure
-
-  if g_xcb_conn = nil then Exit;
-
-  cookie := xcb_destroy_window(g_xcb_conn, CUInt(AWindow));
-  error_ptr := xcb_request_check(g_xcb_conn, cookie);
-  if error_ptr <> nil then
-  begin
-    free(error_ptr);
-    Result := 0; // Failure
-  end
-  else
-  begin
-    Result := 1; // Success
-  end;
-end;
-
-function XGetWMNormalHints(display: PDisplay; w: TWindow; hints_return: PXSizeHints; supplied_return: PLongInt): LongInt; cdecl;
-var
-  wm_normal_hints: xcb_atom_t;
-  cookie: xcb_get_property_cookie_t;
-  reply: Pxcb_get_property_reply_t;
-  atom_cookie: xcb_intern_atom_cookie_t;
-  atom_reply: Pxcb_intern_atom_reply_t;
-begin
-  if hints_return = nil then begin
-    writeln('XGetWMNormalHints: hints_return is nil');
-    Result := 0;
-    Exit;
-  end;
-  writeln('XGetWMNormalHints: hints_return = ', PtrInt(hints_return));
-  atom_cookie := xcb_intern_atom(display, 0, Length('WM_NORMAL_HINTS'), 'WM_NORMAL_HINTS');
-  atom_reply := xcb_intern_atom_reply(display, atom_cookie, nil);
-  if atom_reply = nil then begin
-    writeln('XGetWMNormalHints: atom_reply is nil');
-    Result := 0;
-    Exit;
-  end;
-  wm_normal_hints := atom_reply^.atom;
-  writeln('XGetWMNormalHints: wm_normal_hints = ', wm_normal_hints);
-  free(atom_reply);
-  cookie := xcb_get_property(display, 0, w, wm_normal_hints, wm_normal_hints, 0, 18);
-  reply := xcb_get_property_reply(display, cookie, nil);
-  if (reply <> nil) and (reply^.value_len > 0) then begin
-    Move(xcb_get_property_value(reply)^, hints_return^, SizeOf(XSizeHints));
-    if supplied_return <> nil then
-      supplied_return^ := hints_return^.flags;
-    writeln('XGetWMNormalHints: flags = ', hints_return^.flags, ', reply = ', PtrInt(reply), ', value_len = ', reply^.value_len);
-    free(reply);
-    Result := 1;
-  end else begin
-    free(reply);
-    FillChar(hints_return^, SizeOf(XSizeHints), 0);
-    if supplied_return <> nil then
-      supplied_return^ := 0;
-    writeln('XGetWMNormalHints: reply is nil or empty');
-    Result := 0;
-  end;
-end;
 
 function XUnmapWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
 begin
@@ -4812,27 +4146,6 @@ end;
 function XScreenNumberOfScreen(para1: PScreen): cint; cdecl;
 begin
 
-end;
-
-function XCheckTypedWindowEvent(para1: PDisplay; para2: TWindow; para3: cint; para4: PXEvent): TBoolResult; cdecl;
-var
-  event: Pxcb_generic_event_t;
-begin
-  event := xcb_poll_for_event(para1);
-  if event = nil then begin
-    writeln('XCheckTypedWindowEvent: no event');
-    Result := false;
-    Exit;
-  end;
-  if (event^.response_type and $7F) = para3 then begin
-    Move(event^, para4^, SizeOf(TXEvent));
-    writeln('XCheckTypedWindowEvent: event_type = ', para3);
-    free(event);
-    Result := true;
-  end else begin
-    free(event);
-    Result := false;
-  end;
 end;
 
 function XPeekEvent(ADisplay: PDisplay; AEvent: PXEvent): cint; cdecl;
@@ -4873,32 +4186,6 @@ end;
 function XSetDashes(para1: PDisplay; para2: TGC; para3: cint; para4: PChar; para5: cint): cint; cdecl;
 begin
 
-end;
-
-function XChangeGC(display: PDisplay; gc: TGC; valuemask: LongWord; values: Pointer): LongInt; cdecl;
-var
-  gc_id: LongWord;
-begin
-  if gc = nil then begin
-    writeln('XChangeGC: gc is nil');
-    Result := 0;
-    Exit;
-  end;
-  if values = nil then begin
-    writeln('XChangeGC: values is nil');
-    Result := 0;
-    Exit;
-  end;
-  try
-    gc_id := PLongWord(gc)^;
-    writeln('XChangeGC: gc_id = ', gc_id, ', valuemask = ', valuemask, ', values = ', PtrInt(values));
-    xcb_change_gc(display, gc_id, valuemask, values);
-  except
-    writeln('XChangeGC: failed, gc = ', PtrInt(gc), ', values = ', PtrInt(values));
-    Result := 0;
-    Exit;
-  end;
-  Result := 0;
 end;
 
 function XSetClipMask(para1: PDisplay; para2: TGC; para3: TPixmap): cint; cdecl;
