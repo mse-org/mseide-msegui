@@ -5,7 +5,7 @@ unit mxcb;
 interface
 
 uses
- mseguiglob, math, ctypes; // For culong, cint, cuint, cshort, cchar, cuchar
+ mseguiglob, math, Classes, ctypes; // For culong, cint, cuint, cshort, cchar, cuchar
 
 {$PACKRECORDS C}
 const
@@ -22,7 +22,7 @@ type
   xcb_colormap_t = cuint32;
   xcb_visualid_t = cuint32;
   
-  xcb_generic_error_t = record
+   xcb_generic_error_t = record
     response_type: cuint8;
     error_code: cuint8;
     sequence: cuint16;
@@ -35,8 +35,6 @@ type
   end;
   Pxcb_generic_error_t = ^xcb_generic_error_t;
   PPxcb_generic_error_t = ^pxcb_generic_error_t;
- 
- 
   PDisplay          = Pxcb_connection_t; // Alias for XCB connection
 
   xcb_void_cookie_t = record
@@ -69,7 +67,7 @@ type
   TTime = culong;
   PTime = ^TTime;
 
-  Window   = cuint; // Maps to xcb_window_t
+  Window   = culong; // Maps to xcb_window_t
   PPWindow = ^PWindow;
   PWindow  = ^TWindow;
   TWindow  = TXID;
@@ -118,6 +116,7 @@ type
   xcb_drawable_t = cuint32;
   Drawable       = cuint; // Maps to xcb_drawable_t
   TDrawable = Drawable;   // For mseguiintf.pas
+ 
   GC  = Pointer;          // Maps to xcb_gcontext_t
   TGC = GC;
   
@@ -409,6 +408,24 @@ type
     descent: cshort;
     attributes: cushort;
   end;
+  
+  // Corrected: Renamed XKeyEvent to TXKeyEvent to match PXKeyEvent = ^TXKeyEvent
+  TXKeyEvent = packed record
+    event_type: CInt; // type
+    serial: CULong;
+    send_event: CInt; // Bool in C
+    display: PDisplay;
+    window: TWindow;
+    root: TWindow;
+    subwindow: TWindow;
+    time: CULong;
+    x, y: CInt;
+    x_root, y_root: CInt;
+    state: CUInt;
+    keycode: CUInt;
+    same_screen: CInt; // Bool in C
+  end;
+  PXKeyEvent = ^TXKeyEvent; // Corrected type to ^TXKeyEvent
 
   PXFontProp = ^TXFontProp;
 
@@ -485,7 +502,6 @@ type
   end;
 
   PXAnyEvent = ^TXAnyEvent;
-
   TXAnyEvent = record
     _type: cint;
     serial: culong;
@@ -493,23 +509,16 @@ type
     display: PDisplay;
     window: TWindow;
   end;
-
-  TXKeyEvent = record
-    _type: cint;
-    serial: culong;
-    send_event: TBool;
+  
+  mXAnyEvent = packed record
+    event_type: CInt; // type
+    serial: CULong;
+    send_event: CInt; // Bool in C
     display: PDisplay;
-    window: TWindow;
-    root: TWindow;
-    subwindow: TWindow;
-    time: TTime;
-    x, y: cint;
-    x_root, y_root: cint;
-    state: cuint;
-    keycode: cuint;
-    same_screen: TBool;
+    window: tWindow;
   end;
-
+  PmXAnyEvent = ^mXAnyEvent;
+  
   PXButtonEvent = ^TXButtonEvent;
 
   TXButtonEvent = record
@@ -853,9 +862,28 @@ type
     c_new: TBool;
     state: cint;
   end;
+  
+  Pxcb_client_message_event_t = ^Txcb_client_message_event_t;
+  Txcb_client_message_event_t = packed record
+    // Byte offsets:
+    response_type: Byte;   // Offset 0 (1 byte)
+    format: Byte;          // Offset 1 (1 byte)
+    sequence: Word;        // Offset 2 (2 bytes)
+    window: Cardinal;      // Offset 4 (4 bytes) - The window ID
+    type_: Cardinal;       // Offset 8 (4 bytes) - CRITICAL: This is the message_type atom
+    // Data union starts at Offset 12 (20 bytes total)
+    Data: record
+      case Integer of
+        0: (data8: array[0..19] of Byte);
+        1: (data16: array[0..9] of Word);
+        2: (data32: array[0..4] of Cardinal); // 5 Cardinal * 4 bytes = 20 bytes
+    end;
+  end;
 
+
+  xcb_client_message_event_t = Txcb_client_message_event_t;
+  
   PXClientMessageEvent = ^TXClientMessageEvent;
-
   TXClientMessageEvent = record
     _type: cint;
     serial: culong;
@@ -871,6 +899,25 @@ type
         2: (l: array[0..4] of clong);
     end;
   end;
+  
+  {
+  TXClientMessageEvent = record
+    response_type: cint;
+    serial: culong;
+    send_event: TBool;
+    display: PDisplay;
+    window: TWindow;
+    message_type: TAtom;
+    format: cint;
+    Data: record
+      case longint of
+        0: (b: array[0..19] of cchar);
+        1: (s: array[0..9] of cshort);
+        2: (l: array[0..4] of clong);
+    end;
+  end;
+}
+
 
   PXMappingEvent = ^TXMappingEvent;
 
@@ -919,6 +966,7 @@ type
     window: TWindow;
     key_vector: array[0..31] of cchar;
   end;
+  
 
   PXEvent = ^TXEvent;
   TXEvent = record
@@ -959,6 +1007,87 @@ type
       33: (xcookie: TXGenericEventCookie);
       34: (pad: array[0..23] of clong);
   end;
+
+{
+PXEvent = ^TXEvent;
+  TXEvent = packed record
+    case longint of // Anonymous tag field for the union variants
+      0: (_type: cint); // _type is here, as part of a variant record's anonymous variant
+      1: (xany: TXAnyEvent);
+      2: (xkey: TXKeyEvent);
+      // Add other MSEgui event types here as needed, following their definition
+      // For example, if you have TXButtonEvent, it would be:
+      // 3: (xbutton: TXButtonEvent);
+      // ...
+      28: (xclient: TXClientMessageEvent); // This must match the index in MSEgui
+      // ...
+      7: (xexpose: TXExposeEvent); // This must match the index in MSEgui
+      // ...
+      34: (pad: array[0..23] of clong); // Padding to ensure correct size
+  end;
+}
+
+
+
+{
+ // MSEgui's main XEvent union (MUST BE PACKED RECORD)
+  // CRITICAL CHANGE: _type, serial, send_event, display, window are now DIRECT fields of TXEvent.
+  PXEvent = ^TXEvent;
+  TXEvent = packed record
+    // These are the common fields for ALL X events, now at the top level.
+    _type: cint;
+    serial: culong;
+    send_event: TBool;
+    display: PDisplay;
+    window: TWindow; // This 'window' field is the common window ID for the event
+
+    // The rest of the record is a variant part (union) that overlays the memory
+    // immediately following the common fields.
+    case longint of // Anonymous tag field for the union variants
+      // We use a single variant (0) to contain all the specific event structures.
+      0: (
+        // These are the *variants* that will overlay the same memory space.
+        // Their definitions (TXAnyEvent, TXKeyEvent, etc.) MUST now exclude
+        // the common header fields (like _type, serial, etc.)
+        xany: TXAnyEvent; // This TXAnyEvent is now a stripped-down version
+        xkey: TXKeyEvent; // This TXKeyEvent is now a stripped-down version
+        xbutton: TXButtonEvent; // Assuming this exists and is stripped down
+        xmotion: TXMotionEvent; // Assuming this exists and is stripped down
+        xcrossing: TXCrossingEvent; // Assuming this exists and is stripped down
+        xfocus: TXFocusChangeEvent; // Assuming this exists and is stripped down
+        xexpose: TXExposeEvent; // This TXExposeEvent is now a stripped-down version
+        xgraphicsexpose: TXGraphicsExposeEvent; // Assuming this exists and is stripped down
+        xnoexpose: TXNoExposeEvent; // Assuming this exists and is stripped down
+        xvisibility: TXVisibilityEvent; // Assuming this exists and is stripped down
+        xcreatewindow: TXCreateWindowEvent; // Assuming this exists and is stripped down
+        xdestroywindow: TXDestroyWindowEvent; // Assuming this exists and is stripped down
+        xunmap: TXUnmapEvent; // Assuming this exists and is stripped down
+        xmap: TXMapEvent; // Assuming this exists and is stripped down
+        xmaprequest: TXMapRequestEvent; // Assuming this exists and is stripped down
+        xreparent: TXReparentEvent; // Assuming this exists and is stripped down
+        xconfigure: TXConfigureEvent; // Assuming this exists and is stripped down
+        xgravity: TXGravityEvent; // Assuming this exists and is stripped down
+        xresizerequest: TXResizeRequestEvent; // Assuming this exists and is stripped down
+        xconfigurerequest: TXConfigureRequestEvent; // Assuming this exists and is stripped down
+        xcirculate: TXCirculateEvent; // Assuming this exists and is stripped down
+        xcirculaterequest: TXCirculateRequestEvent; // Assuming this exists and is stripped down
+        xproperty: TXPropertyEvent; // Assuming this exists and is stripped down
+        xselectionclear: TXSelectionClearEvent; // Assuming this exists and is stripped down
+        xselectionrequest: TXSelectionRequestEvent; // Assuming this exists and is stripped down
+        xselection: TXSelectionEvent; // Assuming this exists and is stripped down
+        xcolormap: TXColormapEvent; // Assuming this exists and is stripped down
+        xclient: TXClientMessageEvent; // This TXClientMessageEvent is now a stripped-down version
+        xmapping: TXMappingEvent; // Assuming this exists and is stripped down
+        xerror: TXErrorEvent; // Assuming this exists and is stripped down
+        xkeymap: TXKeymapEvent; // Assuming this exists and is stripped down
+        xgeneric: TXGenericEvent; // Assuming this exists and is stripped down
+        xcookie: TXGenericEventCookie; // Assuming this exists and is stripped down
+        // Padding to ensure correct total size (adjust if needed to match Xlib's XEvent size)
+        pad: array[0..23] of clong; // This padding is for the overall TXEvent size
+      );
+  end;
+}
+
 
   PXSegment = ^TXSegment;
 
@@ -1148,7 +1277,6 @@ type
   end;
 
   PXImage = ^TXImage;
-
   TXImage = record
     Width, Height: cint;
     xoffset: cint;
@@ -1260,12 +1388,19 @@ type
     npreferred: cint;
     modes: pRRMode;
   end;
+  
+  MXEvent = record
+    data: array[0..191] of Byte; // Max size of XEvent union on 64-bit systems
+  end;
+  PMXEvent = ^MXEvent;
+  
   pXRROutputInfo = ^XRROutputInfo;
   
   TXErrorHandler = function(display: PDisplay; error_event: PXErrorEvent): cint; cdecl;
   
   xcb_connection_t = Pointer; 
- 
+
+  
 const
   MWM_HINTS_DECORATIONS = 1 shl 1;
   WindowGroupHint = 1 shl 6;
@@ -1541,6 +1676,8 @@ const
   XCB_WINDOW_CLASS_INPUT_OUTPUT = 1;
   
   XCB_PROP_MODE_REPLACE = 0;
+  
+  SizeOf_Txcb_client_message_event_t = SizeOf(Txcb_client_message_event_t);
 
 var
   GlobalXCBConnection: PDisplay;
@@ -1551,6 +1688,16 @@ var
   //g_errorhandler: XErrorHandler = nil;
   g_errorhandler: pointer = nil;
   g_root_visual: Visual;
+  g_event_queue: TList = nil;
+  // Global Atoms for WM_PROTOCOLS and WM_DELETE_WINDOW
+  g_wm_protocols_atom: Atom = 0;
+  g_wm_delete_window_atom: Atom = 0;
+  wm_delete_window_atom: Atom = 0;
+  mse_client_message_atom: Atom = 0;
+  wm_protocols_atom: Atom = 0;
+  current_event_handled_as_close: Boolean = False;
+
+
 
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
 procedure XCloseDisplay(display: PDisplay); cdecl;
@@ -1562,8 +1709,13 @@ function XCreateWindow(display: PDisplay; parent: Window; x, y: cint; Width, Hei
            valuemask: culong; attributes: PXSetWindowAttributes): Window; cdecl;
 
 procedure XMapWindow(display: PDisplay; w: Window); cdecl;
-procedure XSelectInput(display: PDisplay; w: Window; event_mask: clong); cdecl;
-procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
+function XSelectInput(para1: PDisplay; para2: TWindow; para3: LongInt): LongInt; cdecl;
+//procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
+
+//function XNextEvent(display: PDisplay; event_return: PXEvent): CInt; cdecl;
+
+function XNextEvent(display: PDisplay; event_return: PmXEvent): CInt; cdecl;
+
 function XPending(display: PDisplay): cint; cdecl;
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
 
@@ -1665,7 +1817,7 @@ function XCreatePixmapCursor(ADisplay: PDisplay; ASource: TPixmap; AMask: TPixma
 function XFillRectangle(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint): cint; cdecl;
 function XFillArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
 function XDrawArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
-function XSetWMProtocols(para1: PDisplay; para2: TWindow; para3: PAtom; para4: cint): TStatus; cdecl;
+function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
 function XDestroyWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
 function XAllocSizeHints: PXSizeHints; cdecl;
 function XGetWMNormalHints(display: PDisplay; w: TWindow; hints_return: PXSizeHints; supplied_return: PLongInt): LongInt; cdecl;
@@ -1680,7 +1832,9 @@ function XPeekEvent(ADisplay: PDisplay; AEvent: PXEvent): cint; cdecl;
 function XFilterEvent(para1: PXEvent; para2: TWindow): TBoolResult; cdecl;
 function XRefreshKeyboardMapping(para1: PXMappingEvent): cint; cdecl;
 function XGetErrorText(para1: PDisplay; para2: cint; para3: PChar; para4: cint): cint; cdecl;
-function XCreateColormap(para1: PDisplay; para2: TWindow; para3: PVisual; para4: cint): TColormap; cdecl;
+
+// function XCreateColormap(para1: PDisplay; para2: TWindow; para3: PVisual; para4: cint): TColormap; cdecl;
+
 function XStoreColors(para1: PDisplay; para2: TColormap; para3: PXColor; para4: cint): cint; cdecl;
 function XSupportsLocale: TBool; cdecl;
 function XDefaultScreenOfDisplay(display: PDisplay): PScreen; cdecl;
@@ -1696,7 +1850,7 @@ function XConnectionNumber(display: PDisplay): cint; cdecl;
 function XSetErrorHandler(para1: TXErrorHandler): TXErrorHandler; cdecl;
 function XSetClipRectangles(para1: PDisplay; para2: TGC; para3: cint; para4: cint; para5: PXRectangle; para6: cint; para7: cint): cint; cdecl;
 function XSetDashes(para1: PDisplay; para2: TGC; para3: cint; para4: PChar; para5: cint): cint; cdecl;
-function XChangeGC(para1: PDisplay; para2: TGC; para3: culong; para4: PXGCValues): cint; cdecl;
+function XChangeGC(display: PDisplay; gc: TGC; valuemask: LongWord; values: Pointer): LongInt; cdecl;
 function XSetClipMask(para1: PDisplay; para2: TGC; para3: TPixmap): cint; cdecl;
 function XFreeFontInfo(para1: PPchar; para2: PXFontStruct; para3: cint): cint; cdecl;
 function XUnloadFont(para1: PDisplay; para2: TFont): cint; cdecl;
@@ -1722,7 +1876,7 @@ function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
   bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
 
 // Todo from libX11 and mseguiintf
-function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
+//function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
 function XSetForeground(Display: PDisplay; GC: TGC; Foreground: culong): cint; cdecl;
 procedure XDrawImageString(Display: PDisplay; D: TDrawable; GC: TGC; X, Y: integer; S: PChar; Len: integer); cdecl;
 procedure XDrawImageString16(Display: PDisplay; D: TDrawable; GC: TGC; X, Y: integer; S: Pxchar2b; Len: integer); cdecl;
@@ -1762,6 +1916,18 @@ function XSendEvent(para1: PDisplay; para2: TWindow; para3: Boolean; para4: clon
 function DefaultDepthOfScreen(s: PScreen): cint;
 function XDestroyImage(ximage: PXImage): cint; cdecl;
 function getxrandrlib: Boolean;
+
+function XImage_create_image(para1: PDisplay; para2: PVisual; para3: CUInt; para4: CInt; para5: CInt; para6: PChar; para7: CUInt; para8: CUInt; para9: CInt; para10: CInt): PXImage; cdecl;
+function XImage_destroy_image(para1: PXImage): CInt; cdecl;
+function XImage_get_pixel(para1: PXImage; para2: CInt; para3: CInt): CULong; cdecl;
+function XImage_put_pixel(para1: PXImage; para2: CInt; para3: CInt; para4: CULong): CInt; cdecl;
+function XImage_sub_image(para1: PXImage; para2: CInt; para3: CInt; para4: CUInt; para5: CUInt): PXImage; cdecl;
+function XImage_add_pixel(para1: PXImage; para2: CLong): CInt; cdecl;
+
+function XGetXCBConnection(display: PDisplay): xcb_connection_t;
+
+function CalculateBitsPerPixel(AFormat: CInt; ADepth: CInt): CInt;
+function CalculateBytesPerLine(AWidth: CUInt; ABitsPerPixel: CInt; ABitmapPad: CInt): CInt;
 
 implementation
 
@@ -1805,9 +1971,22 @@ type
   end;
   pxcb_generic_event_t = ^xcb_generic_event_t;
   
+  mxcb_generic_event_t = record
+    response_type: CUChar;
+    pad0: CUChar;
+    sequence: CUShort;
+    pad: array[0..6] of CUInt; // 7 elements (0 to 6) for 28 bytes, total 32 bytes for the event
+  end;
+  Pmxcb_generic_event_t = ^mxcb_generic_event_t;
+
+  
   
   xcb_key_press_event_t = record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: Byte;
+   {$else}
+   response_type: Byte;
+   {$endif}
     detail: cuint8;
     sequence: cuint16;
     time: cuint32;
@@ -1823,8 +2002,12 @@ type
   pxcb_key_press_event_t = ^xcb_key_press_event_t;
 
   xcb_expose_event_t = record
-    response_type: cuint8;
-    pad0: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
+     pad0: cuint8;
     sequence: cuint16;
     window: xcb_window_t;
     x, y: cuint16;
@@ -1833,6 +2016,7 @@ type
   end;
   pxcb_expose_event_t = ^xcb_expose_event_t;
 
+{
   xcb_client_message_event_t = record
     response_type: cuint8;
     format: cuint8;
@@ -1846,11 +2030,16 @@ type
         2: (data32: array[0..4] of cuint32);
     end;
   end;
-
   pxcb_client_message_event_t = ^xcb_client_message_event_t;
+ }
+ 
   Pxcb_intern_atom_reply_t = ^xcb_intern_atom_reply_t;
   xcb_intern_atom_reply_t = record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
     pad0: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -1873,7 +2062,11 @@ type
   end;
 
   xcb_shape_query_extension_reply_t = record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
     pad0: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -1883,7 +2076,11 @@ type
   end;
  
   xcb_get_property_reply_t = packed record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
     format: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -1909,7 +2106,11 @@ type
   Pxcb_query_extension_cookie_t = ^xcb_query_extension_cookie_t;
 
   xcb_query_extension_reply_t = record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
     pad0: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -1933,7 +2134,11 @@ type
   end;
   
   xcb_get_atom_name_reply_t = record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
     pad0: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -1957,7 +2162,11 @@ type
  
   Pxcb_get_modifier_mapping_reply_t = ^xcb_get_modifier_mapping_reply_t;
   xcb_get_modifier_mapping_reply_t = record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
     extension: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -1993,7 +2202,11 @@ type
   end;
   Pxcb_get_geometry_reply_t = ^xcb_get_geometry_reply_t;
   xcb_get_geometry_reply_t = record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
     depth: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -2010,7 +2223,11 @@ type
   end;
   Pxcb_get_window_attributes_reply_t = ^xcb_get_window_attributes_reply_t;
   xcb_get_window_attributes_reply_t = record
-    response_type: cuint8;
+   {$ifdef use_xcb}
+   _type: cuint8;
+   {$else}
+   response_type: cuint8;
+   {$endif}
     backing_store: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -2033,6 +2250,19 @@ type
   xcb_map_window_cookie_t = record
     sequence: cunsigned;
   end;
+  
+  xcb_ge_event_t = record
+     response_type: CUChar; // 1 byte (offset 0) - Should be 0 for generic events
+    detail: CUChar;        // 1 byte (offset 1)
+    sequence: CUShort;     // 2 bytes (offset 2)
+    length: CUInt;         // 4 bytes (offset 4)
+    event_type: CUInt;     // 4 bytes (offset 8) - The actual event type for generic events
+    event_extension: CUInt; // 4 bytes (offset 12)
+    pad: array[0..3] of CUInt; // 4 * 4 bytes = 16 bytes (offset 16). Total size: 1+1+2+4+4+4+16 = 32 bytes.
+  end;
+  Pxcb_ge_event_t = ^xcb_ge_event_t;
+
+
 
 procedure free(ptr: Pointer); cdecl; external 'libc.so';
  
@@ -2090,7 +2320,10 @@ function xcb_intern_atom(c: Pxcb_connection_t; only_if_exists: cuint8; name_len:
 function xcb_intern_atom_reply(c: Pxcb_connection_t; cookie: xcb_intern_atom_cookie_t; e: PPxcb_generic_error_t): Pxcb_intern_atom_reply_t; cdecl; external libxcb;
 function xcb_get_property(c: pxcb_connection_t; Delete: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; offset, length: cuint32): xcb_get_property_cookie_t; cdecl; external libxcb;
 function xcb_get_property_reply(c: pxcb_connection_t; cookie: xcb_get_property_cookie_t; e: Pointer): pxcb_get_property_reply_t; cdecl; external libxcb;
-function xcb_change_property(c: pxcb_connection_t; mode: cuint8; window: xcb_window_t; prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; Data: Pointer): Pointer; cdecl; external libxcb;
+
+function xcb_change_property(c: pxcb_connection_t; mode: cuint8; window: xcb_window_t;
+ prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; Data: Pointer): xcb_void_cookie_t; cdecl; external libxcb;
+
 function xcb_send_event(c: pxcb_connection_t; propagate: cuint8; destination: xcb_window_t; event_mask: cuint32; event: Pointer): Pointer; cdecl; external libxcb;
 procedure xcb_flush(c: pxcb_connection_t); cdecl; external libxcb;
 function xcb_get_atom_name(c: Pxcb_connection_t; atom: xcb_atom_t): xcb_get_atom_name_cookie_t; cdecl; external libxcb;function xcb_get_atom_name_reply(c: Pxcb_connection_t; cookie: xcb_get_atom_name_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_atom_name_reply_t; cdecl; external libxcb;
@@ -2126,13 +2359,19 @@ function xcb_visualtype_next(iterator: Pxcb_visualtype_iterator_t): Pxcb_visualt
 procedure xcb_depth_next(iterator: Pxcb_depth_iterator_t); cdecl; external libxcb;
 procedure xcb_screen_next(iterator: Pxcb_screen_iterator_t); cdecl; external libxcb;
 function xcb_get_atom_name_name(reply: Pxcb_get_atom_name_reply_t): PChar; cdecl; external libxcb;
+// function xcb_wait_for_event(c: Pxcb_connection_t): Pxcb_generic_event_t; cdecl; external libxcb;
 function xcb_wait_for_event(c: Pxcb_connection_t): Pxcb_generic_event_t; cdecl; external libxcb;
 function xcb_configure_window(c: Pxcb_connection_t; window: xcb_window_t; value_mask: cuint16; 
          value_list: Pointer): xcb_void_cookie_t; cdecl; external libxcb;
+function xcb_destroy_window(c: xcb_connection_t; window: xcb_window_t): xcb_void_cookie_t; cdecl; external libxcb;
+
+         
          
 // Implementation
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
 begin
+if g_event_queue = nil then
+    g_event_queue := TList.Create;
   Result := xcb_connect(display_name, nil);
   g_xcb_conn := result;
 end;
@@ -2348,7 +2587,7 @@ begin
   end
   else
   begin
-     WriteLn('windo OK');
+     WriteLn('window create OK');
     Result := wid;
   end;
 end;
@@ -2358,14 +2597,15 @@ begin
   xcb_map_window(display, w);
 end;
 
-procedure XSelectInput(display: PDisplay; w: Window; event_mask: clong); cdecl;
-var
-  value_list: array[0..0] of cuint32;
+
+function XSelectInput(para1: PDisplay; para2: TWindow; para3: LongInt): LongInt; cdecl;
 begin
-  value_list[0] := event_mask;
-  xcb_change_window_attributes(display, w, CWEventMask, @value_list);
+  writeln('XSelectInput: event_mask = ', para3);
+  xcb_change_window_attributes(para1, para2, XCB_CW_EVENT_MASK, @para3);
+  Result := 0;
 end;
 
+{
 function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: TBool): Atom; cdecl;
 var
   cookie: xcb_intern_atom_cookie_t;
@@ -2384,6 +2624,50 @@ begin
      free(reply);
   end;
 end;
+}
+
+function XInternAtom(display: PDisplay; atom_name: PChar; only_if_exists: tbool): Atom; cdecl;
+var
+  conn: xcb_connection_t;
+  cookie: xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+begin
+  writeln(Format('DEBUG: XInternAtom called for atom: "%s", only_if_exists: %d', [atom_name, only_if_exists]));
+  Result := 0;
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    writeln('ERROR: XInternAtom: Could not get XCB connection.');
+    Exit;
+  end;
+
+  cookie := xcb_intern_atom(conn, CUChar(only_if_exists), CUShort(StrLen(atom_name)), atom_name);
+  reply := xcb_intern_atom_reply(conn, cookie, nil); // nil for error means we don't care about the error structure
+  if reply <> nil then
+  begin
+    Result := reply^.atom;
+    writeln(Format('DEBUG: XInternAtom: Atom "%s" interned successfully with ID: %d', [atom_name, Result]));
+    // Update global atoms if they are the ones being interned
+    if AnsiCompareText(atom_name, 'WM_PROTOCOLS') = 0 then
+    begin
+      g_wm_protocols_atom := Result;
+      writeln(Format('DEBUG: XInternAtom: g_wm_protocols_atom set to: %d', [g_wm_protocols_atom]));
+    end
+    else if AnsiCompareText(atom_name, 'WM_DELETE_WINDOW') = 0 then
+    begin
+      g_wm_delete_window_atom := Result;
+      writeln(Format('DEBUG: XInternAtom: g_wm_delete_window_atom set to: %d', [g_wm_delete_window_atom]));
+    end;
+    free(reply);
+  end
+  else
+  begin
+    writeln(Format('ERROR: XInternAtom: Failed to intern atom "%s".', [atom_name]));
+    Result := 0;
+  end;
+end;
+
 
 function XSendEvent(display: PDisplay; w: Window; propagate: tbool; event_mask: clong; event_send: PXEvent): cint; cdecl;
 var
@@ -2449,15 +2733,17 @@ end;
 
 function XCreateGC(display: PDisplay; d: Drawable; valuemask: culong; values: PXGCValues): GC; cdecl;
 var
-  cid: xcb_gcontext_t;
-  value_list: array[0..2] of cuint32;
+  gc_id: xcb_gcontext_t;
+  gc_ptr: GC;
 begin
-  cid           := xcb_generate_id(display);
-  value_list[0] := values^.foreground;
-  value_list[1] := values^.background;
-  value_list[2] := values^.font;
-  xcb_create_gc(display, cid, d, valuemask, @value_list);
-  Result        := Pointer(cid);
+  gc_id := xcb_generate_id(display);
+  writeln('XCreateGC: gc_id = ', gc_id, ', drawable = ', d, ', valuemask = ', valuemask);
+  if values <> nil then
+    writeln('XCreateGC: values.foreground = ', values^.foreground, ', values.background = ', values^.background);
+  xcb_create_gc(display, gc_id, d, valuemask, values);
+  GetMem(gc_ptr, SizeOf(cuint));
+  PLongWord(gc_ptr)^ := gc_id;
+  Result := gc_ptr;
 end;
 
 procedure XFreeGC(display: PDisplay; gc: GC); cdecl;
@@ -2957,6 +3243,50 @@ begin
   Result := XIC(ic);
 end;
 
+{
+function XInternAtom(display: PDisplay; atom_name: PAnsiChar; only_if_exists: CInt): Atom; cdecl;
+var
+  conn: xcb_connection_t;
+  cookie: xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+begin
+  writeln(Format('DEBUG: XInternAtom called for atom: "%s", only_if_exists: %d', [atom_name, only_if_exists]));
+  Result := 0;
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    writeln('ERROR: XInternAtom: Could not get XCB connection.');
+    Exit;
+  end;
+
+  cookie := xcb_intern_atom(conn, CUChar(only_if_exists), CUShort(StrLen(atom_name)), atom_name);
+  reply := xcb_intern_atom_reply(conn, cookie, nil); // nil for error means we don't care about the error structure
+  if reply <> nil then
+  begin
+    Result := reply^.atom;
+    writeln(Format('DEBUG: XInternAtom: Atom "%s" interned successfully with ID: %d', [atom_name, Result]));
+    // Update global atoms if they are the ones being interned
+    if AnsiCompareText(atom_name, 'WM_PROTOCOLS') = 0 then
+    begin
+      g_wm_protocols_atom := Result;
+      writeln(Format('DEBUG: XInternAtom: g_wm_protocols_atom set to: %d', [g_wm_protocols_atom]));
+    end
+    else if AnsiCompareText(atom_name, 'WM_DELETE_WINDOW') = 0 then
+    begin
+      g_wm_delete_window_atom := Result;
+      writeln(Format('DEBUG: XInternAtom: g_wm_delete_window_atom set to: %d', [g_wm_delete_window_atom]));
+    end;
+    free(reply);
+  end
+  else
+  begin
+    writeln(Format('ERROR: XInternAtom: Failed to intern atom "%s".', [atom_name]));
+    Result := 0;
+  end;
+end;
+}
+
 function XInternAtoms(dpy: PDisplay; names: PPChar; n: cint; only_if_exists: tbool; atoms_return: PAtom): TStatus; cdecl;
 var
   i: cint;
@@ -2977,6 +3307,7 @@ begin
     end;
   end;
 end;
+
 
 function XOpenIM(Display: PDisplay; rdb: PXrmHashBucketRec; res_name: PChar; res_class: PChar): XIM; cdecl;
 var
@@ -3125,6 +3456,7 @@ begin
  // xcb_aux_release(reply); 
 end;
 
+{
 function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
   Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
   bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
@@ -3200,8 +3532,139 @@ begin
   image^.f.put_pixel := nil;
   image^.f.sub_image := nil;
   image^.f.add_pixel := nil;
+  writeln('XCreateImage: depth = ', depth, ', format = ', XCB_IMAGE_FORMAT_Z_PIXMAP);
   Result := image;
 end;
+}
+
+// --- XCreateImage Implementation (moved after helper functions) ---
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
+  Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
+  bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
+var
+  new_image: TXImage;
+  image_data_size: CInt;
+  actual_bytes_per_line: CInt;
+  bits_per_pixel_val: CInt;
+  setup: Pxcb_setup_t;
+begin
+  Result := nil; // Default to nil
+
+  // Basic validation
+  if (Width = 0) or (Height = 0) then Exit;
+  if (Format <> XYBitmap) and (Format <> ZPixmap) then Exit; // Only support these two formats for now
+
+  // Allocate the TXImage record
+  New(Result);
+  if Result = nil then Exit;
+
+  // Initialize all fields to zero first
+  FillChar(new_image, SizeOf(TXImage), 0);
+
+  // Populate basic fields
+  new_image.Width := CInt(Width);
+  new_image.Height := CInt(Height);
+  new_image.xoffset := Offset;
+  new_image.format := Format;
+  new_image.depth := CInt(Depth);
+  new_image.bitmap_pad := bitmap_pad;
+
+  // Determine bits_per_pixel
+  bits_per_pixel_val := CalculateBitsPerPixel(Format, CInt(Depth));
+  if bits_per_pixel_val = 0 then
+  begin
+    Dispose(Result);
+    Exit;
+  end;
+  new_image.bits_per_pixel := bits_per_pixel_val;
+
+  // Get system byte order and bitmap bit order from XCB setup
+  setup := xcb_get_setup(g_xcb_conn);
+  if setup <> nil then
+  begin
+    // Xlib constants LSBFirst/MSBFirst usually correspond to XCB_IMAGE_ORDER_LSB_FIRST/MSB_FIRST
+    new_image.byte_order := CInt(setup^.image_byte_order);
+    new_image.bitmap_bit_order := CInt(setup^.bitmap_format_bit_order);
+    new_image.bitmap_unit := CInt(setup^.bitmap_format_scanline_unit);
+  end
+  else
+  begin
+    // Fallback to common defaults if setup info is not available
+    new_image.byte_order := LSBFirst; // Assume common little-endian
+    new_image.bitmap_bit_order := LSBFirst; // Assume common little-endian
+    new_image.bitmap_unit := 8; // Assume 8-bit unit
+  end;
+
+
+  // Calculate bytes_per_line if not provided (bytes_per_line = 0)
+  if bytes_per_line = 0 then
+  begin
+    actual_bytes_per_line := CalculateBytesPerLine(Width, new_image.bits_per_pixel, bitmap_pad);
+  end
+  else
+  begin
+    actual_bytes_per_line := bytes_per_line;
+  end;
+  new_image.bytes_per_line := actual_bytes_per_line;
+
+  // Calculate total data size
+  image_data_size := new_image.bytes_per_line * CInt(Height);
+  if image_data_size <= 0 then // Prevent zero or negative allocation
+  begin
+    Dispose(Result);
+    Exit;
+  end;
+
+  // Handle Data pointer: allocate if nil, otherwise use provided
+  if Data = nil then
+  begin
+    GetMem(new_image.Data, image_data_size);
+    if new_image.Data = nil then
+    begin
+      Dispose(Result);
+      Exit;
+    end;
+    FillChar(new_image.Data^, image_data_size, 0); // Initialize allocated memory to 0
+    new_image.obdata := Pointer(new_image.Data); // Mark that we allocated this memory
+  end
+  else
+  begin
+    new_image.Data := Data;
+    new_image.obdata := nil; // User provided data, we don't own it
+  end;
+
+  // Populate visual masks from the provided Visual structure
+  if Visual <> nil then
+  begin
+    new_image.red_mask := Visual^.red_mask;
+    new_image.green_mask := Visual^.green_mask;
+    new_image.blue_mask := Visual^.blue_mask;
+  end
+  else
+  begin
+    // Fallback masks if no visual provided or visual is nil
+    // These are common for 24-bit TrueColor
+    if new_image.depth >= 24 then
+    begin
+      new_image.red_mask := $FF0000;
+      new_image.green_mask := $00FF00;
+      new_image.blue_mask := $0000FF;
+    end;
+  end;
+
+  // Assign function pointers
+ // new_image.f.create_image := @XImage_create_image;
+  new_image.f.destroy_image := @XImage_destroy_image;
+  new_image.f.get_pixel := @XImage_get_pixel;
+  new_image.f.put_pixel := @XImage_put_pixel;
+  new_image.f.sub_image := @XImage_sub_image;
+  new_image.f.add_pixel := @XImage_add_pixel;
+
+  // Copy the populated new_image record to the Result pointer
+  Result^ := new_image;
+end;
+
+
 
 function XGetGeometry(display: PDisplay; d: TDrawable; root: PWindow; x, y: PLongInt; width, height, border_width, depth: PLongWord): LongInt; cdecl;
 var
@@ -3236,36 +3699,33 @@ end;
 
 function XPending(display: PDisplay): cint; cdecl;
 var
-  count: CInt;
-  generic_event: Pxcb_generic_event_t; // This type is already defined in the interface
+  generic_event: Pxcb_generic_event_t;
+  conn: xcb_connection_t;
 begin
-  count := 0;
-  // Ensure the XCB connection is valid before proceeding
-  // g_xcb_conn is a global variable already defined in xcb_types.pas implementation
-  if g_xcb_conn = nil then
+ // writeln('DEBUG: XPending called.');
+  Result := 0; // Default to 0 pending events
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
   begin
-    Result := 0; // No connection, so no pending events
+    writeln('ERROR: XPending: Could not get XCB connection.');
     Exit;
   end;
-    // Loop to count all pending events without blocking
+
+  // Poll for all currently available events and add them to the internal queue
   repeat
-    // xcb_poll_for_event checks for an event without blocking.
-    // It returns a pointer to an event if one is available, or nil if not.
-    // It also removes the event from the queue.
-    // xcb_poll_for_event is already declared as external in this implementation section.
-    generic_event := xcb_poll_for_event(g_xcb_conn);
+    generic_event := xcb_poll_for_event(conn);
     if generic_event <> nil then
     begin
-      Inc(count); // Increment the count of pending events
-      // Free the memory allocated for the event, as XPending only reports the count
-      // and does not pass the event data to the caller.
-      // 'free' is already declared as external in this implementation section.
-      xfree(generic_event);
+      g_event_queue.Add(generic_event); // Add event to queue, DO NOT FREE HERE
+      writeln(Format('DEBUG: XPending: Polled event %p, queue size: %d', [generic_event, g_event_queue.Count]));
     end;
-  until generic_event = nil; // Continue polling until no more events are pending
+  until generic_event = nil;
 
-  Result := count; // Return the total count of pending events
+  Result := g_event_queue.Count; // Return the count of events in the internal queue
+ // writeln(Format('DEBUG: XPending: Found %d pending events in queue.', [Result]));
 end;
+
 
 function XConfigureWindow(display: PDisplay; w: TWindow; value_mask: LongWord; values: Pointer): LongInt; cdecl;
 var
@@ -3353,19 +3813,553 @@ begin
   end;
 end;
 
+{
 procedure XNextEvent(display: PDisplay; event_return: PXEvent); cdecl;
 var
   xcb_event: Pxcb_generic_event_t;
 begin
   xcb_event := xcb_wait_for_event(display);
   if xcb_event <> nil then begin
-    event_return^._type := xcb_event^.response_type and $7F; // Mask high bit for Xlib type
+  writeln('event_return^._type = ',event_return^._type);
+    event_return^._type := xcb_event^._type and $7F; // Mask high bit for Xlib type
     // Copy event data (assumes TXEvent is large enough)
     move(xcb_event^, event_return^, sizeof(xcb_generic_event_t));
     free(xcb_event);
   end else
     FillChar(event_return^, sizeof(TXEvent), 0); // Clear on failure
 end;
+}
+
+
+//last
+// Implementation for XNextEvent
+{
+function XNextEvent(display: PDisplay; event_return: PXEvent): CInt; cdecl;
+var
+  generic_event: Pxcb_generic_event_t;
+  ge_event: Pxcb_ge_event_t; // For generic events (response_type = 0)
+  conn: xcb_connection_t;
+  xcb_client_msg: Pxcb_client_message_event_t;
+  xcb_key_press_msg: Pxcb_key_press_event_t;
+  xcb_expose_msg: Pxcb_expose_event_t;
+  raw_bytes: array[0..31] of CUChar; // For raw byte inspection
+  j: CInt;
+  temp_event_type_bytes: array[0..3] of CUChar; // For manual extraction
+  manual_event_type: CUInt; // For manual extraction
+begin
+  Result := 0; // Default to failure
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    writeln('ERROR: XNextEvent: Could not get XCB connection.');
+    Exit;
+  end;
+
+  // First, try to get an event from the internal queue (filled by XPending)
+  if g_event_queue.Count > 0 then
+  begin
+    generic_event := Pxcb_generic_event_t(g_event_queue.Items[0]);
+    g_event_queue.Delete(0); // Remove from queue
+  end
+  else
+  begin
+    // If queue is empty, wait for a new event (this will block)
+    generic_event := xcb_wait_for_event(conn);
+  end;
+
+
+  if generic_event <> nil then
+  begin
+    FillChar(event_return^, SizeOf(TXEvent), 0);
+
+    // Determine the actual event type, handling generic events (response_type = 0)
+    if (generic_event^._type and $7F) = 0 then // If it's a generic event
+    begin
+      ge_event := Pxcb_ge_event_t(generic_event); // Cast to generic event structure
+
+      // --- Manual extraction of event_type for debugging (only for GE) ---
+      Move(generic_event^, raw_bytes[0], SizeOf(xcb_generic_event_t));
+      Move(raw_bytes[8], temp_event_type_bytes[0], 4); // Copy the 4 bytes at offset 8
+      // Reconstruct CUInt from bytes (assuming little-endian for now, common on x86)
+      manual_event_type := CUInt(temp_event_type_bytes[0]) or
+                           (CUInt(temp_event_type_bytes[1]) shl 8) or
+                           (CUInt(temp_event_type_bytes[2]) shl 16) or
+                           (CUInt(temp_event_type_bytes[3]) shl 24);
+      // --- End manual extraction ---
+
+      event_return^._type := CInt(ge_event^.event_type); // Keep original assignment for comparison
+      // Only print if it's an unexpected generic event type
+      if (event_return^._type <> KeyPress) and (event_return^._type <> ClientMessage) and (event_return^._type <> Expose) then
+      begin
+        writeln(Format('DEBUG: XNextEvent: Detected XCB_GE_GENERIC. Raw response_type: %d. Manual event_type: %d (0x%x). Actual event_type: %d (from ge_event^.event_type)',
+          [generic_event^._type, manual_event_type, manual_event_type, event_return^._type]));
+        write('DEBUG: XNextEvent: Raw event bytes (first 16): ');
+        for j := 0 to 15 do
+          write(Format('%02x ', [raw_bytes[j]]));
+        writeln('');
+      end;
+    end
+    else
+    begin
+      // For standard X events, response_type holds the event type
+      event_return^._type := (generic_event^._type and $7F);
+      // Only print if it's an unexpected standard event type
+      if (event_return^._type <> KeyPress) and (event_return^._type <> ClientMessage) and (event_return^._type <> Expose) then
+      begin
+        writeln(Format('DEBUG: XNextEvent: Detected standard X event. Raw response_type: %d. Type: %d (from generic_event^.response_type)',
+          [generic_event^._type, event_return^._type]));
+      end;
+    end;
+
+    // Corrected access to common fields via xany
+    event_return^.xany.serial := generic_event^.sequence;
+    event_return^.xany.send_event := CInt( (generic_event^._type and $80) <> 0 );
+    event_return^.xany.display := display;
+    // The 'window' field is common, set it in each specific event type case below.
+    // For general events (like XAnyEvent), we can set it here if generic_event has a window field.
+    // Since generic_event doesn't have a direct 'window' field, it's safer to set it in specific event handlers.
+
+
+    case event_return^._type of // Use the determined _type field for dispatch
+      ClientMessage:
+      begin
+        xcb_client_msg := Pxcb_client_message_event_t(generic_event);
+        writeln('DEBUG: XNextEvent: Detected ClientMessage event.');
+        writeln(Format('DEBUG: ClientMessage: Raw response_type: %d, Sequence: %d, Window: %d',
+          [xcb_client_msg^._type, xcb_client_msg^.sequence, xcb_client_msg^.window]));
+
+        event_return^.xclient.message_type := xcb_client_msg^.type_;
+        event_return^.xclient.format := CInt(xcb_client_msg^.format);
+        event_return^.xany.window := TWindow(xcb_client_msg^.window); // Corrected: Set via xany
+
+        // Copy the 20 bytes of data from XCB event to the specific data union within xclient
+        Move(xcb_client_msg^.Data, event_return^.xclient.Data.b[0], SizeOf(xcb_client_msg^.Data));
+
+        writeln(Format('DEBUG: ClientMessage: message_type: %d (expected WM_PROTOCOLS: %d)',
+          [event_return^.xclient.message_type, g_wm_protocols_atom]));
+        writeln(Format('DEBUG: ClientMessage: data.l[0]: %d (expected WM_DELETE_WINDOW: %d)',
+          [event_return^.xclient.Data.l[0], g_wm_delete_window_atom]));
+
+        // Check for WM_DELETE_WINDOW protocol message
+        if (event_return^.xclient.message_type = g_wm_protocols_atom) and
+           (event_return^.xclient.Data.l[0] = g_wm_delete_window_atom) then
+        begin
+          writeln('DEBUG: ClientMessage: WM_DELETE_WINDOW protocol message received. Signalling exit...');
+          // In a real app, this would signal the main loop to exit
+        end;
+
+        Result := 1;
+      end;
+
+      KeyPress:
+      begin
+        xcb_key_press_msg := Pxcb_key_press_event_t(generic_event);
+        writeln('DEBUG: XNextEvent: Detected KeyPress event.');
+        writeln(Format('DEBUG: KeyPress: Raw response_type: %d, Sequence: %d, Window: %d',
+          [xcb_key_press_msg^._type, xcb_key_press_msg^.sequence, xcb_key_press_msg^.event]));
+
+        event_return^.xany.window := TWindow(xcb_key_press_msg^.event); // Corrected: Set via xany
+
+        event_return^.xkey.root := xcb_key_press_msg^.root;
+        event_return^.xkey.subwindow := xcb_key_press_msg^.child;
+        event_return^.xkey.time := xcb_key_press_msg^.time;
+        event_return^.xkey.x := xcb_key_press_msg^.event_x;
+        event_return^.xkey.y := xcb_key_press_msg^.event_y;
+        event_return^.xkey.x_root := xcb_key_press_msg^.root_x;
+        event_return^.xkey.y_root := xcb_key_press_msg^.root_y;
+        event_return^.xkey.state := xcb_key_press_msg^.state;
+        event_return^.xkey.keycode := xcb_key_press_msg^.detail;
+        event_return^.xkey.same_screen := CInt(xcb_key_press_msg^.same_screen);
+
+        writeln(Format('DEBUG: KeyPress: Keycode: %d', [event_return^.xkey.keycode]));
+        Result := 1;
+      end;
+
+      Expose:
+      begin
+        xcb_expose_msg := Pxcb_expose_event_t(generic_event);
+        writeln('DEBUG: XNextEvent: Detected Expose event.');
+        writeln(Format('DEBUG: Expose: Raw response_type: %d, Sequence: %d, Window: %d',
+          [xcb_expose_msg^._type, xcb_expose_msg^.sequence, xcb_expose_msg^.window]));
+
+        event_return^.xany.window := TWindow(xcb_expose_msg^.window); // Corrected: Set via xany
+
+        event_return^.xexpose.x := xcb_expose_msg^.x;
+        event_return^.xexpose.y := xcb_expose_msg^.y;
+        event_return^.xexpose.width := xcb_expose_msg^.width;
+        event_return^.xexpose.height := xcb_expose_msg^.height;
+        event_return^.xexpose.count := xcb_expose_msg^.count;
+
+        writeln(Format('DEBUG: Expose: Window: %d, X: %d, Y: %d, W: %d, H: %d',
+          [event_return^.xany.window, event_return^.xexpose.x, event_return^.xexpose.y,
+           event_return^.xexpose.width, event_return^.xexpose.height]));
+        Result := 1;
+      end;
+
+      else // For any other event type not explicitly handled
+      begin
+        writeln(Format('DEBUG: XNextEvent: Detected unhandled event type: %d', [event_return^._type]));
+        // Removed raw bytes dump for unhandled events to reduce clutter
+        Result := 1;
+      end;
+    end;
+
+    free(generic_event); // Always free the XCB-allocated event after processing
+  end
+  else
+  begin
+    // Suppress this debug message for nil events
+  end;
+end;
+}
+
+function XNextEvent(display: PDisplay; event_return: PmXEvent): CInt; cdecl;
+var
+  generic_event: Pxcb_generic_event_t;
+  conn: xcb_connection_t;
+  // Specific event pointers for casting the generic_event
+  xcb_client_msg: Pxcb_client_message_event_t;
+  xcb_key_press_msg: Pxcb_key_press_event_t;
+  xcb_expose_msg: Pxcb_expose_event_t;
+  // Pointers to the Xlib-mimic event structures within event_return^.data
+  xany: PmXAnyEvent;
+  xclient: Pxcb_client_message_event_t;
+  xkey: PXKeyEvent;
+  xexpose: Pointer; // For XExposeEvent, if you had a specific type for it
+begin
+  Result := 0; // Default to failure
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    Exit;
+  end;
+
+  // Blocks until an event occurs
+  generic_event := xcb_wait_for_event(conn);
+
+  if generic_event <> nil then
+  begin
+    // Clear the XEvent buffer to avoid old data
+    FillChar(event_return^, SizeOf(MXEvent), 0);
+
+    // Get common header pointer for easier access
+    xany := PmXAnyEvent(@event_return^.data);
+
+    // Populate common Xlib event header fields
+    xany^.display := display;
+    // The highest bit (0x80) in response_type indicates if event was sent by client
+    xany^.send_event := CInt( (generic_event^.response_type and $80) <> 0 );
+    xany^.serial := generic_event^.sequence; // XCB sequence maps to Xlib serial
+
+    case (generic_event^.response_type and $7F) of // Mask out the send_event bit
+      ClientMessage:
+      begin
+        xcb_client_msg := Pxcb_client_message_event_t(generic_event);
+        xclient := Pxcb_client_message_event_t(@event_return^.data);
+
+        xany^.event_type := ClientMessage;
+        xany^.window := xcb_client_msg^.window;
+
+        xclient^.response_type := xcb_client_msg^.response_type;
+        xclient^.format := CInt(xcb_client_msg^.format);
+
+        // Copy the 20 bytes of data from XCB event to Xlib mimic event's data union
+        Move(xcb_client_msg^.data, xclient^.data.data32[0], SizeOf(xcb_client_msg^.data));
+
+        Result := 1;
+      end;
+      KeyPress:
+      begin
+        xcb_key_press_msg := Pxcb_key_press_event_t(generic_event);
+        xkey := PXKeyEvent(@event_return^.data);
+
+        xany^.event_type := KeyPress;
+        xany^.window := xcb_key_press_msg^.event; // The window the event occurred in
+        xkey^.root := xcb_key_press_msg^.root;
+        xkey^.subwindow := xcb_key_press_msg^.child; // Xlib subwindow is XCB child
+        xkey^.time := xcb_key_press_msg^.time;
+        xkey^.x := xcb_key_press_msg^.event_x;
+        xkey^.y := xcb_key_press_msg^.event_y;
+        xkey^.x_root := xcb_key_press_msg^.root_x;
+        xkey^.y_root := xcb_key_press_msg^.root_y;
+        xkey^.state := xcb_key_press_msg^.state;
+        xkey^.keycode := xcb_key_press_msg^.detail;
+        xkey^.same_screen := xcb_key_press_msg^.same_screen;
+
+        Result := 1;
+      end;
+      Expose:
+      begin
+        xcb_expose_msg := Pxcb_expose_event_t(generic_event);
+        // If you had a specific XExposeEvent type, you'd cast to it here
+        // For now, we'll just set common fields and the window.
+        xany^.event_type := Expose;
+        xany^.window := xcb_expose_msg^.window;
+        // You might want to map x, y, width, height, count from xcb_expose_msg here
+        Result := 1;
+      end;
+      else // For any other event type not explicitly handled, just set the type
+      begin
+        xany^.event_type := (generic_event^.response_type and $7F);
+        // For unhandled types, we can still copy the initial generic header
+        // This ensures at least basic info is available if needed.
+        Move(generic_event^, event_return^.data[0], SizeOf(xcb_generic_event_t));
+        Result := 1;
+      end;
+    end;
+
+    free(generic_event); // Always free the XCB-allocated event
+  end;
+end;
+
+{
+function XInternAtom(display: PDisplay; atom_name: PAnsiChar; only_if_exists: CInt): Atom; cdecl;
+var
+  conn: xcb_connection_t;
+  cookie: xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+begin
+  writeln(Format('DEBUG: XInternAtom called for atom: %s, only_if_exists: %d', [atom_name, only_if_exists]));
+  Result := 0;
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    writeln('ERROR: XInternAtom: Could not get XCB connection.');
+    Exit;
+  end;
+
+  cookie := xcb_intern_atom(conn, CUChar(only_if_exists), CUShort(StrLen(atom_name)), atom_name);
+  writeln('DEBUG: XInternAtom: xcb_intern_atom called.');
+  reply := xcb_intern_atom_reply(conn, cookie, nil); // nil for error means we don't care about the error structure
+  if reply <> nil then
+  begin
+    Result := reply^.atom;
+    writeln(Format('DEBUG: XInternAtom: Atom "%s" interned successfully with ID: %d', [atom_name, Result]));
+    free(reply);
+  end
+  else
+  begin
+    writeln(Format('ERROR: XInternAtom: Failed to intern atom "%s".', [atom_name]));
+    Result := 0;
+  end;
+end;
+}
+{
+function XInternAtom(display: PDisplay; atom_name: PAnsiChar; only_if_exists: CInt): Atom; cdecl;
+var
+  conn: xcb_connection_t;
+  cookie: xcb_intern_atom_cookie_t;
+  reply: Pxcb_intern_atom_reply_t;
+begin
+  writeln(Format('DEBUG: XInternAtom called for atom: "%s", only_if_exists: %d', [atom_name, only_if_exists]));
+  Result := 0;
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    writeln('ERROR: XInternAtom: Could not get XCB connection.');
+    Exit;
+  end;
+
+  cookie := xcb_intern_atom(conn, CUChar(only_if_exists), CUShort(StrLen(atom_name)), atom_name);
+  // No need to print xcb_intern_atom called, it's implicit.
+  reply := xcb_intern_atom_reply(conn, cookie, nil); // nil for error means we don't care about the error structure
+  if reply <> nil then
+  begin
+    Result := reply^.atom;
+    writeln(Format('DEBUG: XInternAtom: Atom "%s" interned successfully with ID: %d', [atom_name, Result]));
+    // Update global atoms if they are the ones being interned
+    if AnsiCompareText(atom_name, 'WM_PROTOCOLS') = 0 then
+    begin
+      g_wm_protocols_atom := Result;
+      writeln(Format('DEBUG: XInternAtom: g_wm_protocols_atom set to: %d', [g_wm_protocols_atom]));
+    end
+    else if AnsiCompareText(atom_name, 'WM_DELETE_WINDOW') = 0 then
+    begin
+      g_wm_delete_window_atom := Result;
+      writeln(Format('DEBUG: XInternAtom: g_wm_delete_window_atom set to: %d', [g_wm_delete_window_atom]));
+    end;
+    free(reply);
+  end
+  else
+  begin
+    writeln(Format('ERROR: XInternAtom: Failed to intern atom "%s".', [atom_name]));
+    Result := 0;
+  end;
+end;
+}
+
+{
+// Implementation for XNextEvent
+function XNextEvent(display: PDisplay; event_return: PXEvent): CInt; cdecl;
+var
+  generic_event: Pxcb_generic_event_t;
+  ge_event: Pxcb_ge_event_t; // For generic events (response_type = 0)
+  conn: xcb_connection_t;
+  xcb_client_msg: Pxcb_client_message_event_t;
+  xcb_key_press_msg: Pxcb_key_press_event_t;
+  xcb_expose_msg: Pxcb_expose_event_t;
+  raw_bytes: array[0..31] of CUChar; // For raw byte inspection
+  j: CInt;
+begin
+   writeln('DEBUG: XNextEvent called.');
+  Result := 0; // Default to failure
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    writeln('ERROR: XNextEvent: Could not get XCB connection.');
+    Exit;
+  end;
+
+  // First, try to get an event from the internal queue (filled by XPending)
+  if g_event_queue.Count > 0 then
+  begin
+    generic_event := Pxcb_generic_event_t(g_event_queue.Items[0]);
+    g_event_queue.Delete(0); // Remove from queue
+    writeln(Format('DEBUG: XNextEvent: Retrieved event %p from internal queue. Remaining: %d', [generic_event, g_event_queue.Count]));
+  end
+  else
+  begin
+    // If queue is empty, wait for a new event (this will block)
+   // writeln('DEBUG: XNextEvent: Internal queue empty. Waiting for event from XCB...');
+    generic_event := xcb_wait_for_event(conn);
+    writeln(Format('DEBUG: XNextEvent: Received XCB generic event: %p (blocking call)', [generic_event]));
+  end;
+
+
+  if generic_event <> nil then
+  begin
+    // Dump raw bytes for debugging
+      Move(generic_event^, raw_bytes[0], SizeOf(xcb_generic_event_t)); // This copies 32 bytes
+write('DEBUG: XNextEvent: Raw event bytes (first 16): '); // Adjusted label
+for j := 0 to 15 do // Dump more bytes!
+  write(Format('%02x ', [raw_bytes[j]]));
+writeln('');
+  
+   {
+    write('DEBUG: XNextEvent: Raw event bytes (first 8): ');
+    for j := 0 to 7 do
+      write(Format('%02x ', [raw_bytes[j]]));
+    writeln('');
+    writeln(Format('DEBUG: XNextEvent: Raw generic_event^.response_type: %d', [generic_event^._type]));
+    }
+
+    FillChar(event_return^, SizeOf(TXEvent), 0);
+
+    // Determine the actual event type, handling generic events (response_type = 0)
+    if (generic_event^._type and $7F) = 0 then // If it's a generic event
+    begin
+      ge_event := Pxcb_ge_event_t(generic_event); // Cast to generic event structure
+      event_return^._type := CInt(ge_event^.event_type); // Use the event_type field
+      writeln(Format('DEBUG: XNextEvent: Detected XCB_GE_GENERIC. Actual event_type: %d', [event_return^._type]));
+    end
+    else
+    begin
+      // For standard X events, response_type holds the event type
+      event_return^._type := (generic_event^._type and $7F);
+    end;
+
+    event_return^.serial := generic_event^.sequence;
+    event_return^.send_event := CInt( (generic_event^._type and $80) <> 0 );
+    event_return^.display := display;
+    // The 'window' field is common, but its source depends on the specific event type.
+    // We'll set it within the specific event cases.
+
+    writeln(Format('DEBUG: XNextEvent: Processed generic event. Type: %d, Serial: %d, SendEvent: %d',
+      [event_return^._type, event_return^.serial, event_return^.send_event]));
+
+    case event_return^._type of // Use the determined _type field for dispatch
+      ClientMessage:
+      begin
+        xcb_client_msg := Pxcb_client_message_event_t(generic_event);
+        writeln('DEBUG: XNextEvent: Detected ClientMessage event.');
+
+        event_return^.xclient.message_type := xcb_client_msg^.type_;
+        event_return^.xclient.format := CInt(xcb_client_msg^.format);
+        event_return^.window := TWindow(xcb_client_msg^.window); // Set common window field
+
+        // Copy the 20 bytes of data from XCB event to the specific data union within xclient
+        Move(xcb_client_msg^.Data, event_return^.xclient.Data.b[0], SizeOf(xcb_client_msg^.Data));
+       
+       {
+        writeln(Format('DEBUG: ClientMessage: message_type: %d (expected WM_PROTOCOLS: %d)',
+          [event_return^.xclient.message_type, g_wm_protocols_atom]));
+        writeln(Format('DEBUG: ClientMessage: data.l[0]: %d (expected WM_DELETE_WINDOW: %d)',
+          [event_return^.xclient.Data.l[0], g_wm_delete_window_atom]));
+
+        // Check for WM_DELETE_WINDOW protocol message
+        if (event_return^.xclient.message_type = g_wm_protocols_atom) and
+           (event_return^.xclient.Data.l[0] = g_wm_delete_window_atom) then
+        begin
+          writeln('DEBUG: ClientMessage: WM_DELETE_WINDOW protocol message received. Breaking loop...');
+          // In a real app, this would signal the main loop to exit
+        end;
+        }
+
+        Result := 1;
+      end;
+
+      KeyPress:
+      begin
+        xcb_key_press_msg := Pxcb_key_press_event_t(generic_event);
+        writeln('DEBUG: XNextEvent: Detected KeyPress event.');
+
+        event_return^.window := TWindow(xcb_key_press_msg^.event); // Set common window field
+
+        event_return^.xkey.root := xcb_key_press_msg^.root;
+        event_return^.xkey.subwindow := xcb_key_press_msg^.child;
+        event_return^.xkey.time := xcb_key_press_msg^.time;
+        event_return^.xkey.x := xcb_key_press_msg^.event_x;
+        event_return^.xkey.y := xcb_key_press_msg^.event_y;
+        event_return^.xkey.x_root := xcb_key_press_msg^.root_x;
+        event_return^.xkey.y_root := xcb_key_press_msg^.root_y;
+        event_return^.xkey.state := xcb_key_press_msg^.state;
+        event_return^.xkey.keycode := xcb_key_press_msg^.detail;
+        event_return^.xkey.same_screen := CInt(xcb_key_press_msg^.same_screen);
+
+        writeln(Format('DEBUG: KeyPress: Keycode: %d', [event_return^.xkey.keycode]));
+        Result := 1;
+      end;
+
+      Expose:
+      begin
+        xcb_expose_msg := Pxcb_expose_event_t(generic_event);
+        writeln('DEBUG: XNextEvent: Detected Expose event.');
+
+        event_return^.window := TWindow(xcb_expose_msg^.window); // Set common window field
+
+        event_return^.xexpose.x := xcb_expose_msg^.x;
+        event_return^.xexpose.y := xcb_expose_msg^.y;
+        event_return^.xexpose.width := xcb_expose_msg^.width;
+        event_return^.xexpose.height := xcb_expose_msg^.height;
+        event_return^.xexpose.count := xcb_expose_msg^.count;
+
+        writeln(Format('DEBUG: Expose: Window: %d, X: %d, Y: %d, W: %d, H: %d',
+          [event_return^.window, event_return^.xexpose.x, event_return^.xexpose.y,
+           event_return^.xexpose.width, event_return^.xexpose.height]));
+        Result := 1;
+      end;
+
+      else // For any other event type not explicitly handled
+      begin
+      //  writeln(Format('DEBUG: XNextEvent: Detected unhandled event type: %d', [event_return^._type]));
+        Result := 1;
+      end;
+    end;
+
+    free(generic_event); // Always free the XCB-allocated event after processing
+  end
+  else
+  begin
+    writeln('DEBUG: XNextEvent: generic_event was nil after polling/waiting.');
+  end;
+end;
+}
+
 
 function XShapeQueryExtension(display: PDisplay; event_base, error_base: Pcint): TBool; cdecl;
 var
@@ -3577,19 +4571,227 @@ begin
 
 end;
 
-function XSetWMProtocols(para1: PDisplay; para2: TWindow; para3: PAtom; para4: cint): TStatus; cdecl;
+{
+function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
+//function XSetWMProtocols(display: PDisplay; w: XWindow; protocols: PAtom; count: CInt): CInt; cdecl;
+var
+  cookie: xcb_void_cookie_t;
+  error_ptr: Pointer;
 begin
+  Result := 0; // Default to failure
 
+  if g_xcb_conn = nil then Exit;
+
+  // Use xcb_change_property to set the WM_PROTOCOLS property.
+  // Property: WM_PROTOCOLS (atom obtained via XInternAtom)
+  // Type: XA_ATOM (standard atom for atom type)
+  // Format: 32 (atoms are 32-bit values on XCB)
+  // Data: protocols (array of Atom IDs)
+  // Data_len: count (number of atoms in the array)
+  cookie := xcb_change_property(
+    g_xcb_conn,
+    PropModeReplace, // Always replace existing protocols
+    CUInt(w),        // Window ID
+    CUInt(XInternAtom(display, 'WM_PROTOCOLS', 0)), // Property atom
+    4,         // Type of data (Atom)
+    32,              // Format (32-bit values)
+    CUInt(count),    // Number of items
+    protocols        // Pointer to the array of Atom IDs
+  );
+
+  error_ptr := xcb_request_check(g_xcb_conn, cookie);
+  if error_ptr <> nil then
+  begin
+    free(error_ptr);
+    Result := 0; // Failure
+  end
+  else
+  begin
+    Result := 1; // Success
+  end;
+end;
+}
+{
+function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
+var
+  cookie: xcb_void_cookie_t;
+  error_ptr: Pointer;
+  i: CInt;
+begin
+  Result := 0; // Default to failure
+   writeln(SysUtils.Format('DEBUG: XSetWMProtocols: Setting protocols for window %x (count: %d)', [w, count]));
+
+  if g_xcb_conn = nil then
+  begin
+     writeln('DEBUG: XSetWMProtocols: g_xcb_conn is NIL. Cannot set protocols.');
+    Exit;
+  end;
+
+  // Debugging protocol list
+  for i := 0 to count - 1 do
+  begin
+   //  writeln(SysUtils.Format('DEBUG: XSetWMProtocols: Protocol[%d]: %d', [i, protocols^[i]]));
+  
+  end;
+
+  // Use xcb_change_property to set the WM_PROTOCOLS property.
+  // Property: WM_PROTOCOLS (atom obtained via XInternAtom)
+  // Type: XA_ATOM (standard atom for atom type)
+  // Format: 32 (atoms are 32-bit values on XCB)
+  // Data: protocols (array of Atom IDs)
+  // Data_len: count (number of items)
+  cookie := xcb_change_property(
+    g_xcb_conn,
+    PropModeReplace, // Always replace existing protocols
+    CUInt(w),        // Window ID
+    CUInt(XInternAtom(display, 'WM_PROTOCOLS', 0)), // Property atom (used 0 for False)
+    4,         // Type of data (Atom)
+    32,              // Format (32-bit values)
+    CUInt(count),    // Number of items
+    protocols        // Pointer to the array of Atom IDs
+  );
+
+  error_ptr := xcb_request_check(g_xcb_conn, cookie);
+  if error_ptr <> nil then
+  begin
+   writeln('DEBUG: XSetWMProtocols: FAILED to set WM_PROTOCOLS property.');
+    free(error_ptr);
+    Result := 0; // Failure
+  end
+  else
+  begin
+     writeln('DEBUG: XSetWMProtocols: Successfully set WM_PROTOCOLS property.');
+    Result := 1; // Success
+  end;
+end;
+}
+
+function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
+var
+  conn: xcb_connection_t;
+  cookie: xcb_void_cookie_t;
+  error_ptr: Pointer;
+  i: CInt;
+begin
+  writeln(Format('DEBUG: XSetWMProtocols called for window ID: %d, count: %d', [w, count]));
+  Result := 0;
+
+  conn := XGetXCBConnection(display);
+  if conn = nil then
+  begin
+    writeln('ERROR: XSetWMProtocols: Could not get XCB connection.');
+    Exit;
+  end;
+
+  // Intern WM_PROTOCOLS if not already done (it's a property atom)
+  if g_wm_protocols_atom = 0 then
+  begin
+    writeln('DEBUG: XSetWMProtocols: WM_PROTOCOLS atom not yet interned, interning now.');
+    g_wm_protocols_atom := XInternAtom(display, 'WM_PROTOCOLS', 0);
+  end;
+
+  // Store the WM_DELETE_WINDOW atom (which is passed in protocols[0])
+  if (count > 0) and (protocols <> nil) then
+  begin
+    g_wm_delete_window_atom := protocols^; // Corrected: Use protocols^ to dereference the PAtom
+    writeln(Format('DEBUG: XSetWMProtocols: Value of protocols^ (WM_DELETE_WINDOW being set): %d', [protocols^])); // Added debug
+  end;
+
+  writeln(Format('DEBUG: XSetWMProtocols: Using WM_PROTOCOLS_ATOM: %d, WM_DELETE_WINDOW_ATOM: %d for property setting',
+    [g_wm_protocols_atom, g_wm_delete_window_atom]));
+
+
+  // Call xcb_change_property to set the WM_PROTOCOLS property on the window
+  cookie := xcb_change_property(
+    conn,
+    XCB_PROP_MODE_REPLACE, // Replace any existing property
+    CUInt(w),              // Window ID
+    g_wm_protocols_atom,   // The property atom (WM_PROTOCOLS)
+    4,                     // The type of the property value (ATOM) 4
+    32,                    // Format: 32-bit data
+    CUInt(count),          // Number of atoms in the data array
+    protocols              // Pointer to the array of atoms (e.g., WM_DELETE_WINDOW)
+  );
+  writeln('DEBUG: XSetWMProtocols: xcb_change_property called.');
+
+  error_ptr := xcb_request_check(conn, cookie);
+  if error_ptr <> nil then
+  begin
+    writeln('ERROR: XSetWMProtocols: xcb_change_property failed.');
+    free(error_ptr);
+    Result := 0;
+  end
+  else
+  begin
+    writeln('DEBUG: XSetWMProtocols: WM_PROTOCOLS property set successfully.');
+    Result := 1;
+  end;
 end;
 
-function XDestroyWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
-begin
 
+function XDestroyWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
+var
+  cookie: xcb_void_cookie_t;
+  error_ptr: Pointer;
+begin
+  Result := 0; // Default to failure
+
+  if g_xcb_conn = nil then Exit;
+
+  cookie := xcb_destroy_window(g_xcb_conn, CUInt(AWindow));
+  error_ptr := xcb_request_check(g_xcb_conn, cookie);
+  if error_ptr <> nil then
+  begin
+    free(error_ptr);
+    Result := 0; // Failure
+  end
+  else
+  begin
+    Result := 1; // Success
+  end;
 end;
 
 function XGetWMNormalHints(display: PDisplay; w: TWindow; hints_return: PXSizeHints; supplied_return: PLongInt): LongInt; cdecl;
+var
+  wm_normal_hints: xcb_atom_t;
+  cookie: xcb_get_property_cookie_t;
+  reply: Pxcb_get_property_reply_t;
+  atom_cookie: xcb_intern_atom_cookie_t;
+  atom_reply: Pxcb_intern_atom_reply_t;
 begin
-
+  if hints_return = nil then begin
+    writeln('XGetWMNormalHints: hints_return is nil');
+    Result := 0;
+    Exit;
+  end;
+  writeln('XGetWMNormalHints: hints_return = ', PtrInt(hints_return));
+  atom_cookie := xcb_intern_atom(display, 0, Length('WM_NORMAL_HINTS'), 'WM_NORMAL_HINTS');
+  atom_reply := xcb_intern_atom_reply(display, atom_cookie, nil);
+  if atom_reply = nil then begin
+    writeln('XGetWMNormalHints: atom_reply is nil');
+    Result := 0;
+    Exit;
+  end;
+  wm_normal_hints := atom_reply^.atom;
+  writeln('XGetWMNormalHints: wm_normal_hints = ', wm_normal_hints);
+  free(atom_reply);
+  cookie := xcb_get_property(display, 0, w, wm_normal_hints, wm_normal_hints, 0, 18);
+  reply := xcb_get_property_reply(display, cookie, nil);
+  if (reply <> nil) and (reply^.value_len > 0) then begin
+    Move(xcb_get_property_value(reply)^, hints_return^, SizeOf(XSizeHints));
+    if supplied_return <> nil then
+      supplied_return^ := hints_return^.flags;
+    writeln('XGetWMNormalHints: flags = ', hints_return^.flags, ', reply = ', PtrInt(reply), ', value_len = ', reply^.value_len);
+    free(reply);
+    Result := 1;
+  end else begin
+    free(reply);
+    FillChar(hints_return^, SizeOf(XSizeHints), 0);
+    if supplied_return <> nil then
+      supplied_return^ := 0;
+    writeln('XGetWMNormalHints: reply is nil or empty');
+    Result := 0;
+  end;
 end;
 
 function XUnmapWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
@@ -3613,8 +4815,24 @@ begin
 end;
 
 function XCheckTypedWindowEvent(para1: PDisplay; para2: TWindow; para3: cint; para4: PXEvent): TBoolResult; cdecl;
+var
+  event: Pxcb_generic_event_t;
 begin
-
+  event := xcb_poll_for_event(para1);
+  if event = nil then begin
+    writeln('XCheckTypedWindowEvent: no event');
+    Result := false;
+    Exit;
+  end;
+  if (event^.response_type and $7F) = para3 then begin
+    Move(event^, para4^, SizeOf(TXEvent));
+    writeln('XCheckTypedWindowEvent: event_type = ', para3);
+    free(event);
+    Result := true;
+  end else begin
+    free(event);
+    Result := false;
+  end;
 end;
 
 function XPeekEvent(ADisplay: PDisplay; AEvent: PXEvent): cint; cdecl;
@@ -3633,11 +4851,6 @@ begin
 end;
 
 function XGetErrorText(para1: PDisplay; para2: cint; para3: PChar; para4: cint): cint; cdecl;
-begin
-
-end;
-
-function XCreateColormap(para1: PDisplay; para2: TWindow; para3: PVisual; para4: cint): TColormap; cdecl;
 begin
 
 end;
@@ -3662,9 +4875,30 @@ begin
 
 end;
 
-function XChangeGC(para1: PDisplay; para2: TGC; para3: culong; para4: PXGCValues): cint; cdecl;
+function XChangeGC(display: PDisplay; gc: TGC; valuemask: LongWord; values: Pointer): LongInt; cdecl;
+var
+  gc_id: LongWord;
 begin
-
+  if gc = nil then begin
+    writeln('XChangeGC: gc is nil');
+    Result := 0;
+    Exit;
+  end;
+  if values = nil then begin
+    writeln('XChangeGC: values is nil');
+    Result := 0;
+    Exit;
+  end;
+  try
+    gc_id := PLongWord(gc)^;
+    writeln('XChangeGC: gc_id = ', gc_id, ', valuemask = ', valuemask, ', values = ', PtrInt(values));
+    xcb_change_gc(display, gc_id, valuemask, values);
+  except
+    writeln('XChangeGC: failed, gc = ', PtrInt(gc), ', values = ', PtrInt(values));
+    Result := 0;
+    Exit;
+  end;
+  Result := 0;
 end;
 
 function XSetClipMask(para1: PDisplay; para2: TGC; para3: TPixmap): cint; cdecl;
@@ -3800,11 +5034,6 @@ begin
 end;
 
 function XRRUpdateConfiguration(event: pXEvent): cint; cdecl;
-begin
-
-end;
-
-function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
 begin
 
 end;
@@ -3979,6 +5208,366 @@ end;
 function getxrandrlib: Boolean;
 begin
   Result := True;
+end;
+
+// Helper to calculate bits per pixel based on format and depth
+function CalculateBitsPerPixel(AFormat: CInt; ADepth: CInt): CInt;
+begin
+  case AFormat of
+    XYBitmap: Result := 1;
+    ZPixmap: Result := ADepth; // For ZPixmap, bits per pixel is typically the depth
+    else Result := 0; // Unknown or unsupported format
+  end;
+end;
+
+// Helper to calculate bytes per line if not provided
+function CalculateBytesPerLine(AWidth: CUInt; ABitsPerPixel: CInt; ABitmapPad: CInt): CInt;
+var
+  bits_per_line: CInt;
+begin
+  bits_per_line := AWidth * ABitsPerPixel;
+  // Pad to the next multiple of bitmap_pad
+  Result := (bits_per_line + ABitmapPad - 1) div ABitmapPad * (ABitmapPad div 8);
+end;
+
+// --- Implementations for TXImage.f functions (moved above XCreateImage) ---
+
+function XImage_create_image(para1: PDisplay; para2: PVisual; para3: CUInt; para4: CInt; para5: CInt; para6: PChar; para7: CUInt; para8: CUInt; para9: CInt; para10: CInt): PXImage; cdecl;
+begin
+  // This function pointer should point back to the main XCreateImage function.
+  // This allows Xlib's XImage functions to create new XImages consistently.
+  Result := XCreateImage(para1, para2, para3, para4, para5, para6, para7, para8, para9, para10);
+end;
+
+function XImage_destroy_image(para1: PXImage): CInt; cdecl;
+begin
+  Result := 0; // Indicate failure by default
+
+  if para1 = nil then Exit;
+
+  // If the Data was allocated by XCreateImage (i.e., obdata points to Data), free it.
+  // In our current XCreateImage, if Data is nil on input, we allocate it and obdata points to it.
+  // If Data was provided by the user, we should NOT free it.
+  // A simple way to track this is to set obdata to Data if allocated internally, else nil.
+  if (para1^.obdata <> nil) and (para1^.obdata = Pointer(para1^.Data)) then
+  begin
+    FreeMem(para1^.Data);
+    para1^.Data := nil;
+  end;
+
+  // Dispose of the TXImage record itself
+  Dispose(para1);
+  Result := 1; // Indicate success
+end;
+
+function XImage_get_pixel(para1: PXImage; para2: CInt; para3: CInt): CULong; cdecl;
+var
+  byte_offset: CInt;
+  bit_offset_in_byte: CInt;
+  pixel_value: CULong;
+  byte_data: CUChar;
+  mask_size: CInt;
+  shift: CInt;
+  byte_idx: CInt;
+begin
+  Result := 0; // Default to 0
+
+  if (para1 = nil) or (para1^.Data = nil) then Exit;
+  if (para2 < 0) or (para2 >= para1^.Width) or (para3 < 0) or (para3 >= para1^.Height) then Exit;
+
+  // Calculate the starting bit position of the pixel
+  // xoffset is usually 0 for ZPixmap, but can be non-zero for XYPixmap
+  // We are assuming ZPixmap for simplicity in pixel packing.
+  // For XYBitmap, bits_per_pixel is 1.
+
+  case para1^.format of
+    ZPixmap:
+      begin
+        // Calculate byte offset to the start of the pixel's data
+        byte_offset := para3 * para1^.bytes_per_line + (para2 * para1^.bits_per_pixel div 8);
+        bit_offset_in_byte := (para2 * para1^.bits_per_pixel) mod 8;
+
+        if byte_offset + (para1^.bits_per_pixel div 8) > para1^.bytes_per_line * para1^.Height then Exit; // Bounds check
+
+        pixel_value := 0;
+        mask_size := para1^.bits_per_pixel;
+
+        // Read bytes based on bits_per_pixel and byte_order
+        case para1^.bits_per_pixel of
+          1..8: // 1 byte
+            begin
+              byte_data := CUChar(para1^.Data[byte_offset]);
+              if para1^.bitmap_bit_order = LSBFirst then
+                shift := bit_offset_in_byte
+              else // MSBFirst
+                shift := 8 - (bit_offset_in_byte + mask_size); // Adjust for MSB first within byte
+
+              pixel_value := (byte_data shr shift) and ((1 shl mask_size) - 1);
+            end;
+          9..16: // 2 bytes
+            begin
+              if para1^.byte_order = LSBFirst then
+                pixel_value := CULong(Word(para1^.Data[byte_offset+1]) shl 8) or CULong(Word(para1^.Data[byte_offset]))
+              else // MSBFirst
+                pixel_value := CULong(Word(para1^.Data[byte_offset]) shl 8) or CULong(Word(para1^.Data[byte_offset+1]));
+            end;
+          17..24: // 3 bytes (common for 24-bit, often padded to 32)
+            begin
+              // Read 3 bytes, handle byte order
+              if para1^.byte_order = LSBFirst then
+                pixel_value := (CULong(para1^.Data[byte_offset+2]) shl 16) or
+                               (CULong(para1^.Data[byte_offset+1]) shl 8) or
+                                CULong(para1^.Data[byte_offset])
+              else // MSBFirst
+                pixel_value := (CULong(para1^.Data[byte_offset]) shl 16) or
+                               (CULong(para1^.Data[byte_offset+1]) shl 8) or
+                                CULong(para1^.Data[byte_offset+2]);
+            end;
+          25..32: // 4 bytes
+            begin
+              if para1^.byte_order = LSBFirst then
+                pixel_value := (CULong(para1^.Data[byte_offset+3]) shl 24) or
+                               (CULong(para1^.Data[byte_offset+2]) shl 16) or
+                               (CULong(para1^.Data[byte_offset+1]) shl 8) or
+                                CULong(para1^.Data[byte_offset])
+              else // MSBFirst
+                pixel_value := (CULong(para1^.Data[byte_offset]) shl 24) or
+                               (CULong(para1^.Data[byte_offset+1]) shl 16) or
+                               (CULong(para1^.Data[byte_offset+2]) shl 8) or
+                                CULong(para1^.Data[byte_offset+3]);
+            end;
+          else // Handle other bit depths or error
+            Exit;
+        end;
+
+        // Apply masks if visual is TrueColor and masks are provided
+        if (para1^.red_mask <> 0) or (para1^.green_mask <> 0) or (para1^.blue_mask <> 0) then
+        begin
+          // This is a simplified approach. Proper mask application involves
+          // shifting and combining based on mask positions.
+          // For now, assume pixel_value already contains the combined RGB.
+          // If the image is 24-bit RGB (0xRRGGBB), the masks help extract components.
+          // For a direct pixel value, we might just return it.
+        end;
+
+        Result := pixel_value;
+      end;
+    XYBitmap: // 1 bit per pixel, packed
+      begin
+        byte_offset := para3 * para1^.bytes_per_line + (para2 div 8);
+        bit_offset_in_byte := para2 mod 8;
+
+        if byte_offset >= para1^.bytes_per_line * para1^.Height then Exit; // Bounds check
+
+        byte_data := CUChar(para1^.Data[byte_offset]);
+
+        if para1^.bitmap_bit_order = LSBFirst then
+          shift := bit_offset_in_byte
+        else // MSBFirst
+          shift := 7 - bit_offset_in_byte;
+
+        Result := (byte_data shr shift) and 1; // Get the single bit
+      end;
+    else
+      // Unsupported format or error
+      Result := 0;
+  end;
+end;
+
+function XImage_put_pixel(para1: PXImage; para2: CInt; para3: CInt; para4: CULong): CInt; cdecl;
+var
+  byte_offset: CInt;
+  bit_offset_in_byte: CInt;
+  byte_data: CUChar;
+  mask_size: CInt;
+  shift: CInt;
+  pixel_val_to_write: CULong;
+begin
+  Result := 0; // Default to failure
+
+  if (para1 = nil) or (para1^.Data = nil) then Exit;
+  if (para2 < 0) or (para2 >= para1^.Width) or (para3 < 0) or (para3 >= para1^.Height) then Exit;
+
+  case para1^.format of
+    ZPixmap:
+      begin
+        byte_offset := para3 * para1^.bytes_per_line + (para2 * para1^.bits_per_pixel div 8);
+        bit_offset_in_byte := (para2 * para1^.bits_per_pixel) mod 8;
+
+        if byte_offset + (para1^.bits_per_pixel div 8) > para1^.bytes_per_line * para1^.Height then Exit; // Bounds check
+
+        pixel_val_to_write := para4;
+        mask_size := para1^.bits_per_pixel;
+
+        case para1^.bits_per_pixel of
+          1..8: // 1 byte
+            begin
+              byte_data := CUChar(para1^.Data[byte_offset]);
+              if para1^.bitmap_bit_order = LSBFirst then
+                shift := bit_offset_in_byte
+              else // MSBFirst
+                shift := 8 - (bit_offset_in_byte + mask_size);
+
+              // Clear bits at position, then set new bits
+              byte_data := byte_data and not (CUChar((1 shl mask_size) - 1) shl shift);
+              byte_data := byte_data or (CUChar(pixel_val_to_write and ((1 shl mask_size) - 1)) shl shift);
+              para1^.Data[byte_offset] := Char(byte_data);
+            end;
+          9..16: // 2 bytes
+            begin
+              if para1^.byte_order = LSBFirst then
+              begin
+                para1^.Data[byte_offset] := Char(pixel_val_to_write and $FF);
+                para1^.Data[byte_offset+1] := Char((pixel_val_to_write shr 8) and $FF);
+              end
+              else // MSBFirst
+              begin
+                para1^.Data[byte_offset] := Char((pixel_val_to_write shr 8) and $FF);
+                para1^.Data[byte_offset+1] := Char(pixel_val_to_write and $FF);
+              end;
+            end;
+          17..24: // 3 bytes
+            begin
+              if para1^.byte_order = LSBFirst then
+              begin
+                para1^.Data[byte_offset] := Char(pixel_val_to_write and $FF);
+                para1^.Data[byte_offset+1] := Char((pixel_val_to_write shr 8) and $FF);
+                para1^.Data[byte_offset+2] := Char((pixel_val_to_write shr 16) and $FF);
+              end
+              else // MSBFirst
+              begin
+                para1^.Data[byte_offset] := Char((pixel_val_to_write shr 16) and $FF);
+                para1^.Data[byte_offset+1] := Char((pixel_val_to_write shr 8) and $FF);
+                para1^.Data[byte_offset+2] := Char(pixel_val_to_write and $FF);
+              end;
+            end;
+          25..32: // 4 bytes
+            begin
+              if para1^.byte_order = LSBFirst then
+              begin
+                para1^.Data[byte_offset] := Char(pixel_val_to_write and $FF);
+                para1^.Data[byte_offset+1] := Char((pixel_val_to_write shr 8) and $FF);
+                para1^.Data[byte_offset+2] := Char((pixel_val_to_write shr 16) and $FF);
+                para1^.Data[byte_offset+3] := Char((pixel_val_to_write shr 24) and $FF);
+              end
+              else // MSBFirst
+              begin
+                para1^.Data[byte_offset] := Char((pixel_val_to_write shr 24) and $FF);
+                para1^.Data[byte_offset+1] := Char((pixel_val_to_write shr 16) and $FF);
+                para1^.Data[byte_offset+2] := Char((pixel_val_to_write shr 8) and $FF);
+                para1^.Data[byte_offset+3] := Char(pixel_val_to_write and $FF);
+              end;
+            end;
+          else // Handle other bit depths or error
+            Exit;
+        end;
+        Result := 1; // Success
+      end;
+    XYBitmap: // 1 bit per pixel, packed
+      begin
+        byte_offset := para3 * para1^.bytes_per_line + (para2 div 8);
+        bit_offset_in_byte := para2 mod 8;
+
+        if byte_offset >= para1^.bytes_per_line * para1^.Height then Exit; // Bounds check
+
+        byte_data := CUChar(para1^.Data[byte_offset]);
+
+        if para1^.bitmap_bit_order = LSBFirst then
+          shift := bit_offset_in_byte
+        else // MSBFirst
+          shift := 7 - bit_offset_in_byte;
+
+        if (para4 and 1) = 1 then // If pixel value is 1, set the bit
+          byte_data := byte_data or (1 shl shift)
+        else // If pixel value is 0, clear the bit
+          byte_data := byte_data and not (1 shl shift);
+
+        para1^.Data[byte_offset] := Char(byte_data);
+        Result := 1; // Success
+      end;
+    else
+      // Unsupported format or error
+      Result := 0;
+  end;
+end;
+
+function XImage_sub_image(para1: PXImage; para2: CInt; para3: CInt; para4: CUInt; para5: CUInt): PXImage; cdecl;
+var
+  new_image: PXImage;
+  src_x, src_y, dest_x, dest_y: CInt;
+  pixel_value: CULong;
+begin
+  Result := nil; // Default to nil
+
+  if (para1 = nil) or (para1^.Data = nil) then Exit;
+  // Check if sub-image region is within bounds of the original image
+  if (para2 < 0) or (para3 < 0) or
+     (para2 + para4 > para1^.Width) or (para3 + para5 > para1^.Height) then
+  begin
+    Exit; // Sub-image out of bounds
+  end;
+
+  // Create a new XImage for the sub-image.
+  // We pass nil for Data, so XCreateImage will allocate new memory.
+  new_image := XCreateImage(
+    nil, // Display is not strictly needed for client-side image creation, pass nil
+    PVisual(para1^.obdata), // Re-use the visual pointer if stored in obdata, or pass nil
+    para1^.depth,
+    para1^.format,
+    0, // xoffset for sub-image is typically 0
+    nil, // XCreateImage will allocate data for us
+    para4, para5, // New width and height
+    para1^.bitmap_pad,
+    0 // Let XCreateImage calculate bytes_per_line
+  );
+
+  if new_image = nil then Exit;
+
+  // Copy pixel data from the original image to the new sub-image
+  for dest_y := 0 to CInt(para5) - 1 do
+  begin
+    for dest_x := 0 to CInt(para4) - 1 do
+    begin
+      src_x := para2 + dest_x;
+      src_y := para3 + dest_y;
+
+      pixel_value := XImage_get_pixel(para1, src_x, src_y);
+      XImage_put_pixel(new_image, dest_x, dest_y, pixel_value);
+    end;
+  end;
+
+  Result := new_image;
+end;
+
+function XImage_add_pixel(para1: PXImage; para2: CLong): CInt; cdecl;
+var
+  x, y: CInt;
+  current_pixel: CULong;
+begin
+  Result := 0; // Default to failure
+
+  if (para1 = nil) or (para1^.Data = nil) then Exit;
+
+  // Iterate through all pixels and add the value
+  for y := 0 to para1^.Height - 1 do
+  begin
+    for x := 0 to para1^.Width - 1 do
+    begin
+      current_pixel := XImage_get_pixel(para1, x, y);
+      // Add the value. Be careful with overflow/underflow for signed CLong.
+      // For simplicity, we'll just add it directly.
+      XImage_put_pixel(para1, x, y, current_pixel + CULong(para2));
+    end;
+  end;
+
+  Result := 1; // Success
+end;
+
+function XGetXCBConnection(display: PDisplay): xcb_connection_t;
+begin
+  // Since PDisplay is just a Pointer to our xcb_connection_t,
+  // we can simply cast it back.
+  Result := xcb_connection_t(display);
 end;
 
 end.

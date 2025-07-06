@@ -43,21 +43,12 @@ interface
  {$endif}
 {$endif}
 
-{$ifdef mse_debugwindowfocus}
- {$define mse_debug}
-{$endif}
-{$ifdef mse_debugconfigure}
- {$define mse_debug}
-{$endif}
-{$ifdef mse_debugshow}
- {$define mse_debug}
-{$endif}
 uses
  {$ifdef use_xcb}mxcb{$else}mxlib,mxrandr{$endif},msetypes,mseapplication,msesys,
  msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
  msethread{$ifdef FPC},dynlibs{$endif},
  mselibc,msectypes,msesysintf,msegraphics,
- msestrings,mxft,mshape;
+ msestrings,mxft,mshape, mseclasses;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -499,7 +490,7 @@ implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
+ msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,
  mseglob,msetimer,mseprocess,mseprocmonitor,typinfo
  {$ifdef mse_debug},mseformatstr{$endif};
 {$ifndef mse_allwarnings}
@@ -518,6 +509,7 @@ const
  xdndprotocolversion = 4;
 var
  pixmapcount: integer;
+  destroyed: boolean = false;
 
 type
  pwinid = ^TXID;
@@ -1347,7 +1339,13 @@ var
              {$ifndef xbooleanresult} <> 0{$endif});
 
    if bo1 then begin
-    case event.xany.xtype of
+  
+     {$ifdef use_xcb}
+     case event.xany._type of
+     {$else}
+     case event.xany.xtype of
+     {$endif}
+    
      selectionnotify: begin
       with event.xselection do begin
      {$ifdef FPC}
@@ -1764,6 +1762,7 @@ begin
 {$ifdef mse_debugshow}
   debugwindow('*gui_setwindowstate xmapwindow ',id);
 {$endif}
+
   if (getwmstate(id) = wms_iconic) and windowmapped(id) and
                                   (netatoms[net_active_window] <> 0)then begin
                     //probably gnome mutter
@@ -2951,11 +2950,14 @@ var
  gc: tgc;
  int1,int2: integer;
 begin
+    writeln('gui_imagetopixmap init');
+
  gdi_lock;
  result:= gde_ok;
  po2:= nil;
  case image.kind of
   bmk_mono: begin
+  writeln('gui_imagetopixmap init bmk_mono');
    ximage:= XCreateImage(appdisp,nil,1,xypixmap,0,nil,
                                   image.size.cx,image.size.cy,32,0);
    if ximage = nil then begin
@@ -2971,6 +2973,8 @@ begin
    end;
   end;
   bmk_gray: begin
+     writeln('gui_imagetopixmap init bmk_gray');
+ 
    ximage:= XCreateImage(appdisp,nil,8,zpixmap,0,nil,
                                   image.size.cx,image.size.cy,32,0);
    if ximage = nil then begin
@@ -2986,6 +2990,7 @@ begin
    end;
   end;
   else begin
+       writeln('gui_imagetopixmap init else');
    ximage:= XCreateImage(appdisp,defvisual,defdepth,zpixmap,0,nil,
                   image.size.cx,image.size.cy,32,0);
    if ximage = nil then begin
@@ -3188,6 +3193,7 @@ var
 begin
  gdi_lock;
   xmapwindow(appdisp,id);
+  
 {$ifdef mse_debugshow}
  debugwindow('*gui_showwindow ',id);
 {$endif}
@@ -3585,8 +3591,10 @@ begin
  checkgdilock;
 {$endif}
  while xpending(appdisp) > 0 do begin
+    writeln('avant xnextevent free');
   xnextevent(appdisp,@xev);
-  with xev.xclient do begin
+      tmseevent(getclientpointer(xev.xclient)).free1;
+    with xev.xclient do begin
    if (xtype = clientmessage) and (display = appdisp) and
            (message_type = mseclientmessageatom) then begin
     tmseevent(getclientpointer(xev.xclient)).free1;
@@ -4029,7 +4037,7 @@ begin
   window_group:= group;
   writeln('gui_setwindowgroup 4.1');
   // fred --- crash
-   // flags:= flags or windowgrouphint;
+  // flags:= flags or windowgrouphint;
   writeln('gui_setwindowgroup 4.2');
    xsetwmhints(appdisp,id,wmhints);
    writeln('gui_setwindowgroup 5');
@@ -4137,18 +4145,23 @@ var
   
    valuemask:= valuemask or cwwingravity or cwbitgravity;
   
+   // fred
+   attributes.background_pixel := CUInt($C0C0C0);
+   attributes.event_mask := KeyPressMask or ExposureMask;
+   valuemask := valuemask or CULong(CWBackPixel) or CULong(CWEventMask);
+  
    WriteLn('Avant id:= XCreateWindow: display=', PtrInt(appdisp), ' visual=', PtrInt(visual), ' attributes=', PtrInt(@attributes));
  
    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
    width,height,0,
     depth,  copyfromparent,visual,
-      valuemask,@attributes);      
+      valuemask,@attributes);  
       
- {$ifdef use_xcb} // fred to test
-    //XMapWindow(appdisp, id);
-    //XFlush(appdisp);
-  {$endif}
-  //  sleep(1000);
+ // {$ifdef use_xcb} // fred to test
+//   XMapWindow(appdisp, id);
+//   XFlush(appdisp);
+//  {$endif}
+  //  sleep(2000);
 //////////////////////////////////////////////
  if (wo_onalldesktops in options.options) then
  begin
@@ -4193,7 +4206,7 @@ XSetForeground(appdisp, shape_gc, 0);
 XFillRectangle(appdisp, pmap, shape_gc, 0, 0, width,height);
 
 //* shape the window: now "unblank" everything where we want to draw */
-
+  
 XSetForeground(appdisp, shape_gc, 1);
 
   if (wo_ellipse in options.options) then
@@ -4315,16 +4328,10 @@ XFreePixmap(appdisp, pmap);
 
 XSelectInput(appdisp, id, ButtonPressMask or ExposureMask);
 
-// fred
-XMapWindow(appdisp, id);
-XSync(appdisp, False);
-
 //   fin shape 
 
 end;
 
- writeln('fin shape ');
- 
    if colormap <> 0 then begin
     xfreecolormap(appdisp,colormap);
     colormap:= 0;
@@ -4345,9 +4352,8 @@ end;
   end;
   
    writeln('options.parent <> 0');
-
-  
-  if (options.transientfor <> 0) or
+ 
+    if (options.transientfor <> 0) or
           (options.options * [wo_popup,wo_message] <> []) then begin
    settransientforhint(id,options.transientfor);
   end;
@@ -4370,10 +4376,15 @@ end;
     gui_setwindowgroup(id,options.groupleader);
    end;
   end;
+ 
+  // fred 
+  XMapWindow(appdisp, id);
   
-  if options.pos <> wp_default then begin
+   if options.pos <> wp_default then begin
    gui_reposwindow(id,rect);
   end;
+ 
+       
 {           //single ic for whole application
   ic:= xcreateic(im,pchar(xninputstyle),
           ximstatusnothing or ximpreeditnothing,
@@ -4449,7 +4460,7 @@ end;
  writeln('fin window', gue_ok);
  //sleep(3000);
   gdi_unlock;  
-  
+   
 end;
 
 
@@ -5910,7 +5921,7 @@ var
 
 begin
  with aevent do begin
-  event1.xtype:= selectionnotify;
+  event1.{$ifdef use_xcb}_type{$else}xtype{$endif}:= selectionnotify;
   event1.requestor:= requestor;
   event1.selection:= selection;
   if {$ifdef FPC}_property{$else}xproperty{$endif} = none then begin
@@ -6153,6 +6164,13 @@ function gui_getevent: tmseevent;
 
 var
  xev,xev2: xevent;
+ {$ifdef use_xcb} 
+ mxev, mxev2 : MXEvent;
+ pxcbclientmessageevent_ptr: Pxcb_client_message_event_t; // For client message event details
+ temp_txclient_event: TXClientMessageEvent; // Temporary Xlib-like ClientMessage struct for getclientpointer
+ raw_byte_ptr: PByte;
+ i : integer;
+ {$endif}
 // w: winidty;
  eventkind: eventkindty;
  akey: keysym;
@@ -6179,7 +6197,8 @@ var
  timeout1: timespec;
  b1: boolean;
  win1: twindow;
-
+ handled_close_event: Boolean = False; // New flag to manage close event handling
+ actectyp: CInt; // Variable to hold the correctly extracted event type
 type
  char_0_19 = array[0..19] of char;
 
@@ -6187,8 +6206,7 @@ label
  eventrestart;
 begin
   result:= nil;
-  // fred sleep
-       
+ 
  sigfillset(allsig);
  timeout1.tv_sec:= 10;
  timeout1.tv_nsec:= 0;
@@ -6210,8 +6228,7 @@ begin
    handlesigchld;
   end;
   if gui_hasevent then begin
-      // fred sleep
-     break;
+    break;
   end;
   
   pthread_sigmask(sig_block,@allsig,@sig1); //block signals
@@ -6240,8 +6257,7 @@ begin
  {$endif}
  
 {$endif}     
-    
-     if pollinfo[1].revents <> 0 then begin
+      if pollinfo[1].revents <> 0 then begin
       repeat                                     //empty pipe
       until (__read(connectpipe.readdes,dummybyte,1) < 0) and
                                       (sys_getlasterror() = ewouldblock);
@@ -6321,15 +6337,274 @@ begin
  end;
 
 eventrestart:
- b1:= false;
- while true do begin
-  i1:= xpending(appdisp);
-  if i1 > 0 then begin
-   xnextevent(appdisp,@xev);
-   if (xev.xtype = keyrelease) then begin
-   {$ifdef mse_debugkey}
+ {$ifdef use_xcb}
+  b1:= false;
+  while true do begin
+    i1:= xpending(appdisp);
+    if i1 > 0 then begin
+       xnextevent(appdisp,@mxev);
+       
+       writeln('');
+   
+      actectyp := CUChar(mxev.data[0]) and $7F ; // Mask out the sent_event bit if present
+    // xev.xtype := actual_event_type;
+    
+     writeln(Format('DEBUG: Main Loop: Received XEvent type: %d', [actectyp]));
+ 
+      case actectyp of // Use the correctly extracted event type
+      KeyPress:
+        begin
+          writeln('DEBUG: Main Loop: Key press detected. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+      KeyPressMask:
+        begin
+          writeln('DEBUG: Main Loop: KeyPressMask. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+      ExposureMask:
+        begin
+          writeln('DEBUG: Main Loop: ExposureMask. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+      Expose:
+        begin
+          writeln('DEBUG: Main Loop: Expose. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+      KeyRelease:
+        begin
+          writeln('DEBUG: Main Loop: KeyRelease. Breaking loop.');
+          writeln('repeatkey start pending:'+inttostr(i1));
+        
+    if i1 < 2 then begin
+     xsync(appdisp,0);
+     i1:= xpending(appdisp) + 1;
+     writeln('repeatkey second pending:'+inttostr(i1));
+      end;
+    if i1 > 1 then begin
+     xpeekevent(appdisp,@mxev2); // todo xpeekevent
+     actectyp := CUChar(mxev2.data[0]) and $7F; // Mask out the sent_event bit if present
+     xev2.xtype := actectyp;
+     
+     writeln(Format('DEBUG: Main Loop: Received xpeekevent type: %d', [actectyp]));
+      
+     if (xev2.xtype = keypress) and
+                  (xev.xkey.keycode = xev2.xkey.keycode) and
+                                     (xev.xkey.time = xev2.xkey.time) then begin
+      repeatkey:= xev.xkey.keycode;
+      repeatkeytime:= xev.xkey.time;
+      
+      writeln('repeatkey key:'+inttostr(repeatkey)+
+                                       ' time:'+inttostr(repeatkeytime));
+       end;
+      end;
+          Break; // Exit loop
+        end;
+        
+     PropertyNotify:
+        begin
+          writeln('DEBUG: Main Loop: PropertyNotify. Breaking loop.');
+          Break; // Exit loop
+        end;                 
+
+     ButtonPress:
+        begin
+          writeln('DEBUG: Main Loop: ButtonPress. Breaking loop.');
+          Break; // Exit loop
+        end;  
+     
+     ButtonRelease:
+        begin
+          writeln('DEBUG: Main Loop: ButtonRelease. Breaking loop.');
+          Break; // Exit loop
+        end;  
+        
+     MotionNotify:
+        begin
+          writeln('DEBUG: Main Loop: MotionNotify. Breaking loop.');
+          Break; // Exit loop
+        end;  
+        
+     LeaveNotify:
+        begin
+          writeln('DEBUG: Main Loop: LeaveNotify. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+     FocusIn:
+        begin
+          writeln('DEBUG: Main Loop: FocusIn. Breaking loop.');
+          Break; // Exit loop
+        end;                    
+            
+     FocusOut:
+        begin
+          writeln('DEBUG: Main Loop: FocusOut. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+     MappingNotify:
+        begin
+          writeln('DEBUG: Main Loop: MappingNotify. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+     MapNotify:
+        begin
+          writeln('DEBUG: Main Loop: MapNotify. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+     ConfigureNotify:
+        begin
+          writeln('DEBUG: Main Loop: ConfigureNotify. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+     UnmapNotify:
+        begin
+          writeln('DEBUG: Main Loop: UnmapNotify. Breaking loop.');
+          Break; // Exit loop
+        end;
+        
+     49:
+        begin
+          writeln('DEBUG: Main Loop: ClientMessage 49. Breaking loop.');
+          Break; // Exit loop
+        end;        
+
+      ClientMessage: begin
+      writeln('DEBUG: Entered ClientMessage case (XCB path)!');
+
+      // CRITICAL: Step 1: Cast the *entire raw XCB event* (mxev) to the TRUE XCB-native client message structure.
+      // This ensures we read the raw XCB event fields correctly from the XCB perspective.
+      pxcbclientmessageevent_ptr := Pxcb_client_message_event_t(@mxev);
+
+      with pxcbclientmessageevent_ptr^ do begin
+        // Debug the raw XCB event fields directly from the XCB structure
+        writeln('DEBUG: XCB ClientMessage raw: response_type = ', IntToStr(response_type),
+                ', type_ (XCB message_type) = ', IntToStr(type_),
+                ', format = ', IntToStr(format),
+                ', window = ', IntToStr(window));
+        writeln('DEBUG: XCB ClientMessage raw: Data.data32[0] = ', IntToStr(data.data32[0]));
+
+        // Step 2: Manually map the correctly parsed XCB fields into MSEgui's expected TXClientMessageEvent.
+        // This is the bridge for functions that expect the Xlib structure.
+        FillChar(temp_txclient_event, SizeOf(temp_txclient_event), 0); // Clear it first
+
+        // Map common XEvent header fields (from xcb_generic_event_t part of mxev)
+        temp_txclient_event._type := ClientMessage; // Always 33 for ClientMessage (Xlib value)
+        temp_txclient_event.serial := sequence; // XCB sequence maps to Xlib serial
+        temp_txclient_event.send_event := CInt( (response_type and $80) <> 0 ); // Extract send_event bit
+        temp_txclient_event.display := appdisp; // XCB events don't have this, use global appdisp
+        temp_txclient_event.window := window; // Direct assignment as it compiles for you
+
+        // Map ClientMessage specific fields
+        temp_txclient_event.message_type := TAtom(type_); // XCB 'type_' is Xlib 'message_type'
+        temp_txclient_event.format := CInt(format); // XCB 'format' is Xlib 'format'
+        
+        // CRITICAL: Explicitly copy each 32-bit data element
+        temp_txclient_event.Data.l[0] := data.data32[0];
+        temp_txclient_event.Data.l[1] := data.data32[1];
+        temp_txclient_event.Data.l[2] := data.data32[2];
+        temp_txclient_event.Data.l[3] := data.data32[3];
+        temp_txclient_event.Data.l[4] := data.data32[4];
+
+        // Debug the mapped Xlib-like event fields
+        writeln('DEBUG: Mapped Xlib-like TXClientMessageEvent: message_type = ', IntToStr(temp_txclient_event.message_type),
+                ', format = ', IntToStr(temp_txclient_event.format),
+                ', Data.l[0] = ', IntToStr(temp_txclient_event.data.l[0]));
+
+        // Now use temp_txclient_event for MSEgui's logic
+        if temp_txclient_event.display = appdisp then begin
+          writeln('display = appdisp ');
+          // Check for MSEgui's custom client message atom first
+          if (temp_txclient_event.message_type = mseclientmessageatom) then begin
+            // Call getclientpointer with the correctly mapped TXClientMessageEvent
+            result:= tmseevent(getclientpointer(temp_txclient_event));
+            // After getclientpointer, check the event kind it returned
+            if (result <> nil) and ((result.kind = ek_close) or (result.kind = ek_terminate)) then begin
+              writeln('DEBUG: MSEgui custom close/terminate event detected via getclientpointer (XCB).');
+            end else if result <> nil then begin
+              result.free;
+              result := nil; // Clear result if not a close/terminate event
+            end;
+          end
+          // Then, check for the standard WM_PROTOCOLS message
+          // We need to be flexible here because 'type_' is 0, but Data.data32[0] is 371 (WM_DELETE_WINDOW)
+          else if (temp_txclient_event.message_type = wmprotocolsatom) or (temp_txclient_event.message_type = 0) then begin
+            // If message_type is WM_PROTOCOLS atom OR 0 (as seen in your debug)
+            // AND Data.l[0] is WM_DELETE_WINDOW atom
+            if longword(temp_txclient_event.data.l[0]) = wmprotocols[wm_delete_window] then begin
+              writeln('DEBUG: Standard WM_DELETE_WINDOW protocol message received (XCB). Setting ek_close.');
+              result:= twindowevent.create(ek_close,temp_txclient_event.window); // Use mapped window ID
+            {$ifdef with_saveyourself}
+            end
+            else begin
+              if longword(temp_txclient_event.data.l[0]) = wmprotocols[wm_save_yourself] then begin
+                result:= tevent.create(ek_terminate);
+                saveyourselfwindow:= temp_txclient_event.window;
+              end;
+            end;
+            {$else}
+            end;
+            {$endif}
+          end
+          else begin
+          {$ifdef mse_debugxembed}
+            if (netatoms[xembed] <> 0) and
+               (temp_txclient_event.message_type = netatoms[xembed]) then begin // Use mapped message_type
+              debugwindow('*xembed ',temp_txclient_event.window); // Use mapped window ID
+              writeln(' ',inttohex(temp_txclient_event.data.l[0],8),' ',
+                        inttohex(temp_txclient_event.data.l[1],8),' ',
+                        inttohex(temp_txclient_event.data.l[2],8),' ',
+                        inttohex(temp_txclient_event.data.l[3],8),' ',
+                        inttohex(temp_txclient_event.data.l[4],8));
+            end;
+            if (netatoms[net_system_tray_message_data] <> 0) and
+               (temp_txclient_event.message_type = netatoms[net_system_tray_message_data]) then begin // Use mapped message_type
+              debugwindow(
+               '*net_system_tray_message_data format:'+inttostr(temp_txclient_event.format)+' ',temp_txclient_event.window); // Use mapped format and window
+              writeln(' ',char_0_19(temp_txclient_event.data.b));
+            end;
+            if (netatoms[net_system_tray_opcode] <> 0) and
+               (temp_txclient_event.message_type = netatoms[net_system_tray_opcode]) then begin // Use mapped message_type
+              debugwindow(
+               '*net_system_tray_opcode format:'+inttostr(temp_txclient_event.format)+' ',temp_txclient_event.window); // Use mapped format and window
+              writeln(' ',inttohex(temp_txclient_event.data.l[0],8),' ',
+                        inttohex(temp_txclient_event.data.l[1],8),' ',
+                        inttohex(temp_txclient_event.data.l[2],8),' ',
+                        inttohex(temp_txclient_event.data.l[3],8),' ',
+                        inttohex(temp_txclient_event.data.l[4],8));
+            end;
+          {$endif}
+            // This handlexdnd also expects an Xlib-like TXClientMessageEvent
+            result:= handlexdnd(temp_txclient_event); // Pass the mapped record
+          end;
+        end;
+      end; // end with pxcbclientmessageevent_ptr^
+    end; // end ClientMessage case
+  end;
+    
+  {$else} // libX11
+     
+   b1:= false;
+    while true do begin
+    i1:= xpending(appdisp);
+   if i1 > 0 then begin
+   xnextevent(appdisp,@xev); 
+   
+    writeln('xev.xtype = ',xev.xtype);
+ 
+    if (xev.xtype = keyrelease) then begin
+   //{$ifdef mse_debugkey}
     debugwriteln('repeatkey start pending:'+inttostr(i1));
-   {$endif}
+   //{$endif}
     if i1 < 2 then begin
      xsync(appdisp,0);
      i1:= xpending(appdisp) + 1;
@@ -6351,6 +6626,8 @@ eventrestart:
      end;
     end;
    end;
+   writeln('fin keypress');
+   
   {$ifdef mse_debugsysevent}
    debugevent(xev);
   {$endif}
@@ -6368,6 +6645,7 @@ eventrestart:
    break;
   end;
  end;
+ writeln('avant if not b1');
  if not b1 then begin
  {$ifdef mse_debugsysevent}
   debugwriteln('sysevent exit');
@@ -6380,6 +6658,7 @@ eventrestart:
  if bo1 then begin
   exit;
  end;
+ writeln('avant xev.xany.xwindow');
  if xev.xany.xwindow = appid then begin
   if (xev.xtype = selectionclear) then begin
    if isclipboard(xev.xselectionclear.selection,buf1) then begin
@@ -6398,10 +6677,15 @@ eventrestart:
    end;
   end;
  end;
- case xev.xtype of
-  clientmessage: begin
+ writeln('avant clientmessage');
+   case xev.xtype of
+      clientmessage: begin
+       writeln('DEBUG: Main Loop: Received ClientMessage 33 event.'); 
    with xev.xclient do begin
-    if display = appdisp then begin
+      writeln('message_type = ', message_type,' format = ', format, ' window = ', window);
+       if display = appdisp then begin
+      writeln('display = appdisp ');
+  
      if message_type = mseclientmessageatom then begin
        result:= tmseevent(getclientpointer(xev.xclient));
      end
@@ -6453,320 +6737,287 @@ eventrestart:
       end;
      end;
     end;
+    with xev.xclient do begin
+         writeln('DEBUG: ClientMessage: message_type: %d (expected WM_PROTOCOLS: %d)', message_type);
+         writeln('DEBUG: ClientMessage: data.l[0]: %d (expected WM_DELETE_WINDOW: %d)', data.l[0]);
+   end;
    end;
   end;
-  propertynotify: begin
-   with xev.xproperty do begin
-    if atom = wmstateatom then begin //gnome workaround, missing unmap/map
-     if application.findwindow(xwindow,win1) then begin
-      if windowdestroyed(xwindow) then begin
-       result:= twindowevent.create(ek_destroy,xwindow);
-      end
-      else begin
-       case getwmstate(xwindow) of
-        wms_iconic: begin
-         if windowmapped(xwindow) then begin
-          result:= twindowevent.create(ek_hide,xwindow);
-          hasminimizeunmapworkaround:= true;
-          lastmapwindow:= 0;
-         {$ifdef mse_debugsysevent}
-          debugwriteln(' synthetic ek_hide');
-         {$endif}
-         end;
-        end;
-        wms_normal: begin
-       
-         if hasminimizeunmapworkaround and
-                                 (lastmapwindow <> xwindow) then begin
-          lastmapwindow:= 0;
-          result:= twindowevent.create(ek_show,xwindow);
-         {$ifdef mse_debugsysevent}
-          debugwriteln(' synthetic ek_show');
-         {$endif}
-         end;
-        end;
-        else; // For case statment added to make compiler happy.
-       end;
-      end;
-     end;
-    end;
-   end;
-  end;
-  enternotify: begin
-   with xev.xcrossing do begin
-    result:= tmouseenterevent.create(xwindow,
-                makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),
-                 time*1000);
-   end;
-  end;
-  leavenotify: begin
-   with xev.xcrossing do begin
-    if mode = notifynormal then begin //??
-     result:= twindowevent.create(ek_leavewindow,xwindow);
-    end;
-   end;
-  end;
-  motionnotify: begin
-   with xev.xmotion do begin
-    lasteventtime:= time;
-    result:= tmouseevent.create(xwindow,false,mb_none,mw_none,
-                makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),time*1000);
-   end;
-  end;
-  keypress: begin
-   with xev.xkey do begin
-    b1:= false;
-    {$ifdef FPC}
-    aic:= getic(window);
-    {$else}
-    aic:= getic(xwindow);
-    {$endif}
-    lasteventtime:= time;
-    setlength(buffer,20);
-    i1:= xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),
-                                                          @akey,@icstatus);
-    setlength(buffer,i1);
-    if icstatus = xbufferoverflow then begin
-     xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
-    end;
-    chars:= utf8tostringansi(buffer);
-   {$ifdef mse_debugkey}
-    debugwriteln('*X11keypress window '+hextostr(window,8)+'"'+buffer+'" key:'+
-                                     inttostr(akey)+' time:'+inttostr(time));
-   {$endif}
-    case icstatus of
-     xlookupnone: exit;
-     xlookupchars: akey:= 0;
-     xlookupkeysym_: chars:= '';
-    end;
-   {$ifdef mse_debugkey}
-    debugwriteln('after icstatuscheck');
-   {$endif}
-    shiftstate1:= [];
-    key1:= xkeytokey(akey,shiftstate1);
-    if key1 = key_escape then begin
-     escapepressed:= true;
-    end;
-    shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,false);
-    if checkrepeatkey(xev) then begin
-     include(shiftstate1,ss_repeat);
-    end;
-    if (keycode = repeatkey) and (time = repeatkeytime) then begin
-     include(shiftstate1,ss_repeat);
-     resetrepeatkey;
-    end;
-    key2:= getkeynomod(xev.xkey);
-    result:= tkeyevent.create(xwindow,false,key1,key2,
-                                    shiftstate1,chars,time*1000);
-   end;
-  end;
-  keyrelease: begin
-   with xev.xkey do begin
-    lasteventtime:= time;
-    if checkrepeatkey(xev) then begin
-    {$ifdef mse_debugkey}
-     debugwriteln('keyrelease dropped, eventrestart');
-    {$endif}
-     goto eventrestart;
-    end;
-    i1:= keycode;
-    xlookupstring(@xev.xkey,nil,0,@akey,nil);
-   {$ifdef mse_debugkey}
-    debugwriteln('*X11keyrelease window '+hextostr(window,8)+
-                           ' key:'+inttostr(akey)+' time:'+inttostr(time));
-   {$endif}
-    shiftstate1:= [];
-    key1:= xkeytokey(akey,shiftstate1);
-    key2:= getkeynomod(xev.xkey);
-    shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,true);
-  (* does not work anymore because of intermediate messages by IM
-    if xpending(appdisp) > 0 then begin
-     xpeekevent(appdisp,@xev);
-     if (xev.xtype = keypress) and (time - lasteventtime < 10) and
-                                                   (keycode = int1) then begin
-      repeatkey:= int1;
-      repeatkeytime:= time;
-   {$ifdef mse_debugkey}
-    debugwriteln('eventrestart');
-   {$endif}
-      goto eventrestart;  //auto repeat key, don't send
-     end;
-    end;
-  *)
-    result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
-   end;
-  end;
-  buttonpress,buttonrelease: begin
-   with xev.xbutton do begin
-   {$ifdef mse_debugmouse}
-    if xtype = buttonpress then begin
-     debugwrite('*X11buttonpress');
-    end
-    else begin
-     debugwrite('*X11buttonrelease');
-    end;
-    debugwriteln(' window '+hextostr(window,8)+
-       ' button:'+inttostr(button)+' x:'+inttostr(x)+' y:'+inttostr(y)+
-                                                     ' time:'+inttostr(time));
-   {$endif}
-    lasteventtime:= time;
-    button1:= xtomousebutton(button);
-    shiftstate1:= xtoshiftstate(state,key_none,button1,xev.xtype=buttonrelease);
-    if button = 4 then begin
-     if xev.xtype = buttonpress then begin
-      result:= tmouseevent.create(xwindow,false,mb_none,mw_up,
-                makepoint(x,y),shiftstate1,time*1000);
-     end;
-    end
-    else begin
-     if button = 5 then begin
-      if xev.xtype = buttonpress then begin
-       result:= tmouseevent.create(xwindow,false,mb_none,mw_down,
-                makepoint(x,y),shiftstate1,time*1000);
-      end;
-     end
-     else begin
-      result:= tmouseevent.create(xwindow,xtype = buttonrelease,button1,mw_none,
-                makepoint(x,y),shiftstate1,time*1000);
-     end;
-    end;
-   end;
-  end;
-  mappingnotify: begin
-   xrefreshkeyboardmapping(@xev.xkeymap);
-  end;
-  mapnotify: begin
-   // fred sleep
-      
-   with xev.xmap do begin
-    lastmapwindow:= xwindow;
-    result:= twindowevent.create(ek_show,xwindow);
-    if application.findwindow(xwindow,window1) and
-             (wo_notaskbar in window1.options) then begin
-     setnetatomarrayitem(xwindow,net_wm_state,net_wm_state_skip_taskbar);
-    end;
-   end;
-  end;
-  unmapnotify: begin
-   with xev.xunmap do begin
-    result:= twindowevent.create(ek_hide,xwindow);
-   end;
-  end;
-  reparentnotify: begin
-   with xev.xreparent do begin
-    result:= treparentevent.create(ek_reparent,xwindow,parent);
-   end;
-  end;
-  focusin,focusout: begin
-   with xev.xfocus do begin
-    if xtype = focusin then begin
-     eventkind:= ek_focusin;
-     lastfocuswindow:= window;
-    end
-    else begin
-     eventkind:= ek_focusout;
-     lastfocuswindow:= 0;
-    end;
-    if mode <> notifypointer then begin
-     result:= twindowevent.create(eventkind,window);
-    end;
-   end;
-  end;
-  expose: begin
-   with xev.xexpose do begin
-    result:= twindowrectevent.create(ek_expose,xwindow,
-                          makerect(x,y,width,height),nullpoint);
-   end;
-  end;
-  graphicsexpose: begin
-   with xev.xgraphicsexpose do begin
-    result:= twindowrectevent.create(ek_expose,drawable,
-                          makerect(x,y,width,height),nullpoint);
-   end;
-  end;
-  configurenotify: begin
-   with xev.xconfigure do begin
-    if windowdestroyed(xwindow) then begin
-     result:= twindowevent.create(ek_destroy,xwindow);
-    end
-    else begin
-     if not application.deinitializing then begin
-      rect1.x:= x;
-      rect1.y:= y;
-      pt1:= nullpoint;
-      if send_event = 0 then begin //from window manager?
-       getrootoffset(xwindow,pt1); //no, map to screen origin
-      end;
-      rect1.cx:= width;
-      rect1.cy:= height;
-    {$ifdef mse_debugconfigure}
-      debugwindow('*conf winrect:'+
-                      inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+
-                 inttostr(rect1.x)+' '+inttostr(rect1.y)+
-                 ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy)+
-                 ' above:',above,xwindow);
-    {$endif}
-      result:= twindowrectevent.create(ek_configure,xwindow,rect1,pt1);
-     end;
 
-(* gnome bug workaround
-     if not application.deinitializing and
-       (getwindowrect(w,rect1,pt1) = gue_ok) then begin
-                         //there can be an Xerror?
-     //gnome returns a different pos on window resizing than on window moving!
-    {$ifdef mse_debugconfigure}
-      debugwindow('*conf winrect     '+
-                      inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+
-                 inttostr(rect1.x)+' '+inttostr(rect1.y)+
-                 ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy)+' ',w);
-    {$endif}
-      result:= twindowrectevent.create(ek_configure,w,rect1,pt1);
-     end;
-    {$ifdef mse_debugconfigure}
-     debugwriteln('                  '+inttostr(x)+' '+inttostr(y)+
-                 ' '+inttostr(width)+' '+inttostr(height));
-    {$endif}
-     while tboolresult(xchecktypedwindowevent(
-                        appdisp,w,configurenotify,@xev)) do begin
-    {$ifdef mse_debugconfigure}
-      debugwriteln('                  '+inttostr(x)+' '+inttostr(y)+
-                 ' '+inttostr(width)+' '+inttostr(height));
-    {$endif}
-     end;
-*)
-    end;
-   end;
-  end;
-  destroynotify: begin
-   with xev.xdestroywindow do begin
-    if xwindow = lastmapwindow then begin
-     lastmapwindow:= 0;
-    end;
-    if (sysdndreader <> nil) and
-                (sysdndreader.winid = xwindow) then begin
-     freeandnil(sysdndreader);
-    end;
-    if (sysdndwriter <> nil) then begin
-     with sysdndwriter do begin
-      if fdest = xwindow then begin
-       fdest:= 0;
+    PropertyNotify: begin
+      with xev.xproperty do begin
+        if atom = wmstateatom then begin //gnome workaround, missing unmap/map
+          if application.findwindow(xwindow,win1) then begin
+            if windowdestroyed(xwindow) then begin
+              result:= twindowevent.create(ek_destroy,xwindow);
+            end
+            else begin
+              case getwmstate(xwindow) of
+                wms_iconic: begin
+                  if windowmapped(xwindow) then begin
+                    result:= twindowevent.create(ek_hide,xwindow);
+                    hasminimizeunmapworkaround:= true;
+                    lastmapwindow:= 0;
+                  {$ifdef mse_debugsysevent}
+                    debugwriteln(' synthetic ek_hide');
+                  {$endif}
+                  end;
+                end;
+                wms_normal: begin
+                  if hasminimizeunmapworkaround and
+                      (lastmapwindow <> xwindow) then begin
+                    lastmapwindow:= 0;
+                    result:= twindowevent.create(ek_show,xwindow);
+                  {$ifdef mse_debugsysevent}
+                    debugwriteln(' synthetic ek_show');
+                  {$endif}
+                  end;
+                end;
+                else; // For case statment added to make compiler happy.
+              end;
+            end;
+          end;
+        end;
       end;
-      if fsource = xwindow then begin
-       freeandnil(sysdndwriter);
-      end;
-     end;
     end;
-    result:= twindowevent.create(ek_destroy,xwindow);
-   end;
+    EnterNotify: begin
+      with xev.xcrossing do begin
+        result:= tmouseenterevent.create(xwindow,
+                      makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),
+                      time*1000);
+      end;
+    end;
+    LeaveNotify: begin
+      with xev.xcrossing do begin
+        if mode = notifynormal then begin //??
+          result:= twindowevent.create(ek_leavewindow,xwindow);
+        end;
+      end;
+    end;
+    MotionNotify: begin
+      with xev.xmotion do begin
+        lasteventtime:= time;
+        result:= tmouseevent.create(xwindow,false,mb_none,mw_none,
+                      makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),time*1000);
+      end;
+    end;
+    KeyPress: begin
+      with xev.xkey do begin
+        b1:= false;
+      {$ifdef FPC}
+        aic:= getic(window);
+      {$else}
+        aic:= getic(xwindow);
+      {$endif}
+        lasteventtime:= time;
+        setlength(buffer,20);
+        i1:= xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),
+                                                    @akey,@icstatus);
+        setlength(buffer,i1);
+        if icstatus = xbufferoverflow then begin
+          xutf8lookupstring(aic,@xev.xkey,@buffer[1],length(buffer),@akey,@icstatus);
+        end;
+        chars:= utf8tostringansi(buffer);
+      {$ifdef mse_debugkey}
+        debugwriteln('*X11keypress window '+hextostr(window,8)+'"'+buffer+'" key:'+
+                                         inttostr(akey)+' time:'+inttostr(time));
+      {$endif}
+        case icstatus of
+          xlookupnone: exit;
+          xlookupchars: akey:= 0;
+          xlookupkeysym_: chars:= '';
+        end;
+      {$ifdef mse_debugkey}
+        debugwriteln('after icstatuscheck');
+      {$endif}
+        shiftstate1:= [];
+        key1:= xkeytokey(akey,shiftstate1);
+        if key1 = key_escape then begin
+          escapepressed:= true;
+        end;
+        shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,false);
+        if checkrepeatkey(xev) then begin
+          include(shiftstate1,ss_repeat);
+        end;
+        if (keycode = repeatkey) and (time = repeatkeytime) then begin
+          include(shiftstate1,ss_repeat);
+          resetrepeatkey;
+        end;
+        key2:= getkeynomod(xev.xkey);
+        result:= tkeyevent.create(xwindow,false,key1,key2,
+                                         shiftstate1,chars,time*1000);
+      end;
+    end;
+    KeyRelease: begin
+      with xev.xkey do begin
+        lasteventtime:= time;
+        if checkrepeatkey(xev) then begin
+        {$ifdef mse_debugkey}
+          debugwriteln('keyrelease dropped, eventrestart');
+        {$endif}
+          goto eventrestart;
+        end;
+        i1:= keycode;
+        xlookupstring(@xev.xkey,nil,0,@akey,nil);
+      {$ifdef mse_debugkey}
+        debugwriteln('*X11keyrelease window '+hextostr(window,8)+
+                               ' key:'+inttostr(akey)+' time:'+inttostr(time));
+      {$endif}
+        shiftstate1:= [];
+        key1:= xkeytokey(akey,shiftstate1);
+        key2:= getkeynomod(xev.xkey);
+        shiftstate1:= shiftstate1 + xtoshiftstate(state,key1,mb_none,true);
+        result:= tkeyevent.create(xwindow,true,key1,key2,shiftstate1,'',time*1000);
+      end;
+    end;
+    ButtonPress,ButtonRelease: begin
+      with xev.xbutton do begin
+      {$ifdef mse_debugmouse}
+        if xev.{$ifdef use_xcb}_type{$else}xtype{$endif} = buttonpress then begin
+          debugwrite('*X11buttonpress');
+        end
+        else begin
+          debugwrite('*X11buttonrelease');
+        end;
+        debugwriteln(' window '+hextostr(window,8)+
+          ' button:'+inttostr(button)+' x:'+inttostr(x)+' y:'+inttostr(y)+
+                                         ' time:'+inttostr(time));
+      {$endif}
+        lasteventtime:= time;
+        button1:= xtomousebutton(button);
+        shiftstate1:= xtoshiftstate(state,key_none,button1,xev.{$ifdef use_xcb}_type{$else}xtype{$endif}=buttonrelease);
+        if button = 4 then begin
+          if xev.{$ifdef use_xcb}_type{$else}xtype{$endif} = buttonpress then begin
+            result:= tmouseevent.create(xwindow,false,mb_none,mw_up,
+                          makepoint(x,y),shiftstate1,time*1000);
+          end;
+        end
+        else begin
+          if button = 5 then begin
+            if xev.{$ifdef use_xcb}_type{$else}xtype{$endif} = buttonpress then begin
+              result:= tmouseevent.create(xwindow,false,mb_none,mw_down,
+                            makepoint(x,y),shiftstate1,time*1000);
+            end;
+          end
+          else begin
+            result:= tmouseevent.create(xwindow,xev.{$ifdef use_xcb}_type{$else}xtype{$endif} = buttonrelease,button1,mw_none,
+                          makepoint(x,y),shiftstate1,time*1000);
+          end;
+        end;
+      end;
+    end;
+    MappingNotify: begin
+      xrefreshkeyboardmapping(@xev.xkeymap);
+    end;
+    MapNotify: begin
+      with xev.xmap do begin
+        lastmapwindow:= xwindow;
+        result:= twindowevent.create(ek_show,xwindow);
+        if application.findwindow(xwindow,window1) and
+            (wo_notaskbar in window1.options) then begin
+          setnetatomarrayitem(xwindow,net_wm_state,net_wm_state_skip_taskbar);
+        end;
+      end;
+    end;
+    UnmapNotify: begin
+      with xev.xunmap do begin
+        result:= twindowevent.create(ek_hide,xwindow);
+      end;
+    end;
+    ReparentNotify: begin
+      with xev.xreparent do begin
+        result:= treparentevent.create(ek_reparent,xwindow,parent);
+      end;
+    end;
+    FocusIn,FocusOut: begin
+      with xev.xfocus do begin
+        if xev.{$ifdef use_xcb}_type{$else}xtype{$endif} = focusin then begin
+          eventkind:= ek_focusin;
+          lastfocuswindow:= window;
+        end
+        else begin
+          eventkind:= ek_focusout;
+          lastfocuswindow:= 0;
+        end;
+        if mode <> notifypointer then begin
+          result:= twindowevent.create(eventkind,window);
+        end;
+      end;
+    end;
+    Expose: begin
+      with xev.xexpose do begin
+        result:= twindowrectevent.create(ek_expose,xwindow,
+                            makerect(x,y,width,height),nullpoint);
+      end;
+    end;
+    GraphicsExpose: begin
+      with xev.xgraphicsexpose do begin
+        result:= twindowrectevent.create(ek_expose,drawable,
+                            makerect(x,y,width,height),nullpoint);
+      end;
+    end;
+    ConfigureNotify: begin
+      with xev.xconfigure do begin
+        if windowdestroyed(xwindow) then begin
+          result:= twindowevent.create(ek_destroy,xwindow);
+        end
+        else begin
+          if not application.deinitializing then begin
+            rect1.x:= x;
+            rect1.y:= y;
+            pt1:= nullpoint;
+            if send_event = 0 then begin //from window manager?
+              getrootoffset(xwindow,pt1); //no, map to screen origin
+            end;
+            rect1.cx:= width;
+            rect1.cy:= height;
+          {$ifdef mse_debugconfigure}
+            debugwindow('*conf winrect:'+
+                               inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+
+                         inttostr(rect1.x)+' '+inttostr(rect1.y)+
+                         ' '+inttostr(rect1.cx)+' '+inttostr(rect1.cy)+
+                         ' above:',above,xwindow);
+          {$endif}
+            result:= twindowrectevent.create(ek_configure,xwindow,rect1,pt1);
+          end;
+        end;
+      end;
+    end;
+    DestroyNotify: begin
+      with xev.xdestroywindow do begin
+        if xwindow = lastmapwindow then begin
+          lastmapwindow:= 0;
+        end;
+        if (sysdndreader <> nil) and
+            (sysdndreader.winid = xwindow) then begin
+          freeandnil(sysdndreader);
+        end;
+        if (sysdndwriter <> nil) then begin
+          with sysdndwriter do begin
+            if fdest = xwindow then begin
+              fdest:= 0;
+            end;
+            if fsource = xwindow then begin
+              freeandnil(sysdndwriter);
+            end;
+          end;
+        end;
+        result:= twindowevent.create(ek_destroy,xwindow);
+      end;
+    end;
+    else begin
+      if hasxrandr and (xev.{$ifdef use_xcb}_type{$else}xtype{$endif} >= xrandreventbase) and
+          (xev.{$ifdef use_xcb}_type{$else}xtype{$endif} <= xrandreventbase+rrlastnotify) then begin
+        screenrectsvalid:= false;
+        xrrupdateconfiguration(@xev);
+      end;
+      
+   {$endif} // end libx11
+   
+    end;
+  
   end;
-  else begin
-   if hasxrandr and (xev.xtype >= xrandreventbase) and
-            (xev.xtype <= xrandreventbase+rrlastnotify) then begin
-    screenrectsvalid:= false;
-    xrrupdateconfiguration(@xev);
-   end;
-  end;
- end;
+  
 end;
 
 function errorhandler(Display: PDisplay; ErrorEvent: PXErrorEvent):
@@ -7042,7 +7293,9 @@ begin
   if appdisp = nil then begin
    goto error;
   end;
-  
+  {$ifdef use_xcb}
+  mse_client_message_atom := XInternAtom(appdisp, 'mseclientmessage', 0);
+  {$endif}
   writeln('gui_init 2');
   
   if not createim then begin
@@ -7092,7 +7345,7 @@ writeln('gui_init 4.1.1');
 
 writeln('gui_init 4.1.2');
   
-  appid:= xcreatewindow(appdisp,rootid,0,0,200,200,0,
+  appid:= xcreatewindow(appdisp,rootid,0,0,2,2,0,
                0,inputonly,pvisual(copyfromparent),cweventmask,@attrib);
  
 writeln('gui_init 4.1.3');

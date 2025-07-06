@@ -315,7 +315,6 @@ type
   PWindow  = ^TWindow;
   TWindow  = TXID;
 
-
   PXErrorEvent = ^TXErrorEvent;
 
   TXErrorEvent = record
