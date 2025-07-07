@@ -3987,321 +3987,6 @@ begin
   end;
 end;
 
-
-// Todo
-function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; bytes_buffer: cint; keysym_return: Pculong; status_in_out: Pointer): cint; cdecl;
-begin
-
-end;
-
-function XShapeCombineRegion(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; region: TRegion; op: cint): TStatus; cdecl;
-begin
-
-end;
-
-function XwcTextListToTextProperty(para1: PDisplay; para2: PPWideChar; para3: cint; para4: TXICCEncodingStyle; para5: PXTextProperty): cint; cdecl;
-begin
-
-end;
-
-function XSetSelectionOwner(para1: PDisplay; para2: TAtom; para3: TWindow; para4: TTime): cint; cdecl;
-begin
-
-end;
-
-function XDeleteProperty(para1: PDisplay; para2: TWindow; para3: TAtom): cint; cdecl;
-begin
-
-end;
-
-function XCheckTypedEvent(para1: PDisplay; para2: cint; para3: PXEvent): TBoolResult; cdecl;
-begin
-
-end;
-
-function XConvertSelection(para1: PDisplay; para2: TAtom; para3: TAtom; para4: TAtom; para5: TWindow; para6: TTime): cint; cdecl;
-begin
-
-end;
-
-function XGetSelectionOwner(para1: PDisplay; para2: TAtom): TWindow; cdecl;
-begin
-
-end;
-
-procedure XFreeStringList(para1: PPchar); cdecl;
-begin
-
-end;
-
-function XSync(para1: PDisplay; para2: TBool): cint; cdecl;
-begin
-
-end;
-
-function XIconifyWindow(para1: PDisplay; para2: TWindow; para3: cint): TStatus; cdecl;
-begin
-
-end;
-
-procedure XSetWMName(para1: PDisplay; para2: TWindow; para3: PXTextProperty); cdecl;
-begin
-
-end;
-
-function XGetWMHints(para1: PDisplay; para2: TWindow): PXWMHints; cdecl;
-begin
-
-end;
-
-function XAllocWMHints: PXWMHints; cdecl;
-begin
-
-end;
-
-function XQueryTree(para1: PDisplay; para2: TWindow; para3: PWindow; para4: PWindow; para5: PPWindow; para6: Pcuint): TStatus; cdecl;
-begin
-
-end;
-
-function XRaiseWindow(para1: PDisplay; para2: TWindow): cint; cdecl;
-begin
-
-end;
-
-function XLowerWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
-begin
-
-end;
-
-function XReconfigureWMWindow(para1: PDisplay; para2: TWindow; para3: cint; para4: cuint; para5: PXWindowChanges): TStatus; cdecl;
-begin
-
-end;
-
-function XQueryPointer(para1: PDisplay; para2: TWindow; para3: PWindow; para4: PWindow; para5: Pcint; para6: Pcint; para7: Pcint; para8: Pcint; para9: Pcuint): TBoolResult; cdecl;
-begin
-
-end;
-
-function XWarpPointer(para1: PDisplay; para2: TWindow; para3: TWindow; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
-begin
-
-end;
-
-function XUngrabPointer(para1: PDisplay; para2: TTime): cint; cdecl;
-begin
-
-end;
-
-function XGrabPointer(para1: PDisplay; para2: TWindow; para3: TBool; para4: cuint; para5: cint; para6: cint; para7: TWindow; para8: TCursor; para9: TTime): cint; cdecl;
-begin
-
-end;
-
-function XGetImage(para1: PDisplay; para2: TDrawable; para3: cint; para4: cint; para5: cuint; para6: cuint; para7: culong; para8: cint): PXImage; cdecl;
-begin
-
-end;
-
-function XSetGraphicsExposures(para1: PDisplay; para2: TGC; para3: TBool): cint; cdecl;
-begin
-
-end;
-
-function XCreateBitmapFromData(ADiplay: PDisplay; ADrawable: TDrawable; AData: PChar; AWidth: cuint; AHeight: cuint): TPixmap; cdecl;
-begin
-
-end;
-
-function XCreateFontCursor(ADisplay: PDisplay; AShape: cuint): TCursor; cdecl;
-begin
-
-end;
-
-function XDefineCursor(ADisplay: PDisplay; AWindow: TWindow; ACursor: TCursor): cint; cdecl;
-begin
-
-end;
-
-function XFreeCursor(ADisplay: PDisplay; ACursor: TCursor): cint; cdecl;
-begin
-
-end;
-
-function XSetTransientForHint(ADisplay: PDisplay; AWindow: TWindow; APropWindow: TWindow): cint; cdecl;
-begin
-
-end;
-
-function XTranslateCoordinates(ADisplay: PDisplay; ASrcWindow: TWindow; ADestWindow: TWindow; ASrcX: cint; ASrcY: cint; ADestXReturn: Pcint; ADestYReturn: Pcint; AChildReturn: PWindow): TBool; cdecl;
-begin
-
-end;
-
-function XDrawRectangle(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint): cint; cdecl;
-begin
-
-end;
-
-function XFreeColormap(para1: PDisplay; para2: TColormap): cint; cdecl;
-begin
-
-end;
-
-function XGetTransientForHint(para1: PDisplay; para2: TWindow; para3: PWindow): TStatus; cdecl;
-begin
-
-end;
-
-function XSetInputFocus(para1: PDisplay; para2: TWindow; para3: cint; para4: TTime): cint; cdecl;
-begin
-
-end;
-
-function XCreatePixmapCursor(ADisplay: PDisplay; ASource: TPixmap; AMask: TPixmap; AForegroundColor: PXColor; ABackgroundColor: PXColor; AX: cuint; AY: cuint): TCursor; cdecl;
-begin
-
-end;
-
-//procedure XFillRectangle(display: PDisplay; win: TWindow; gc: TGC;  x, y, width, height: cint);
-
-procedure XFillRectangle(display: PDisplay; win: TWindow; gc: TGC;
-                         x, y, width, height: cint);
-
-var
-  rect: xcb_rectangle_t;
-begin
-  rect.x := x;
-  rect.y := y;
-  rect.width := width;
-  rect.height := height;
-
-  // Cast `gc` pointer to xcb_gcontext_t (cuint32)
-  xcb_poly_fill_rectangle(display, win, cuint(gc), 1, @rect);
-end;
-
-function XFillArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
-begin
-
-end;
-
-function XDrawArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
-begin
-
-end;
-
-
-function XUnmapWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
-begin
-
-end;
-
-function XReparentWindow(para1: PDisplay; para2: TWindow; para3: TWindow; para4: cint; para5: cint): cint; cdecl;
-begin
-
-end;
-
-function XBell(para1: PDisplay; para2: cint): cint; cdecl;
-begin
-
-end;
-
-function XScreenNumberOfScreen(para1: PScreen): cint; cdecl;
-begin
-
-end;
-
-function XPeekEvent(ADisplay: PDisplay; AEvent: PXEvent): cint; cdecl;
-begin
-
-end;
-
-function XFilterEvent(para1: PXEvent; para2: TWindow): TBoolResult; cdecl;
-begin
-result := true;
-end;
-
-function XRefreshKeyboardMapping(para1: PXMappingEvent): cint; cdecl;
-begin
-
-end;
-
-function XGetErrorText(para1: PDisplay; para2: cint; para3: PChar; para4: cint): cint; cdecl;
-begin
-
-end;
-
-function XStoreColors(para1: PDisplay; para2: TColormap; para3: PXColor; para4: cint): cint; cdecl;
-begin
-
-end;
-
-function XSupportsLocale: TBool; cdecl;
-begin
-
-end;
-
-function XSetClipRectangles(para1: PDisplay; para2: TGC; para3: cint; para4: cint; para5: PXRectangle; para6: cint; para7: cint): cint; cdecl;
-begin
-
-end;
-
-function XSetDashes(para1: PDisplay; para2: TGC; para3: cint; para4: PChar; para5: cint): cint; cdecl;
-begin
-
-end;
-
-function XSetClipMask(para1: PDisplay; para2: TGC; para3: TPixmap): cint; cdecl;
-begin
-
-end;
-
-function XFreeFontInfo(para1: PPchar; para2: PXFontStruct; para3: cint): cint; cdecl;
-begin
-
-end;
-
-function XUnloadFont(para1: PDisplay; para2: TFont): cint; cdecl;
-begin
-
-end;
-
-function XSetFunction(para1: PDisplay; para2: TGC; para3: cint): cint; cdecl;
-begin
-
-end;
-
-function XCopyPlane(para1: PDisplay; para2: TDrawable; para3: TDrawable; para4: TGC; para5: cint; para6: cint; para7: cuint; para8: cuint; para9: cint; para10: cint; para11: culong): cint; cdecl;
-begin
-
-end;
-
-function XCopyGC(para1: PDisplay; para2: TGC; para3: culong; para4: TGC): cint; cdecl;
-begin
-
-end;
-
-function XDrawLines(para1: PDisplay; para2: TDrawable; para3: TGC; para4: PXPoint; para5: cint; para6: cint): cint; cdecl;
-begin
-
-end;
-
-function XDrawSegments(para1: PDisplay; para2: TDrawable; para3: TGC; para4: PXSegment; para5: cint): cint; cdecl;
-begin
-
-end;
-
-function XSetClipOrigin(para1: PDisplay; para2: TGC; para3: cint; para4: cint): cint; cdecl;
-begin
-
-end;
-
-function XFillPolygon(para1: PDisplay; para2: TDrawable; para3: TGC; para4: PXPoint; para5: cint; para6: cint; para7: cint): cint; cdecl;
-begin
-
-end;
-
 type
   Region = Pointer; // Matches Xlib's Region (pointer to region ID)
 
@@ -4514,6 +4199,317 @@ begin
   Result := 1;
 end;
 
+procedure XFillRectangle(display: PDisplay; win: TWindow; gc: TGC;
+                         x, y, width, height: cint);
+var
+  rect: xcb_rectangle_t;
+begin
+  rect.x := x;
+  rect.y := y;
+  rect.width := width;
+  rect.height := height;
+
+  // Cast `gc` pointer to xcb_gcontext_t (cuint32)
+  xcb_poly_fill_rectangle(display, win, cuint(gc), 1, @rect);
+end;
+
+// Todo
+function XLookupString(event_struct: PXKeyPressedEvent; buffer_return: PChar; bytes_buffer: cint; keysym_return: Pculong; status_in_out: Pointer): cint; cdecl;
+begin
+
+end;
+
+function XShapeCombineRegion(display: PDisplay; dest: Window; dest_kind: cint; x, y: cint; region: TRegion; op: cint): TStatus; cdecl;
+begin
+
+end;
+
+function XwcTextListToTextProperty(para1: PDisplay; para2: PPWideChar; para3: cint; para4: TXICCEncodingStyle; para5: PXTextProperty): cint; cdecl;
+begin
+
+end;
+
+function XSetSelectionOwner(para1: PDisplay; para2: TAtom; para3: TWindow; para4: TTime): cint; cdecl;
+begin
+
+end;
+
+function XDeleteProperty(para1: PDisplay; para2: TWindow; para3: TAtom): cint; cdecl;
+begin
+
+end;
+
+function XCheckTypedEvent(para1: PDisplay; para2: cint; para3: PXEvent): TBoolResult; cdecl;
+begin
+
+end;
+
+function XConvertSelection(para1: PDisplay; para2: TAtom; para3: TAtom; para4: TAtom; para5: TWindow; para6: TTime): cint; cdecl;
+begin
+
+end;
+
+function XGetSelectionOwner(para1: PDisplay; para2: TAtom): TWindow; cdecl;
+begin
+
+end;
+
+procedure XFreeStringList(para1: PPchar); cdecl;
+begin
+
+end;
+
+function XSync(para1: PDisplay; para2: TBool): cint; cdecl;
+begin
+
+end;
+
+function XIconifyWindow(para1: PDisplay; para2: TWindow; para3: cint): TStatus; cdecl;
+begin
+
+end;
+
+procedure XSetWMName(para1: PDisplay; para2: TWindow; para3: PXTextProperty); cdecl;
+begin
+
+end;
+
+function XGetWMHints(para1: PDisplay; para2: TWindow): PXWMHints; cdecl;
+begin
+
+end;
+
+function XAllocWMHints: PXWMHints; cdecl;
+begin
+
+end;
+
+function XQueryTree(para1: PDisplay; para2: TWindow; para3: PWindow; para4: PWindow; para5: PPWindow; para6: Pcuint): TStatus; cdecl;
+begin
+
+end;
+
+function XRaiseWindow(para1: PDisplay; para2: TWindow): cint; cdecl;
+begin
+
+end;
+
+function XLowerWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
+begin
+
+end;
+
+function XReconfigureWMWindow(para1: PDisplay; para2: TWindow; para3: cint; para4: cuint; para5: PXWindowChanges): TStatus; cdecl;
+begin
+
+end;
+
+function XQueryPointer(para1: PDisplay; para2: TWindow; para3: PWindow; para4: PWindow; para5: Pcint; para6: Pcint; para7: Pcint; para8: Pcint; para9: Pcuint): TBoolResult; cdecl;
+begin
+
+end;
+
+function XWarpPointer(para1: PDisplay; para2: TWindow; para3: TWindow; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
+begin
+
+end;
+
+function XUngrabPointer(para1: PDisplay; para2: TTime): cint; cdecl;
+begin
+
+end;
+
+function XGrabPointer(para1: PDisplay; para2: TWindow; para3: TBool; para4: cuint; para5: cint; para6: cint; para7: TWindow; para8: TCursor; para9: TTime): cint; cdecl;
+begin
+
+end;
+
+function XGetImage(para1: PDisplay; para2: TDrawable; para3: cint; para4: cint; para5: cuint; para6: cuint; para7: culong; para8: cint): PXImage; cdecl;
+begin
+
+end;
+
+function XSetGraphicsExposures(para1: PDisplay; para2: TGC; para3: TBool): cint; cdecl;
+begin
+
+end;
+
+function XCreateBitmapFromData(ADiplay: PDisplay; ADrawable: TDrawable; AData: PChar; AWidth: cuint; AHeight: cuint): TPixmap; cdecl;
+begin
+
+end;
+
+function XCreateFontCursor(ADisplay: PDisplay; AShape: cuint): TCursor; cdecl;
+begin
+
+end;
+
+function XDefineCursor(ADisplay: PDisplay; AWindow: TWindow; ACursor: TCursor): cint; cdecl;
+begin
+
+end;
+
+function XFreeCursor(ADisplay: PDisplay; ACursor: TCursor): cint; cdecl;
+begin
+
+end;
+
+function XSetTransientForHint(ADisplay: PDisplay; AWindow: TWindow; APropWindow: TWindow): cint; cdecl;
+begin
+
+end;
+
+function XTranslateCoordinates(ADisplay: PDisplay; ASrcWindow: TWindow; ADestWindow: TWindow; ASrcX: cint; ASrcY: cint; ADestXReturn: Pcint; ADestYReturn: Pcint; AChildReturn: PWindow): TBool; cdecl;
+begin
+
+end;
+
+function XDrawRectangle(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint): cint; cdecl;
+begin
+
+end;
+
+function XFreeColormap(para1: PDisplay; para2: TColormap): cint; cdecl;
+begin
+
+end;
+
+function XGetTransientForHint(para1: PDisplay; para2: TWindow; para3: PWindow): TStatus; cdecl;
+begin
+
+end;
+
+function XSetInputFocus(para1: PDisplay; para2: TWindow; para3: cint; para4: TTime): cint; cdecl;
+begin
+
+end;
+
+function XCreatePixmapCursor(ADisplay: PDisplay; ASource: TPixmap; AMask: TPixmap; AForegroundColor: PXColor; ABackgroundColor: PXColor; AX: cuint; AY: cuint): TCursor; cdecl;
+begin
+
+end;
+
+function XFillArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
+begin
+
+end;
+
+function XDrawArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
+begin
+
+end;
+
+
+function XUnmapWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
+begin
+
+end;
+
+function XReparentWindow(para1: PDisplay; para2: TWindow; para3: TWindow; para4: cint; para5: cint): cint; cdecl;
+begin
+
+end;
+
+function XBell(para1: PDisplay; para2: cint): cint; cdecl;
+begin
+
+end;
+
+function XScreenNumberOfScreen(para1: PScreen): cint; cdecl;
+begin
+
+end;
+
+function XPeekEvent(ADisplay: PDisplay; AEvent: PXEvent): cint; cdecl;
+begin
+
+end;
+
+function XFilterEvent(para1: PXEvent; para2: TWindow): TBoolResult; cdecl;
+begin
+result := true;
+end;
+
+function XRefreshKeyboardMapping(para1: PXMappingEvent): cint; cdecl;
+begin
+
+end;
+
+function XGetErrorText(para1: PDisplay; para2: cint; para3: PChar; para4: cint): cint; cdecl;
+begin
+
+end;
+
+function XStoreColors(para1: PDisplay; para2: TColormap; para3: PXColor; para4: cint): cint; cdecl;
+begin
+
+end;
+
+function XSupportsLocale: TBool; cdecl;
+begin
+
+end;
+
+function XSetClipRectangles(para1: PDisplay; para2: TGC; para3: cint; para4: cint; para5: PXRectangle; para6: cint; para7: cint): cint; cdecl;
+begin
+
+end;
+
+function XSetDashes(para1: PDisplay; para2: TGC; para3: cint; para4: PChar; para5: cint): cint; cdecl;
+begin
+
+end;
+
+function XSetClipMask(para1: PDisplay; para2: TGC; para3: TPixmap): cint; cdecl;
+begin
+
+end;
+
+function XFreeFontInfo(para1: PPchar; para2: PXFontStruct; para3: cint): cint; cdecl;
+begin
+
+end;
+
+function XUnloadFont(para1: PDisplay; para2: TFont): cint; cdecl;
+begin
+
+end;
+
+function XSetFunction(para1: PDisplay; para2: TGC; para3: cint): cint; cdecl;
+begin
+
+end;
+
+function XCopyPlane(para1: PDisplay; para2: TDrawable; para3: TDrawable; para4: TGC; para5: cint; para6: cint; para7: cuint; para8: cuint; para9: cint; para10: cint; para11: culong): cint; cdecl;
+begin
+
+end;
+
+function XCopyGC(para1: PDisplay; para2: TGC; para3: culong; para4: TGC): cint; cdecl;
+begin
+
+end;
+
+function XDrawLines(para1: PDisplay; para2: TDrawable; para3: TGC; para4: PXPoint; para5: cint; para6: cint): cint; cdecl;
+begin
+
+end;
+
+function XDrawSegments(para1: PDisplay; para2: TDrawable; para3: TGC; para4: PXSegment; para5: cint): cint; cdecl;
+begin
+
+end;
+
+function XSetClipOrigin(para1: PDisplay; para2: TGC; para3: cint; para4: cint): cint; cdecl;
+begin
+
+end;
+
+function XFillPolygon(para1: PDisplay; para2: TDrawable; para3: TGC; para4: PXPoint; para5: cint; para6: cint; para7: cint): cint; cdecl;
+begin
+
+end;
+
 function XClipBox(para1: TRegion; para2: PXRectangle): cint; cdecl;
 begin
 
@@ -4700,8 +4696,7 @@ end;
 
 function WhitePixel(dpy: PDisplay; scr: cint): culong;
 begin
- // WhitePixel := (ScreenOfDisplay(dpy, scr))^.white_pixel;
- WhitePixel := 1000;
+ WhitePixel := (ScreenOfDisplay(dpy, scr))^.white_pixel;
 end;
 
 function DefaultScreen(dpy: PDisplay): cint;
