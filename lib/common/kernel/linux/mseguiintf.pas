@@ -2941,6 +2941,56 @@ begin
  gdi_unlock();
 end;
 
+{
+function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
+                         gchandle: longword): gdierrorty;
+var
+  ximage: PXImage;
+  data: PChar;
+  width, height: LongWord;
+  visual: msePVisual;
+begin
+  writeln('gui_imagetopixmap: Entering, image = ', ', pixmap = ', pixmap, ', gc = ', gchandle);
+ { 
+   kind: bitmapkindty;
+  bgr: boolean;
+  size: sizety;
+  length: integer;     //number of longword
+  linelength: integer; //number of longword in row
+  linebytes: integer;  //number of bytes in row
+  pixels: plongwordaty;
+ } 
+  // Render image to pixmap
+ if  (image.size.cx > 0) and (image.size.cy > 0) then begin
+    width := image.size.cx;
+    height := image.size.cy;
+    data := pchar(image.pixels);
+    writeln('gui_imagetopixmap: Image width = ', width, ', height = ', height, ', data = ', PtrInt(data));
+    
+    with xcb_setup_roots_iterator(xcb_get_setup(appdisp))^ do
+      visual := data^.root_visual;
+      
+    ximage := XCreateImage(appdisp, visual, 24, XCB_IMAGE_FORMAT_Z_PIXMAP, 0, data, width, height, 32, 0);
+    writeln('gui_imagetopixmap: ximage = ', PtrInt(ximage));
+    if ximage = nil then begin
+      writeln('gui_imagetopixmap: XCreateImage returned nil');
+      Result := gue_error;
+      xcb_flush(appdisp);
+      Exit;
+    end;
+    
+    xcb_put_image(appdisp, XCB_IMAGE_FORMAT_Z_PIXMAP, pixmap, gc, width, height, 0, 0, 0, 24, ximage^.data);
+    writeln('gui_imagetopixmap: Put image to pixmap = ', pixmap);
+    XDestroyImage(ximage);
+  end else begin
+    writeln('gui_imagetopixmap: Image invalid (nil, data nil, or zero size)');
+    Result := gue_error;
+  end;
+  
+  xcb_flush(appdisp);
+  Result := gue_ok;
+end;
+}
 function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
                          gchandle: longword): gdierrorty;
 var
@@ -4378,7 +4428,7 @@ end;
   end;
  
   // fred 
-  XMapWindow(appdisp, id);
+   XMapWindow(appdisp, id);
   
    if options.pos <> wp_default then begin
    gui_reposwindow(id,rect);
@@ -6348,8 +6398,64 @@ eventrestart:
    
       actectyp := CUChar(mxev.data[0]) and $7F ; // Mask out the sent_event bit if present
     
-     writeln(Format('DEBUG: Main Loop: Received XEvent type: %d', [actectyp]));
+      writeln(Format('DEBUG: Main Loop: Received XEvent type: %d', [actectyp]));
+     
+        if actectyp = KeyRelease then
+        begin
+          writeln('DEBUG: Main Loop: KeyRelease. Breaking loop.');
+          writeln('repeatkey start pending:'+inttostr(i1));
+        
+         if i1 < 2 then begin
+         xsync(appdisp,0);
+         i1:= xpending(appdisp) + 1;
+         writeln('repeatkey second pending:'+inttostr(i1));
+        end;
+        if i1 > 1 then begin
+       xpeekevent(appdisp,@mxev2); // todo xpeekevent
+       actectyp := CUChar(mxev2.data[0]) and $7F; // Mask out the sent_event bit if present
+       xev2.xtype := actectyp;
+     
+       writeln(Format('DEBUG: Main Loop: Received xpeekevent type: %d', [actectyp]));
+      
+       if (xev2.xtype = keypress) and
+                     (xev.xkey.keycode = xev2.xkey.keycode) and
+                                     (xev.xkey.time = xev2.xkey.time) then begin
+      repeatkey:= xev.xkey.keycode;
+      repeatkeytime:= xev.xkey.time;
+      
+      writeln('repeatkey key:'+inttostr(repeatkey)+
+                                       ' time:'+inttostr(repeatkeytime));
+       end;
+      end;
+        //  Break; // Exit loop
+     end;
+       
+     writeln('avant xfilterevent');
+       
+   if longint(xfilterevent(@mxev,none)) = 0 then begin
+    b1:= true;
+    writeln('xfilterevent = 0');
+    break;
+   end
+   else begin
+    debugwriteln('sysevent filtered');
+   end;
+   
+     writeln('apres xfilterevent');
+  end
+  else begin
+   break;
+  end;
+// end;
+
+ writeln('avant not b1');
+ b1 := true;
  
+ if not b1 then begin
+  debugwriteln('sysevent exit');
+  exit;
+ end;   
+   
       case actectyp of // Use the correctly extracted event type
       KeyPress:
         begin
@@ -6360,121 +6466,91 @@ eventrestart:
       KeyPressMask:
         begin
           writeln('DEBUG: Main Loop: KeyPressMask. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
         
       ExposureMask:
         begin
           writeln('DEBUG: Main Loop: ExposureMask. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
         
       Expose:
         begin
           writeln('DEBUG: Main Loop: Expose. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
-        
-      KeyRelease:
-        begin
-          writeln('DEBUG: Main Loop: KeyRelease. Breaking loop.');
-          writeln('repeatkey start pending:'+inttostr(i1));
-        
-    if i1 < 2 then begin
-     xsync(appdisp,0);
-     i1:= xpending(appdisp) + 1;
-     writeln('repeatkey second pending:'+inttostr(i1));
-      end;
-    if i1 > 1 then begin
-     xpeekevent(appdisp,@mxev2); // todo xpeekevent
-     actectyp := CUChar(mxev2.data[0]) and $7F; // Mask out the sent_event bit if present
-     xev2.xtype := actectyp;
-     
-     writeln(Format('DEBUG: Main Loop: Received xpeekevent type: %d', [actectyp]));
-      
-     if (xev2.xtype = keypress) and
-                  (xev.xkey.keycode = xev2.xkey.keycode) and
-                                     (xev.xkey.time = xev2.xkey.time) then begin
-      repeatkey:= xev.xkey.keycode;
-      repeatkeytime:= xev.xkey.time;
-      
-      writeln('repeatkey key:'+inttostr(repeatkey)+
-                                       ' time:'+inttostr(repeatkeytime));
-       end;
-      end;
-          Break; // Exit loop
-        end;
-        
+   
      PropertyNotify:
         begin
           writeln('DEBUG: Main Loop: PropertyNotify. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;                 
 
      ButtonPress:
         begin
           writeln('DEBUG: Main Loop: ButtonPress. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;  
      
      ButtonRelease:
         begin
           writeln('DEBUG: Main Loop: ButtonRelease. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;  
         
      MotionNotify:
         begin
           writeln('DEBUG: Main Loop: MotionNotify. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;  
         
      LeaveNotify:
         begin
           writeln('DEBUG: Main Loop: LeaveNotify. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
         
      FocusIn:
         begin
           writeln('DEBUG: Main Loop: FocusIn. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;                    
             
      FocusOut:
         begin
           writeln('DEBUG: Main Loop: FocusOut. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
         
      MappingNotify:
         begin
           writeln('DEBUG: Main Loop: MappingNotify. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
         
      MapNotify:
         begin
           writeln('DEBUG: Main Loop: MapNotify. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
         
      ConfigureNotify:
         begin
           writeln('DEBUG: Main Loop: ConfigureNotify. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
         
      UnmapNotify:
         begin
           writeln('DEBUG: Main Loop: UnmapNotify. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;
         
      49:
         begin
           writeln('DEBUG: Main Loop: ClientMessage 49. Breaking loop.');
-          Break; // Exit loop
+          //Break; // Exit loop
         end;        
 
       ClientMessage: begin
@@ -6988,11 +7064,11 @@ eventrestart:
         xrrupdateconfiguration(@xev);
       end;
       
+      end;
+      
    {$endif} // end libx11
    
-    end;
-  
-  end;
+   end;
   
 end;
 

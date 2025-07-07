@@ -14,9 +14,20 @@ const
   libxcb_render = 'libxcb-render.so.0';
   libxcb_randr  = 'libxcb-randr.so.0';
   libxcb_keysyms = 'libxcb-keysyms.so.1';
+  libxcb_xfixes = 'libxcb-xfixes.so';
 
 type
- 
+   
+  Pxcb_xfixes_query_version_reply_t = ^Txcb_xfixes_query_version_reply_t;
+  Txcb_xfixes_query_version_reply_t = record
+    response_type: Byte;
+    pad0: Byte;
+    sequence: Word;
+    length: LongWord;
+    major_version: LongWord;
+    minor_version: LongWord;
+  end;
+  
   Pxcb_connection_t = Pointer;
    xcb_window_t = cuint32;
   xcb_colormap_t = cuint32;
@@ -272,7 +283,7 @@ type
   xcb_gcontext_t = cuint;
   xcb_pixmap_t   = cuint;
   xcb_font_t     = cuint;
-  xcb_region_t   = Pointer;
+  xcb_region_t   = cuint;
 
   // XRender-specific types for msex11gdi.pas and mxft.pas
   xcb_render_color_t = record
@@ -1197,6 +1208,14 @@ PXEvent = ^TXEvent;
     bits_per_pixel: cint;
     scanline_pad: cint;
   end;
+  
+  xcb_rectangle_t  = record
+  	x: cint16;
+    y: cint16;
+    width: cint16;
+    height: cint16;
+  end;
+  Pxcb_rectangle_t = ^xcb_rectangle_t;
 
   PXPrivate = ^TXPrivate;
   TXPrivate = record
@@ -1814,7 +1833,8 @@ function XTranslateCoordinates(ADisplay: PDisplay; ASrcWindow: TWindow; ADestWin
 function XDrawRectangle(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint): cint; cdecl;
 function XFreeColormap(para1: PDisplay; para2: TColormap): cint; cdecl;
 function XCreatePixmapCursor(ADisplay: PDisplay; ASource: TPixmap; AMask: TPixmap; AForegroundColor: PXColor; ABackgroundColor: PXColor; AX: cuint; AY: cuint): TCursor; cdecl;
-function XFillRectangle(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint): cint; cdecl;
+procedure XFillRectangle(display: PDisplay; win: TWindow; gc: TGC;
+                         x, y, width, height: cint);
 function XFillArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
 function XDrawArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
 function XSetWMProtocols(display: PDisplay; w: TWindow; protocols: PAtom; count: cint): LongInt; cdecl;
@@ -1862,19 +1882,24 @@ function XDrawSegments(para1: PDisplay; para2: TDrawable; para3: TGC; para4: PXS
 function XSetClipOrigin(para1: PDisplay; para2: TGC; para3: cint; para4: cint): cint; cdecl;
 function XFillPolygon(para1: PDisplay; para2: TDrawable; para3: TGC; para4: PXPoint; para5: cint; para6: cint; para7: cint): cint; cdecl;
 function XCreateRegion: TRegion; cdecl;
-function XUnionRectWithRegion(para1: PXRectangle; para2: TRegion; para3: TRegion): cint; cdecl;
-function XDestroyRegion(para1: TRegion): cint; cdecl;
-function XEmptyRegion(para1: TRegion): cint; cdecl;
+function XUnionRectWithRegion(rectangle: PXRectangle; src_region, dest_region: tRegion): LongInt; cdecl;
+procedure XDestroyRegion(region: tRegion); cdecl;
+function XEmptyRegion(region: tRegion): LongInt; cdecl;
 function XClipBox(para1: TRegion; para2: PXRectangle): cint; cdecl;
-function XUnionRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
-function XOffsetRegion(para1: TRegion; para2: cint; para3: cint): cint; cdecl;
-function XSubtractRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
-function XIntersectRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
+function XUnionRegion(src1, src2, dest: tRegion): LongInt; cdecl;
+function XOffsetRegion(region: TRegion; dx, dy: LongInt): LongInt; cdecl;
+function XSubtractRegion(src1, src2, dest: TRegion): LongInt; cdecl;
+function XIntersectRegion(src1, src2, dest: tRegion): LongInt; cdecl;
 
+{
 function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword;
   Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
   bitmap_pad: Longint; bytes_per_line: Longint): PXImage; cdecl;
+}
 
+function XCreateImage(Display: PDisplay; Visual: msePVisual; Depth: longword; 
+  Format: Longint; Offset: Longint; Data: PChar; Width, Height: longword;
+  bitmap_pad: LongInt; bytes_per_line: LongInt): PXImage; cdecl;
 // Todo from libX11 and mseguiintf
 //function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
 function XSetForeground(Display: PDisplay; GC: TGC; Foreground: culong): cint; cdecl;
@@ -1925,6 +1950,11 @@ function XImage_sub_image(para1: PXImage; para2: CInt; para3: CInt; para4: CUInt
 function XImage_add_pixel(para1: PXImage; para2: CLong): CInt; cdecl;
 
 function XGetXCBConnection(display: PDisplay): xcb_connection_t;
+
+procedure xcb_flush(c: pxcb_connection_t); cdecl; external libxcb;
+
+function xcb_xfixes_set_gc_clip_region(conn: PDisplay; gc: GC; region: xcb_region_t; x_origin, y_origin: cint): Pointer;
+          cdecl; external libxcb_xfixes;      
 
 function CalculateBitsPerPixel(AFormat: CInt; ADepth: CInt): CInt;
 function CalculateBytesPerLine(AWidth: CUInt; ABitsPerPixel: CInt; ABitmapPad: CInt): CInt;
@@ -2151,6 +2181,12 @@ type
     sequence: cunsigned;
   end;
   
+  TRegionRec = record
+    id: cuint; // Dummy ID for compatibility
+    empty: Boolean; // Flag to indicate empty region
+  end;
+  PRegionRec = ^TRegionRec;
+  
   Pxcb_get_property_cookie_t = ^xcb_get_property_cookie_t;
   
   Pxcb_key_symbols_t = ^xcb_key_symbols_t;
@@ -2325,7 +2361,6 @@ function xcb_change_property(c: pxcb_connection_t; mode: cuint8; window: xcb_win
  prop: xcb_atom_t; type_: xcb_atom_t; format: cuint8; data_len: cuint32; Data: Pointer): xcb_void_cookie_t; cdecl; external libxcb;
 
 function xcb_send_event(c: pxcb_connection_t; propagate: cuint8; destination: xcb_window_t; event_mask: cuint32; event: Pointer): Pointer; cdecl; external libxcb;
-procedure xcb_flush(c: pxcb_connection_t); cdecl; external libxcb;
 function xcb_get_atom_name(c: Pxcb_connection_t; atom: xcb_atom_t): xcb_get_atom_name_cookie_t; cdecl; external libxcb;function xcb_get_atom_name_reply(c: Pxcb_connection_t; cookie: xcb_get_atom_name_cookie_t; e: PPxcb_generic_error_t): Pxcb_get_atom_name_reply_t; cdecl; external libxcb;
 function xcb_create_gc(c: pxcb_connection_t; cid: xcb_gcontext_t; drawable: xcb_drawable_t; value_mask: cuint32; value_list: Pointer): Pointer; cdecl; external libxcb;
 function xcb_free_gc(c: pxcb_connection_t; gc: xcb_gcontext_t): Pointer; cdecl; external libxcb;
@@ -2364,15 +2399,30 @@ function xcb_wait_for_event(c: Pxcb_connection_t): Pxcb_generic_event_t; cdecl; 
 function xcb_configure_window(c: Pxcb_connection_t; window: xcb_window_t; value_mask: cuint16; 
          value_list: Pointer): xcb_void_cookie_t; cdecl; external libxcb;
 function xcb_destroy_window(c: xcb_connection_t; window: xcb_window_t): xcb_void_cookie_t; cdecl; external libxcb;
-     
-      
+function xcb_poly_fill_rectangle(c: Pxcb_connection_t;
+                                  drawable: xcb_drawable_t;
+                                  gc: xcb_gcontext_t;
+                                  rectangles_len: cuint;
+                                  const rectangles: Pxcb_rectangle_t): xcb_void_cookie_t; cdecl; external libxcb;
+
+function xcb_xfixes_query_version(dpy: PDisplay; major_version, minor_version: LongWord):
+         Pxcb_xfixes_query_version_reply_t; cdecl; external libxcb_xfixes;
+procedure xcb_xfixes_create_region(dpy: PDisplay; region: xcb_region_t; nrectangles: LongWord; rectangles: Pxcb_rectangle_t);
+          cdecl; external libxcb_xfixes;
+procedure xcb_xfixes_destroy_region(dpy: PDisplay; region: xcb_region_t); cdecl; external libxcb_xfixes;
+function xcb_xfixes_fetch_region(dpy: PDisplay; region: xcb_region_t): Pxcb_rectangle_t; cdecl; external libxcb_xfixes;
+procedure xcb_xfixes_union_region(dpy: PDisplay; source1, source2, dest: xcb_region_t); cdecl; external libxcb_xfixes;
+procedure xcb_xfixes_intersect_region(dpy: PDisplay; source1, source2, dest: xcb_region_t); cdecl; external libxcb_xfixes;
+function xcb_xfixes_fetch_region_rectangles_length(rects: Pxcb_rectangle_t): LongWord; cdecl; external libxcb_xfixes;
+procedure xcb_xfixes_subtract_region(dpy: PDisplay; source1, source2, dest: xcb_region_t); cdecl; external libxcb_xfixes;
+
 // Implementation
 function XOpenDisplay(display_name: PChar): PDisplay; cdecl;
 begin
 if g_event_queue = nil then
     g_event_queue := TList.Create;
   Result := xcb_connect(display_name, nil);
-  g_xcb_conn := result;
+  GlobalXCBConnection := result;
 end;
 
 procedure XCloseDisplay(display: PDisplay); cdecl;
@@ -2576,6 +2626,7 @@ end;
 procedure XMapWindow(display: PDisplay; w: Window); cdecl;
 begin
   xcb_map_window(display, w);
+  xcb_flush(display);
 end;
 
 function XSelectInput(para1: PDisplay; para2: TWindow; para3: LongInt): LongInt; cdecl;
@@ -3437,7 +3488,7 @@ begin
   new_image.bits_per_pixel := bits_per_pixel_val;
 
   // Get system byte order and bitmap bit order from XCB setup
-  setup := xcb_get_setup(g_xcb_conn);
+  setup := xcb_get_setup(GlobalXCBConnection);
   if setup <> nil then
   begin
     // Xlib constants LSBFirst/MSBFirst usually correspond to XCB_IMAGE_ORDER_LSB_FIRST/MSB_FIRST
@@ -3520,6 +3571,7 @@ begin
   // Copy the populated new_image record to the Result pointer
   Result^ := new_image;
 end;
+
 
 function XGetGeometry(display: PDisplay; d: TDrawable; root: PWindow; x, y: PLongInt; width, height, border_width, depth: PLongWord): LongInt; cdecl;
 var
@@ -3856,10 +3908,10 @@ var
 begin
   Result := 0; // Default to failure
 
-  if g_xcb_conn = nil then Exit;
+  if GlobalXCBConnection = nil then Exit;
 
-  cookie := xcb_destroy_window(g_xcb_conn, CUInt(AWindow));
-  error_ptr := xcb_request_check(g_xcb_conn, cookie);
+  cookie := xcb_destroy_window(GlobalXCBConnection, CUInt(AWindow));
+  error_ptr := xcb_request_check(GlobalXCBConnection, cookie);
   if error_ptr <> nil then
   begin
     free(error_ptr);
@@ -4112,9 +4164,21 @@ begin
 
 end;
 
-function XFillRectangle(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint): cint; cdecl;
-begin
+//procedure XFillRectangle(display: PDisplay; win: TWindow; gc: TGC;  x, y, width, height: cint);
 
+procedure XFillRectangle(display: PDisplay; win: TWindow; gc: TGC;
+                         x, y, width, height: cint);
+
+var
+  rect: xcb_rectangle_t;
+begin
+  rect.x := x;
+  rect.y := y;
+  rect.width := width;
+  rect.height := height;
+
+  // Cast `gc` pointer to xcb_gcontext_t (cuint32)
+  xcb_poly_fill_rectangle(display, win, cuint(gc), 1, @rect);
 end;
 
 function XFillArc(para1: PDisplay; para2: TDrawable; para3: TGC; para4: cint; para5: cint; para6: cuint; para7: cuint; para8: cint; para9: cint): cint; cdecl;
@@ -4155,7 +4219,7 @@ end;
 
 function XFilterEvent(para1: PXEvent; para2: TWindow): TBoolResult; cdecl;
 begin
-
+result := true;
 end;
 
 function XRefreshKeyboardMapping(para1: PXMappingEvent): cint; cdecl;
@@ -4238,47 +4302,219 @@ begin
 
 end;
 
-function XCreateRegion: TRegion; cdecl;
-begin
+type
+  Region = Pointer; // Matches Xlib's Region (pointer to region ID)
 
+function XCreateRegion: Region; cdecl;
+var
+  conn: PDisplay;
+  region_id: xcb_region_t;
+  xfixes_reply: Pxcb_xfixes_query_version_reply_t;
+  gc_ptr: Region;
+begin
+  conn := GlobalXCBConnection; // Global Pxcb_connection_t
+  if conn = nil then begin
+    writeln('XCreateRegion: Connection is nil');
+    Result := nil;
+    Exit;
+  end;
+
+  // Initialize XFixes
+  xfixes_reply := xcb_xfixes_query_version(conn, 5, 0);
+  if xfixes_reply = nil then begin
+    writeln('XCreateRegion: Failed to initialize XFixes');
+    Result := nil;
+    Exit;
+  end;
+  writeln('XCreateRegion: XFixes version = ', xfixes_reply^.major_version, '.', xfixes_reply^.minor_version);
+  free(xfixes_reply);
+
+  // Create empty region
+  region_id := xcb_generate_id(conn);
+  writeln('XCreateRegion: region_id = ', region_id);
+  xcb_xfixes_create_region(conn, region_id, 0, nil); // Empty region
+
+  GetMem(gc_ptr, SizeOf(cuint));
+  PLongWord(gc_ptr)^ := region_id;
+  Result := gc_ptr;
+  xcb_flush(conn);
+  writeln('XCreateRegion: Created region = ', PtrInt(Result));
 end;
 
-function XUnionRectWithRegion(para1: PXRectangle; para2: TRegion; para3: TRegion): cint; cdecl;
+function XUnionRectWithRegion(rectangle: PXRectangle; src_region, dest_region: tRegion): LongInt; cdecl;
+var
+  conn: PDisplay;
+  rect: xcb_rectangle_t;
+  src_id, dest_id: xcb_region_t;
 begin
-
+  conn := GlobalXCBConnection;
+  if (conn = nil) or (rectangle = nil) or (src_region = nil) or (dest_region = nil) then begin
+    writeln('XUnionRectWithRegion: Invalid parameters');
+    Result := 0;
+    Exit;
+  end;
+  src_id := PLongWord(src_region)^;
+  dest_id := PLongWord(dest_region)^;
+  rect.x := rectangle^.x;
+  rect.y := rectangle^.y;
+  rect.width := rectangle^.width;
+  rect.height := rectangle^.height;
+  writeln('XUnionRectWithRegion: src_id = ', src_id, ', dest_id = ', dest_id, ', rect = [', rect.x, ',', rect.y, ',', rect.width, ',', rect.height, ']');
+  xcb_xfixes_create_region(conn, dest_id, 1, @rect);
+  xcb_xfixes_union_region(conn, src_id, dest_id, dest_id);
+  xcb_flush(conn);
+  Result := 1; // Success
 end;
 
-function XDestroyRegion(para1: TRegion): cint; cdecl;
+procedure XDestroyRegion(region: tRegion); cdecl;
+var
+  conn: PDisplay;
+  region_id: xcb_region_t;
 begin
-
+  conn := GlobalXCBConnection;
+  if (conn = nil) or (region = nil) then begin
+    writeln('XDestroyRegion: Invalid parameters');
+    Exit;
+  end;
+  region_id := PLongWord(region)^;
+  writeln('XDestroyRegion: Freeing region_id = ', region_id);
+  xcb_xfixes_destroy_region(conn, region_id);
+  FreeMem(region);
+  xcb_flush(conn);
 end;
 
-function XEmptyRegion(para1: TRegion): cint; cdecl;
+function XEmptyRegion(region: tRegion): LongInt; cdecl;
+var
+  conn: PDisplay;
+  region_id: xcb_region_t;
+  rects: Pxcb_rectangle_t;
 begin
+  conn := GlobalXCBConnection;
+  if (conn = nil) or (region = nil) then begin
+    writeln('XEmptyRegion: Invalid parameters');
+    Result := 0;
+    Exit;
+  end;
+  region_id := PLongWord(region)^;
+  rects := xcb_xfixes_fetch_region(conn, region_id);
+  if rects = nil then begin
+    writeln('XEmptyRegion: Region is empty, region_id = ', region_id);
+    Result := 1; // Empty
+  end else begin
+    writeln('XEmptyRegion: Region is not empty, region_id = ', region_id);
+    free(rects);
+    Result := 0; // Not empty
+  end;
+end;
 
+function XUnionRegion(src1, src2, dest: Region): LongInt; cdecl;
+var
+  conn: PDisplay;
+  src1_id, src2_id, dest_id: xcb_region_t;
+begin
+  conn := GlobalXCBConnection;
+  if (conn = nil) or (src1 = nil) or (src2 = nil) or (dest = nil) then begin
+    writeln('XUnionRegion: Invalid parameters');
+    Result := 0;
+    Exit;
+  end;
+  src1_id := PLongWord(src1)^;
+  src2_id := PLongWord(src2)^;
+  dest_id := PLongWord(dest)^;
+  writeln('XUnionRegion: src1_id = ', src1_id, ', src2_id = ', src2_id, ', dest_id = ', dest_id);
+  xcb_xfixes_union_region(conn, src1_id, src2_id, dest_id);
+  xcb_flush(conn);
+  Result := 1; // Success
+end;
+
+function XIntersectRegion(src1, src2, dest: tRegion): LongInt; cdecl;
+var
+  conn: PDisplay;
+  src1_id, src2_id, dest_id: xcb_region_t;
+begin
+  conn := GlobalXCBConnection;
+  if (conn = nil) or (src1 = nil) or (src2 = nil) or (dest = nil) then begin
+    writeln('XIntersectRegion: Invalid parameters');
+    Result := 0;
+    Exit;
+  end;
+  src1_id := PLongWord(src1)^;
+  src2_id := PLongWord(src2)^;
+  dest_id := PLongWord(dest)^;
+  writeln('XIntersectRegion: src1_id = ', src1_id, ', src2_id = ', src2_id, ', dest_id = ', dest_id);
+  xcb_xfixes_intersect_region(conn, src1_id, src2_id, dest_id);
+  xcb_flush(conn);
+  Result := 1; // Success
+end;
+
+function XOffsetRegion(region: TRegion; dx, dy: LongInt): LongInt; cdecl;
+var
+  conn: PDisplay;
+  region_id, temp_id: xcb_region_t;
+  rects: Pxcb_rectangle_t;
+  num_rects: LongWord;
+  i: LongWord;
+begin
+  conn := GlobalXCBConnection;
+  if (conn = nil) or (region = nil) then begin
+    writeln('XOffsetRegion: Invalid parameters');
+    Result := 0;
+    Exit;
+  end;
+  region_id := PLongWord(region)^;
+  writeln('XOffsetRegion: region_id = ', region_id, ', dx = ', dx, ', dy = ', dy);
+  
+  // Fetch rectangles
+  rects := xcb_xfixes_fetch_region(conn, region_id);
+  if rects = nil then begin
+    writeln('XOffsetRegion: Region is empty, no offset needed');
+    Result := 1;
+    Exit;
+  end;
+  num_rects := xcb_xfixes_fetch_region_rectangles_length(rects);
+  writeln('XOffsetRegion: Fetched ', num_rects, ' rectangles');
+  
+  // Offset rectangles
+  for i := 0 to num_rects - 1 do begin
+    rects[i].x := rects[i].x + dx;
+    rects[i].y := rects[i].y + dy;
+    writeln('XOffsetRegion: Rectangle ', i, ': x=', rects[i].x, ', y=', rects[i].y, ', width=', rects[i].width, ', height=', rects[i].height);
+  end;
+  
+  // Create new region
+  temp_id := xcb_generate_id(conn);
+  xcb_xfixes_create_region(conn, temp_id, num_rects, rects);
+  free(rects);
+  
+  // Replace original region
+  xcb_xfixes_destroy_region(conn, region_id);
+  PLongWord(region)^ := temp_id;
+  xcb_flush(conn);
+  Result := 1;
+  writeln('XOffsetRegion: Created new region_id = ', temp_id);
+end;
+
+function XSubtractRegion(src1, src2, dest: TRegion): LongInt; cdecl;
+var
+  conn: PDisplay;
+  src1_id, src2_id, dest_id: xcb_region_t;
+begin
+  conn := GlobalXCBConnection;
+  if (conn = nil) or (src1 = nil) or (src2 = nil) or (dest = nil) then begin
+    writeln('XSubtractRegion: Invalid parameters');
+    Result := 0;
+    Exit;
+  end;
+  src1_id := PLongWord(src1)^;
+  src2_id := PLongWord(src2)^;
+  dest_id := PLongWord(dest)^;
+  writeln('XSubtractRegion: src1_id = ', src1_id, ', src2_id = ', src2_id, ', dest_id = ', dest_id);
+  xcb_xfixes_subtract_region(conn, src1_id, src2_id, dest_id);
+  xcb_flush(conn);
+  Result := 1;
 end;
 
 function XClipBox(para1: TRegion; para2: PXRectangle): cint; cdecl;
-begin
-
-end;
-
-function XUnionRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
-begin
-
-end;
-
-function XOffsetRegion(para1: TRegion; para2: cint; para3: cint): cint; cdecl;
-begin
-
-end;
-
-function XSubtractRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
-begin
-
-end;
-
-function XIntersectRegion(para1: TRegion; para2: TRegion; para3: TRegion): cint; cdecl;
 begin
 
 end;
@@ -4464,7 +4700,8 @@ end;
 
 function WhitePixel(dpy: PDisplay; scr: cint): culong;
 begin
-  WhitePixel := (ScreenOfDisplay(dpy, scr))^.white_pixel;
+ // WhitePixel := (ScreenOfDisplay(dpy, scr))^.white_pixel;
+ WhitePixel := 1000;
 end;
 
 function DefaultScreen(dpy: PDisplay): cint;
