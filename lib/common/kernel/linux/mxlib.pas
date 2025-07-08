@@ -267,11 +267,7 @@ type // xcb
 
   Pxcb_intern_atom_reply_t = ^xcb_intern_atom_reply_t;
   xcb_intern_atom_reply_t = record
-   {$ifdef use_xcb}
-   _type: cuint8;
-   {$else}
-   response_type: cuint8;
-   {$endif}
+    _type: cuint8;
     pad0: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -366,11 +362,7 @@ type // xcb
   end;
   Pxcb_get_geometry_reply_t = ^xcb_get_geometry_reply_t;
   xcb_get_geometry_reply_t = record
-   {$ifdef use_xcb}
-   _type: cuint8;
-   {$else}
-   response_type: cuint8;
-   {$endif}
+    _type: cuint8;
     depth: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -387,11 +379,7 @@ type // xcb
   end;
   Pxcb_get_window_attributes_reply_t = ^xcb_get_window_attributes_reply_t;
   xcb_get_window_attributes_reply_t = record
-   {$ifdef use_xcb}
-   _type: cuint8;
-   {$else}
-   response_type: cuint8;
-   {$endif}
+    _type: cuint8;
     backing_store: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -422,11 +410,7 @@ type // xcb
   end;
   
     xcb_get_property_reply_t = packed record
-   {$ifdef use_xcb}
-   _type: cuint8;
-   {$else}
-   response_type: cuint8;
-   {$endif}
+    _type: cuint8;
     format: cuint8;
     sequence: cuint16;
     length: cuint32;
@@ -566,7 +550,6 @@ type
   TXIC = record
   end;
 
-
   PFont = ^TFont;
   TFont = TXID;
 
@@ -602,7 +585,6 @@ type
     ascent: cint;
     descent: cint;
   end;
-
 
   PXGCValues = ^TXGCValues;
 
@@ -660,7 +642,7 @@ type
   end;
   PXWMHints = ^XWMHints;
 
-  XKeyEvent = record // For mseguiintf.pas
+  XKeyEvent = record
     type_: cint;
     serial: culong;
     send_event: Boolean;
@@ -675,7 +657,7 @@ type
     keycode: cuint;
     same_screen: Boolean;
   end;
-  PXKeyPressedEvent = ^XKeyEvent; // For mseguiintf.pas
+  PXKeyPressedEvent = ^XKeyEvent;
 
   PDrawable = ^TDrawable;
   TDrawable = TXID;
@@ -777,7 +759,6 @@ type
   end;
   PXRenderDirectFormat = ^TXRenderDirectFormat;
 
-
   TXRenderPictFormat = record
     id: TPictFormat;
     _type: longint;
@@ -839,14 +820,12 @@ type
   end;
   PXPointFixed = ^TXPointFixed;
 
-
   TXTriangle = record
     p1: TXPointFixed;
     p2: TXPointFixed;
     p3: TXPointFixed;
   end;
   PXTriangle = ^TXTriangle;
-
 
   PXKeyReleasedEvent = ^TXKeyReleasedEvent;
   TXKeyReleasedEvent = TXKeyEvent;
@@ -1771,12 +1750,14 @@ function DefaultScreen(dpy: PDisplay): cint;
 function XGetWindowProperty(para1: PDisplay; para2: TWindow; para3: TAtom; para4: clong; para5: clong; para6: Boolean; para7: TAtom; para8: PAtom; para9: Pcint; para10: Pculong; para11: Pculong; para12: PPcuchar): cint;
 function DefaultDepthOfScreen(s: PScreen): cint;
 
+{$ifdef use_xcb}
 var
   g_wm_protocols_atom: Atom = 0;
   g_wm_delete_window_atom: Atom = 0;
   wm_delete_window_atom: Atom = 0;
   mse_client_message_atom: Atom = 0;
   wm_protocols_atom: Atom = 0;
+{$endif}
 
 implementation
 

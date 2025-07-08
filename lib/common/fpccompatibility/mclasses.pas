@@ -1915,7 +1915,7 @@ end;
 Procedure TComponent.ValidateContainer(AComponent: TComponent);
 
 begin
-  AComponent.ValidateInsert(Self);
+  // AComponent.ValidateInsert(Self);
 end;
 
 
@@ -2099,10 +2099,10 @@ begin
   Result:=False;
 end;
 
-
 Procedure TComponent.InsertComponent(AComponent: TComponent);
 
 begin
+if (acomponent <> nil) and (self <> nil) then begin
   AComponent.ValidateContainer(Self);
   ValidateRename(AComponent,'',AComponent.FName);
   Insert(AComponent);
@@ -2110,8 +2110,8 @@ begin
   If csDesigning in FComponentState then
     AComponent.SetDesigning(true);
   Notification(AComponent,opInsert);
+end;  
 end;
-
 
 Procedure TComponent.RemoveComponent(AComponent: TComponent);
 

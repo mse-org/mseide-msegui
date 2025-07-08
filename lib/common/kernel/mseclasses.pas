@@ -2400,6 +2400,7 @@ begin
  if floadedlist = nil then begin
   floadedlist:= tloadedlist.create(nil);
  end;
+ if (floadedlist <> nil) and (instance <> nil) then
  instance.freenotification(floadedlist);
 end;
 
@@ -2453,7 +2454,7 @@ end;
 procedure trefresheventhandler.onsetname(reader: treader;
                                     component: tcomponent; var aname: string);
 begin
-exit;
+ exit;
  if (component.owner <> nil) and ((csinline in component.owner.componentstate) and
         not(csancestor in component.componentstate) or
         (component.owner.findcomponent(aname) <> nil)) then begin
@@ -2508,6 +2509,8 @@ constructor tcomponentdeleter.create(const acomponents: componentarty);
 var
  int1: integer;
 begin
+if self <> nil then
+begin
  inherited create(nil);
  fdelcomponents:= acomponents;
  for int1:= 0 to high(fdelcomponents) do begin
@@ -2515,6 +2518,7 @@ begin
    fdelcomponents[int1].freenotification(self);
   end;
  end;
+end; 
 end;
 
 procedure tcomponentdeleter.notification(acomponent: tcomponent;
@@ -5247,6 +5251,7 @@ end;
 procedure tmsecomponent.validaterename(acomponent: tcomponent;
                const curname: string; const newname: string);
 begin
+if acomponent <> nil then begin
  inherited;
  if componentstate * [csdesigning,csreading,csloading,csdestroying] =
                                                     [csdesigning] then begin
@@ -5255,6 +5260,7 @@ begin
   end;
   designvalidaterename(acomponent,curname,newname);
  end;
+end; 
 end;
 
 procedure tmsecomponent.setsubcompref;
