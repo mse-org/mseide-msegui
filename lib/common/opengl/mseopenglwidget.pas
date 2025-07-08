@@ -177,7 +177,7 @@ type
 
 implementation
 uses
- sysutils{$ifdef unix}{$ifdef FPC},mxutil{$endif}{$endif},mseglextglob;
+ sysutils,mseglextglob;
 
 { tcustomopenglwidget }
 

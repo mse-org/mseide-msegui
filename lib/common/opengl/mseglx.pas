@@ -39,7 +39,7 @@ interface
 {$ifdef linux}{$define unix}{$endif}
 {$IFDEF Unix}
   uses
-    {$ifdef FPC}mx,{$endif} mxlib,{$ifdef FPC} mxutil,{$endif}mseglextglob;
+   mxlib, mseglextglob;
   {$DEFINE HasGLX}  // Activate GLX stuff
 {$ELSE}
   {$MESSAGE Unsupported platform.}
