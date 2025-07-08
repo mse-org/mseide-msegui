@@ -2018,7 +2018,7 @@ end;
 
 function XUnmapWindow(ADisplay: PDisplay; AWindow: TWindow): cint; cdecl;
 begin
-  xcb_unmap_window(XGetXCBConnection(ADisplay), AWindow);
+ xcb_unmap_window(XGetXCBConnection(ADisplay), AWindow);
 end;
 
 procedure XFlush(display: PDisplay); cdecl;
