@@ -13,7 +13,7 @@ unit mseopenglwidget;
 interface
 uses
  classes,mclasses,msewindowwidget,msegl,
- {$ifdef unix}mseglx,{$ifdef FPC}mx,{$endif}mxlib,{$else}windows,{$endif}
+ {$ifdef unix}mseglx,mxlib,{$else}windows,{$endif}
  mseguiintf,msetypes,mseguiglob,mseclasses,msemenus,mseevent,msegui,msegraphics,
  msegraphutils;
 
