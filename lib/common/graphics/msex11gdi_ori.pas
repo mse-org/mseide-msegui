@@ -11,9 +11,10 @@ unit msex11gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
- {$ifdef FPC}mxlib{$else}Xlib{$endif},mxft,dynlibs,
+ {$ifdef FPC}mxlib{$else}Xlib{$endif},mxft,
+ {$ifdef FPC}mx,mxutil,dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
- msectypes,msefontconfig,msetriaglob;
+ msectypes,mxrender,msefontconfig,msetriaglob;
 
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                  const adepth: integer);
