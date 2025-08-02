@@ -1069,6 +1069,7 @@ begin
  end;
  if not (acs_dooncreatecalled in factstate) then begin
   dooncreate;
+   
  end;
  if not load then begin
 //  autoreadstat;
@@ -1166,6 +1167,9 @@ begin
    beginsuspendgloballoading;
    try
     foncreate(self);
+    if (wo_transparentbackground in foptionswindow) or 
+       (wo_transparentbackgroundellipse in foptionswindow) or 
+       (wo_transparentbackgroundround in foptionswindow) then SetChildBounds(self);
    finally
     endsuspendgloballoading;
    end;
