@@ -920,7 +920,7 @@ type
  fflags_t = cuint32;
 
  _stat = packed record
-{$if defined(freebsd) or defined(dragonfly) or defined(netbsd) or defined(darwin) }
+{$if defined(freebsd) or defined(netbsd) or defined(darwin) }
    st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
   st_mode: mode_t;          //* inode protection mode */
@@ -941,6 +941,31 @@ type
   st_gen: cuint32;          //* file generation number */
   st_lspare: cint32;
   st_birthtim: timespec;    //* time of file creation */
+  {$endif}
+  
+  {$if defined(dragonfly)}
+  st_ino: cuint64;            //* inode's number */
+  st_nlink: cuint32;       //* number of hard links */
+  st_dev: cuint32;          //* inode's device */
+  st_mode: cuint16;          //* inode protection mode */
+  st_pad1: cuint16;          
+  st_uid: uid_t;            //* user ID of the file's owner */
+  st_gid: gid_t;            //* group ID of the file's group */
+  st_rdev: __dev_t;         //* device type */
+  st_atime: culong;         //* time of last access */
+  st_atime_nsec: culong;
+  st_mtime: culong;         //* time of last data modification */
+  st_mtime_nsec: culong;
+  st_ctime: culong;         //* time of last file status change */
+  st_ctime_nsec: culong;
+  st_size: cuint64;           //* file size, in bytes */
+  st_blocks: blkcnt_t;      //* blocks allocated for file */
+  st_blksize: blksize_t;    //* optimal blocksize for I/O */
+  st_flags: fflags_t;       //* user defined flags for file */
+  st_gen: cuint32;          //* file generation number */
+  st_lspare: cint32;
+  st_qspare1: cint64;  
+  st_qspare2: cint64;    
   {$endif}
  
   {$if defined(openbsd)}
@@ -1054,7 +1079,32 @@ type
  blksize_t = cuint32;
  fflags_t = cuint32;
  
- {$if not defined(openbsd)} 
+  {$if defined(dragonfly)}
+  st_ino: cuint64;            //* inode's number */
+  st_nlink: cuint32;       //* number of hard links */
+  st_dev: cuint32;          //* inode's device */
+  st_mode: cuint16;          //* inode protection mode */
+  st_pad1: cuint16;          
+  st_uid: uid_t;            //* user ID of the file's owner */
+  st_gid: gid_t;            //* group ID of the file's group */
+  st_rdev: __dev_t;         //* device type */
+  st_atime: culong;         //* time of last access */
+  st_atime_nsec: culong;
+  st_mtime: culong;         //* time of last data modification */
+  st_mtime_nsec: culong;
+  st_ctime: culong;         //* time of last file status change */
+  st_ctime_nsec: culong;
+  st_size: cuint64;           //* file size, in bytes */
+  st_blocks: blkcnt_t;      //* blocks allocated for file */
+  st_blksize: blksize_t;    //* optimal blocksize for I/O */
+  st_flags: fflags_t;       //* user defined flags for file */
+  st_gen: cuint32;          //* file generation number */
+  st_lspare: cint32;
+  st_qspare1: cint64;  
+  st_qspare2: cint64;    
+  {$endif}
+  
+ {$if defined(netbsd) or defined(darwin)} 
  _stat = packed record
   st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
@@ -2258,11 +2308,20 @@ type
        end;
 {$else}
  dirent64 = record
-        {$if defined(dragonfly) or defined(netbsd) or defined(darwin)}
+        {$if defined(netbsd) or defined(darwin)}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
         d_type: cuint8;               //* file type, see below */
         d_namlen: cuint8;             //* length of string in d_name */
+        d_name: array[0..255] of char;        //* name must be no longer than this */
+        {$endif}
+        
+        {$if defined(dragonfly)}
+        d_fileno: cuint64;            //* file number of entry */
+        d_namlen: cuint16;             //* length of string in d_name */
+        d_type: cuint8;               //* file type, see below */
+        d_unused1: cuint8;
+        d_unused2: cuint32;            //* length of this record */
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
 
