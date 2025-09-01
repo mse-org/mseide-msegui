@@ -99,7 +99,7 @@ Const
  libiconvname='c';  // is in libc under Linux.
 {$endif}
 
-{$if defined(darwin) or defined(freebsd) or defined(dragonfly) or defined(openbsd) and not defined(freebsd5)}
+{$if defined(darwin) or defined(freebsd) or defined(openbsd) and not defined(freebsd5)}
  prefix = 'lib';
 {$else}
  prefix = '';
