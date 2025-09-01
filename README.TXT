@@ -10,6 +10,7 @@ Copyright (c) 1999-2025 by Martin Schreiber and friends.
   Linux-Rpi-arm32, Linux-Rpi-aarch64,
   NetBSD-x86_64, NetBSD-i386,
   OpenBSD x86_64, OpenBSD-i386,
+  DragonFlyBSD x86_64, 
   Darwin-MacOs-x86_64,  Darwin-MacOs-aarch64,
   Windows-i386, Windows-x86_64.
 - Links to xlib and gdi32, no external widget library needed.
