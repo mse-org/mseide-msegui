@@ -76,7 +76,19 @@ const
   {$else}
   platformtext = 'i386-openbsd';
   {$endif}
- {$else}
+ {$ifdef netbsd}
+  {$ifdef CPU64}
+  platformtext = 'x86_64-netbsd';
+  {$else}
+  platformtext = 'i386-netbsd';
+  {$endif} 
+  {$ifdef dragonflybsd}
+  {$ifdef CPU64}
+  platformtext = 'x86_64-dragonflybsd';
+  {$else}
+  platformtext = 'i386-dragonflybsd';
+  {$endif}
+   {$else}
   {$ifdef bsd}
    {$ifdef CPUAARCH64}
    platformtext = 'aarch64-bsd';
@@ -95,6 +107,8 @@ const
    {$endif}
   {$endif}
  {$endif}
+{$endif}
+{$endif}
 {$endif}
 {$endif}
 {$endif}
