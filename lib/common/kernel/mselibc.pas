@@ -2333,6 +2333,14 @@ type
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
 
+        {$if defined(freebsd) and (defined(powerpc64) or defined(powerpc64le))}
+        d_fileno: cuint32;            //* file number of entry */
+        d_reclen: cuint16;            //* length of this record */
+        d_type: cuint8;               //* file type, see below */
+        d_namlen: cuint8;             //* length of string in d_name */
+        d_name: array[0..255] of char;        //* name must be no longer than this */
+        {$endif}
+
         {$if defined(freebsd) and defined(cpuaarch64)}
         d_fileno: cuint32;          //* file number of entry */
         d_off : __off64_t;
