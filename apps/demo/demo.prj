@@ -19,6 +19,61 @@ order16=0
 order17=0
 order18=0
 [projectoptions]
+projectdir=/home/fred/mseide-msegui/apps/demo
+projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
+findinfiledialog=52
+ [findinfileadialogfo.dir]
+ filenames=1
+  /home/fred/freepascal-ootb/
+ filenamescust=0
+ filecolwidth=174
+ x=397
+ y=216
+ cx=608
+ cy=451
+ nopanel=0
+ compact=0
+ showoptions=0
+ hidehistory=0
+ hideicons=0
+ showhidden=0
+ colnamewidth=211
+ colsizewidth=81
+ colextwidth=45
+ coldatewidth=119
+ splitterplaces=244
+ splitterlateral=126
+ lastdir=/home/fred/freepascal-ootb/
+ filehistory=2
+  /home/fred/freepascal-ootb/
+  /home/fred/mseide-msegui/
+ filefilterindex=0
+ filefilter="*.pas" "*.pp" "*.inc"
+ [findinfileadialogfo.subdirs]
+ value=1
+ [findinfileadialogfo.incurrentfile]
+ value=0
+ [findinfileadialogfo.inopenfiles]
+ value=0
+ [findinfileadialogfo.wholeword]
+ value=0
+ [findinfileadialogfo.indirectories]
+ value=1
+ [findinfileadialogfo.inprojectdir]
+ value=0
+ [findinfileadialogfo.casesensitive]
+ value=0
+ [findinfileadialogfo.mask]
+ value="*.pas" "*.pp" "*.inc"
+ history=1
+  "*.pas" "*.pp" "*.inc"
+ [findinfileadialogfo.findtext]
+ value=powerpc64
+ history=3
+  powerpc64
+  cpupowerpc
+  
+ [findinfileadialogfo]
 options=114
  [projectoptionsfo.toolshortcuts]
  dropdowncolwidths=3
@@ -668,6 +723,7 @@ files=
  a=0,8229,6,Text Files
  )
 [componentstore]
+storedir=/home/fred/mseide-msegui/apps/ide/compstore/
 filename=
 [components]
 [selecteditpage]
@@ -683,17 +739,33 @@ envvarons=0
 [edit]
 hintwidth=0
 hintheight=0
-finddtext=
-findhistory=0
+finddtext=powerpc
+findhistory=1
+ powerpc
 findoptions=1
-editpos=1
+editpos=4
  0,0
+ 0,133
+ 0,0
+ 71,2335
 bookmarks0=0
-sourcefiles=1
+bookmarks1=0
+bookmarks2=0
+bookmarks3=0
+sourcefiles=4
  ${PROJECTDIR}/demo.pas
-relpaths=1
+ /home/fred/freepascal-ootb/utils/fpcres/target.pas
+ /home/fred/mseide-msegui/lib/common/kernel/msectypes.pas
+ /home/fred/mseide-msegui/lib/common/kernel/mselibc.pas
+relpaths=4
  demo.pas
-ismoduletexts=1
+ ../../freepascal-ootb/utils/fpcres/target.pas
+ ../lib/common/kernel/msectypes.pas
+ ../lib/common/kernel/mselibc.pas
+ismoduletexts=4
+ 0
+ 0
+ 0
  0
 modules=0
 moduleoptions=0
@@ -701,9 +773,9 @@ visiblemodules=0
 nomenumodules=0
 [sourcefo.files_tab]
 firsttab=0
-index=0
+index=3
 [layout]
-windowlayout=573
+windowlayout=511
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -717,15 +789,18 @@ windowlayout=573
  ny=0
  ncx=0
  ncy=0
- x=5
- y=96
- cx=1430
+ x=0
+ y=79
+ cx=1398
  cy=724
  rcx=0
  rcy=0
  wsize=0
  active=1
  visible=1
+ [findinfilefo.tabs]
+ firsttab=0
+ index=0
  [findmessagefo.findtext]
  value=
  history=3
@@ -747,8 +822,8 @@ windowlayout=573
  ncy=0
  x=495
  y=172
- cx=497
- cy=314
+ cx=700
+ cy=467
  rcx=0
  rcy=0
  wsize=0
@@ -775,7 +850,7 @@ windowlayout=573
  [memoryfo]
  splitdir=0
  useroptions=268451963
- stackedunder=dialogfilesfo
+ stackedunder=findmessagefo
  parent=
  mdistate=0
  nx=0
@@ -818,26 +893,10 @@ windowlayout=573
  wsize=0
  active=0
  visible=0
- [findinfilefo]
- splitdir=0
- useroptions=268451947
- stackedunder=
- parent=
- mdistate=0
- nx=0
- ny=0
- ncx=0
- ncy=0
- x=239
- y=115
- cx=678
- cy=414
- rcx=0
- rcy=0
  [projecttreefo]
  splitdir=0
  useroptions=268484715
- stackedunder=objectinspectorfo
+ stackedunder=conflangfo
  parent=
  mdistate=3
  nx=0
@@ -854,15 +913,15 @@ windowlayout=573
  active=0
  visible=0
  [projecttreefo.grid]
- propcolwidthref=27
+ propcolwidthref=26
  width0=141
  sortdescend0=0
- width1=25
+ width1=24
  sortdescend1=0
  sorted=0
  col=1
  row=0
- rowheight=17
+ rowheight=28
  [stackfo]
  splitdir=0
  useroptions=268460137
@@ -921,7 +980,7 @@ windowlayout=573
  [breakpointsfo]
  splitdir=0
  useroptions=268451947
- stackedunder=conflangfo
+ stackedunder=projecttreefo
  parent=
  mdistate=0
  nx=0
@@ -940,10 +999,10 @@ windowlayout=573
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=330
- width0=79
+ propcolwidthref=414
+ width0=99
  sortdescend0=0
- width1=245
+ width1=309
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1036,8 +1095,8 @@ windowlayout=573
  ncx=0
  ncy=0
  x=0
- y=612
- cx=1417
+ y=610
+ cx=1384
  cy=88
  rcx=0
  rcy=0
@@ -1137,8 +1196,8 @@ windowlayout=573
  ncy=0
  x=0
  y=0
- cx=1417
- cy=59
+ cx=1384
+ cy=63
  rcx=0
  rcy=0
  [debuggerfo.basedock]
@@ -1149,12 +1208,12 @@ windowlayout=573
  mdistate=0
  nx=0
  ny=0
- ncx=1422
- ncy=64
+ ncx=1417
+ ncy=62
  x=0
  y=0
- cx=1417
- cy=62
+ cx=1384
+ cy=66
  rcx=0
  rcy=0
  [debuggerfo.edit_options]
@@ -1164,8 +1223,11 @@ windowlayout=573
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
-  [debuggerfo.project_options]
- value=1
+ value=/home/fred/mseide-msegui/lib/common/kernel/mselibc.pas
+ history=1
+  /home/fred/mseide-msegui/lib/common/kernel/msectypes.pas
+ [debuggerfo.project_options]
+ value=M
  [debuggerfo.hints]
  value=1
  [sourcefo]
@@ -1180,13 +1242,13 @@ windowlayout=573
  ncy=0
  x=0
  y=0
- cx=1417
- cy=547
+ cx=1384
+ cy=541
  rcx=0
  rcy=0
  [sourcefo.files_tab]
  firsttab=0
- index=0
+ index=3
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1220,9 +1282,9 @@ windowlayout=573
  ncx=0
  ncy=0
  x=0
- y=62
- cx=1417
- cy=547
+ y=66
+ cx=1384
+ cy=541
  rcx=0
  rcy=0
 [targetconsole]
