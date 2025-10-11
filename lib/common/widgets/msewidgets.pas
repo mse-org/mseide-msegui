@@ -6034,12 +6034,16 @@ end;
 
 procedure tscrollingwidgetnwr.dolayout(const sender: twidget);
 begin
+{$ifndef CPUpowerpc64} // For testing powerpc64
  if canevent(tmethod(fonlayout)) then begin
   fonlayout(self);
  end
  else begin
   inherited;
  end;
+ {$else}
+ inherited;
+ {$endif}
 end;
 
 procedure tscrollingwidgetnwr.loaded;
