@@ -21,7 +21,7 @@ order18=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/apps/demo
 projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
-findinfiledialog=53
+findinfiledialog=54
  [findinfileadialogfo.dir]
  filenames=1
   /home/fred/mseide-msegui/
@@ -68,8 +68,9 @@ findinfiledialog=53
  history=1
   "*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=msecws
- history=4
+ value=cpuamd64
+ history=5
+  cpuamd64
   msecws
   powerpc64
   cpupowerpc
@@ -435,9 +436,12 @@ settingsstorage=0
 settingsprojecttree=0
 settingsautoload=0
 settingsautosave=0
-modulenames=0
-moduletypes=0
-modulefiles=0
+modulenames=1
+ MAINFO
+moduletypes=1
+ TMAINFO
+modulefiles=1
+ /home/fred/mseide-msegui/apps/demo/main.mfm
 befcommandon=0
 makeoptionson=5
  63
@@ -744,50 +748,66 @@ finddtext=powerpc
 findhistory=1
  powerpc
 findoptions=1
-editpos=5
- 0,0
- 0,2400
+editpos=7
+ 0,5
+ 0,2188
  0,19
- 116,30
+ 0,21
  0,1852
+ 0,107
+ 0,44
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
 bookmarks3=0
 bookmarks4=0
-sourcefiles=5
+bookmarks5=0
+bookmarks6=0
+sourcefiles=7
  ${PROJECTDIR}/demo.pas
  /home/fred/mseide-msegui/lib/common/kernel/mselibc.pas
  /home/fred/mseide-msegui/lib/common/kernel/linux/msesetlocale.pas
  /home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
  /home/fred/mseide-msegui/lib/common/db/msedb.pas
-relpaths=5
+ /home/fred/mseide-msegui/lib/common/kernel/mseclasses.pas
+ ${PROJECTDIR}/main.pas
+relpaths=7
  demo.pas
  ../lib/common/kernel/mselibc.pas
  ../lib/common/kernel/linux/msesetlocale.pas
  ../lib/common/kernel/linux/msesysintf.pas
  ../lib/common/db/msedb.pas
-ismoduletexts=5
+ ../lib/common/kernel/mseclasses.pas
+ main.pas
+ismoduletexts=7
  0
  0
  0
  0
  0
-modules=0
-moduleoptions=0
-visiblemodules=0
-nomenumodules=0
+ 0
+ 0
+modules=1
+ /home/fred/mseide-msegui/apps/demo/main.mfm
+moduleoptions=1
+ 0
+visiblemodules=1
+ -1
+nomenumodules=1
+ 0
 [sourcefo.files_tab]
-order=5
- 0
- 2
- 3
- 4
+order=7
  1
+ 0
+ 6
+ 3
+ 5
+ 4
+ 2
 firsttab=0
 index=2
 [layout]
-windowlayout=517
+windowlayout=537
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1011,10 +1031,10 @@ windowlayout=517
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=414
- width0=99
+ propcolwidthref=399
+ width0=95
  sortdescend0=0
- width1=309
+ width1=298
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1235,9 +1255,8 @@ windowlayout=517
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/lib/common/kernel/linux/msesysintf.pas
- history=1
-  /home/fred/mseide-msegui/lib/common/kernel/mselibc.pas
+ value=/home/fred/mseide-msegui/apps/demo/main.pas
+ history=0
  [debuggerfo.project_options]
  value=M
  [debuggerfo.hints]
@@ -1259,12 +1278,14 @@ windowlayout=517
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=5
-  0
-  2
-  3
-  4
+ order=7
   1
+  0
+  6
+  3
+  5
+  4
+  2
  firsttab=0
  index=2
  [confideufo.usedefaulteditoroptions]
@@ -1305,6 +1326,25 @@ windowlayout=517
  cy=541
  rcx=0
  rcy=0
+ [_mse_mainfo_mse_]
+ splitdir=0
+ useroptions=268451963
+ stackedunder=mainfo
+ parent=
+ mdistate=3
+ nx=0
+ ny=0
+ ncx=0
+ ncy=0
+ x=129
+ y=271
+ cx=445
+ cy=138
+ rcx=0
+ rcy=0
+ wsize=0
+ active=0
+ visible=1
 [targetconsole]
 finddtext=
 findhistory=0

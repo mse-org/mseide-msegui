@@ -91,16 +91,22 @@ const
   platformtext = 'i386-dragonflybsd';
    {$endif}
   {$else}
-  {$ifdef bsd}
+  {$ifdef freebsd}
    {$ifdef CPUAARCH64}
-   platformtext = 'aarch64-bsd';
+   platformtext = 'aarch64-freebsd';
    {$else}
    {$ifdef CPUamd64}
-  platformtext = 'x86_64-bsd';
+  platformtext = 'x86_64-freebsd';
    {$else}
-  platformtext = 'i386-bsd';
+   {$ifdef CPUi386}
+  platformtext = 'i386-freebsd';
+  {$else}
+  {$ifdef CPUpowerpc64}
+  platformtext = 'powerpc64-freebsd';
    {$endif}
-    {$endif}
+   {$endif}
+   {$endif}
+   {$endif}
   {$else}
    {$ifdef cpu64}
    platformtext = 'x86_64-win64';

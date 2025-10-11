@@ -1,28 +1,81 @@
 object mainfo: tmainfo
   bounds_x = 129
   bounds_y = 271
-  bounds_cx = 341
-  bounds_cy = 166
+  bounds_cx = 435
+  bounds_cy = 138
   container.frame.localprops = []
   container.frame.localprops1 = []
   container.bounds = (
     0
     0
-    341
-    166
+    435
+    138
   )
   options = [fo_main, fo_terminateonclose, fo_autoreadstat, fo_autowritestat, fo_savepos, fo_savestate]
   windowopacity = -Inf
   moduleclassname = 'tmseform'
   object tbutton1: tbutton
-    bounds_x = 144
-    bounds_y = 72
+    color = -1610612731
+    bounds_x = 352
+    bounds_y = 96
     bounds_cx = 50
     bounds_cy = 22
-    state = [as_localcaption, as_localonexecute]
+    state = [as_localcaption, as_localcolor, as_localonexecute]
     caption = 'Exit'
     font.xscale = 1
     font.localprops = [flp_xscale]
     onexecute = exitonexecute
+  end
+  object tbutton2: tbutton
+    color = -1610612731
+    taborder = 1
+    bounds_x = 24
+    bounds_y = 24
+    bounds_cx = 90
+    bounds_cy = 22
+    state = [as_localcaption, as_localcolor, as_localonexecute]
+    caption = 'Change title'
+    font.xscale = 1
+    font.localprops = [flp_xscale]
+    onexecute = onchangetitle
+  end
+  object tbutton3: tbutton
+    color = -1610612731
+    taborder = 2
+    bounds_x = 120
+    bounds_y = 24
+    bounds_cx = 90
+    bounds_cy = 22
+    state = [as_localcaption, as_localcolor, as_localonexecute]
+    caption = 'Move Window'
+    font.xscale = 1
+    font.localprops = [flp_xscale]
+    onexecute = onmovewindow
+  end
+  object tbutton4: tbutton
+    color = -1610612731
+    taborder = 3
+    bounds_x = 320
+    bounds_y = 24
+    bounds_cx = 90
+    bounds_cy = 22
+    state = [as_localcaption, as_localcolor, as_localonexecute]
+    caption = 'Change color'
+    font.xscale = 1
+    font.localprops = [flp_xscale]
+    onexecute = onchangecolor
+  end
+  object tbutton5: tbutton
+    color = -1610612731
+    taborder = 4
+    bounds_x = 216
+    bounds_y = 24
+    bounds_cx = 98
+    bounds_cy = 22
+    state = [as_localcaption, as_localcolor, as_localonexecute]
+    caption = 'Resize Window'
+    font.xscale = 1
+    font.localprops = [flp_xscale]
+    onexecute = onresizwindow
   end
 end
