@@ -2526,7 +2526,7 @@ function stat64(__file:Pchar; __buf:Pstat64):longint;
 function fstat64(__fd:longint; __buf:Pstat64):longint;
 function lstat(__file:Pchar; __buf:Pstat):longint;
 function lstat64(__file:Pchar; __buf:Pstat64):longint;
-{$else} //linux
+{$else} // end linux
 function stat(__file:Pchar; __buf:Pstat):longint; cdecl;
                                    external clib name 'stat';
 function fstat(__fd:longint; __buf:Pstat):longint; cdecl;
@@ -3049,8 +3049,6 @@ function waitpid(__pid:__pid_t; var __stat_loc:longint;
                          __options:longint):__pid_t;
                              cdecl;external clib name 'waitpid' + LIBC_SUFFIX; overload;
 function __system(__command:Pchar):longint;cdecl;external clib name 'system' + LIBC_SUFFIX;
-
-
  
 function WEXITSTATUS(status: cint): cint;
 function WTERMSIG(status: cint): cint;
@@ -3187,7 +3185,6 @@ type
           2: (s6_addr32: packed array [0..4-1] of uint32_t);
         );
    end;
-
 
   Psockaddr_in6 = ^sockaddr_in6;
   sockaddr_in6 = record
@@ -3418,10 +3415,10 @@ function pthread_cond_broadcast(var Cond: TCondVar): Integer; cdecl;
 function pthread_cond_signal(var Cond: TCondVar): Integer; cdecl;
            external threadslib name 'pthread_cond_signal' + LIBC_SUFFIX;
            
-  {$ifndef darwin}  
+{$ifndef darwin}  
 function sem_timedwait(var __sem: TSemaphore; __abstime: ptimespec): Integer; cdecl;
             external threadslib name 'sem_timedwait' + LIBC_SUFFIX3;
-   {$endif}            
+{$endif}            
 
 function pthread_mutex_init(__mutex: Ppthread_mutex_t;
                __mutex_attr: Ppthread_mutexattr_t): longint; cdecl;
