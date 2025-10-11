@@ -21,14 +21,14 @@ order18=0
 [projectoptions]
 projectdir=/home/fred/mseide-msegui/apps/demo
 projectfilename=/home/fred/mseide-msegui/apps/demo/demo.prj
-findinfiledialog=54
+findinfiledialog=56
  [findinfileadialogfo.dir]
  filenames=1
-  /home/fred/mseide-msegui/
+  /home/fred/freepascal-ootb/
  filenamescust=0
  filecolwidth=174
- x=397
- y=216
+ x=398
+ y=240
  cx=608
  cy=451
  nopanel=0
@@ -43,10 +43,10 @@ findinfiledialog=54
  coldatewidth=119
  splitterplaces=244
  splitterlateral=126
- lastdir=/home/fred/mseide-msegui/
+ lastdir=/home/fred/freepascal-ootb/
  filehistory=2
-  /home/fred/mseide-msegui/
   /home/fred/freepascal-ootb/
+  /home/fred/mseide-msegui/
  filefilterindex=0
  filefilter="*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.subdirs]
@@ -68,8 +68,10 @@ findinfiledialog=54
  history=1
   "*.pas" "*.pp" "*.inc"
  [findinfileadialogfo.findtext]
- value=cpuamd64
- history=5
+ value=CPUpowerpc64
+ history=7
+  CPUpowerpc64
+  powerpc64le
   cpuamd64
   msecws
   powerpc64
@@ -748,7 +750,7 @@ finddtext=powerpc
 findhistory=1
  powerpc
 findoptions=1
-editpos=7
+editpos=10
  0,5
  0,2188
  0,19
@@ -756,6 +758,9 @@ editpos=7
  0,1852
  0,107
  0,44
+ 0,89
+ 0,43
+ 0,3726
 bookmarks0=0
 bookmarks1=0
 bookmarks2=0
@@ -763,7 +768,10 @@ bookmarks3=0
 bookmarks4=0
 bookmarks5=0
 bookmarks6=0
-sourcefiles=7
+bookmarks7=0
+bookmarks8=0
+bookmarks9=0
+sourcefiles=10
  ${PROJECTDIR}/demo.pas
  /home/fred/mseide-msegui/lib/common/kernel/mselibc.pas
  /home/fred/mseide-msegui/lib/common/kernel/linux/msesetlocale.pas
@@ -771,7 +779,10 @@ sourcefiles=7
  /home/fred/mseide-msegui/lib/common/db/msedb.pas
  /home/fred/mseide-msegui/lib/common/kernel/mseclasses.pas
  ${PROJECTDIR}/main.pas
-relpaths=7
+ /home/fred/freepascal-ootb/utils/fpcres/target.pas
+ /home/fred/freepascal-ootb/compiler/powerpc64/tripletcpu.pas
+ /home/fred/freepascal-ootb/compiler/options.pas
+relpaths=10
  demo.pas
  ../lib/common/kernel/mselibc.pas
  ../lib/common/kernel/linux/msesetlocale.pas
@@ -779,7 +790,13 @@ relpaths=7
  ../lib/common/db/msedb.pas
  ../lib/common/kernel/mseclasses.pas
  main.pas
-ismoduletexts=7
+ ../../freepascal-ootb/utils/fpcres/target.pas
+ ../../freepascal-ootb/compiler/powerpc64/tripletcpu.pas
+ ../../freepascal-ootb/compiler/options.pas
+ismoduletexts=10
+ 0
+ 0
+ 0
  0
  0
  0
@@ -796,18 +813,21 @@ visiblemodules=1
 nomenumodules=1
  0
 [sourcefo.files_tab]
-order=7
+order=10
  1
  0
  6
+ 7
+ 8
+ 9
  3
  5
  4
  2
 firsttab=0
-index=2
+index=5
 [layout]
-windowlayout=537
+windowlayout=540
  [mainfo.basedock]
  splitdir=2
  useroptions=268450944
@@ -1031,10 +1051,10 @@ windowlayout=537
  [breakpointsfo.bkptson]
  value=1
  [objectinspectorfo.grid]
- propcolwidthref=399
- width0=95
+ propcolwidthref=414
+ width0=99
  sortdescend0=0
- width1=298
+ width1=309
  sortdescend1=0
  [symbolfo]
  splitdir=0
@@ -1255,7 +1275,7 @@ windowlayout=537
  [debuggerfo.edit_compiler]
  value=Pascal
  [debuggerfo.file_history]
- value=/home/fred/mseide-msegui/apps/demo/main.pas
+ value=/home/fred/freepascal-ootb/compiler/options.pas
  history=0
  [debuggerfo.project_options]
  value=M
@@ -1278,16 +1298,19 @@ windowlayout=537
  rcx=0
  rcy=0
  [sourcefo.files_tab]
- order=7
+ order=10
   1
   0
   6
+  7
+  8
+  9
   3
   5
   4
   2
  firsttab=0
- index=2
+ index=5
  [confideufo.usedefaulteditoroptions]
  value=0
  [cpuc86_64fo]
@@ -1329,7 +1352,7 @@ windowlayout=537
  [_mse_mainfo_mse_]
  splitdir=0
  useroptions=268451963
- stackedunder=mainfo
+ stackedunder=findinfilefo
  parent=
  mdistate=3
  nx=0

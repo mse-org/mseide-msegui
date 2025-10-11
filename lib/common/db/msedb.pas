@@ -2862,7 +2862,7 @@ begin
   try
    result:= msestring(sender.asstring);
   except
-  {$if not defined(openbsd) and not defined(darwin)}
+  {$if not defined(openbsd) and not defined(freebsd) and not defined(darwin)}
    on e: eiconv do begin
     //no crash by iconverror
    end
