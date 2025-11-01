@@ -692,7 +692,11 @@ begin
 {$ifdef mse_with_showsourceitems}
          showsourceitems(edit.editpos);
 {$endif}
-        end
+        end;
+        key_Backspace: begin
+        edit.selectword(edit.editpos,selectdelims);
+        edit.deleteselection;
+        end;
         else begin
          exclude(eventstate,es_processed);
         end;
