@@ -1203,7 +1203,7 @@ end;
 
 procedure tsourcepage.showlink(const apos: gridcoordty);
 begin
- edit.showlink(apos,pascaldelims + '.[]');
+ edit.showlink(apos,pascaldelims + '[]');
 end;
 
 procedure tsourcepage.editontextmouseevent(const sender: tobject;
