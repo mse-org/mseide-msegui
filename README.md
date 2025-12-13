@@ -99,7 +99,7 @@ https://bugs.freepascal.org/view.php?id=32367
 
 ### Bash installer
 
-There is a Bash installer for Linux that you can find [here](https://github.com/rchastain2/scripts/tree/main/install-mseide).
+There is a Bash installer for Linux that you can find [here](https://github.com/rchastain2/scripts/tree/main/bash/install-mseide).
 
 The script clones the git repository, build the IDE, and creates a desktop shortcut.
 
