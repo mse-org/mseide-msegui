@@ -256,6 +256,9 @@ function completeclass(const filename: filenamety; var pos: sourceposty): boolea
 function getimplementationtext(const amodule: tmsecomponent; out aunit: punitinfoty;
                 out start,stop: sourceposty; out adest: msestring): boolean;
                 //false if not found
+
+function inusessection(const edit: tsyntaxedit; var apos: sourceposty): Boolean;
+
 implementation
 uses
  sysutils,msesys,msefileutils,sourceform,sourcepage,projectoptionsform,
@@ -268,6 +271,34 @@ uses
   {$warn 6058 off}
  {$endif}
 {$endif}
+
+function inusessection(const edit: tsyntaxedit; var apos: sourceposty): Boolean;
+var
+  po1: punitinfoty;
+  po2: psourceitemty;
+  str1: msestring;
+  startword: gridcoordty;
+  apos2: sourceposty;
+begin
+  Result := False;
+
+  startword := edit.wordatpos(apos.pos,str1,defaultdelimchars + ',;{}/',[]);
+  apos2.pos := startword;
+
+  with sourceupdater do
+    if not application.waitcanceled then
+    begin
+      po1 := updatesourceunit(edit.filename, apos2.filenum, false);
+
+      if updateline(po1, apos2) then
+      begin
+        po2 := findsourceitem(po1, apos2);
+        if po2 <> nil then
+          if po2^.kind = sik_uses then
+            Result := True;
+       end;
+    end;
+end;
 
 function findprogramlanguage(const afilename: filenamety): proglangty;
 var
