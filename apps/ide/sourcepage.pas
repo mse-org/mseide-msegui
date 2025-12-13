@@ -1202,8 +1202,20 @@ begin
 end;
 
 procedure tsourcepage.showlink(const apos: gridcoordty);
+var
+ pos1: sourceposty;
+ str1: msestring;
+ startword: gridcoordty;
 begin
- edit.showlink(apos,pascaldelims + '[]');
+ pos1.pos:= apos;
+ if inusessection(edit,pos1) then
+ begin
+  // In uses statements, don't use dot as delimiter to support namespace units
+  startword := edit.wordatpos(pos1.pos,str1,defaultdelimchars + ',;{}/',[]);
+  edit.showlink(startword,pascaldelims + '[]')
+ end
+ else
+  edit.showlink(apos,pascaldelims + '.[]');
 end;
 
 procedure tsourcepage.editontextmouseevent(const sender: tobject;
@@ -1253,6 +1265,8 @@ begin
     if (shiftstate1 = [ss_ctrl,ss_left]) {and active} then begin
 //     include(info.mouseeventinfopo^.eventstate,es_processed);
      pos1.pos:= info.pos;
+     if inusessection(edit,pos1) then
+      pos1.pos:= edit.wordatpos(info.pos,str1,defaultdelimchars + ',;{}/',[]);
      pos1.filename:= designer.designfiles.find(edit.filename);
      if findlinkdest(edit,pos1,str1) then begin
       fshowsourcepos:= pos1;
