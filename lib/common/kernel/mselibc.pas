@@ -1104,7 +1104,7 @@ type
   st_qspare2: cint64;    
   {$endif}
   
- {$if defined(netbsd) or defined(darwin)} 
+ {$if defined(netbsd) or defined(darwin) or defined(freebsd)} 
  _stat = packed record
   st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
