@@ -38,7 +38,7 @@ uses
  msebitmap,msearrayprops,msethreadcomp,mserichstring,msearrayutils
                    {$ifdef mse_with_ifi},mseifiglob,mseificompglob{$endif};
  const
- mseguiversiontext = '5.10.6';
+ mseguiversiontext = '5.12.0';
  copyrighttext = 'Copyright 1999-2025';
  defaultwidgetcolor = cl_default;
  defaulttoplevelwidgetcolor = cl_background;

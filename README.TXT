@@ -1,6 +1,6 @@
 MSEide+MSEgui Pascal Cross Platform GUI Development System.
 
-2025-06-02 MSEgui Version 5.10.6.
+2025-12-13 MSEgui Version 5.12.0.
 Copyright (c) 1999-2025 by Martin Schreiber and friends.
 
 - Compiles with FPC 2.6.4, 3.0.0, 3.0.2, 3.2.0, 3.2.2 or 3.3.1.
@@ -10,6 +10,7 @@ Copyright (c) 1999-2025 by Martin Schreiber and friends.
   Linux-Rpi-arm32, Linux-Rpi-aarch64,
   NetBSD-x86_64, NetBSD-i386,
   OpenBSD x86_64, OpenBSD-i386,
+  DragonFlyBSD x86_64, 
   Darwin-MacOs-x86_64,  Darwin-MacOs-aarch64,
   Windows-i386, Windows-x86_64.
 - Links to xlib and gdi32, no external widget library needed.

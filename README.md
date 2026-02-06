@@ -1,6 +1,6 @@
 # MSEide+MSEgui Pascal Cross Platform GUI Development System
 
-2025-06-02 Version 5.10.6.
+2025-12-13 Version 5.12.0.
 Copyright (c) 1999-2025 by Martin Schreiber and friends.
 
 MSEgui is a complete independent Free Pascal widgetset.
@@ -20,6 +20,7 @@ And because it is developed in Pascal, you have full control on the widgetset.
   Linux-Rpi-arm32, Linux-Rpi-aarch64,
   NetBSD-x86_64, NetBSD-i386,
   OpenBSD x86_64, OpenBSD-i386,
+  DragonFlyBSD x86_64, 
   Darwin-MacOs-x86_64, Darwin-MacOs-aarch64,
   Windows-i386, Windows-x86_64.
 - Links to xlib and gdi32, no external widget library needed.
@@ -98,7 +99,7 @@ https://bugs.freepascal.org/view.php?id=32367
 
 ### Bash installer
 
-There is a Bash installer for Linux that you can find [here](https://github.com/rchastain2/scripts/tree/main/install-mseide).
+There is a Bash installer for Linux that you can find [here](https://github.com/rchastain2/scripts/tree/main/bash/install-mseide).
 
 The script clones the git repository, build the IDE, and creates a desktop shortcut.
 

@@ -1791,22 +1791,33 @@ begin
  setlength(result,count);
 end;
 
-function tparser.getorignamelist: lstringarty; //names separated by ','
+function tparser.getorignamelist: lstringarty; //names separated by ',' or '.' for namespace units
 var
  count: integer;
+ str1: lstringty;
+ str2: string;
 begin
  count:= 0;
  setlength(result,1);
  while not eof do begin
-  if not getorigname(result[count]) then begin
+  if not getorigname(str1) then begin
    break;
   end;
-  inc(count);
-  if not checkoperator(',') and (fto^.kind = tk_operator) then begin
-   break;
-  end;
-  if high(result) < count then begin
-   setlength(result,high(result)+33);
+  // For namespace units like Something.Utils, concatenate with dots
+  if (count > 0) and testoperator('.') then begin
+   checkoperator('.'); // Consume the dot
+   str2:= lstringtostring(result[count-1]) + '.' + lstringtostring(str1);
+   result[count-1]:= stringtolstring(str2);
+  end
+  else begin
+   result[count]:= str1;
+   inc(count);
+   if not checkoperator(',') and (fto^.kind = tk_operator) then begin
+    break;
+   end;
+   if high(result) < count then begin
+    setlength(result,high(result)+33);
+   end;
   end;
  end;
  setlength(result,count);

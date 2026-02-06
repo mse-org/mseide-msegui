@@ -1,5 +1,12 @@
 MSEide+MSEgui changes version history
 **********************************************
+Version 5.12.0
+2025-12-13
+MSEgui: SetChildBounds(self) for transparent forms and other bug fix.
+MSEgui: New target DragonFlyBSD aarch64, compatible last fpc 3.3.1.
+MSEide: Key Ctrl+key_Backspace delete the word at cursor (like other editors do).
+MSEide: Fix code navigation for namespace units.
+
 Version 5.10.6
 2025-06-02
 Fixes in mselibc.pas for Linux i386, msedrag.pas. and other fixes.
