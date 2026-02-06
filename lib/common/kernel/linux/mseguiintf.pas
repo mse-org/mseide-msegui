@@ -54,7 +54,7 @@ interface
 {$endif}
 
 uses
-  {$ifdef use_xcb}mxcb{$else}mxlib, mxrandr{$endif}, msetypes, mseapplication, msesys,
+  mxlib, mxrandr, msetypes, mseapplication, msesys,
   msegraphutils, mseevent, msepointer, mseguiglob, msesystypes,{msestockobjects,}
   msethread{$ifdef FPC},dynlibs{$endif},
   mselibc, msectypes, msesysintf, msegraphics,

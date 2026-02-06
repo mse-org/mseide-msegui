@@ -36,7 +36,7 @@ unit mshape;
 interface
 
 uses
-  dynlibs, ctypes,{$ifdef use_xcb}mxcb{$else}mxlib{$endif};
+  dynlibs, ctypes, mxlib;
 
 
 const

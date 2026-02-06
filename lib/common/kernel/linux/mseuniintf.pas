@@ -20,7 +20,7 @@ function uni_listfontswithglyph(achar: msechar): msestringarty;
 
 implementation
 uses
- mseguiintf,msex11gdi,mxft,{$ifdef use_xcb}mxcb{$else}mxlib{$endif},msefontconfig;
+ mseguiintf,msex11gdi,mxft,mxlib,msefontconfig;
 
 function uni_getfontwithglyph(var drawinfo: drawinfoty): boolean;
 var
