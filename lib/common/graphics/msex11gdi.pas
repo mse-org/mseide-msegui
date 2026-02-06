@@ -11,7 +11,7 @@ unit msex11gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
- {$ifdef use_xcb}mxcb{$else}mxlib{$endif},mxft,
+ mxlib,mxft,
  {$ifdef FPC}dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
  msectypes,msefontconfig,msetriaglob;
@@ -143,7 +143,6 @@ var //xft functions
  XftDrawSrcPicture: function(draw: pXftDraw; color: pXftColor): tpicture; cdecl;
 {$endif}
 
-{$ifndef use_xcb}
 var
  XRenderSetPictureClipRectangles: procedure(dpy:PDisplay; picture:TPicture;
             xOrigin:longint; yOrigin:longint; rects:PXRectangle; n:longint);
@@ -195,8 +194,6 @@ var
                npoint: cint); cdecl;
  XRenderChangePicture: procedure(dpy: pdisplay; picture: tpicture;
              valuemask: culong; attributes: PXRenderPictureAttributes); cdecl;
-
-{$endif}
 
 implementation
 uses
@@ -400,17 +397,9 @@ begin
   argbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardargb32);
  end;
  
-  {$ifdef use_xcb}
-  noxft := true;
-  {$endif}
   if not noxft then begin
-  {$ifndef use_xcb}
   fhasxft:= fhasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
-  {$else}
-  fhasxft := true;
-  {$endif}
- 
-  if fhasxft then begin
+   if fhasxft then begin
    fhasxft:= xftinit(nil);
    if fhasxft then begin
     fhasxft:= xftinitftlibrary();
@@ -3233,7 +3222,6 @@ begin
  result:= true;
 end;
 
-{$ifndef use_xcb}
 function getxrenderlib: boolean;
 const
  funcs: array[0..14] of funcinfoty = (
@@ -3287,16 +3275,6 @@ begin
   end;
  end;
 end;
-
-{$else}
-
-function getxrenderlib: boolean;
-begin
-   createcolorpic:= @createcolorpic2;
-   result := true;
-end;
-
-{$endif}
 
 const
  gdifunctions: gdifunctionaty = (
