@@ -139,7 +139,7 @@ type
                    //wo_transparentbackgroundellipse, // removed because fpc published set are limitged to 31 elements 
                    wo_transparentbackgroundround, 
                    wo_onalldesktops,
-                   wo_custom
+                   wo_customshape
                    );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;

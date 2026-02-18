@@ -3117,7 +3117,7 @@ begin
     DeleteObject(region);
    end else
    }
-if (wo_custom in options) and (mse_shapefile <> '') then
+if (wo_customshape in options) and (mse_shapefile <> '') then
 begin
   shapebmp := tmaskedbitmap.Create(bmk_mono);
   try

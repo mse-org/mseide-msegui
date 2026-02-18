@@ -4182,7 +4182,7 @@ var
 //////////////////////////////////////////////
 
   if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)
-  or (wo_custom in options.options) 
+  or (wo_customshape in options.options) 
   or (wo_transparentbackground in options.options)
   or (wo_transparentbackgroundround in options.options)
   //or (wo_transparentbackgroundellipse in options.options)
@@ -4233,7 +4233,7 @@ XSetForeground(appdisp, shape_gc, 1);
             end;
        end;
   end else
-   if (wo_custom in options.options) and (mse_shapefile <> '') then
+   if (wo_customshape in options.options) and (mse_shapefile <> '') then
   begin
     DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
     shapebmp := tmaskedbitmap.Create(bmk_mono);  // Monochrome mode
