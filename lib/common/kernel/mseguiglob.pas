@@ -136,9 +136,10 @@ type
                    wo_ellipse,
                    wo_rounded,
                    wo_transparentbackground,
-                   wo_transparentbackgroundellipse,
+                   //wo_transparentbackgroundellipse, // removed because fpc published set are limitged to 31 elements 
                    wo_transparentbackgroundround, 
-                   wo_onalldesktops
+                   wo_onalldesktops,
+                   wo_custom
                    );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;
@@ -328,6 +329,7 @@ var
  toplevelraise: boolean;
  nostaticgravity: boolean;
  mse_radiuscorner : integer = 8;
+ mse_shapefile : string = '';
 // exabug: boolean;
 // nocreatestaticgravity: boolean;
 

@@ -52,12 +52,13 @@ interface
 {$ifdef mse_debugshow}
  {$define mse_debug}
 {$endif}
+
 uses
- {$ifdef FPC}mxlib{$else}Xlib{$endif},msetypes,mseapplication,msesys,
- msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
- msethread{$ifdef FPC},mx,mxutil,dynlibs{$endif},
- mselibc,msectypes,msesysintf,msegraphics,
- msestrings,mxft,mxrender,mxrandr,mshape;
+  mxlib, mxrandr, mx, mxutil, msetypes, mseapplication, msesys,
+  msegraphutils, mseevent, msepointer, mseguiglob, msesystypes,{msestockobjects,}
+  msethread{$ifdef FPC},dynlibs{$endif},
+  mselibc, msectypes, msesysintf, msegraphics,
+  msestrings, mxft, mshape, mseclasses, msebitmap, mseformatpngread  ;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -472,6 +473,8 @@ type
    TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
   }
+function CustomErrorHandler(dpy: PDisplay; err: PXErrorEvent): cint; cdecl;
+  
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
                               external sXLib name 'XSetWMHints';
 function XSetForeground(Display: PDisplay; GC: TGC;
@@ -542,7 +545,7 @@ implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
+ msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,
  mseglob,msetimer,mseprocess,mseprocmonitor,typinfo
  {$ifdef mse_debug},mseformatstr{$endif};
 {$ifndef mse_allwarnings}
@@ -907,6 +910,14 @@ var
 // lastshiftstate: shiftstatesty;
  clipboardbuffers: array[clipboardbufferty] of clipboardinfoty;
  fidnum: integer;
+ DefaultErrorHandler: TXErrorHandler;
+
+function CustomErrorHandler(dpy: PDisplay; err: PXErrorEvent): cint; cdecl;
+begin
+  if (err^.error_code = 3) and (err^.request_code = 15) then
+    Exit(0);  // Ignore silently
+  Result := DefaultErrorHandler(dpy, err);  // Handle others normally
+end;
 
 procedure deleteitemat(var dest: atomarty; index: integer); overload;
 begin
@@ -4090,7 +4101,7 @@ var
  colormap1: tcolormap;
  opt1: windowtypeoptionty;
 // valall: ptruint;
- 
+ shapebmp: tmaskedbitmap;
  // shape from Xext
  xgcv :TXGCValues;
  pmap : pixmapty;
@@ -4171,8 +4182,11 @@ var
 //////////////////////////////////////////////
 
   if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)
-  or (wo_transparentbackground  in options.options) or (wo_transparentbackgroundround  in options.options)
-  or (wo_transparentbackgroundellipse in options.options)) then
+  or (wo_custom in options.options) 
+  or (wo_transparentbackground in options.options)
+  or (wo_transparentbackgroundround in options.options)
+  //or (wo_transparentbackgroundellipse in options.options)
+  ) then
  begin
  // shape
   //* create a graphics context for drawing on the window */
@@ -4219,6 +4233,23 @@ XSetForeground(appdisp, shape_gc, 1);
             end;
        end;
   end else
+   if (wo_custom in options.options) and (mse_shapefile <> '') then
+  begin
+    DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
+    shapebmp := tmaskedbitmap.Create(bmk_mono);  // Monochrome mode
+    try
+      shapebmp.LoadFromFile(mse_shapefile);  // Load b/w PNG image
+      shapebmp.MaskKind := bmk_mono;  // Ensure 1-bit mask
+      // Copy mask to pmap (1=visible/opaque, 0=transparent/clipped)
+      // Assumes mask bits are set correctly (black=1/visible, white=0/transparent)
+      XCopyArea(appdisp, shapebmp.mask.handle, pmap, shape_gc, 0, 0, width, height, 0, 0);
+    finally
+      shapebmp.Free;
+      //XSetErrorHandler(DefaultErrorHandler);  // Restore default
+    end;
+    
+end else
+  {
   if (wo_transparentbackgroundellipse in options.options) then
    begin
     if length(mse_formchild) = 0 then
@@ -4236,6 +4267,7 @@ XSetForeground(appdisp, shape_gc, 1);
             end;  
         end;              
  end else
+ }
   if (wo_transparentbackgroundround in options.options) then
   begin
      if length(mse_formchild) = 0 then
@@ -4421,7 +4453,6 @@ end;
    xdeleteproperty(appdisp,id,xdndatoms[xdnd_aware]);
   end;
  end;
- 
   gdi_unlock;
 end;
 

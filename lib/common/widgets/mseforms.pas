@@ -1168,7 +1168,7 @@ begin
    try
     foncreate(self);
     if (wo_transparentbackground in foptionswindow) or 
-       (wo_transparentbackgroundellipse in foptionswindow) or 
+     //  (wo_transparentbackgroundellipse in foptionswindow) or 
        (wo_transparentbackgroundround in foptionswindow) then SetChildBounds(self);
    finally
     endsuspendgloballoading;

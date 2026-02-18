@@ -64,7 +64,7 @@ implementation
 //todo: 19.10.03 rasterops for textout
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd,msebitmap
+ msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd,msebitmap,mseformatpngread
  {$ifdef mse_debugzorder},typinfo{$endif} ;
 
 type
@@ -2944,6 +2944,10 @@ var
  ownerwindow: winidty;
  region, region2 : THandle;
  x, deco_x, deco_y : integer;
+ shapebmp: tmaskedbitmap;
+ //rgn, rectrgn: HRGN;
+ y, startx: integer;
+ 
 begin
  fillchar(awindow,sizeof(awindow),0);
  with awindow,win32windowty(awindow.platformdata).d,options do begin
@@ -3029,8 +3033,7 @@ begin
     groupleaderwindow:= id;
    end;
   end;
-  
-  
+    
   
   if id = 0 then begin
    result:= gue_createwindow;
@@ -3082,6 +3085,8 @@ begin
     DeleteObject(region2);
     DeleteObject(region);
    end else
+   
+   {
    if wo_transparentbackgroundellipse in options then
   begin
    if length(mse_formchild) = 0 then
@@ -3111,6 +3116,48 @@ begin
     DeleteObject(region2);
     DeleteObject(region);
    end else
+   }
+if (wo_custom in options) and (mse_shapefile <> '') then
+begin
+  shapebmp := tmaskedbitmap.Create(bmk_mono);
+  try
+    shapebmp.LoadFromFile(mse_shapefile);
+    shapebmp.maskkind := bmk_mono;
+    shapebmp.mask.size := shapebmp.size; 
+
+    region := CreateRectRgn(0, 0, 0, 0);
+    
+    for y := 0 to shapebmp.size.cy - 1 do
+    begin
+      x := 0;
+      while x < shapebmp.size.cx do
+      begin
+        if (shapebmp.pixels[x, y] and $FFFFFF) > $7F7F7F then 
+        begin
+          Inc(x);
+          Continue;
+        end;
+
+       startx := x;
+        // Collect everything that is "dark"
+        while (x < shapebmp.size.cx) and ((shapebmp.pixels[x, y] and $FFFFFF) <= $7F7F7F) do
+          Inc(x);
+ 
+        region2 := CreateRectRgn(startx, y, x, y + 1);
+        CombineRgn(region, region, region2, RGN_OR);
+        DeleteObject(region2);
+      end;
+    end;
+
+    // Apply the custom region to the window handle
+    SetWindowRgn(id, region, True);
+    
+  finally
+    shapebmp.Free;
+  end;
+
+end else
+ 
    if wo_transparentbackgroundround in options then
    begin
     if length(mse_formchild) = 0 then
