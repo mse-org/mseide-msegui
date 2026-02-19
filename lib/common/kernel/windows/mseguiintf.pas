@@ -15,7 +15,7 @@ interface
 uses
  windows,messages,mseapplication,msetypes,msegraphutils,msesys,
  mseevent,msepointer,mseguiglob,msegraphics,
- msethread,mseformatstr,{msesysintf,}msestrings,msesystypes,msewinglob;
+ msethread,mseformatstr,{msesysintf,}msestrings,msesystypes,msewinglob, msebitmap;
 
 type
  syseventty = record
@@ -60,11 +60,14 @@ var
  gccount: integer;
 {$endif}
 
+var
+mse_shapebmp: tmaskedbitmap;
+
 implementation
 //todo: 19.10.03 rasterops for textout
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd,msebitmap,mseformatpngread
+ msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd
  {$ifdef mse_debugzorder},typinfo{$endif} ;
 
 type
@@ -2944,7 +2947,7 @@ var
  ownerwindow: winidty;
  region, region2 : THandle;
  x, deco_x, deco_y : integer;
- shapebmp: tmaskedbitmap;
+// shapebmp: tmaskedbitmap;
  //rgn, rectrgn: HRGN;
  y, startx: integer;
  
@@ -3117,22 +3120,20 @@ begin
     DeleteObject(region);
    end else
    }
-if (wo_customshape in options) and (mse_shapefile <> '') then
+if (wo_customshape in options)
+then
 begin
-  shapebmp := tmaskedbitmap.Create(bmk_mono);
-  try
-    shapebmp.LoadFromFile(mse_shapefile);
-    shapebmp.maskkind := bmk_mono;
-    shapebmp.mask.size := shapebmp.size; 
-
     region := CreateRectRgn(0, 0, 0, 0);
     
-    for y := 0 to shapebmp.size.cy - 1 do
+    mse_shapebmp.maskkind := bmk_mono;
+    mse_shapebmp.mask.size := mse_shapebmp.size;  
+    
+    for y := 0 to mse_shapebmp.size.cy - 1 do
     begin
       x := 0;
-      while x < shapebmp.size.cx do
+      while x < mse_shapebmp.size.cx do
       begin
-        if (shapebmp.pixels[x, y] and $FFFFFF) > $7F7F7F then 
+        if (mse_shapebmp.pixels[x, y] and $FFFFFF) > $7F7F7F then 
         begin
           Inc(x);
           Continue;
@@ -3140,7 +3141,7 @@ begin
 
        startx := x;
         // Collect everything that is "dark"
-        while (x < shapebmp.size.cx) and ((shapebmp.pixels[x, y] and $FFFFFF) <= $7F7F7F) do
+        while (x < mse_shapebmp.size.cx) and ((mse_shapebmp.pixels[x, y] and $FFFFFF) <= $7F7F7F) do
           Inc(x);
  
         region2 := CreateRectRgn(startx, y, x, y + 1);
@@ -3151,10 +3152,6 @@ begin
 
     // Apply the custom region to the window handle
     SetWindowRgn(id, region, True);
-    
-  finally
-    shapebmp.Free;
-  end;
 
 end else
  

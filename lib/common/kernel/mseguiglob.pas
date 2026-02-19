@@ -329,10 +329,7 @@ var
  toplevelraise: boolean;
  nostaticgravity: boolean;
  mse_radiuscorner : integer = 8;
- mse_shapefile : string = '';
-// exabug: boolean;
-// nocreatestaticgravity: boolean;
-
+ 
 procedure guierror(error: guierrorty; text: string = ''); overload;
 procedure guierror(error: guierrorty; sender: tobject;
                                                   text: string = ''); overload;
@@ -340,7 +337,7 @@ procedure guierror(error: guierrorty; sender: tobject;
 implementation
 
 uses
- mseclasses,msestreaming{,mseapplication,msegui,mseguiintf};
+ mseclasses,msestreaming {,mseapplication,msegui,mseguiintf};
 
 const
  errortexts: array[guierrorty] of string =

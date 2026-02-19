@@ -58,7 +58,7 @@ uses
   msegraphutils, mseevent, msepointer, mseguiglob, msesystypes,{msestockobjects,}
   msethread{$ifdef FPC},dynlibs{$endif},
   mselibc, msectypes, msesysintf, msegraphics,
-  msestrings, mxft, mshape, mseclasses, msebitmap, mseformatpngread  ;
+  msestrings, mxft, mshape, mseclasses, msebitmap;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -540,6 +540,9 @@ function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar;
 function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
+
+var
+mse_shapebmp: tmaskedbitmap;
 
 implementation
 uses
@@ -4101,7 +4104,7 @@ var
  colormap1: tcolormap;
  opt1: windowtypeoptionty;
 // valall: ptruint;
- shapebmp: tmaskedbitmap;
+// shapebmp: tmaskedbitmap;
  // shape from Xext
  xgcv :TXGCValues;
  pmap : pixmapty;
@@ -4233,22 +4236,11 @@ XSetForeground(appdisp, shape_gc, 1);
             end;
        end;
   end else
-   if (wo_customshape in options.options) and (mse_shapefile <> '') then
+   if (wo_customshape in options.options) then
   begin
     DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
-    shapebmp := tmaskedbitmap.Create(bmk_mono);  // Monochrome mode
-    try
-      shapebmp.LoadFromFile(mse_shapefile);  // Load b/w PNG image
-      shapebmp.MaskKind := bmk_mono;  // Ensure 1-bit mask
-      // Copy mask to pmap (1=visible/opaque, 0=transparent/clipped)
-      // Assumes mask bits are set correctly (black=1/visible, white=0/transparent)
-      XCopyArea(appdisp, shapebmp.mask.handle, pmap, shape_gc, 0, 0, width, height, 0, 0);
-    finally
-      shapebmp.Free;
-      //XSetErrorHandler(DefaultErrorHandler);  // Restore default
-    end;
-    
-end else
+    XCopyArea(appdisp, mse_shapebmp.mask.handle, pmap, shape_gc, 0, 0, width, height, 0, 0);
+  end else
   {
   if (wo_transparentbackgroundellipse in options.options) then
    begin
