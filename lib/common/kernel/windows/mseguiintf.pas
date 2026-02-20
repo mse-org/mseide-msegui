@@ -3125,8 +3125,8 @@ then
 begin
     region := CreateRectRgn(0, 0, 0, 0);
     
-    mse_shapebmp.maskkind := bmk_mono;
-    mse_shapebmp.mask.size := mse_shapebmp.size;  
+     mse_shapebmp.options := [bmo_graymask];
+     mse_shapebmp.mask.size := mse_shapebmp.size;  
     
     for y := 0 to mse_shapebmp.size.cy - 1 do
     begin
