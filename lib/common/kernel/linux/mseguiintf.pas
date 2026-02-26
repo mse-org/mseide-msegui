@@ -58,7 +58,7 @@ uses
   msegraphutils, mseevent, msepointer, mseguiglob, msesystypes,{msestockobjects,}
   msethread{$ifdef FPC},dynlibs{$endif},
   mselibc, msectypes, msesysintf, msegraphics,
-  msestrings, mxft, mshape, mseclasses;
+  msestrings, mxft, mshape, mseclasses, msebitmap;
 
 {$ifdef FPC}
  {$define xbooleanresult}
