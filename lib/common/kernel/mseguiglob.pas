@@ -136,9 +136,10 @@ type
                    wo_ellipse,
                    wo_rounded,
                    wo_transparentbackground,
-                   wo_transparentbackgroundellipse,
+                   //wo_transparentbackgroundellipse, // removed because fpc published set are limitged to 31 elements 
                    wo_transparentbackgroundround, 
-                   wo_onalldesktops
+                   wo_onalldesktops,
+                   wo_customshape
                    );
  windowoptionsty = set of windowoptionty;
  windowtypeoptionty = wo_popup..wo_dnd;
@@ -328,9 +329,7 @@ var
  toplevelraise: boolean;
  nostaticgravity: boolean;
  mse_radiuscorner : integer = 8;
-// exabug: boolean;
-// nocreatestaticgravity: boolean;
-
+ 
 procedure guierror(error: guierrorty; text: string = ''); overload;
 procedure guierror(error: guierrorty; sender: tobject;
                                                   text: string = ''); overload;
@@ -338,7 +337,7 @@ procedure guierror(error: guierrorty; sender: tobject;
 implementation
 
 uses
- mseclasses,msestreaming{,mseapplication,msegui,mseguiintf};
+ mseclasses,msestreaming {,mseapplication,msegui,mseguiintf};
 
 const
  errortexts: array[guierrorty] of string =

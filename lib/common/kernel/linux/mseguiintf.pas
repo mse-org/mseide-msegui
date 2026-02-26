@@ -53,12 +53,11 @@ interface
  {$define mse_debug}
 {$endif}
 
-uses
-  mxlib, mxrandr, msetypes, mseapplication, msesys,
-  msegraphutils, mseevent, msepointer, mseguiglob, msesystypes,{msestockobjects,}
-  msethread{$ifdef FPC},dynlibs{$endif},
-  mselibc, msectypes, msesysintf, msegraphics,
-  msestrings, mxft, mshape, mseclasses;
+{$ifdef FPC}mxlib{$else}Xlib{$endif},msetypes,mseapplication,msesys,
+ msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
+ msethread{$ifdef FPC},mx,mxutil,dynlibs{$endif},
+ mselibc,msectypes,msesysintf,msegraphics,
+ msestrings,mxft,mxrender,mxrandr,mshape, mseclasses, msebitmap;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -473,6 +472,8 @@ type
    TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
   }
+function CustomErrorHandler(dpy: PDisplay; err: PXErrorEvent): cint; cdecl;
+ 
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
                               external sXLib name 'XSetWMHints';
 function XSetForeground(Display: PDisplay; GC: TGC;
@@ -538,6 +539,9 @@ function Xutf8TextListToTextProperty(para1:PDisplay; para2:PPchar;
 function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
+
+var
+mse_shapebmp: tmaskedbitmap;
 
 implementation
 uses
@@ -908,6 +912,14 @@ var
 // lastshiftstate: shiftstatesty;
  clipboardbuffers: array[clipboardbufferty] of clipboardinfoty;
  fidnum: integer;
+ DefaultErrorHandler: TXErrorHandler;
+
+function CustomErrorHandler(dpy: PDisplay; err: PXErrorEvent): cint; cdecl;
+begin
+  if (err^.error_code = 3) and (err^.request_code = 15) then
+    Exit(0);  // Ignore silently
+  Result := DefaultErrorHandler(dpy, err);  // Handle others normally
+end;
 
 procedure deleteitemat(var dest: atomarty; index: integer); overload;
 begin
@@ -4091,7 +4103,7 @@ var
  colormap1: tcolormap;
  opt1: windowtypeoptionty;
 // valall: ptruint;
- 
+// shapebmp: tmaskedbitmap;
  // shape from Xext
  xgcv :TXGCValues;
  pmap : pixmapty;
@@ -4172,8 +4184,11 @@ var
 //////////////////////////////////////////////
 
   if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)
-  or (wo_transparentbackground  in options.options) or (wo_transparentbackgroundround  in options.options)
-  or (wo_transparentbackgroundellipse in options.options)) then
+  or (wo_customshape in options.options) 
+  or (wo_transparentbackground in options.options)
+  or (wo_transparentbackgroundround in options.options)
+  //or (wo_transparentbackgroundellipse in options.options)
+  ) then
  begin
  // shape
   //* create a graphics context for drawing on the window */
@@ -4220,6 +4235,12 @@ XSetForeground(appdisp, shape_gc, 1);
             end;
        end;
   end else
+   if (wo_customshape in options.options) then
+  begin
+    DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
+    XCopyArea(appdisp, mse_shapebmp.mask.handle, pmap, shape_gc, 0, 0, width, height, 0, 0);
+  end else
+  {
   if (wo_transparentbackgroundellipse in options.options) then
    begin
     if length(mse_formchild) = 0 then
@@ -4237,6 +4258,7 @@ XSetForeground(appdisp, shape_gc, 1);
             end;  
         end;              
  end else
+ }
   if (wo_transparentbackgroundround in options.options) then
   begin
      if length(mse_formchild) = 0 then
@@ -4422,7 +4444,6 @@ end;
    xdeleteproperty(appdisp,id,xdndatoms[xdnd_aware]);
   end;
  end;
- 
   gdi_unlock;
 end;
 
