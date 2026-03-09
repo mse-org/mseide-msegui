@@ -990,7 +990,7 @@ begin
  haslang:= sys_getenv(lcmessages,langbefore);
  sys_setenv(lcmessages,'C');
 
- fgdb:= execmse2({$ifdef UNIX}'DEBUGINFOD_URLS=; ' + {$endif} syscommandline(commandline)+' --interpreter=mi --nx --readnever',
+ fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx --readnever',
                 fgdbto,fgdbfrom,fgdbfrom,-1,
                 [exo_inactive,exo_tty,exo_winpipewritehandles]);
 
@@ -1007,6 +1007,7 @@ begin
   else begin
    unsetenv(lcmessages);
   end;
+  clicommand('set debuginfod enabled off');
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
   clicommand('set width 0');
