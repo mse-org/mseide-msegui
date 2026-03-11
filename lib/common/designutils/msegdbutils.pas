@@ -990,7 +990,7 @@ begin
  haslang:= sys_getenv(lcmessages,langbefore);
  sys_setenv(lcmessages,'C');
 
- fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx --readnever',
+ fgdb:= execmse2(syscommandline(commandline)+' --interpreter=mi --nx',
                 fgdbto,fgdbfrom,fgdbfrom,-1,
                 [exo_inactive,exo_tty,exo_winpipewritehandles]);
 
