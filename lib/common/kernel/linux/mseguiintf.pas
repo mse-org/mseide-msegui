@@ -343,7 +343,7 @@ const
  {$ifdef darwin}
  Xlibmodulename = 'libX11.dylib';
  {$else}
- {$ifdef openbsd}
+  {$if defined(netbsd) or defined(openbsd)}
   Xlibmodulename = 'libX11.so';
  {$else}
   Xlibmodulename = 'libX11.so.6';
