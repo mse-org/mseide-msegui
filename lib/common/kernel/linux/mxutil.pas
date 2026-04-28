@@ -13,7 +13,7 @@ uses
    const
    libX11='libX11.dylib';
  {$else}
-  {$if defined(netbsd) or defined(openbsd)}
+  {$if defined(netbsd) or defined(openbsd) or defined(dragonfly)}
    {$LinkLib libX11.so}
    const
    libX11='libX11.so';

@@ -8,7 +8,7 @@ uses
    {$ifdef darwin}
   {$LinkLib libX11.dylib}
  {$else}
-  {$if defined(netbsd) or defined(openbsd)}
+  {$if defined(netbsd) or defined(openbsd) or defined(dragonfly)}
    {$LinkLib libX11.so}
  {$else}
   {$LinkLib libX11.so.6}  
