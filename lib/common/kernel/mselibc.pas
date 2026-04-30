@@ -982,9 +982,7 @@ type
     st_gen: cuint32;      
     st_lspare: cint32;    
     st_birthtime: cint64; st_birthtime_nsec: cint64;
-  end;
-{$endif}
-
+ {$endif}
  
   {$if defined(openbsd)}
  st_dev: cuint64;          //* inode's device */
@@ -3702,9 +3700,6 @@ end;
 
 initialization
  initlibc();
- {$ifdef dragonfly}
- if sizeof(_stat) < 120 then writeln('FATAL: stat record too small for DragonFly');
- {$endif}
-finalization
+ finalization
  finalizelibinfo(rtlibinfo);
 end.
