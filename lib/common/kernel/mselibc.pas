@@ -909,14 +909,21 @@ type
  {$endif} // arm64
 
  {$else} //bsd
-{$if defined(freebsd) or defined(dragonfly) or defined(netbsd) or defined(darwin)}
+{$if defined(freebsd) or defined(netbsd) or defined(darwin)}
  ino_t = cuint32;
  mode_t = cuint16;
  {$endif}
+ 
  {$if defined(openbsd)}
  ino_t = cuint64;
  mode_t = cuint64;
  {$endif}
+ 
+ {$if defined(dragonfly)}
+  ino_t = cuint64;  // 8 bytes
+  mode_t = cuint32; // 4 bytes
+  {$endif}
+ 
  n_link_t = cuint16;
  uid_t = cuint32;
  gid_t = cuint32;
@@ -949,30 +956,34 @@ type
   st_birthtim: timespec;    //* time of file creation */
   {$endif}
   
-  {$if defined(dragonfly)}
-  st_ino: cuint64;            //* inode's number */
-  st_nlink: cuint32;       //* number of hard links */
-  st_dev: cuint32;          //* inode's device */
-  st_mode: cuint16;          //* inode protection mode */
-  st_pad1: cuint16;          
-  st_uid: uid_t;            //* user ID of the file's owner */
-  st_gid: gid_t;            //* group ID of the file's group */
-  st_rdev: __dev_t;         //* device type */
-  st_atime: culong;         //* time of last access */
-  st_atime_nsec: culong;
-  st_mtime: culong;         //* time of last data modification */
-  st_mtime_nsec: culong;
-  st_ctime: culong;         //* time of last file status change */
-  st_ctime_nsec: culong;
-  st_size: cuint64;           //* file size, in bytes */
-  st_blocks: blkcnt_t;      //* blocks allocated for file */
-  st_blksize: blksize_t;    //* optimal blocksize for I/O */
-  st_flags: fflags_t;       //* user defined flags for file */
-  st_gen: cuint32;          //* file generation number */
+{$if defined(dragonfly)}
+  st_ino: cuint64;      
+  st_nlink: cuint32;    
+  st_dev: cuint32;      
+  st_mode: cuint16;     
+  st_padding1: cuint16; 
+  st_uid: cuint32;      
+  st_gid: cuint32;      
+  st_rdev: cuint32;     
+  
+  // DragonFly uses 64-bit for all time fields
+  st_atime: cint64;      
+  st_atime_nsec: cint64; 
+  st_mtime: cint64;      
+  st_mtime_nsec: cint64; 
+  st_ctime: cint64;      
+  st_ctime_nsec: cint64; 
+  
+  st_size: cint64;      
+  st_blocks: cint64;    
+  st_blksize: cuint32;  
+  st_flags: cuint32;    
+  st_gen: cuint32;      
   st_lspare: cint32;
-  st_qspare1: cint64;  
-  st_qspare2: cint64;    
-  {$endif}
+  st_birthtime: cint64; // DragonFly has birthtime!
+  st_birthtime_nsec: cint64;
+{$endif}
+
  
   {$if defined(openbsd)}
  st_dev: cuint64;          //* inode's device */
