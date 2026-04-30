@@ -2118,16 +2118,39 @@ type
   TSigset = __sigset_t;
   PSigset = ^TSigset;
 
+{$ifdef dragonfly}
+TSigActionEx = record // Remove 'packed' to allow natural C alignment
+  sa_sigaction: TSigActionHandlerEx;
+  sa_mask: __sigset_t;
+  sa_flags: Integer;
+  // NO sa_restorer!
+end;
+{$else} 
  TSigActionEx = packed record
                 sa_sigaction: TSigActionHandlerEx;
                 sa_mask: __sigset_t;
                 sa_flags: Integer;
                 sa_restorer: TRestoreHandler;
                 end;
+ {$endif} 
+
 type
   __sighandler_t = procedure(SigNum: Integer); cdecl;
   TSignalHandler = __sighandler_t;
    P_sigaction = ^_sigaction;
+  
+  {$ifdef dragonfly} 
+   _sigaction = record
+    case integer of
+      1: (
+          sa_handler: __sighandler_t;
+          sa_mask: __sigset_t; // 16 bytes (4 x 32-bit dwords)
+          sa_flags: longint;   // 4 bytes
+          // NO sa_restorer here!
+         );
+      2: (__sigaction_handler: __sighandler_t);
+  end;
+  {$else}
    _sigaction = record // Renamed, avoid conflict with sigaction function
      case integer of
        1: (sa_handler : __sighandler_t;
@@ -2138,6 +2161,8 @@ type
        // Kylix compatibility
        2: (__sigaction_handler: __sighandler_t);
    end;
+  {$endif} 
+  
   TSigAction = _sigaction;
   PSigAction = ^TSigAction;
    __sigaction = _sigaction;
