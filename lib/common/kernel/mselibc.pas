@@ -1926,7 +1926,7 @@ type
  
   Ppthread_t = ^pthread_t;
   
-  {$if not defined(darwin)}
+  {$if not defined(darwin) and not defined(Dragonfly)}
   pthread_t = culong;
   {$else}
   pthread_t = ptruint;
@@ -1948,6 +1948,9 @@ type
        __stacksize : size_t;
     end;
  
+  {$if defined(dragonfly)}
+  pthread_attr_t = pointer;
+  {$else}
   {$if not defined(darwin)}
   pthread_attr_t = __pthread_attr_s;
   {$else}
@@ -1956,6 +1959,7 @@ type
     opaque: array[0..{$ifdef cpu64}56{$else}36{$endif}-1] of byte;
     end;   
   {$endif}
+   {$endif}
 
   Ppthread_attr_t = ^pthread_attr_t;
 
@@ -2095,13 +2099,19 @@ const
 type
    P__sigset_t = ^__sigset_t;
 
+{$ifdef dragonfly}
+   __sigset_t = record
+        __val : array[0..3] of dword;
+     end;
+{$else}   
 {$ifndef darwin}
    __sigset_t = record
         __val : array[0..(_SIGSET_NWORDS)-1] of dword;
      end;
 {$else}     
    __sigset_t = array[0..0] of cuint;
-{$endif}   
+{$endif}  
+{$endif}  
      
   sigset_t = __sigset_t;
   Psigset_t = ^sigset_t;
