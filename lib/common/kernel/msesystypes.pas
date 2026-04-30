@@ -11,7 +11,7 @@ unit msesystypes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msetypes,sysutils;
+ msetypes, {$ifdef unix}mselibc,{$endif}  sysutils;
 type
  {$ifndef FPC}
  tlibhandle = thandle;
@@ -19,17 +19,22 @@ type
  
  {$if (fpc_fullversion >= 030204) and defined(cpu64) and defined(mswindows)}
  threadty = qword;
- {$else}
- {$if (fpc_fullversion >= 030200)}
- {$if defined(cpu64) and defined(mswindows)}
- threadty = Longword;
- {$else}
- threadty = ptruint;
- {$endif}
- {$else}
- threadty = ptruint;
- {$endif}
- {$endif}
+{$else}
+  {$ifdef unix}
+   threadty = pthread_t; // Use the actual type defined in mselibc
+  {$else}
+    {$if (fpc_fullversion >= 030200)}
+      {$if defined(cpu64) and defined(mswindows)}
+       threadty = Longword;
+      {$else}
+       threadty = ptruint;
+      {$endif}
+    {$else}
+     threadty = ptruint;
+    {$endif}
+  {$endif}
+{$endif}
+
 
  procidty = ptrint;
  pprocidty = ^procidty;
