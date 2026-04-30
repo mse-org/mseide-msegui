@@ -333,9 +333,6 @@ procedure tpipereader.terminate(const noclosehandle: boolean = false);
 var
  by1: byte;
  begin
- {$ifdef dragonfly}
- writeln('CRASH DEBUG: fthread = ', ptrint(fthread)); 
- {$endif}
    
  if fthread <> nil then begin
   fthread.terminate;

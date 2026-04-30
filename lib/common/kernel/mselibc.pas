@@ -932,9 +932,14 @@ type
  blksize_t = cuint32;
  fflags_t = cuint32;
 
+{$if defined(dragonfly)}
+  _stat = record  // Remove 'packed'
+ {$else}
  _stat = packed record
+ {$endif}
+
 {$if defined(freebsd) or defined(netbsd) or defined(darwin) }
-   st_dev: __dev_t;          //* inode's device */
+  st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
   st_mode: mode_t;          //* inode protection mode */
   st_nlink: n_link_t;       //* number of hard links */
@@ -957,31 +962,27 @@ type
   {$endif}
   
 {$if defined(dragonfly)}
-  st_ino: cuint64;      
-  st_nlink: cuint32;    
-  st_dev: cuint32;      
-  st_mode: cuint16;     
-  st_padding1: cuint16; 
-  st_uid: cuint32;      
-  st_gid: cuint32;      
-  st_rdev: cuint32;     
-  
-  // DragonFly uses 64-bit for all time fields
-  st_atime: cint64;      
-  st_atime_nsec: cint64; 
-  st_mtime: cint64;      
-  st_mtime_nsec: cint64; 
-  st_ctime: cint64;      
-  st_ctime_nsec: cint64; 
-  
-  st_size: cint64;      
-  st_blocks: cint64;    
-  st_blksize: cuint32;  
-  st_flags: cuint32;    
-  st_gen: cuint32;      
-  st_lspare: cint32;
-  st_birthtime: cint64; // DragonFly has birthtime!
-  st_birthtime_nsec: cint64;
+    st_ino: cuint64;      
+    st_nlink: cuint32;    
+    st_dev: cuint32;      
+    st_mode: cuint16;     
+    st_padding1: cuint16; // Explicit padding often needed
+    st_uid: cuint32;      
+    st_gid: cuint32;      
+    st_rdev: cuint32;     
+    
+    st_atime: cint64;      st_atime_nsec: cint64; 
+    st_mtime: cint64;      st_mtime_nsec: cint64; 
+    st_ctime: cint64;      st_ctime_nsec: cint64; 
+    
+    st_size: cint64;      
+    st_blocks: cint64;    
+    st_blksize: cuint32;  
+    st_flags: cuint32;    
+    st_gen: cuint32;      
+    st_lspare: cint32;    
+    st_birthtime: cint64; st_birthtime_nsec: cint64;
+  end;
 {$endif}
 
  
@@ -3701,6 +3702,9 @@ end;
 
 initialization
  initlibc();
+ {$ifdef dragonfly}
+ if sizeof(_stat) < 120 then writeln('FATAL: stat record too small for DragonFly');
+ {$endif}
 finalization
  finalizelibinfo(rtlibinfo);
 end.
