@@ -596,7 +596,6 @@ const
    O_RDWR = $0002;     //* open for reading and writing */
    O_ACCMODE = $0003;  //* mask for above modes */
 
-   O_NONBLOCK = $0004; //* no delay */
    O_APPEND = $0008;   //* set append mode */
    O_SHLOCK = $0010;   //* open with shared file lock */
    O_EXLOCK = $0020;   //* open with exclusive file lock */
@@ -621,11 +620,18 @@ const
 //* Defined by POSIX 1003.1-2008; BSD default, but reserve for future use. */
    O_TTY_INIT = $00080000; //* Restore default termios attributes */
 
-   O_CLOEXEC = $00100000;
+{$ifdef dragonfly}
+   O_CLOEXEC = $00020000;
+   O_NONBLOCK = $00000004; //* no delay */
+{$else}   
+ O_CLOEXEC = $00100000;  
+  O_NONBLOCK = $0004; //* no delay */
+{$endif}
 
 {$endif}
 
 {$ifdef linux}
+
    F_DUPFD   = 0;
    F_GETFD   = 1;
    F_SETFD   = 2;
