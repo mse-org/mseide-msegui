@@ -208,6 +208,12 @@ type
   intmax_t = Int64;
   uintmax_t = QWord;
 
+{$ifdef dragonfly}
+  timespec = record
+    tv_sec: int64;  // DragonFly time_t is 64-bit
+    tv_nsec: int64; // DragonFly tv_nsec is 64-bit (long)
+  end;
+{$else}
  {$if defined(CPU32) and defined(openbsd)}
  timespec = record
   tv_sec: int64;
@@ -218,6 +224,7 @@ type
   tv_sec: __time_t;
   tv_nsec: clong;
  end;
+ {$endif} 
  {$endif} 
 
  TTimeSpec = timespec;
