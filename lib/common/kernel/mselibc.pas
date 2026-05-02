@@ -2079,8 +2079,11 @@ type
     si_signo: cint;
     si_errno: cint;
     si_code: cint;
-    si_pad: cint; // DragonFly has an extra 4 bytes of padding here on 64-bit
-    _union: array[0..111] of byte; // Total 128 bytes
+    si_pad: cint; // 4-byte padding to align the union on 64-bit
+    case integer of
+      0: (_pad: array[0..111] of byte); // Ensure 128 bytes total
+      6: (si_addr: pointer;             // DragonFly si_addr
+          si_fd: cint);                 // si_fd follows si_addr in DragonFly sigpoll
   end;
  {$else}
   _siginfo = record
