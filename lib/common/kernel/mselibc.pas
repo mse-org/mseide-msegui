@@ -1922,8 +1922,7 @@ type
  
  {$if defined(dragonfly)}
   pthread_mutexattr_t = pointer;
-  Ppthread_mutexattr_t = ^pthread_mutexattr_t;
-{$elseif defined(netbsd)}
+ {$elseif defined(netbsd)}
   pthread_mutexattr_t = record
     ptma_magic : cint;
     ptma_private: pointer;
@@ -2223,7 +2222,6 @@ type
 
 {$ifdef dragonfly}
   pthread_mutex_t = pointer;
-  Ppthread_mutex_t = ^pthread_mutex_t;
 {$else}
  {$if not defined(netbsd) and not defined(darwin)}  
   pthread_mutex_t = array[0..__SIZEOF_PTHREAD_MUTEX_T-1] of byte;
