@@ -775,6 +775,17 @@ const
    NOTE_TRACKERR = $00000002;   //* could not track child */
    NOTE_CHILD = $00000004;      //* am a child process */
 
+{$ifdef dragonfly}
+type
+  kevent_t = record
+    ident: qword;      // Use qword to guarantee 8 bytes on 64-bit
+    filter: smallint;  // 2 bytes
+    flags: word;       // 2 bytes
+    fflags: longword;  // 4 bytes
+    data: int64;       // 8 bytes
+    udata: pointer;    // 8 bytes
+  end;
+{$else}
 type
  kevent_t = record
   ident: uintptr_t;  //* identifier for this event */
@@ -784,6 +795,8 @@ type
   data: intptr_t;
   udata: pointer;    //* opaque user data identifier */
  end;
+{$endif} 
+ 
  pkevent_t = ^kevent_t;
  
   function kqueue(): cint; cdecl; external clib name 'kqueue' + LIBC_SUFFIX;
@@ -2397,12 +2410,13 @@ type
         {$endif}
         
         {$if defined(dragonfly)}
-        d_fileno: cuint64;            //* file number of entry */
-        d_namlen: cuint16;             //* length of string in d_name */
-        d_type: cuint8;               //* file type, see below */
-        d_unused1: cuint8;
-        d_unused2: cuint32;            //* length of this record */
-        d_name: array[0..255] of char;        //* name must be no longer than this */
+        d_fileno: cuint64;   // 8 bytes: inode number
+        d_reclen: cuint16;   // 2 bytes: length of this record <-- SHOULD BE HERE
+        d_type: cuint8;      // 1 byte: file type
+        d_unused1: cuint8;   // 1 byte: padding
+        d_namlen: cuint16;   // 2 bytes: length of string in d_name
+        d_unused2: cuint16;  // 2 bytes: padding
+        d_name: array[0..255] of char;
         {$endif}
 
         {$if defined(freebsd) and (defined(cpuamd64) or defined(cpu32))}
