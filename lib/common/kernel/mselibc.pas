@@ -1994,6 +1994,9 @@ type
    Psem_t = ^sem_t;
    //sem_t = array[0..__SIZEOF_SEM_T-1] of byte;
    //{
+   {$ifdef dragonfly}
+  sem_t = pointer; // DragonFly sem_t is a pointer
+  {$else}   
    {$if not defined(darwin)}
    sem_t = record
         __sem_lock : _pthread_fastlock;
@@ -2002,6 +2005,7 @@ type
      end;
    {$else}
    sem_t                = cint;   
+   {$endif}
    {$endif}
        
  //    }
@@ -2070,6 +2074,15 @@ type
  end;
  Psiginfo = ^_siginfo;
  
+ {$ifdef dragonfly}
+  _siginfo = record
+    si_signo: cint;
+    si_errno: cint;
+    si_code: cint;
+    si_pad: cint; // DragonFly has an extra 4 bytes of padding here on 64-bit
+    _union: array[0..111] of byte; // Total 128 bytes
+  end;
+ {$else}
   _siginfo = record
       si_signo : cint;
       si_errno : cint;
@@ -2083,7 +2096,8 @@ type
         5: (_sigfault: _si_sigfault);
         6: (_sigpoll: _si_sigpoll);
    end;
-    
+ {$endif} 
+   
  siginfo_t = _siginfo;
  Psiginfo_t = ^siginfo_t;
  Tsiginfo_t = siginfo_t;
