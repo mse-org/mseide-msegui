@@ -1920,25 +1920,27 @@ type
   end;
   Ppthread_mutexattr_t = ^pthread_mutexattr_t;
  
-  {$if not defined(netbsd) and not defined(darwin)}
+ {$if defined(dragonfly)}
+  pthread_mutexattr_t = pointer;
+  Ppthread_mutexattr_t = ^pthread_mutexattr_t;
+{$elseif defined(netbsd)}
   pthread_mutexattr_t = record
-   case integer of
-    0:( __mutexkind : longint);
-    1:(buffer: pointer);
+    ptma_magic : cint;
+    ptma_private: pointer;
   end;
-  {$else}
-   {$if defined(darwin)}
-   pthread_mutexattr_t = record
-   sig: {$ifdef cpu64}int64{$else}longint{$endif}; 
-   opaque: array[0..{$ifdef cpu64}56{$else}40{$endif}-1] of byte;
-   end;
-   {$else}  // netbsd
-   pthread_mutexattr_t = record
-   ptma_magic : cint;
-   ptma_private: pointer;
+{$elseif defined(darwin)}
+  pthread_mutexattr_t = record
+    sig: {$ifdef cpu64}int64{$else}longint{$endif}; 
+    opaque: array[0..{$ifdef cpu64}56{$else}40{$endif}-1] of byte;
   end;
-  {$endif}
-  {$endif}
+{$else}
+  // Linux / Others
+  pthread_mutexattr_t = record
+    case integer of
+      0:( __mutexkind : longint);
+      1:(buffer: pointer);
+  end;
+{$endif}
  
   Ppthread_t = ^pthread_t;
   
@@ -2137,9 +2139,9 @@ type
 {$ifdef dragonfly}
 TSigActionEx = record // Remove 'packed' to allow natural C alignment
   sa_sigaction: TSigActionHandlerEx;
-  sa_mask: __sigset_t;
   sa_flags: Integer;
-  // NO sa_restorer!
+  sa_mask: __sigset_t;
+   // NO sa_restorer!
 end;
 {$else} 
  TSigActionEx = packed record
@@ -2160,8 +2162,8 @@ type
     case integer of
       1: (
           sa_handler: __sighandler_t;
-          sa_mask: __sigset_t; // 16 bytes (4 x 32-bit dwords)
           sa_flags: longint;   // 4 bytes
+          sa_mask: __sigset_t; // 16 bytes (4 x 32-bit dwords)
           // NO sa_restorer here!
          );
       2: (__sigaction_handler: __sighandler_t);
@@ -2219,6 +2221,10 @@ const
 type
   Ppthread_mutex_t = ^pthread_mutex_t;
 
+{$ifdef dragonfly}
+  pthread_mutex_t = pointer;
+  Ppthread_mutex_t = ^pthread_mutex_t;
+{$else}
  {$if not defined(netbsd) and not defined(darwin)}  
   pthread_mutex_t = array[0..__SIZEOF_PTHREAD_MUTEX_T-1] of byte;
 {$else}
@@ -2239,6 +2245,7 @@ type
          ptm_recursed: dword;
          ptm_spare2: pointer;
       end;
+{$endif}
 {$endif}
 {$endif}
 
@@ -2790,6 +2797,14 @@ type
       revents : smallint;
    end;
 
+{$if defined(dragonfly)}
+function poll(__fds: Ppollfd; __nfds: nfds_t; __timeout: longint): cint;
+  cdecl; external clib name 'poll';
+
+function ppoll(__fds: Ppollfd; __nfds: nfds_t; __timeout: ptimespec;
+               __ss: psigset_t): cint;
+  cdecl; external clib name 'ppoll';
+{$else}
 {$if defined(netbsd)} 
 function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                                 __ss: p__sigset_t): cint
@@ -2814,6 +2829,7 @@ function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                              __ss: p__sigset_t): cint
                                            cdecl; external clib name 'ppoll';
 
+{$endif}
 {$endif}
 {$endif}
                                
