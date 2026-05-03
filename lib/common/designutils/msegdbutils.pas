@@ -1874,7 +1874,7 @@ begin
  until not b2; //all data read
 end;
 
- {$if defined(UNIX) and not defined(dragonfly)}
+{$ifdef UNIX}
 procedure tgdbmi.targetfrom(const sender: tpipereader);
 begin
  if not sender.eof then begin
@@ -1884,8 +1884,10 @@ end;
 
 procedure tgdbmi.killtargetconsole;
 begin
+ {$if not defined(dragonfly)}
  ftargetconsole.kill;
  ftargetterminal.outecho:= false;
+ {$endif)}
 end;
 
 function tgdbmi.createtargetconsole: boolean;
@@ -1894,6 +1896,7 @@ var
  pts,ptsn,ptsh: msestring;
 begin
  result:= false;
+ {$if not defined(dragonfly)}
   if fxtermcommand <> '' then begin
   ptsn:= '';
   ftargetterminal.outecho:= true;
@@ -1914,6 +1917,7 @@ begin
   ftargetconsole.active:= true;
   result:= ftargetconsole.running;
  end;
+ {$endif)}
 end;
 
 procedure tgdbmi.xtermfrom(const sender: tpipereader);
@@ -4963,8 +4967,10 @@ end;
 destructor tpseudoterminal.destroy;
 begin
  closeinp;
+ {$if not defined(dragonfly)}
  foutput.releasehandle;
  finput.releasehandle;
+ {$endif)}
  foutput.free;
  finput.free;
  if fpty <> invalidfilehandle then begin
