@@ -872,7 +872,7 @@ begin
  fsourcefiles:= tmsestringhashdatalist.create();
 // fsourcefiles:= thashedmsestrings.create;
  fstoptime:= emptydatetime;
- {$if defined(UNIX)}
+ {$if defined(UNIX) and not defined(dragonfly)}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
  ftargetconsole:= tcustommseprocess.create(nil);
@@ -890,7 +890,7 @@ begin
  closegdb;
  inherited;
  fsourcefiles.free;
- {$if defined(UNIX)}
+ {$if defined(UNIX) and not defined(dragonfly)}
  ftargetconsole.free;
  ftargetterminal.free;
  {$endif}
@@ -1011,7 +1011,7 @@ begin
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
   clicommand('set width 0');
-  {$ifdef UNIX}
+ {$if defined(UNIX) and not defined(dragonfly)}
   {
   bo1:= true;
   if synccommand('-gdb-show inferior-tty') = gdb_ok then begin
@@ -1450,7 +1450,7 @@ begin
         end;
         fprocid:= 0;
         getprocid(fprocid);
-        {$ifdef UNIX}
+        {$if defined(UNIX) and not defined(dragonfly)}
         if not fnewconsole then begin
          ftargetterminal.restart;
         end;
@@ -1874,7 +1874,7 @@ begin
  until not b2; //all data read
 end;
 
-{$ifdef UNIX}
+ {$if defined(UNIX) and not defined(dragonfly)}
 procedure tgdbmi.targetfrom(const sender: tpipereader);
 begin
  if not sender.eof then begin
@@ -1894,7 +1894,7 @@ var
  pts,ptsn,ptsh: msestring;
 begin
  result:= false;
- if fxtermcommand <> '' then begin
+  if fxtermcommand <> '' then begin
   ptsn:= '';
   ftargetterminal.outecho:= true;
   pts:= msestring(ftargetterminal.devicename);
@@ -4834,6 +4834,7 @@ end;
 
 procedure tgdbmi.targetwriteln(const avalue: string);
 begin
+ {$if not defined(dragonfly)}
  if running then begin
   {$ifdef UNIX}
   ftargetterminal.output.writeln(avalue);
@@ -4841,6 +4842,7 @@ begin
   fgdbto.writeln(avalue);
   {$endif}
  end;
+ {$endif}
 end;
 
 function tgdbmi.downloading: boolean;
@@ -4890,7 +4892,7 @@ begin
   fgdberror.overloadsleepus:= avalue;
  end;
 }
- {$if defined(UNIX)}
+ {$if defined(UNIX) and not defined(dragonfly)}
   ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
 end;
