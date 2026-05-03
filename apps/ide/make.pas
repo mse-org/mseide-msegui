@@ -408,15 +408,20 @@ begin
   ffinished:= true;
   exit;
  end;
- fexitcode:= 1; //defaulterror
+ 
  fmessagefinished:= false;
  ffinished:= false;
- procid:= invalidprochandle;
- 
- {$if defined(darwin) or defined(dragonfly)}
+
+ {$if defined(darwin)}
  procid:= 0;
  {$else}
   procid:= invalidprochandle; 
+ {$endif} 
+ 
+ {$if defined(dragonfly)}
+ fexitcode:= 0;
+ {$else}
+ fexitcode:= 1; 
  {$endif} 
  
  with projectoptions,k.texp do begin
