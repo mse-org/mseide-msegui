@@ -2791,7 +2791,7 @@ begin
  end
  else begin
  {$if defined(dragonfly)}
-  setstattext('Process done', mtk_finished);
+  setstattext('Process done', mtk_info);
  {$else}
   setstattext(c[ord(makeok)],mtk_finished);
  {$endif} 
