@@ -652,7 +652,7 @@ end;
 
 procedure tactionsmo.resetactonexecute(const sender: tobject);
 begin
-{$ifndef darwin}
+ {$if not defined(darwin) and not defined(dragonfly)}
  with mainfo do begin
   gdb.abort;
   killtarget; //if running
@@ -672,7 +672,7 @@ end;
 
 procedure tactionsmo.continueactonexecute(const sender: tobject);
 begin
- {$ifndef darwin}
+  {$if not defined(darwin) and not defined(dragonfly)}
  with mainfo do begin
   if checkremake(sc_continue) then begin
    cpufo.beforecontinue;

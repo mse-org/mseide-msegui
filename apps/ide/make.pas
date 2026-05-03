@@ -36,7 +36,7 @@ function downloading: boolean;
 function downloadresult: integer;
 function runscript(const script: filenamety;
                              const clearscreen,setmakedir: boolean): boolean;
-{$ifdef darwin}
+{$if defined(darwin) or defined(dragonfly)}
 procedure RunWithoutDebugMac(Const AFilename: String; Aparam: String);
  var 
  targetcons: boolean = false;
@@ -44,7 +44,7 @@ procedure RunWithoutDebugMac(Const AFilename: String; Aparam: String);
 
 implementation
 uses
-  {$IFDEF darwin}
+  {$if defined(darwin) or defined(dragonfly)}
    Process,
    debuggerform,
    targetconsole,
@@ -122,7 +122,7 @@ var
  maker: tmaker;
  loader: tloader;
  
-{$ifdef darwin}
+{$if defined(darwin) or defined(dragonfly)}
 procedure RunWithoutDebugMac(Const AFilename: String; Aparam: String);
 
 var 
@@ -413,7 +413,7 @@ begin
  ffinished:= false;
  procid:= invalidprochandle;
  
- {$ifdef darwin}
+ {$if defined(darwin) or defined(dragonfly)}
  procid:= 0;
  {$else}
   procid:= invalidprochandle; 
@@ -425,7 +425,7 @@ begin
   end;
   try
 
- {$ifdef darwin}
+{$if defined(darwin) or defined(dragonfly)}
   targetcons  := false;
   mainfo.setstattext('Compiling ' + gettargetfile + '...' , mtk_signal);
   RunWithoutDebugMac(ansistring(acommandline), '');
@@ -518,7 +518,7 @@ begin
  inherited create(nil,true,true);
  if procid <> invalidprochandle then begin
   
-  {$ifndef darwin}
+  {$if not defined(darwin) and not defined(dragonfly)}
   mainfo.setstattext(actionsmo.c[ord(ac_making)],mtk_running);
  {$endif} 
   
