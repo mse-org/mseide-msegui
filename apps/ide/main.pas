@@ -2790,7 +2790,11 @@ begin
   showfirsterror;
  end
  else begin
+ {$if defined(dragonfly)}
+  setstattext('Process done', mtk_finished);
+ {$else}
   setstattext(c[ord(makeok)],mtk_finished);
+ {$endif} 
   fcurrent:= true;
   fnoremakecheck:= false;
   messagefo.messages.lastrow;
