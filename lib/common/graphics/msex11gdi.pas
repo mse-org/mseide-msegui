@@ -11,10 +11,10 @@ unit msex11gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 interface
 uses
- {$ifdef FPC}mxlib{$else}Xlib{$endif},mxft,
- {$ifdef FPC}mx,mxutil,dynlibs,{$endif}
+ mxlib,mxft,
+ {$ifdef FPC}dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
- msectypes,mxrender,msefontconfig,msetriaglob;
+ msectypes,msefontconfig,msetriaglob;
 
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                  const adepth: integer);
@@ -102,7 +102,6 @@ type
    0: (d: x11fontdatadty;);
    1: (_bufferspace: fontdatapty;);
  end;
-
 
 {$ifndef staticxft}
 var //xft functions
@@ -397,9 +396,10 @@ begin
   rgbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardrgb24);
   argbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardargb32);
  end;
- if not noxft then begin
+ 
+  if not noxft then begin
   fhasxft:= fhasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
-  if fhasxft then begin
+   if fhasxft then begin
    fhasxft:= xftinit(nil);
    if fhasxft then begin
     fhasxft:= xftinitftlibrary();
@@ -412,6 +412,7 @@ begin
  else begin
   fhasxft:= false;
  end;
+
   for propnum:= low(fontpropertiesty) to high(fontpropertiesty) do begin
    fontpropnames[propnum]:= fontpropertynames[propnum].name;
   end;
@@ -1050,7 +1051,7 @@ begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   if xftdraw = nil then begin
    xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,
-                                                 mxlib.pvisual(defvisual),0);
+                                                 pvisual(defvisual),0);
    xftdrawpic:= xftdrawpicture(xftdraw);
    attr.poly_edge:= polyedgesmooth;
    attr.poly_mode:= polymodeprecise;
@@ -3258,7 +3259,7 @@ const
   (n: 'XRenderSetPictureClipRegion';
                      d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRegion)
   );
-
+  
 var
  handle: tlibhandle;
 begin

@@ -54,11 +54,11 @@ interface
 {$endif}
 
 uses
-  mxlib, mxrandr, mx, mxutil, msetypes, mseapplication, msesys,
+  mxlib, mxrandr, mxft, msetypes, mseapplication, msesys,
   msegraphutils, mseevent, msepointer, mseguiglob, msesystypes,{msestockobjects,}
   msethread{$ifdef FPC},dynlibs{$endif},
   mselibc, msectypes, msesysintf, msegraphics,
-  msestrings, mxft, mshape, mseclasses, msebitmap;
+  msestrings, mshape, mseclasses, msebitmap;
 
 {$ifdef FPC}
  {$define xbooleanresult}
