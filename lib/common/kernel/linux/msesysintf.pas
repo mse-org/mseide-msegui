@@ -28,7 +28,7 @@ interface
 
 uses
 baseunix,
- msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads, {$if defined(bsd) or defined(darwin)} cwstring {$else} msecwstring {$endif},{$endif}msetypes,
+ msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads, {$if defined(bsd) or defined(darwin) or defined(freebsd)} cwstring {$else} msecwstring {$endif},{$endif}msetypes,
  mselibc,msectypes,
  msestrings,msestream,classes;
  
