@@ -1,7 +1,7 @@
 # MSEide+MSEgui Pascal Cross Platform GUI Development System
 
-2025-12-13 Version 5.12.0.
-Copyright (c) 1999-2025 by Martin Schreiber and friends.
+2026-05-07 Version 5.14.0.
+Copyright (c) 1999-2026 by Martin Schreiber and friends.
 
 MSEgui is a complete independent Free Pascal widgetset.
 It does not use any other widgetsets like GTK2/GTK3/Qt4/Qt5.
