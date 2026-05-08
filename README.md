@@ -47,6 +47,8 @@ And because it is developed in Pascal, you have full control on the widgetset.
 - Visual form inheritance.
 - Integrated report designer.
 
+<img width="1135" height="785" alt="mseide-screenshot" src="https://github.com/user-attachments/assets/4524f5c4-666c-41f0-b08c-e4bd532d6f15" />
+
 ## About MSEide+MSEgui
 
 MSEide+MSEgui is exclusively designed for use with Free Pascal (FPC). It is not compatible with Delphi or Lazarus.
