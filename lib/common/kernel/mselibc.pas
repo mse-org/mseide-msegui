@@ -2418,7 +2418,12 @@ type
         d_unused2: cuint16;  // 2 bytes: padding
         d_name: array[0..255] of char;
         {$endif}
-
+        
+        
+        {$if defined(freebsd)}
+        
+        {$if defined(freebsd12)} // freebsd <= 12
+        
         {$if defined(freebsd) and (defined(cpuamd64) or defined(cpu32))}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
@@ -2426,7 +2431,7 @@ type
         d_namlen: cuint8;             //* length of string in d_name */
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
-
+                 
         {$if defined(freebsd) and defined(cpuaarch64)}
         d_fileno: cuint32;          //* file number of entry */
         d_off : __off64_t;
@@ -2437,7 +2442,35 @@ type
         d_pad1:  cuint16;
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
-
+        
+        {$else}
+           // freebsd >= 13
+        {$if defined(freebsd) and (defined(cpuamd64) or defined(cpu32))}
+            d_fileno: cuint64;      // 8 bytes
+            d_off:    clonglong;    // 8 bytes
+            d_reclen: cuint16;      // 2 bytes
+            d_type:   cuint8;       // 1 byte
+            d_pad0:   cuint8;       // 1 byte
+            d_namlen: cuint16;      // 2 bytes
+            d_pad1:   cuint16;      // 2 bytes
+            d_name:   array[0..255] of char;
+        {$endif}
+         {$endif}
+                 
+         {$if defined(freebsd) and defined(cpuaarch64)}
+         d_fileno: cuint64;          //* file number of entry */
+         d_off : __off64_t;
+         d_reclen: cuint16;            //* length of this record */
+         d_type:  cuint8;               //* file type, see below */
+         d_pad0: cuint8;
+         d_namlen: cuint16;             //* length of string in d_name */
+         d_pad1:  cuint16;
+         d_name: array[0..255] of char;        //* name must be no longer than this */
+        {$endif}
+       
+        {$endif}
+        
+        
         {$if defined(openbsd) and defined(cpu64)}
         d_fileno: cuint32;          //* file number of entry */
         d_off : __off64_t;
