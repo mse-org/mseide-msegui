@@ -254,6 +254,15 @@ begin
  end;
 end;
 
+{$IFDEF WINDOWS}
+// Save the global compiler state (-O3)
+{$PUSH}
+
+// Force FPC down to safe -O2 rules exclusively for this specific function.
+{$OPTIMIZATION LEVEL2}
+{$OPTIMIZATION NOREGVAR}
+{$ENDIF}
+
 function buildmakecommandline(const atag: integer): msestring;
 
  function normalizename(const aname: filenamety): filenamety;
@@ -336,6 +345,11 @@ begin
  end;
  result:= str1;
 end;
+
+{$IFDEF WINDOWS}
+// Restore global compiler options (-O3) for the rest of the unit
+{$POP}
+{$ENDIF}
 
 procedure dodownload;
 begin

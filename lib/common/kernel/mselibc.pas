@@ -2455,7 +2455,7 @@ type
             d_pad1:   cuint16;      // 2 bytes
             d_name:   array[0..255] of char;
         {$endif}
-         {$endif}
+        {$endif}
                  
          {$if defined(freebsd) and defined(cpuaarch64)}
          d_fileno: cuint64;          //* file number of entry */
