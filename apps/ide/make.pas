@@ -254,7 +254,7 @@ begin
  end;
 end;
 
-{$IFDEF WINDOWS}
+{$IF DEFINED(WINDOWS) AND (FPC_FULLVERSION >= 30301)}
 // Save the global compiler state (-O3)
 {$PUSH}
 
