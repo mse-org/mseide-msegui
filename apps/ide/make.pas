@@ -346,7 +346,7 @@ begin
  result:= str1;
 end;
 
-{$IFDEF WINDOWS}
+{$IF DEFINED(WINDOWS) AND (FPC_FULLVERSION >= 30301)}
 // Restore global compiler options (-O3) for the rest of the unit
 {$POP}
 {$ENDIF}
