@@ -4169,7 +4169,7 @@ var
     depth,  copyfromparent,visual,
       valuemask,@attributes);
 
-// DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
+ DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
 
 //////////////////////////////////////////////
  if (wo_onalldesktops in options.options) then
