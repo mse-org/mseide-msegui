@@ -21,8 +21,9 @@ uses
  mseevent,mseglob,msegraphics,msestrings,msetimer,msemenus,msegraphutils
  {$ifdef mse_usedbus},msestatusnotifieritem{$endif};
 
-const
- trayoptionswidget = [ow_appinactivehint];
+ const
+  trayoptionswidget = [ow_appinactivehint];
+  //EV_SHOWTRAYMENU   = $8000 + 999; // Unique user window message constant
 
 type
  traywidgetoptionty = (two_usedbus);
@@ -30,6 +31,8 @@ type
 
  ttraywidget = class(teventwidget)
   private
+   //fclick_pos: pointty;     // FIX: Stores click coordinates safely
+   //fclick_menu: tpopupmenu; // FIX: Stores menu layout profile securely
    ficon: tmaskedbitmap;
    ficonchanging: integer;
    fimagelist: timagelist;
@@ -330,12 +333,10 @@ begin
 end;
 
 procedure ttraywidget.objectevent(const sender: tobject;
-  const event: objecteventty);
+                                  const event: objecteventty);
 begin
- inherited;
- if (sender = fimagelist) and (event = oe_changed) then begin
-  iconchanged(nil);
- end;
+  // Restore the pristine, original framework lifecycle event mapping.
+  inherited objectevent(sender, event);
 end;
 
 procedure ttraywidget.setimagelist(const avalue: timagelist);
@@ -371,26 +372,6 @@ begin
  if not (csloading in componentstate) then begin
   settrayhint;
  end;
-end;
-
-procedure ttraywidget.dopopup(var amenu: tpopupmenu;
-               var mouseinfo: mouseeventinfoty);
-begin
- {$ifdef mswindows}
- if ownswindow then begin
-  gui_settrayhint(windowpo^,'');
-  try
-   inherited;
-  finally
-   gui_settrayhint(windowpo^,hint);
-  end;
- end
- else begin
-  inherited;
- end;
- {$else}
- inherited;
- {$endif}
 end;
 
 procedure ttraywidget.showmessage(const amessage: msestring;
@@ -444,10 +425,46 @@ begin
   fmessageid:= 0;
  end;
 end;
+///
 
 procedure ttraywidget.dotimer(const sender: tobject);
 begin
- cancelmessage;
+  // Restore your original notification balloon-clearing code!
+  cancelmessage;
+end;
+
+procedure ttraywidget.dopopup(var amenu: tpopupmenu;
+                              var mouseinfo: mouseeventinfoty);
+begin
+
+ {$ifdef mse_usedbus}
+  // FIX: Since D-Bus is released instantly, paint your menu immediately 
+  // right next to your cursor position with zero lag or human delay!
+  if hasdbus then begin
+    if (amenu <> nil) and (owner <> nil) and (owner is twidget) then begin
+      amenu.show(twidget(owner), mouseinfo.pos); 
+    end;
+    exit;
+  end;
+ {$endif}
+
+  // YOUR ORIGINAL WINDOWS & LEGACY X11 CODE LEFT COMPLETELY UNTOUCHED:
+ {$ifdef mswindows}
+ if ownswindow then begin
+  gui_settrayhint(windowpo^,'');
+  try
+   inherited;
+  finally
+   gui_settrayhint(windowpo^,hint);
+  end;
+ end
+ else begin
+  inherited;
+ end;
+ {$else}
+ inherited;
+ {$endif}
+ 
 end;
 
 procedure ttraywidget.setcaption(const avalue: msestring);

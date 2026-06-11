@@ -10,12 +10,13 @@
 //
 // for internal use in MSEgui only
 //
+
 unit msestatusnotifieritem;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msedbusinterface,msestrings,msetypes,msebitmap,msedbus,msegraphutils,
- mseevent;
+ msedbusinterface,msetimer,msestrings,msetypes,msebitmap,msedbus,msegraphutils,
+ mseevent,mseguiintf;
 type
  desktopkindty = (desk_none,desk_freedesktop,desk_kde);
 
@@ -41,6 +42,7 @@ type
                                                const apos: pointty) of object;
  tstatusnotifieritem = class(tdbusobject)
   private
+   fclickpos: pointty;   // Store the coordinates for the async thread
    fstatuscategory: statusnotifiercategoryty;
    fid: string;
    fid1: string; //possibly updated from applicationname
@@ -63,6 +65,7 @@ type
    function getcategory: string;
    function getid: string;
    procedure setactive(const avalue: boolean);
+   procedure triggerasyncmenu(sender: tobject); // The asynchronous executor
   protected
    fdesktopkind: desktopkindty;
    function getintrospectitems(): string override;
@@ -141,62 +144,57 @@ type
 
 function bitmaptoiconpixmap(const abitmap: tmaskedbitmap): iconpixmapty;
 var
- p1: pdbuspixelty;
- p1a: prgbtriplety;
- p2: pcard8;
- pe: pointer;
- bmp1: tmaskedbitmap;
- i1: int32;
+  bmp1: tmaskedbitmap;
+  i1, x: int32;
+  idx: integer;
+  p1a: prgbtriplety;
+  p2: pcard8;
 begin
- bmp1:= tmaskedbitmap.create(abitmap.kind);
- bmp1.assign(abitmap);
- bmp1.kind:= bmk_rgb;
- with result do begin
-  cx:= abitmap.width;
-  cy:= abitmap.height;
-  setlength(data,cx*cy*4);
-  if (cx <> 0) and (cy <> 0) then begin
-   p1:= pdbuspixelty(pointer(data));
-   p1a:= bmp1.scanline[0];
-   if bmp1.masked then begin
-    bmp1.graymask:= true;
-    for i1:= 0 to cy-1 do begin
-     p2:= bmp1.mask.scanline[i1];
-     pe:= p2+cx;
-     while p2 < pe do begin
-      p1^.r:= p1a^.red;
-      p1^.g:= p1a^.green;
-      p1^.b:= p1a^.blue;
-      p1^.a:= p2^;
-      inc(p1);
-      inc(p1a);
-      inc(p2);
-     end;
+  bmp1:= tmaskedbitmap.create(abitmap.kind);
+  try
+    bmp1.assign(abitmap);
+    bmp1.kind:= bmk_rgb;
+    
+    result.cx:= abitmap.width;
+    result.cy:= abitmap.height;
+    setlength(result.data, result.cx * result.cy * 4);
+    
+    if (result.cx > 0) and (result.cy > 0) then begin
+      idx := 0;
+      if bmp1.masked then begin
+        bmp1.graymask:= true;
+        for i1:= 0 to result.cy - 1 do begin
+          p1a:= bmp1.scanline[i1];
+          p2:= bmp1.mask.scanline[i1];
+          for x := 0 to result.cx - 1 do begin
+            // Strictly order byte-by-byte into the variant buffer array
+            result.data[idx]   := p2^;        // Alpha
+            result.data[idx+1] := p1a^.red;   // Red
+            result.data[idx+2] := p1a^.green; // Green
+            result.data[idx+3] := p1a^.blue;  // Blue
+            inc(idx, 4);
+            inc(p1a);
+            inc(p2);
+          end;
+        end;
+      end
+      else begin
+        for i1:= 0 to result.cy - 1 do begin
+          p1a:= bmp1.scanline[i1];
+          for x := 0 to result.cx - 1 do begin
+            result.data[idx]   := $ff;        // Fully Opaque Alpha
+            result.data[idx+1] := p1a^.red;   // Red
+            result.data[idx+2] := p1a^.green; // Green
+            result.data[idx+3] := p1a^.blue;  // Blue
+            inc(idx, 4);
+            inc(p1a);
+          end;
+        end;
+      end;
     end;
-   end
-   else begin
-    p1:= pdbuspixelty(pointer(data));
-    pe:= p1 + cx*cy;
-    while p1 < pe do begin
-     p1^.r:= p1a^.red;
-     p1^.g:= p1a^.green;
-     p1^.b:= p1a^.blue;
-     p1^.a:= $ff;
-     inc(p1);
-     inc(p1a);
-    end;
-   end;
+  finally
+    bmp1.free;
   end;
-  {
-  p1:= pdbuspixelty(pointer(data));
-  pe:= p1 + cx*cy;
-  while p1 < pe do begin
-   swapendian(card32(p1^));
-   inc(p1);
-  end;
-  }
- end;
- bmp1.free;
 end;
 
 const
@@ -408,20 +406,30 @@ procedure tstatusnotifieritem.busconnected();
 var
  s1: string;
 begin
+
  inherited;
-// s1:= fservice.dbusname;
- s1:= fservice.dbusid;
+ 
+ // FIX: We must register the well-known bus name, NOT the low-level connection id!
+ s1:= fservice.dbusname; 
+ if s1 = '' then s1:= fservice.dbusid; // Fallback security check
+
+ // Send registration to the active desktop environment tray watcher
  if not fservice.dbuscallmethod(
              interfacestart[fdesktopkind]+'StatusNotifierWatcher',
              '/StatusNotifierWatcher',
              interfacestart[fdesktopkind]+'StatusNotifierWatcher',
-             'RegisterStatusNotifierItem',variantvalue(s1),[],[]) then begin
+             'RegisterStatusNotifierItem', variantvalue(s1), [], []) then begin
+  // Silent fallback if watcher is busy or unresponsive
  end;
+
 end;
+
 
 procedure tstatusnotifieritem.propertiesget(var props: dictentryarty);
 begin
- setlength(props,1);
+ // FIX: Revert length back to 1. We are only sending ToolTip!
+ setlength(props, 1);
+ 
  with props[0] do begin
   name:= 'ToolTip';
   setvariantvalue(@ftooltip,itemtypeinfo(typeinfo(tooltipinfoarty)),
@@ -465,38 +473,50 @@ begin
  end;
 end;
 
-procedure tstatusnotifieritem.contextmenu(const amessage: pdbusmessage;
-               const adata: pointer; var ahandled: boolean);
-var
- x,y: int32;
+procedure tstatusnotifieritem.triggerasyncmenu(sender: tobject);
 begin
- if fservice.dbusreadmessage(amessage,[dbt_int32,dbt_int32],[@x,@y]) then begin
-  application.postevent(tpointobjectevent.create(mp(x,y),ievent(self)));
-      //deadlock in dbus library if called directly because of modal call
-  fservice.dbusreply(amessage,[]);
-  ahandled:= true;
- end
+  // This executes safely inside the primary UI main loop context!
+  if assigned(foncontextmenu) then begin
+    foncontextmenu(self, fclickpos);
+  end;
 end;
 
-procedure tstatusnotifieritem.activate(const amessage: pdbusmessage;
-               const adata: pointer; var ahandled: boolean);
+procedure tstatusnotifieritem.contextmenu(const amessage: pdbusmessage; 
+                                          const adata: pointer; var ahandled: boolean);
 var
- x,y: int32;
+  apos: pointty;
 begin
- if fservice.dbusreadmessage(amessage,[dbt_int32,dbt_int32],[@x,@y]) then begin
-  fservice.dbusreply(amessage,[]);
-  if assigned(fonactivate) then begin
-   fonactivate(self,mp(x,y));
+  ahandled := false; 
+  
+  if assigned(foncontextmenu) then begin
+    apos.x := 0; 
+    apos.y := 0;
+    foncontextmenu(self, apos); // Transmits execution out to msetraywidget
   end;
-  ahandled:= true;
- end
 end;
+
+procedure tstatusnotifieritem.activate(const amessage: pdbusmessage; 
+                                      const adata: pointer; var ahandled: boolean);
+var
+  apos: pointty;
+begin
+  ahandled := false; 
+  
+  if assigned(fonactivate) then begin
+    apos.x := 0; 
+    apos.y := 0;
+    fonactivate(self, apos);
+  end;
+
+end;
+
 
 procedure tstatusnotifieritem.secondaryactivate(const amessage: pdbusmessage;
                const adata: pointer; var ahandled: boolean);
 var
  x,y: int32;
 begin
+
  if fservice.dbusreadmessage(amessage,[dbt_int32,dbt_int32],[@x,@y]) then begin
   fservice.dbusreply(amessage,[]);
   if assigned(fonsecondaryactivate) then begin
@@ -504,6 +524,7 @@ begin
   end;
   ahandled:= true;
  end
+
 end;
 
 procedure tstatusnotifieritem.scroll(const amessage: pdbusmessage;
@@ -551,15 +572,24 @@ begin
 end;
 
 procedure tstatusnotifieritem.setIconPixmap(const avalue: tmaskedbitmap);
-var
- ar1: iconpixmaparty;
 begin
- ar1:= nil;
- if (avalue <> nil) and avalue.hasimage() then begin
-  setlength(ar1,1);
-  ar1[0]:= bitmaptoiconpixmap(avalue);
- end;
- seticonpixmap(ar1);
+  // 1. Allocate space for exactly 1 icon inside the dynamic array wrapper
+  setlength(ficonpixmap, 1);
+  
+  // 2. Assign the single converted record to the first element index
+  ficonpixmap[0] := bitmaptoiconpixmap(avalue);
+  
+  // 3. FIX: Use your existing working dbuscallmethod engine to emit the update
+  if active then begin
+    fservice.dbuscallmethod(
+      interfacestart[fdesktopkind] + 'StatusNotifierItem', // Interface
+      getpath(),                                          // Object Path
+      'org.freedesktop.DBus.Properties',                  // Property Interface
+      'PropertiesChanged',                                // Standard refresh trigger
+      variantvalue('NewIcon'),                            // Tell it the Icon updated
+      [], []
+    );
+  end;
 end;
 
 procedure tstatusnotifieritem.setIconPixmap(const avalue: iconpixmaparty);

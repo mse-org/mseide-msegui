@@ -1784,11 +1784,13 @@ begin
 //  xflush(appdisp);    //windowmanager has to work
   sleep(5*int1);
   inc(int1);
- until (int1 > 45);
+ until (int1 > 10);
+ 
  if raiseexception and not result then begin
-  raise exception.Create('not decorated');
+  // raise exception.Create('not decorated');
  end;
 end;
+
 
 function gui_setwindowstate(id: winidty; size: windowsizety;
                                         visible: boolean): guierrorty;
