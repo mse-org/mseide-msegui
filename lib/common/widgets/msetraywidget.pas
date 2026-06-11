@@ -23,7 +23,6 @@ uses
 
  const
   trayoptionswidget = [ow_appinactivehint];
-  //EV_SHOWTRAYMENU   = $8000 + 999; // Unique user window message constant
 
 type
  traywidgetoptionty = (two_usedbus);
@@ -31,8 +30,6 @@ type
 
  ttraywidget = class(teventwidget)
   private
-   //fclick_pos: pointty;     // FIX: Stores click coordinates safely
-   //fclick_menu: tpopupmenu; // FIX: Stores menu layout profile securely
    ficon: tmaskedbitmap;
    ficonchanging: integer;
    fimagelist: timagelist;
@@ -429,7 +426,6 @@ end;
 
 procedure ttraywidget.dotimer(const sender: tobject);
 begin
-  // Restore your original notification balloon-clearing code!
   cancelmessage;
 end;
 
@@ -438,9 +434,7 @@ procedure ttraywidget.dopopup(var amenu: tpopupmenu;
 begin
 
  {$ifdef mse_usedbus}
-  // FIX: Since D-Bus is released instantly, paint your menu immediately 
-  // right next to your cursor position with zero lag or human delay!
-  if hasdbus then begin
+   if hasdbus then begin
     if (amenu <> nil) and (owner <> nil) and (owner is twidget) then begin
       amenu.show(twidget(owner), mouseinfo.pos); 
     end;
@@ -448,7 +442,6 @@ begin
   end;
  {$endif}
 
-  // YOUR ORIGINAL WINDOWS & LEGACY X11 CODE LEFT COMPLETELY UNTOUCHED:
  {$ifdef mswindows}
  if ownswindow then begin
   gui_settrayhint(windowpo^,'');

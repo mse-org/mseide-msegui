@@ -15,8 +15,8 @@ unit msestatusnotifieritem;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msedbusinterface,msetimer,msestrings,msetypes,msebitmap,msedbus,msegraphutils,
- mseevent,mseguiintf;
+ msedbusinterface,msestrings,msetypes,msebitmap,msedbus,msegraphutils,
+ mseevent;
 type
  desktopkindty = (desk_none,desk_freedesktop,desk_kde);
 
@@ -42,7 +42,6 @@ type
                                                const apos: pointty) of object;
  tstatusnotifieritem = class(tdbusobject)
   private
-   fclickpos: pointty;   // Store the coordinates for the async thread
    fstatuscategory: statusnotifiercategoryty;
    fid: string;
    fid1: string; //possibly updated from applicationname
@@ -65,7 +64,7 @@ type
    function getcategory: string;
    function getid: string;
    procedure setactive(const avalue: boolean);
-   procedure triggerasyncmenu(sender: tobject); // The asynchronous executor
+
   protected
    fdesktopkind: desktopkindty;
    function getintrospectitems(): string override;
@@ -409,17 +408,14 @@ begin
 
  inherited;
  
- // FIX: We must register the well-known bus name, NOT the low-level connection id!
  s1:= fservice.dbusname; 
  if s1 = '' then s1:= fservice.dbusid; // Fallback security check
 
- // Send registration to the active desktop environment tray watcher
  if not fservice.dbuscallmethod(
              interfacestart[fdesktopkind]+'StatusNotifierWatcher',
              '/StatusNotifierWatcher',
              interfacestart[fdesktopkind]+'StatusNotifierWatcher',
              'RegisterStatusNotifierItem', variantvalue(s1), [], []) then begin
-  // Silent fallback if watcher is busy or unresponsive
  end;
 
 end;
@@ -427,7 +423,6 @@ end;
 
 procedure tstatusnotifieritem.propertiesget(var props: dictentryarty);
 begin
- // FIX: Revert length back to 1. We are only sending ToolTip!
  setlength(props, 1);
  
  with props[0] do begin
@@ -471,14 +466,6 @@ begin
                                              assigned(foncontextmenu) then begin
   foncontextmenu(self,tpointobjectevent(event).data);
  end;
-end;
-
-procedure tstatusnotifieritem.triggerasyncmenu(sender: tobject);
-begin
-  // This executes safely inside the primary UI main loop context!
-  if assigned(foncontextmenu) then begin
-    foncontextmenu(self, fclickpos);
-  end;
 end;
 
 procedure tstatusnotifieritem.contextmenu(const amessage: pdbusmessage; 
@@ -573,14 +560,11 @@ end;
 
 procedure tstatusnotifieritem.setIconPixmap(const avalue: tmaskedbitmap);
 begin
-  // 1. Allocate space for exactly 1 icon inside the dynamic array wrapper
   setlength(ficonpixmap, 1);
   
-  // 2. Assign the single converted record to the first element index
   ficonpixmap[0] := bitmaptoiconpixmap(avalue);
   
-  // 3. FIX: Use your existing working dbuscallmethod engine to emit the update
-  if active then begin
+    if active then begin
     fservice.dbuscallmethod(
       interfacestart[fdesktopkind] + 'StatusNotifierItem', // Interface
       getpath(),                                          // Object Path
