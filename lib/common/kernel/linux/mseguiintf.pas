@@ -1784,7 +1784,7 @@ begin
 //  xflush(appdisp);    //windowmanager has to work
   sleep(5*int1);
   inc(int1);
- until (int1 > 10);
+ until (int1 > 8);
  
  if raiseexception and not result then begin
   // raise exception.Create('not decorated');
@@ -4169,6 +4169,8 @@ var
     depth,  copyfromparent,visual,
       valuemask,@attributes);
 
+// DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
+
 //////////////////////////////////////////////
  if (wo_onalldesktops in options.options) then
  begin
@@ -4240,7 +4242,6 @@ XSetForeground(appdisp, shape_gc, 1);
   end else
    if (wo_customshape in options.options) then
   begin
-    DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
     XCopyArea(appdisp, mse_shapebmp.mask.handle, pmap, shape_gc, 0, 0, width, height, 0, 0);
   end else
   {
