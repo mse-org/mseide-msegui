@@ -1376,7 +1376,7 @@ end;
 {$else} 
 function tfiledialogxfo.LoadImage(const AFileName: msestring): msestring;
 begin
- result := imImage.bitmap.tryLoadFromFile(tosysfilepath(AFileName));
+ result := msestring(imImage.bitmap.tryLoadFromFile(tosysfilepath(AFileName)));
 // if result <> '' then imImage.Bitmap := tbitmapcomp2.bitmap;
 end;
 {$endif}  
@@ -2533,7 +2533,7 @@ end;
 
 procedure tfiledialogxfo.onformcreated(const Sender: TObject);
 var
-strz : string = '';
+strz : msestring = '';
 begin
  if MSEFallbackLang = 'zh' then strz := '             ';
  fcourseid := -1;
