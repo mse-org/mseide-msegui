@@ -4111,7 +4111,7 @@ var
  xgcv :TXGCValues;
  pmap : pixmapty;
  shape_gc : TGC;
- win_gc : TGC;
+// win_gc : TGC;
  begin
  gdi_lock;
  with awindow,x11windowty(platformdata).d do begin
@@ -4202,7 +4202,7 @@ var
   xgcv.line_width := 1;
   xgcv.line_style := LineSolid;
 
-  win_gc := XCreateGC(appdisp, id, GCForeground or GCLineWidth or GCLineStyle, @xgcv);
+ // win_gc := XCreateGC(appdisp, id, GCForeground or GCLineWidth or GCLineStyle, @xgcv);
 
  //* create the pixmap that we'll use for shaping the window */
   pmap := XCreatePixmap(appdisp, id, width, height, 1);

@@ -2711,12 +2711,6 @@ begin
       error(e.message);
      end;
     end;
-    
-    // FIX: Right after the method callback completes, forcibly flush your 
-    // private connection handle fconn to transmit the reply instantly to Ubuntu!
-    if fconn <> nil then begin
-      dbus_connection_flush(fconn); // Bypasses internal buffer delays
-    end;
    end;
   end;
   DBUS_MESSAGE_TYPE_SIGNAL: begin
@@ -2737,7 +2731,6 @@ begin
   end;
  end;
 end;
-
 
 procedure tdbusservice.registerobjects();
 var
