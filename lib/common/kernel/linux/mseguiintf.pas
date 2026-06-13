@@ -914,32 +914,21 @@ var
  clipboardbuffers: array[clipboardbufferty] of clipboardinfoty;
  fidnum: integer;
  DefaultErrorHandler: TXErrorHandler;
-{
-function CustomErrorHandler(dpy: PDisplay; err: PXErrorEvent): cint; cdecl;
-begin
-  if (err^.error_code = 3) and (err^.request_code = 15) then
-    Exit(0);  // Ignore silently
-  Result := DefaultErrorHandler(dpy, err);  // Handle others normally
-end;
-}
 
 function CustomErrorHandler(dpy: PDisplay; err: PXErrorEvent): cint; cdecl;
 begin
-  // Catch your BadMatch error (code 8) during SetInputFocus (major opcode 42)
   if (err^.error_code = 8) and (err^.request_code = 42) then
   begin
     Result := 0; // Explicitly assign 0 to the X11 C-return register
     Exit;        // Exit safely without running the DefaultErrorHandler
   end;
 
-  // Keep the original MSEgui safeguard for BadWindow/QueryTree
   if (err^.error_code = 3) and (err^.request_code = 15) then
   begin
     Result := 0;
     Exit;
   end;
 
-  // Let all other unrelated X11 system errors process normally
   Result := DefaultErrorHandler(dpy, err);
 end;
 
