@@ -1058,8 +1058,10 @@ begin
     if (by1 < $f0) then begin //3byte
      if (pe - pc >= 1) and (pc^ and $c0 = $80) and
                                          ((pc+1)^ and $c0 = $80) then begin
-      pd^:= (by1 shl word(12)) or
-            (pc^ and $3f) shl word(6) or ((pc+1)^ and $3f);
+     pd^:= (card16(by1) shl 12) or
+      ((card16(pc^) and $3f) shl 6) or 
+      ((card16((pc+1)^) and $3f));
+
       if pd^ < $0800 then begin
        seterror(); //overlong
       end;
@@ -1077,10 +1079,11 @@ begin
         seterror(); //overlong;
        end
        else begin
-        pd^:= (((by1 and $07) shl word(8)) or
-               ((pc^ and $3f) shl word(2)) or
-               ((pc+1)^ and $30 shr word(4))) +
-                         (word($d800) - word($10000 shr 10));
+       
+        pd^:= ((card16(by1 and $07) shl 8) or
+       (card16(pc^ and $3f) shl 2) or
+       (card16((pc+1)^ and $30) shr 4)) +
+                 (word($d800) - word($10000 shr 10));
         inc(pd);
         pd^:= (((pc+1)^ and $0f) shl word(6)) or
                                          ((pc+2)^ and $3f) or word($dc00);
