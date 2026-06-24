@@ -211,12 +211,22 @@ begin
                                          ansistring(currencystring)));
 {$ifdef linux}
  {$ifdef FPC}{$checkpointer off}{$endif}
-    ch1:= nl_langinfo(frac_digits)^;
-  // Change "byte(ch1) < 127" to ensure it falls within a valid, safe numeric range
+  ch1:= nl_langinfo(p_cs_precedes)^;
+  ch2:= nl_langinfo(p_sep_by_space)^;
+  // Ensure both lookup indices fall within the [0..1] array boundaries
+  if (ord(ch1) in [0..1]) and (ord(ch2) in [0..1]) then begin
+   currencyformat:= currfo[ord(ch1),ord(ch2)];
+   ch3:= nl_langinfo(p_sign_posn)^;
+   if ord(ch3) in [0..4] then begin
+    negcurrformat:= negcurrfo[ord(ch1),ord(ch2),ord(ch3)];
+   end;
+  end;
+
+  ch1:= nl_langinfo(frac_digits)^;
   if (byte(ch1) < 127) and (ord(ch1) <= 9) then begin
    currencydecimals:= ord(ch1);
   end else begin
-   currencydecimals:= 2; // Safe fallback default value (e.g., USD/EUR)
+   currencydecimals:= 2; // Safe fallback
   end;
 
 {$else} //bsd
