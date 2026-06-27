@@ -758,11 +758,12 @@ var
  int1: integer;
  str1,str2: string;
 begin
- result:= false;
+ result:= true;
  str1:= uppercase(alias);
  str2:= uppercase(ancestor);
  while str2 <> '' do begin
   if str1 = str2 then begin
+   result:= false;
    raise exception.create('Recursive fontalias "'
                   +alias+'" name "'+name+'" caller "'+str1+'".');
   end;
