@@ -15,6 +15,7 @@ unit msedataedits;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
+{$R-}{$Q-}
 
 interface
 {$ifndef mse_allwarnings}
