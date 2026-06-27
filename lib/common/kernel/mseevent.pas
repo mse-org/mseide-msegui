@@ -10,7 +10,7 @@
 unit mseevent;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-//{$R-}{$Q-}
+{$R-}{$Q-}
 interface
 uses
  mselist,mseglob,msegraphutils,msekeyboard,msetypes,msestrings,msesystypes;
