@@ -1,5 +1,6 @@
 unit mxft;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  mxlib,mselibc,msectypes,msefontconfig;
@@ -24,6 +25,7 @@ uses
  {$ALIGN 4}
  {$MINENUMSIZE 4}
 {$ENDIF}
+
 
 type           //from fontconfig.h, XftCompat.h
  XftType = (

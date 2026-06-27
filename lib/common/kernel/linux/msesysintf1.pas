@@ -9,6 +9,7 @@
 }
 unit msesysintf1;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  msesystypes,mselibc,sysutils;

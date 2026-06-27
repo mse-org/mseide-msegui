@@ -9,7 +9,7 @@
 }
 unit msesysintf; //linux, freebsd, openbsd, dragonfly, netbsd
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 {$ifdef mse_debuglock}
  {$define mse_debugmutex}
 {$endif}

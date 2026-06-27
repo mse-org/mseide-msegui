@@ -10,7 +10,7 @@
 unit msescrollbar;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 
 uses

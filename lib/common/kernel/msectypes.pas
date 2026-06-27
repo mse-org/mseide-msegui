@@ -1,5 +1,6 @@
 unit msectypes;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 {$ifndef FPC}
  {$ifndef mswindows}

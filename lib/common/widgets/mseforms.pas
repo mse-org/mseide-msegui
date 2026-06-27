@@ -15,7 +15,6 @@ unit mseforms;
  {$define mse_with_ifi}
 {$endif}
 {$R-}{$Q-}
-
 interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,

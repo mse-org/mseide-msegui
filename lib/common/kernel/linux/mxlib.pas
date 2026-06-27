@@ -1,7 +1,7 @@
 unit mxlib;
 
  {$mode objfpc}{$h+}
-
+{$R-}{$Q-}
 interface
 
 uses

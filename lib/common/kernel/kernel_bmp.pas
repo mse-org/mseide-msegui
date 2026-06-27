@@ -1,6 +1,7 @@
 unit kernel_bmp;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 
 interface
 

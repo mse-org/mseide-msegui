@@ -10,6 +10,7 @@
 unit msebits;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 //bitmanipulationhelpers
 interface
 uses

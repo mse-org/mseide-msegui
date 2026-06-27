@@ -10,7 +10,7 @@
 unit mseguiglob;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  classes,mclasses,msegraphutils,msetypes,msekeyboard,mseerr,mseevent,msestrings,
