@@ -9,6 +9,7 @@
 }
 unit msestringcontainer;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+ {$R-}{$Q-}
 interface
 uses
  msetypes,mseclasses,msedatalist,classes,mclasses,msehash,msestrings;

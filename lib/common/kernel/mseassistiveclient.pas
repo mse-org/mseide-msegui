@@ -12,6 +12,7 @@ unit mseassistiveclient;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
+ {$R-}{$Q-}
 interface
 uses
  msestrings,mseglob,mseinterfaces,msetypes,mseificompglob;

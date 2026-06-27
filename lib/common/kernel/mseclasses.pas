@@ -10,6 +10,7 @@
 unit mseclasses;
 {$ifdef FPC}
  {$mode objfpc}{$h+}{$interfaces corba}
+ {$R-}{$Q-}
 {$endif}
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}

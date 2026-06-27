@@ -9,6 +9,7 @@
 }
 unit msearrayprops;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 
 interface
 {$ifndef mse_allwarnings}

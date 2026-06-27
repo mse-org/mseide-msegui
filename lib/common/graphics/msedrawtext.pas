@@ -9,7 +9,7 @@
 }
 unit msedrawtext;
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
-
+ {$R-}{$Q-}
 //todo: optimize speed
 
 interface

@@ -9,6 +9,7 @@
 }
 unit msearrayutils;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
+{$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

@@ -10,6 +10,7 @@
 unit mseerr;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 //helpers for errormessages
 interface
 

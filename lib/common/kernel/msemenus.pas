@@ -13,7 +13,8 @@ unit msemenus;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
-
+ {$R-}{$Q-}
+ 
 interface
 uses
  mseact,msegui,msearrayprops,mseclasses,msegraphutils,

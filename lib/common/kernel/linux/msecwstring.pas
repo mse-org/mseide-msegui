@@ -13,6 +13,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  **********************************************************************}
 {$ifdef FPC}{$mode objfpc}{$endif}
+{$R-}{$Q-}
 
 {$define unicodeversion}
 {$if fpc_fullversion >= 30000}

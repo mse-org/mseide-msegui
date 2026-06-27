@@ -11,6 +11,7 @@ unit msegui;
 
 {$ifdef FPC}
  {$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}
+ {$R-}{$Q-}
 {$endif}
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}

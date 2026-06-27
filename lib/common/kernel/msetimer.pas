@@ -10,7 +10,7 @@
 unit msetimer;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  classes,mclasses,msetypes,mseevent,mseclasses,mseglob;

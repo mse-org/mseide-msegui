@@ -9,7 +9,7 @@
 }
 unit msefont;
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  mseguiglob,msegraphics,mseclasses;
