@@ -15,7 +15,7 @@ unit msetextedit;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
-
+{$R-}{$Q-}
 interface
 uses
  mseeditglob,mseedit,msewidgetgrid,classes,mclasses,msedatalist,

@@ -10,7 +10,7 @@
 unit mseintegerenter;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  mseforms,msedataedits,msesimplewidgets,msetypes,mseglob,mseguiglob,msegui,

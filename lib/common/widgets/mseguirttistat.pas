@@ -12,6 +12,7 @@ unit mseguirttistat;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
+{$R-}{$Q-}
 interface
 uses
  msegui,mserttistat,mseglob,mseclasses,msestat,msestatfile;

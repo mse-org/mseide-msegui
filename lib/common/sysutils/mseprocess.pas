@@ -9,6 +9,7 @@
 }
 unit mseprocess;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  classes,mclasses,mseclasses,msepipestream,msestrings,msestatfile,msestat,

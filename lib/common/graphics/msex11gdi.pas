@@ -9,6 +9,7 @@
 }
 unit msex11gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
+{$R-}{$Q-}
 interface
 uses
  mxlib,mxft,

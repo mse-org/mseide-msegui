@@ -18,7 +18,7 @@ interface
   {$warn 6058 off}
  {$endif}
 {$endif}
-
+{$R-}{$Q-}
 uses
  msegui,mseguiglob,msewidgets,msegraphutils,msegraphics,classes,mclasses,
  msetypes,msebitmap,msesimplewidgets,msemenus,mseevent;

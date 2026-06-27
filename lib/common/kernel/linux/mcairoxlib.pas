@@ -27,6 +27,7 @@ unit mCairoXlib;
 }
 
 {$mode ObjFpc}
+{$R-}{$Q-}
 
 interface
 

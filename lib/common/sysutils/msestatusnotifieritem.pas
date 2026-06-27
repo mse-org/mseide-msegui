@@ -13,6 +13,7 @@
 
 unit msestatusnotifieritem;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  msedbusinterface,msestrings,msetypes,msebitmap,msedbus,msegraphutils,

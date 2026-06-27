@@ -11,6 +11,7 @@ unit mseinputcontroller;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
+{$mode objfpc}
 
 interface
 

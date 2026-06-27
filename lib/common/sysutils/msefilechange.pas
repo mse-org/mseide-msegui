@@ -11,7 +11,7 @@ unit msefilechange;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
-
+{$R-}{$Q-}
 interface
 
 uses

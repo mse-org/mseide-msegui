@@ -13,7 +13,7 @@ unit mseprocutils;
 {$if fpc_fullversion >= 30000}
  {$define mse_fpc_3}
 {$endif}
-
+{$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

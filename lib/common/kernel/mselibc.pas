@@ -2,7 +2,7 @@
 
 unit mselibc;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  {$ifndef win64}initc,{$endif}msectypes{$ifndef FPC},msetypes{$endif};

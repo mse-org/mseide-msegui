@@ -9,6 +9,7 @@
 }
 unit msestatussnotifieritem;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$mode objfpc}
 interface
 uses
  msedbusinterface;

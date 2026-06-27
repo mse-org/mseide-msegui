@@ -9,6 +9,7 @@
 }
 unit msestringident;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  {globtypes,}msehash,msestrings,msetypes;

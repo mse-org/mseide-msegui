@@ -10,7 +10,7 @@
 unit msepropertyeditors;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  classes,mclasses,TypInfo,msedesignintf,msetypes,msestrings,sysutils,

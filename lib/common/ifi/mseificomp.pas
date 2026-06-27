@@ -24,6 +24,7 @@
   {$define mse_hastkpointer}
  {$endif}
 {$endif}
+{$R-}{$Q-}
 unit mseificomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 

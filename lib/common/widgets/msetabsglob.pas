@@ -9,6 +9,7 @@
 }
 unit msetabsglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$R-}{$Q-}
 interface
 const
  defaulttabsizemin = 15;

@@ -14,6 +14,7 @@ unit msetraywidget;
   {$define mse_usedbus}
  {$endif}
 {$endif}
+{$R-}{$Q-}
 interface
 uses
  msetypes,mseclasses,classes,mclasses,msesimplewidgets,mseguiglob,msebitmap,

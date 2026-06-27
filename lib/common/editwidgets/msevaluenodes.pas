@@ -18,6 +18,7 @@ interface
   {$warn 6058 off}
  {$endif}
 {$endif}
+{$R-}{$Q-}
 uses
  mseglob,msestrings,msedatalist,msedatanodes,msebitmap,mselistbrowser,
  msetypes,msevaluenodesglob,mseinterfaces,msestat;

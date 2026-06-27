@@ -1,5 +1,6 @@
 unit msedynload;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$R-}{$Q-}
 interface
 uses
  msesystypes,{$ifdef FPC}dynlibs,{$endif}{msestrings,}sysutils,msetypes{,msesys};
