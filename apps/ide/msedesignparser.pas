@@ -17,7 +17,7 @@
 unit msedesignparser;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 {$if FPC_FULLVERSION >= 030100} {$define mse_fpc_3_2} {$endif}
-
+{$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

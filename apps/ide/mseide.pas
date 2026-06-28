@@ -32,6 +32,7 @@ program mseide;
   {$warn 6058 off}
  {$endif}
 {$endif}
+{$R-}{$Q-}
 uses
 // cmem,
 {$ifdef FPC}{$ifdef unix}cthreads,{$endif}{$endif}

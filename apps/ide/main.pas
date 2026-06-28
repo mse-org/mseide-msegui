@@ -25,6 +25,7 @@ unit main;
 {$ifdef mse_no_ifi}
  {$define mse_no_db}
 {$endif}
+{$R-}{$Q-}
 
 interface
 {$ifndef mse_allwarnings}

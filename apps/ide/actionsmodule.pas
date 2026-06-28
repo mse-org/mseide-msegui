@@ -17,6 +17,7 @@
 unit actionsmodule;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 
 interface
 uses
