@@ -17,9 +17,7 @@
 unit projectoptionsform;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-
 {$R-}{$Q-}
-
 {$ifndef mse_no_ifi}
   {$define mse_with_ifi}
      //MSEide needs mse_with_ifi, switch for compiling test only
@@ -2180,7 +2178,6 @@ begin
  with statfiler,projectoptions do begin
   if iswriter then begin
    projectdir:= getcurrentdirmse;
-   writeln('init update');
    with mainfo,mainmenu1.menu.itembyname('view') do begin
     int3:= formmenuitemstart;
     int2:= count - int3;
@@ -2200,13 +2197,11 @@ begin
     s.modulefiles:= modulefiles1;
    end;
   end;
-  writeln('avant updatestat(statfiler)');
   registeredcomponents.updatestat(statfiler);
   setsection('projectoptions');
   updatevalue('projectdir',projectdir);
   updatevalue('projectfilename',projectfilename);
   projectfilename:= afilename;
-    writeln('avant updatememorystatstream');
   updatememorystatstream('findinfiledialog',findinfiledialogstatname);
   updatememorystatstream('finddialog',finddialogstatname);
   updatememorystatstream('replacedialog',replacedialogstatname);
@@ -2242,7 +2237,6 @@ begin
   updatememorystatstream('ififieldeditor',ififieldeditorstatname);
 {$endif}{$endif}
 
-    writeln('avant updateprojectsettings');
   updateprojectsettings(statfiler,[]);
   b1:= projecttree.updatestat(statfiler) or statfiler.iswriter;
   breakpointsfo.updatestat(statfiler);
@@ -2257,32 +2251,25 @@ begin
   selecteditpageform.updatestat(statfiler);
   programparametersform.updatestat(statfiler);
   projectoptionstofont(textpropertyfont);
- writeln('avant if not iswriter');
+
   if not iswriter then begin
-   writeln('guitemplatesmo.sysenv.getintegervalue');
    if guitemplatesmo.sysenv.getintegervalue(int1,
                                              ord(env_vargroup),1,6) then begin
-      writeln('s.macrogroup:= int1-1;');
     s.macrogroup:= int1-1;
    end;
-         writeln('expandprojectmacros');
    expandprojectmacros;
-            writeln('projecttree.updatelist');
    projecttree.updatelist;
   end;
-            writeln('  beginpanelplacement');
+
   beginpanelplacement();
   try
-              writeln('  updatestat(statfiler)');
    sourcefo.updatestat(statfiler);   //needs actual fontalias
    setsection('layout');
-                 writeln('  updatestat(windowlayout)');
    mainfo.projectstatfile.updatestat('windowlayout',statfiler);
   finally
    endpanelplacement();
   end;
   setsection('targetconsole');
-                   writeln('  updatestat(console statfiler)');  
   targetconsole.updatestat(statfiler);
 
   modified:= false;
@@ -2552,14 +2539,10 @@ var
 begin
  result:= false;
  try
-  writeln('init read');
   statreader:= tstatreader.create(filename,ce_utf8);
-  writeln('tstatreader.create');
   try
    application.beginwait;
-   writeln('avant updateprojectoptions');
    updateprojectoptions(statreader,filename);
-     writeln('updateprojectoptions');
   finally
    statreader.free;
    application.endwait;
