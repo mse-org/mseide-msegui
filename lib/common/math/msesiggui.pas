@@ -18,7 +18,7 @@ interface
   {$warn 6058 off}
  {$endif}
 {$endif}
-
+{$R-}{$Q-}
 uses
  classes,mclasses,msegraphedits,msesignal,mseguiglob,mseevent,msechartedit,
  msetypes,
