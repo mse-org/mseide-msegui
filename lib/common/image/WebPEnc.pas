@@ -12,6 +12,11 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+{$IFDEF FPC}
+  {$MODE DELPHI}{$H+}{$inline on}
+{$ENDIF}
+{$R-}{$Q-}
+
 interface
 
 //  Minimal VP8 lossy WebP encoder, ported from libwebp-1.6.0.
