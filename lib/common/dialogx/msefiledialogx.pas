@@ -41,8 +41,8 @@ uses
  mseact,mseapplication,msegui,mseificomp,mseificompglob,mseifiglob,msestream,
  SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,msetimer,
  {$ifdef BGRABITMAP_USE_MSEGUI}BGRABitmap,BGRADefaultBitmap,BGRABitmapTypes,
- {$endif}mseformatbmpicoread,mseformatjpgread,mseformatpngread,
- mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage,msebitmap;
+ {$endif}mseformatbmpicoread,mseformatjpgread,mseformatpngread,mseformatpngread,
+ mseformatwebpread,mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage,msebitmap;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -1460,7 +1460,7 @@ begin
 
  if (lowercase(fileext(filename.Value)) = 'xpm') or
     (lowercase(fileext(filename.Value)) = 'jpeg') or
-  //   (lowercase(fileext(filename.Value)) = 'ico') or
+     (lowercase(fileext(filename.Value)) = 'webp') or
       (lowercase(fileext(filename.Value)) = 'bmp') or
       (lowercase(fileext(filename.Value)) ='png') or
       (lowercase(fileext(filename.Value)) = 'jpg') then
