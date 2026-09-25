@@ -41,7 +41,7 @@ uses
  mseact,mseapplication,msegui,mseificomp,mseificompglob,mseifiglob,msestream,
  SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,msetimer,
  {$ifdef BGRABITMAP_USE_MSEGUI}BGRABitmap,BGRADefaultBitmap,BGRABitmapTypes,
- {$endif}mseformatbmpicoread,mseformatjpgread,mseformatpngread,mseformatpngread,
+ {$endif}mseformatbmpicoread,mseformatjpgread,mseformatpngread,
  mseformatwebpread,mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage,msebitmap;
 
 const
