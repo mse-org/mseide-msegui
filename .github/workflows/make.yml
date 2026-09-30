@@ -22,13 +22,16 @@ jobs:
     strategy:
       matrix:
         include:
-          # Define each platform setup manually to keep the labels valid for GitHub
           - os: ubuntu-latest
             target: linux
           - os: windows-latest
             target: windows
-          - os: ubuntu-latest # Boots an Ubuntu runner to host the FreeBSD virtual machine
+          - os: ubuntu-latest
             target: freebsd
+          - os: ubuntu-latest # Added Raspberry Pi 32-bit ARM
+            target: rpi-arm
+          - os: ubuntu-latest # Added Raspberry Pi 64-bit AArch64
+            target: rpi-aarch64
 
     steps:
     - name: Checkout
@@ -81,3 +84,27 @@ jobs:
           pkg install -y fpc libX11 libXext
         run: |
           fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    # --- RASPBERRY PI ARM (32-bit) COMPILATION TARGET ---
+    - name: Build on RPi ARM (32-bit)
+      if: matrix.target == 'rpi-arm'
+      shell: bash
+      run: |
+        set -xeuo pipefail
+        sudo bash -c '
+          apt-get update; apt-get -y install fpc fpc-utils fp-compiler-3.2.2 binutils-arm-linux-gnueabihf
+        ' >/dev/null
+        # -Parm sets the target architecture, -Tlinux sets OS target
+        fpc -Parm -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    # --- RASPBERRY PI AARCH64 (64-bit) COMPILATION TARGET ---
+    - name: Build on RPi AArch64 (64-bit)
+      if: matrix.target == 'rpi-aarch64'
+      shell: bash
+      run: |
+        set -xeuo pipefail
+        sudo bash -c '
+          apt-get update; apt-get -y install fpc fpc-utils fp-compiler-3.2.2 binutils-aarch64-linux-gnu
+        ' >/dev/null
+        # -Paarch64 sets the target architecture, -Tlinux sets OS target
+        fpc -Paarch64 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
