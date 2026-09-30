@@ -78,6 +78,6 @@ jobs:
         usesh: true
         prepare: |
           pkg update
-          pkg install -y fpc
+          pkg install -y fpc libX11 libXext
         run: |
           fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
