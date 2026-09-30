@@ -91,18 +91,19 @@ jobs:
       shell: bash
       run: |
         set -xeuo pipefail
-        # Install the main compiler, target cross-linkers, and fpc source package
         sudo bash -c '
           apt-get update; apt-get -y install fpc fpc-source binutils-arm-linux-gnueabihf
         ' >/dev/null
         
-        # Build the missing cross-compiler binary (ppcarm) and target RTL components from source
-        cd /usr/share/fpcsrc/*
-        sudo fpc -iV | read -r FPC_VERSION
+        # Safely determine and navigate to the true source folder
+        FPC_SRC_DIR=$(find /usr/share/fpcsrc -maxdepth 1 -type d -name "3.*" | head -n 1)
+        cd "$FPC_SRC_DIR"
+        
+        # Build cross-compiler and runtime libraries
         sudo make crossall crossinstall CPU_TARGET=arm OS_TARGET=linux CROSSBINDIR=/usr/bin
         sudo ln -sf /usr/lib/fpc/$(fpc -iV)/ppcrossarm /usr/bin/ppcarm
         
-        # Run compilation back in workspace
+        # Run compilation inside workspace
         cd $GITHUB_WORKSPACE
         fpc -Parm -Tlinux -XParm-linux-gnueabihf- -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
@@ -112,16 +113,18 @@ jobs:
       shell: bash
       run: |
         set -xeuo pipefail
-        # Install the main compiler, target cross-linkers, and fpc source package
         sudo bash -c '
           apt-get update; apt-get -y install fpc fpc-source binutils-aarch64-linux-gnu
         ' >/dev/null
         
-        # Build the missing cross-compiler binary (ppcaarch64) and target RTL components from source
-        cd /usr/share/fpcsrc/*
+        # Safely determine and navigate to the true source folder
+        FPC_SRC_DIR=$(find /usr/share/fpcsrc -maxdepth 1 -type d -name "3.*" | head -n 1)
+        cd "$FPC_SRC_DIR"
+        
+        # Build cross-compiler and runtime libraries
         sudo make crossall crossinstall CPU_TARGET=aarch64 OS_TARGET=linux CROSSBINDIR=/usr/bin
         sudo ln -sf /usr/lib/fpc/$(fpc -iV)/ppcrossaarch64 /usr/bin/ppcaarch64
         
-        # Run compilation back in workspace
+        # Run compilation inside workspace
         cd $GITHUB_WORKSPACE
         fpc -Paarch64 -Tlinux -XPaarch64-linux-gnu- -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
