@@ -91,10 +91,20 @@ jobs:
       shell: bash
       run: |
         set -xeuo pipefail
+        # Install the main compiler, target cross-linkers, and fpc source package
         sudo bash -c '
-          apt-get update; apt-get -y install fpc binutils-arm-linux-gnueabihf
+          apt-get update; apt-get -y install fpc fpc-source binutils-arm-linux-gnueabihf
         ' >/dev/null
-        fpc -Parm -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        
+        # Build the missing cross-compiler binary (ppcarm) and target RTL components from source
+        cd /usr/share/fpcsrc/*
+        sudo fpc -iV | read -r FPC_VERSION
+        sudo make crossall crossinstall CPU_TARGET=arm OS_TARGET=linux CROSSBINDIR=/usr/bin
+        sudo ln -sf /usr/lib/fpc/$(fpc -iV)/ppcrossarm /usr/bin/ppcarm
+        
+        # Run compilation back in workspace
+        cd $GITHUB_WORKSPACE
+        fpc -Parm -Tlinux -XParm-linux-gnueabihf- -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # --- RASPBERRY PI AARCH64 (64-bit) COMPILATION TARGET ---
     - name: Build on RPi AArch64 (64-bit)
@@ -102,7 +112,16 @@ jobs:
       shell: bash
       run: |
         set -xeuo pipefail
+        # Install the main compiler, target cross-linkers, and fpc source package
         sudo bash -c '
-          apt-get update; apt-get -y install fpc binutils-aarch64-linux-gnu
+          apt-get update; apt-get -y install fpc fpc-source binutils-aarch64-linux-gnu
         ' >/dev/null
-        fpc -Paarch64 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        
+        # Build the missing cross-compiler binary (ppcaarch64) and target RTL components from source
+        cd /usr/share/fpcsrc/*
+        sudo make crossall crossinstall CPU_TARGET=aarch64 OS_TARGET=linux CROSSBINDIR=/usr/bin
+        sudo ln -sf /usr/lib/fpc/$(fpc -iV)/ppcrossaarch64 /usr/bin/ppcaarch64
+        
+        # Run compilation back in workspace
+        cd $GITHUB_WORKSPACE
+        fpc -Paarch64 -Tlinux -XPaarch64-linux-gnu- -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
