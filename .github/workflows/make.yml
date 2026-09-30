@@ -43,8 +43,6 @@ jobs:
           - os: ubuntu-latest
             target: freebsd-x86_64
           - os: ubuntu-latest
-            target: freebsd-i386
-          - os: ubuntu-latest
             target: freebsd-aarch64
 
           # --- NETBSD TARGETS ---
@@ -56,8 +54,6 @@ jobs:
           # --- OPENBSD TARGETS ---
           - os: ubuntu-latest
             target: openbsd-x86_64
-          - os: ubuntu-latest
-            target: openbsd-i386
 
           # --- MACOS (DARWIN) TARGETS ---
           - os: macos-latest
@@ -88,7 +84,7 @@ jobs:
         fpc -Pi386 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
-    # 2. RASPBERRY PI EMULATED BUILD STEPS (WITH CACHE)
+    # 2. RASPBERRY PI EMULATED BUILD STEPS
     # ==========================================
     - name: Cache ARM32 OS Container Environment
       if: matrix.target == 'linux-rpi-arm32'
@@ -155,71 +151,50 @@ jobs:
     # ==========================================
     # 4. FREEBSD VIRTUAL BUILD STEPS
     # ==========================================
-    - name: Build on FreeBSD x86_64
-      if: matrix.target == 'freebsd-x86_64'
+    - name: Build on FreeBSD Layouts
+      if: startsWith(matrix.target, 'freebsd-')
       uses: vmactions/freebsd-vm@v1
       with:
         usesh: true
-        prepare: pkg update && pkg install -y fpc libX11 libXext
-        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    - name: Build on FreeBSD i386
-      if: matrix.target == 'freebsd-i386'
-      uses: vmactions/freebsd-vm@v1
-      with:
-        usesh: true
-        arch: i386
-        prepare: pkg update && pkg install -y fpc libX11 libXext
-        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    - name: Build on FreeBSD aarch64
-      if: matrix.target == 'freebsd-aarch64'
-      uses: vmactions/freebsd-vm@v1
-      with:
-        usesh: true
-        arch: aarch64
-        prepare: pkg update && pkg install -y fpc libX11 libXext
-        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        prepare: |
+          pkg update
+          pkg install -y fpc libX11 libXext
+        run: |
+          if [ "${{ matrix.target }}" = "freebsd-aarch64" ]; then
+            fpc -Paarch64 -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          else
+            fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          fi
 
     # ==========================================
     # 5. NETBSD VIRTUAL BUILD STEPS
     # ==========================================
-    - name: Build on NetBSD x86_64
-      if: matrix.target == 'netbsd-x86_64'
+    - name: Build on NetBSD Layouts
+      if: startsWith(matrix.target, 'netbsd-')
       uses: vmactions/netbsd-vm@v1
       with:
         usesh: true
-        prepare: pkgin -y update && pkgin -y install fpc libX11 libXext
-        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    - name: Build on NetBSD i386
-      if: matrix.target == 'netbsd-i386'
-      uses: vmactions/netbsd-vm@v1
-      with:
-        usesh: true
-        arch: i386
-        prepare: pkgin -y update && pkgin -y install fpc libX11 libXext
-        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        prepare: |
+          pkg_add fpc libX11 libXext
+        run: |
+          if [ "${{ matrix.target }}" = "netbsd-i386" ]; then
+            fpc -Pi386 -Tnetbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          else
+            fpc -Tnetbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          fi
 
     # ==========================================
     # 6. OPENBSD VIRTUAL BUILD STEPS
     # ==========================================
-    - name: Build on OpenBSD x86_64
-      if: matrix.target == 'openbsd-x86_64'
+    - name: Build on OpenBSD Layouts
+      if: startsWith(matrix.target, 'openbsd-')
       uses: vmactions/openbsd-vm@v1
       with:
         usesh: true
-        prepare: pkg_add fpc libX11 libXext
-        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    - name: Build on OpenBSD i386
-      if: matrix.target == 'openbsd-i386'
-      uses: vmactions/openbsd-vm@v1
-      with:
-        usesh: true
-        arch: i386
-        prepare: pkg_add fpc libX11 libXext
-        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        prepare: |
+          pkg_add -I fpc libX11 libXext
+        run: |
+          fpc -Topenbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 7. MACOS (DARWIN) HOST BUILD STEPS
@@ -228,7 +203,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew update
-        # Added xquartz and fontconfig to fulfill the graphical layer constraints on macOS
         brew install fpc xquartz fontconfig
 
     - name: Build on Darwin macOS Targets
