@@ -24,7 +24,7 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
-          - freebsd-latest # Added FreeBSD to the orchestration matrix grid
+          - freebsd-latest
 
     steps:
     - name: Checkout
@@ -38,8 +38,9 @@ jobs:
       shell: bash
       run: |
         set -xeuo pipefail
+        # Updated to use pure fpc instead of the heavy lazarus package
         sudo bash -c '
-          apt-get update; apt-get -y install lazarus
+          apt-get update; apt-get -y install fpc
         ' >/dev/null
         fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
@@ -67,8 +68,6 @@ jobs:
         fpc -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
 
     # --- FREEBSD COMPILATION TARGET ---
-    # We catch the virtual 'freebsd-latest' string from the matrix block, spin up a QEMU VM instance, 
-    # update its internal package systems, and compile targeting the Linux/Unix X11 kernel abstraction paths.
     - name: Build on FreeBSD
       if: matrix.os == 'freebsd-latest'
       uses: vmactions/freebsd-vm@v1
@@ -78,5 +77,4 @@ jobs:
           pkg update
           pkg install -y fpc
         run: |
-          # FreeBSD shares the exact same X11 kernel subsystem path architecture as Linux for MSEgui
           fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
