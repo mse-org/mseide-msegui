@@ -28,9 +28,9 @@ jobs:
             target: windows
           - os: ubuntu-latest
             target: freebsd
-          - os: ubuntu-latest # Added Raspberry Pi 32-bit ARM
+          - os: ubuntu-latest
             target: rpi-arm
-          - os: ubuntu-latest # Added Raspberry Pi 64-bit AArch64
+          - os: ubuntu-latest
             target: rpi-aarch64
 
     steps:
@@ -92,9 +92,8 @@ jobs:
       run: |
         set -xeuo pipefail
         sudo bash -c '
-          apt-get update; apt-get -y install fpc fpc-utils fp-compiler-3.2.2 binutils-arm-linux-gnueabihf
+          apt-get update; apt-get -y install fpc binutils-arm-linux-gnueabihf
         ' >/dev/null
-        # -Parm sets the target architecture, -Tlinux sets OS target
         fpc -Parm -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # --- RASPBERRY PI AARCH64 (64-bit) COMPILATION TARGET ---
@@ -104,7 +103,6 @@ jobs:
       run: |
         set -xeuo pipefail
         sudo bash -c '
-          apt-get update; apt-get -y install fpc fpc-utils fp-compiler-3.2.2 binutils-aarch64-linux-gnu
+          apt-get update; apt-get -y install fpc binutils-aarch64-linux-gnu
         ' >/dev/null
-        # -Paarch64 sets the target architecture, -Tlinux sets OS target
         fpc -Paarch64 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
