@@ -24,30 +24,17 @@ jobs:
         os:
           - ubuntu-latest
           - windows-latest
+          - freebsd-latest # Added FreeBSD to the orchestration matrix grid
 
     steps:
     - name: Checkout
       uses: actions/checkout@v7
       with:
-        submodules: recursive # Replaces 'true' with 'recursive' to guarantee nested dependencies resolve cleanly
+        submodules: recursive
 
-    - name: Install Lazarus/FPC on Windows
-      if: runner.os == 'Windows'
-      uses: gcarreno/setup-lazarus@v3
-      with:
-        lazarus-version: stable
-
-    - name: Add FPC binary path to Bash environment on Windows
-      if: runner.os == 'Windows'
-      shell: bash
-      run: |
-        FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "i386-win32" -o -name "x86_64-win64" 2>/dev/null | head -n 1)
-        if [ -n "$FPC_DIR" ]; then
-          echo "$FPC_DIR" >> $GITHUB_PATH
-        fi
-
+    # --- LINUX COMPILATION TARGET ---
     - name: Build on Linux
-      if: runner.os == 'Linux'
+      if: matrix.os == 'ubuntu-latest'
       shell: bash
       run: |
         set -xeuo pipefail
@@ -56,10 +43,40 @@ jobs:
         ' >/dev/null
         fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
+    # --- WINDOWS COMPILATION TARGET ---
+    - name: Install Lazarus/FPC on Windows
+      if: matrix.os == 'windows-latest'
+      uses: gcarreno/setup-lazarus@v3
+      with:
+        lazarus-version: stable
+
+    - name: Add FPC binary path to Bash environment on Windows
+      if: matrix.os == 'windows-latest'
+      shell: bash
+      run: |
+        FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "i386-win32" -o -name "x86_64-win64" 2>/dev/null | head -n 1)
+        if [ -n "$FPC_DIR" ]; then
+          echo "$FPC_DIR" >> $GITHUB_PATH
+        fi
+
     - name: Build on Windows
-      if: runner.os == 'Windows'
+      if: matrix.os == 'windows-latest'
       shell: bash
       run: |
         set -xeuo pipefail
-        # Compiles the executable targeting the native Windows GDI kernel library architecture
         fpc -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+
+    # --- FREEBSD COMPILATION TARGET ---
+    # We catch the virtual 'freebsd-latest' string from the matrix block, spin up a QEMU VM instance, 
+    # update its internal package systems, and compile targeting the Linux/Unix X11 kernel abstraction paths.
+    - name: Build on FreeBSD
+      if: matrix.os == 'freebsd-latest'
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        prepare: |
+          pkg update
+          pkg install -y fpc
+        run: |
+          # FreeBSD shares the exact same X11 kernel subsystem path architecture as Linux for MSEgui
+          fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
