@@ -1,4 +1,4 @@
-name: Make
+name: Make Ultimate Matrix
 
 on:
   schedule:
@@ -20,18 +20,50 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     strategy:
+      fail-fast: false
       matrix:
         include:
+          # --- LINUX TARGETS ---
           - os: ubuntu-latest
-            target: linux
+            target: linux-x86_64
+          - os: ubuntu-latest
+            target: linux-i386
+          - os: ubuntu-latest
+            target: linux-rpi-arm32
+          - os: ubuntu-latest
+            target: linux-rpi-aarch64
+
+          # --- WINDOWS TARGETS ---
           - os: windows-latest
-            target: windows
+            target: windows-x86_64
+          - os: windows-latest
+            target: windows-i386
+
+          # --- FREEBSD TARGETS ---
           - os: ubuntu-latest
-            target: freebsd
+            target: freebsd-x86_64
           - os: ubuntu-latest
-            target: rpi-arm
+            target: freebsd-i386
           - os: ubuntu-latest
-            target: rpi-aarch64
+            target: freebsd-aarch64
+
+          # --- NETBSD TARGETS ---
+          - os: ubuntu-latest
+            target: netbsd-x86_64
+          - os: ubuntu-latest
+            target: netbsd-i386
+
+          # --- OPENBSD TARGETS ---
+          - os: ubuntu-latest
+            target: openbsd-x86_64
+          - os: ubuntu-latest
+            target: openbsd-i386
+
+          # --- MACOS (DARWIN) TARGETS ---
+          - os: macos-latest
+            target: darwin-macos-x86_64
+          - os: macos-latest
+            target: darwin-macos-aarch64
 
     steps:
     - name: Checkout
@@ -39,92 +71,171 @@ jobs:
       with:
         submodules: recursive
 
-    # --- LINUX COMPILATION TARGET ---
-    - name: Build on Linux
-      if: matrix.target == 'linux'
-      shell: bash
+    # ==========================================
+    # 1. LINUX HOST BUILD STEPS
+    # ==========================================
+    - name: Build on Linux x86_64
+      if: matrix.target == 'linux-x86_64'
       run: |
-        set -xeuo pipefail
-        sudo bash -c '
-          apt-get update; apt-get -y install fpc
-        ' >/dev/null
+        sudo apt-get update && sudo apt-get -y install fpc
         fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
-    # --- WINDOWS COMPILATION TARGET ---
-    - name: Install Lazarus/FPC on Windows
-      if: matrix.target == 'windows'
-      uses: gcarreno/setup-lazarus@v3
-      with:
-        lazarus-version: stable
-
-    - name: Add FPC binary path to Bash environment on Windows
-      if: matrix.target == 'windows'
-      shell: bash
+    - name: Build on Linux i386
+      if: matrix.target == 'linux-i386'
       run: |
-        FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "i386-win32" -o -name "x86_64-win64" 2>/dev/null | head -n 1)
-        if [ -n "$FPC_DIR" ]; then
-          echo "$FPC_DIR" >> $GITHUB_PATH
-        fi
+        sudo dpkg --add-architecture i386
+        sudo apt-get update && sudo apt-get -y install fpc gcc-multilib libx11-6:i386 libxext6:i386
+        fpc -Pi386 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
-    - name: Build on Windows
-      if: matrix.target == 'windows'
-      shell: bash
-      run: |
-        set -xeuo pipefail
-        fpc -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
-
-    # --- FREEBSD COMPILATION TARGET ---
-    - name: Build on FreeBSD
-      if: matrix.target == 'freebsd'
-      uses: vmactions/freebsd-vm@v1
-      with:
-        usesh: true
-        prepare: |
-          pkg update
-          pkg install -y fpc libX11 libXext
-        run: |
-          fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    # --- RASPBERRY PI ARM (32-bit) COMPILATION TARGET WITH CACHE ---
+    # ==========================================
+    # 2. RASPBERRY PI EMULATED BUILD STEPS (WITH CACHE)
+    # ==========================================
     - name: Cache ARM32 OS Container Environment
-      if: matrix.target == 'rpi-arm'
+      if: matrix.target == 'linux-rpi-arm32'
       uses: actions/cache@v4
       with:
         path: ~/.run-on-arch-cache
         key: run-on-arch-cache-armv7-v1
 
-    - name: Build on RPi ARM (32-bit)
-      if: matrix.target == 'rpi-arm'
+    - name: Build on Linux RPi ARM32
+      if: matrix.target == 'linux-rpi-arm32'
       uses: uraimo/run-on-arch-action@v2
       with:
         arch: armv7
         distro: ubuntu_latest
         githubToken: ${{ github.token }}
         run: |
-          # If fpc doesn't exist yet, it's a cold start; install it.
-          if ! command -v fpc &> /dev/null; then
-            apt-get update && apt-get install -y fpc
-          fi
+          if ! command -v fpc &> /dev/null; then apt-get update && apt-get install -y fpc; fi
           fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
-    # --- RASPBERRY PI AARCH64 (64-bit) COMPILATION TARGET WITH CACHE ---
     - name: Cache AArch64 OS Container Environment
-      if: matrix.target == 'rpi-aarch64'
+      if: matrix.target == 'linux-rpi-aarch64'
       uses: actions/cache@v4
       with:
         path: ~/.run-on-arch-cache
         key: run-on-arch-cache-aarch64-v1
 
-    - name: Build on RPi AArch64 (64-bit)
-      if: matrix.target == 'rpi-aarch64'
+    - name: Build on Linux RPi AArch64
+      if: matrix.target == 'linux-rpi-aarch64'
       uses: uraimo/run-on-arch-action@v2
       with:
         arch: aarch64
         distro: ubuntu_latest
         githubToken: ${{ github.token }}
         run: |
-          # If fpc doesn't exist yet, it's a cold start; install it.
-          if ! command -v fpc &> /dev/null; then
-            apt-get update && apt-get install -y fpc
-          fi
+          if ! command -v fpc &> /dev/null; then apt-get update && apt-get install -y fpc; fi
           fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    # ==========================================
+    # 3. WINDOWS HOST BUILD STEPS
+    # ==========================================
+    - name: Install Lazarus/FPC on Windows
+      if: matrix.os == 'windows-latest'
+      uses: gcarreno/setup-lazarus@v3
+      with:
+        lazarus-version: stable
+
+    - name: Add FPC binary path to Bash environment on Windows
+      if: matrix.os == 'windows-latest'
+      shell: bash
+      run: |
+        FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "i386-win32" -o -name "x86_64-win64" 2>/dev/null | head -n 1)
+        if [ -n "$FPC_DIR" ]; then echo "$FPC_DIR" >> $GITHUB_PATH; fi
+
+    - name: Build on Windows Targets
+      if: matrix.os == 'windows-latest'
+      shell: bash
+      run: |
+        if [ "${{ matrix.target }}" = "windows-i386" ]; then
+          fpc -Pi386 -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+        else
+          fpc -Px86_64 -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+        fi
+
+    # ==========================================
+    # 4. FREEBSD VIRTUAL BUILD STEPS
+    # ==========================================
+    - name: Build on FreeBSD x86_64
+      if: matrix.target == 'freebsd-x86_64'
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        prepare: pkg update && pkg install -y fpc libX11 libXext
+        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    - name: Build on FreeBSD i386
+      if: matrix.target == 'freebsd-i386'
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        arch: i386
+        prepare: pkg update && pkg install -y fpc libX11 libXext
+        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    - name: Build on FreeBSD aarch64
+      if: matrix.target == 'freebsd-aarch64'
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        arch: aarch64
+        prepare: pkg update && pkg install -y fpc libX11 libXext
+        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    # ==========================================
+    # 5. NETBSD VIRTUAL BUILD STEPS
+    # ==========================================
+    - name: Build on NetBSD x86_64
+      if: matrix.target == 'netbsd-x86_64'
+      uses: vmactions/netbsd-vm@v1
+      with:
+        usesh: true
+        prepare: pkgin -y update && pkgin -y install fpc libX11 libXext
+        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    - name: Build on NetBSD i386
+      if: matrix.target == 'netbsd-i386'
+      uses: vmactions/netbsd-vm@v1
+      with:
+        usesh: true
+        arch: i386
+        prepare: pkgin -y update && pkgin -y install fpc libX11 libXext
+        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    # ==========================================
+    # 6. OPENBSD VIRTUAL BUILD STEPS
+    # ==========================================
+    - name: Build on OpenBSD x86_64
+      if: matrix.target == 'openbsd-x86_64'
+      uses: vmactions/openbsd-vm@v1
+      with:
+        usesh: true
+        prepare: pkg_add fpc libX11 libXext
+        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    - name: Build on OpenBSD i386
+      if: matrix.target == 'openbsd-i386'
+      uses: vmactions/openbsd-vm@v1
+      with:
+        usesh: true
+        arch: i386
+        prepare: pkg_add fpc libX11 libXext
+        run: fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    # ==========================================
+    # 7. MACOS (DARWIN) HOST BUILD STEPS
+    # ==========================================
+    - name: Install FPC and X11 Dependencies on macOS Host
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew update
+        # Added xquartz and fontconfig to fulfill the graphical layer constraints on macOS
+        brew install fpc xquartz fontconfig
+
+    - name: Build on Darwin macOS Targets
+      if: matrix.os == 'macos-latest'
+      run: |
+        if [ "${{ matrix.target }}" = "darwin-macos-aarch64" ]; then
+          fpc -Paarch64 -Tdarwin -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        else
+          fpc -Px86_64 -Tdarwin -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        fi
