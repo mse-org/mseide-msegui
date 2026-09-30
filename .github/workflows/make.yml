@@ -21,10 +21,14 @@ jobs:
     timeout-minutes: 120
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - freebsd-latest
+        include:
+          # Define each platform setup manually to keep the labels valid for GitHub
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-latest
+            target: windows
+          - os: ubuntu-latest # Boots an Ubuntu runner to host the FreeBSD virtual machine
+            target: freebsd
 
     steps:
     - name: Checkout
@@ -34,11 +38,10 @@ jobs:
 
     # --- LINUX COMPILATION TARGET ---
     - name: Build on Linux
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.target == 'linux'
       shell: bash
       run: |
         set -xeuo pipefail
-        # Updated to use pure fpc instead of the heavy lazarus package
         sudo bash -c '
           apt-get update; apt-get -y install fpc
         ' >/dev/null
@@ -46,13 +49,13 @@ jobs:
 
     # --- WINDOWS COMPILATION TARGET ---
     - name: Install Lazarus/FPC on Windows
-      if: matrix.os == 'windows-latest'
+      if: matrix.target == 'windows'
       uses: gcarreno/setup-lazarus@v3
       with:
         lazarus-version: stable
 
     - name: Add FPC binary path to Bash environment on Windows
-      if: matrix.os == 'windows-latest'
+      if: matrix.target == 'windows'
       shell: bash
       run: |
         FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "i386-win32" -o -name "x86_64-win64" 2>/dev/null | head -n 1)
@@ -61,7 +64,7 @@ jobs:
         fi
 
     - name: Build on Windows
-      if: matrix.os == 'windows-latest'
+      if: matrix.target == 'windows'
       shell: bash
       run: |
         set -xeuo pipefail
@@ -69,7 +72,7 @@ jobs:
 
     # --- FREEBSD COMPILATION TARGET ---
     - name: Build on FreeBSD
-      if: matrix.os == 'freebsd-latest'
+      if: matrix.target == 'freebsd'
       uses: vmactions/freebsd-vm@v1
       with:
         usesh: true
