@@ -92,20 +92,17 @@ jobs:
       run: |
         set -xeuo pipefail
         sudo bash -c '
-          apt-get update; apt-get -y install fpc fpc-source binutils-arm-linux-gnueabihf
+          apt-get update; apt-get -y install fpc binutils-arm-linux-gnueabihf
         ' >/dev/null
         
-        # Safely determine and navigate to the true source folder
-        FPC_SRC_DIR=$(find /usr/share/fpcsrc -maxdepth 1 -type d -name "3.*" | head -n 1)
-        cd "$FPC_SRC_DIR"
+        # Download and extract pre-compiled standalone FPC binaries & cross-RTL for arm-linux
+        curl -sL "https://github.com" -o fpc-arm.tar.gz
+        tar -xzf fpc-arm.tar.gz
         
-        # Build cross-compiler and runtime libraries
-        sudo make crossall crossinstall CPU_TARGET=arm OS_TARGET=linux CROSSBINDIR=/usr/bin
-        sudo ln -sf /usr/lib/fpc/$(fpc -iV)/ppcrossarm /usr/bin/ppcarm
-        
-        # Run compilation inside workspace
-        cd $GITHUB_WORKSPACE
-        fpc -Parm -Tlinux -XParm-linux-gnueabihf- -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        # Point compilation directly to extracted cross-units and cross-compiler binary
+        ./fpc/bin/ppcrossarm -Tlinux -XParm-linux-gnueabihf- \
+          -Fu"./fpc/units/arm-linux/*" \
+          -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # --- RASPBERRY PI AARCH64 (64-bit) COMPILATION TARGET ---
     - name: Build on RPi AArch64 (64-bit)
@@ -114,17 +111,14 @@ jobs:
       run: |
         set -xeuo pipefail
         sudo bash -c '
-          apt-get update; apt-get -y install fpc fpc-source binutils-aarch64-linux-gnu
+          apt-get update; apt-get -y install fpc binutils-aarch64-linux-gnu
         ' >/dev/null
         
-        # Safely determine and navigate to the true source folder
-        FPC_SRC_DIR=$(find /usr/share/fpcsrc -maxdepth 1 -type d -name "3.*" | head -n 1)
-        cd "$FPC_SRC_DIR"
+        # Download and extract pre-compiled standalone FPC binaries & cross-RTL for aarch64-linux
+        curl -sL "https://github.com" -o fpc-aarch64.tar.gz
+        tar -xzf fpc-aarch64.tar.gz
         
-        # Build cross-compiler and runtime libraries
-        sudo make crossall crossinstall CPU_TARGET=aarch64 OS_TARGET=linux CROSSBINDIR=/usr/bin
-        sudo ln -sf /usr/lib/fpc/$(fpc -iV)/ppcrossaarch64 /usr/bin/ppcaarch64
-        
-        # Run compilation inside workspace
-        cd $GITHUB_WORKSPACE
-        fpc -Paarch64 -Tlinux -XPaarch64-linux-gnu- -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        # Point compilation directly to extracted cross-units and cross-compiler binary
+        ./fpc/bin/ppcrossaarch64 -Tlinux -XPaarch64-linux-gnu- \
+          -Fu"./fpc/units/aarch64-linux/*" \
+          -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
