@@ -95,13 +95,18 @@ jobs:
           apt-get update; apt-get -y install fpc binutils-arm-linux-gnueabihf
         ' >/dev/null
         
-        # Download and extract pre-compiled standalone FPC binaries & cross-RTL for arm-linux
-        curl -sL "https://github.com" -o fpc-arm.tar.gz
-        tar -xzf fpc-arm.tar.gz
+        # Download official cross-compiler archive for x86_64 hosts targeting arm-linux
+        curl -sL "https://sourceforge.net" -o fpc-cross-arm.tar.gz
+        tar -xzf fpc-cross-arm.tar.gz
+        cd fpc-3.2.2.x86_64-linux
+
+        # Extract the internal compiler payload components directly into a local folder
+        tar -xzf binary.x86_64-linux.tar.gz
         
-        # Point compilation directly to extracted cross-units and cross-compiler binary
-        ./fpc/bin/ppcrossarm -Tlinux -XParm-linux-gnueabihf- \
-          -Fu"./fpc/units/arm-linux/*" \
+        # Move back to workspace and compile using the official cross-compiler binary
+        cd $GITHUB_WORKSPACE
+        ./fpc-3.2.2.x86_64-linux/usr/lib/fpc/3.2.2/ppcrossarm -Tlinux -XParm-linux-gnueabihf- \
+          -Fu"./fpc-3.2.2.x86_64-linux/usr/lib/fpc/3.2.2/units/arm-linux/*" \
           -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # --- RASPBERRY PI AARCH64 (64-bit) COMPILATION TARGET ---
@@ -114,11 +119,16 @@ jobs:
           apt-get update; apt-get -y install fpc binutils-aarch64-linux-gnu
         ' >/dev/null
         
-        # Download and extract pre-compiled standalone FPC binaries & cross-RTL for aarch64-linux
-        curl -sL "https://github.com" -o fpc-aarch64.tar.gz
-        tar -xzf fpc-aarch64.tar.gz
+        # Download official cross-compiler archive for x86_64 hosts targeting aarch64-linux
+        curl -sL "https://sourceforge.net" -o fpc-cross-aarch64.tar.gz
+        tar -xzf fpc-cross-aarch64.tar.gz
+        cd fpc-3.2.2.x86_64-linux
+
+        # Extract the internal compiler payload components directly into a local folder
+        tar -xzf binary.x86_64-linux.tar.gz
         
-        # Point compilation directly to extracted cross-units and cross-compiler binary
-        ./fpc/bin/ppcrossaarch64 -Tlinux -XPaarch64-linux-gnu- \
-          -Fu"./fpc/units/aarch64-linux/*" \
+        # Move back to workspace and compile using the official cross-compiler binary
+        cd $GITHUB_WORKSPACE
+        ./fpc-3.2.2.x86_64-linux/usr/lib/fpc/3.2.2/ppcrossaarch64 -Tlinux -XPaarch64-linux-gnu- \
+          -Fu"./fpc-3.2.2.x86_64-linux/usr/lib/fpc/3.2.2/units/aarch64-linux/*" \
           -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
