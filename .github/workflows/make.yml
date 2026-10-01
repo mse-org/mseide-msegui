@@ -70,8 +70,9 @@ jobs:
       if: matrix.target == 'linux-i386'
       run: |
         sudo dpkg --add-architecture i386
-        sudo apt-get update && sudo apt-get -y install fp-compiler gcc-multilib libx11-6:i386 libxext6:i386
-        sudo apt-get -y install fp-units-base fp-units-rtl fp-units-fcl fp-units-gfx fp-units-gtk2 fp-units-x11 || true
+        sudo apt-get update
+        # Installs the complete 32-bit compiler binary engine along with its graphics dependencies natively
+        sudo apt-get -y install fpc fp-compiler:i386 fp-units-gfx:i386 gcc-multilib libx11-6:i386 libxext6:i386
         fpc -Pi386 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
@@ -183,7 +184,6 @@ jobs:
         export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
         
         if [ "${{ matrix.target }}" = "darwin-macos-aarch64" ]; then
-          # Added -Fl/opt/X11/lib framework search flag to pass XQuartz location directly to linker [1]
           fpc -Paarch64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
         else
           fpc -Px86_64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
