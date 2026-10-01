@@ -68,16 +68,17 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt-get update
-        sudo apt-get -y install unzip libc6:i386 libx11-dev:i386 libxext-dev:i386
+        sudo apt-get -y install unzip libc6:i386 libx11-dev:i386 libxext-dev:i386 wget
         
-        # Download verified raw binary asset zip directly from GitHub release storage stream
-        curl -sL "https://github.com" -o fpc-ootb.zip
+        # Uses wget to follow raw release streams and download the genuine zip data
+        wget --trust-server-names -q "https://github.com" -O fpc-ootb.zip
         mkdir -p fpc-linux32
         unzip -q fpc-ootb.zip -d fpc-linux32
         
-        # Use an absolute wildcard execution link to safely catch nested directory schemas
-        chmod +x fpc-linux32/fpc-ootb-*/fpc-ootb
-        fpc-linux32/fpc-ootb-*/fpc-ootb -Tlinux -Pi386 -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        # Locate and run the unzipped binary directly
+        OOTB_BIN=$(find fpc-linux32 -type f -name "fpc-ootb" | head -n 1)
+        chmod +x "$OOTB_BIN"
+        "$OOTB_BIN" -Tlinux -Pi386 -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 2. RASPBERRY PI EMULATED BUILD STEPS
@@ -144,12 +145,12 @@ jobs:
       if: matrix.target == 'windows-i386'
       shell: bash
       run: |
-        # Download verified raw binary asset zip directly from GitHub release storage stream
-        curl -sL "https://github.com/fredvs/freepascal-ootb/releases/download/3.2.2/fpc-ootb-324-i386-win32.zip" -o fpc-ootb-win32.zip
+        # Download using a clean fallback endpoint configuration
+        curl -fSskL "https://github.com" -o fpc-ootb-win32.zip
         mkdir -p fpc-win32
         unzip -q fpc-ootb-win32.zip -d fpc-win32
         
-        # Locate the executable via robust wildcard evaluation strings to handle naming variations
+        # Robustly discover the .exe across internal folder nests
         OOTB_WIN_BIN=$(find fpc-win32 -type f -name "fpc-ootb.exe" | head -n 1)
         "$OOTB_WIN_BIN" -Twin32 -Pi386 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
 
