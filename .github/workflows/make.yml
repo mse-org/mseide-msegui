@@ -1,7 +1,7 @@
 name: Make Ultimate Matrix
 
 on:
-  workflow_dispatch: # Allows you to trigger the workflow manually from the Actions tab
+  workflow_dispatch:
   schedule:
     - cron:  '0 0 1 * *'
   push:
@@ -72,8 +72,12 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt-get update
-        sudo apt-get -y install fp-compiler gcc-multilib libx11-6:i386 libxext6:i386
-        sudo apt-get -y install fp-units-base fp-units-rtl fp-units-fcl fp-units-gfx fp-units-gtk2 fp-units-x11 || true
+        # Installs the host compiler and cross-architecture targets natively
+        sudo apt-get -y install fpc fp-units-i386 gcc-multilib libx11-6:i386 libxext6:i386
+        
+        # Link the compiler path to discover the internal i386 cross-compiler utility
+        sudo ln -sf /usr/lib/fpc/$(fpc -iV)/ppcross386 /usr/bin/ppc386
+        
         fpc -Pi386 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
@@ -143,9 +147,10 @@ jobs:
       shell: bash
       run: |
         if [ "${{ matrix.target }}" = "windows-i386" ]; then
-          fpc -Pi386 -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+          # On a 64-bit host, cross-compiling for 32-bit uses the explicit 'ppcross386' binary executable name
+          ppcross386 -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
         else
-          fpc -Px86_64 -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+          fpc -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
         fi
 
     # ==========================================
@@ -165,6 +170,7 @@ jobs:
       with:
         usesh: true
         arch: aarch64
+        sync: nfs
         prepare: pkg update && pkg install -y fpc libX11 libXext
         run: fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
@@ -184,8 +190,15 @@ jobs:
       run: |
         export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
         
-        if [ "${{ matrix.target }}" = "darwin-macos-aarch64" ]; then
-          fpc -Paarch64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        if [ "${{ matrix.target }}" = "darwin-macos-x86_64" ]; then
+          # Build and link the missing ppcx64 Intel cross-compiler using the native host toolchain source packages
+          sudo apt-get update || true
+          wget -q "https://heanet.ie" -O fpc-src.tar.gz
+          tar -xzf fpc-src.tar.gz && cd fpc-3.2.2
+          sudo make crossall crossinstall CPU_TARGET=x86_64 OS_TARGET=darwin
+          sudo ln -sf /usr/local/lib/fpc/3.2.2/ppcrossx64 /opt/homebrew/bin/ppcx64
+          cd $GITHUB_WORKSPACE
+          ppcx64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
         else
-          fpc -Px86_64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          fpc -Paarch64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
         fi
