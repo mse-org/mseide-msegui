@@ -45,16 +45,6 @@ jobs:
           - os: ubuntu-latest
             target: freebsd-aarch64
 
-          # --- NETBSD TARGETS ---
-          - os: ubuntu-latest
-            target: netbsd-x86_64
-          - os: ubuntu-latest
-            target: netbsd-i386
-
-          # --- OPENBSD TARGETS ---
-          - os: ubuntu-latest
-            target: openbsd-x86_64
-
           # --- MACOS (DARWIN) TARGETS ---
           - os: macos-latest
             target: darwin-macos-x86_64
@@ -80,8 +70,7 @@ jobs:
       if: matrix.target == 'linux-i386'
       run: |
         sudo dpkg --add-architecture i386
-        sudo apt-get update && sudo apt-get -y install fpc-utils fp-compiler gcc-multilib libx11-6:i386 libxext6:i386
-        # Install the 32-bit compiler binary package explicitly provided by Ubuntu
+        sudo apt-get update && sudo apt-get -y install fp-compiler gcc-multilib libx11-6:i386 libxext6:i386
         sudo apt-get -y install fp-units-base fp-units-rtl fp-units-fcl fp-units-gfx fp-units-gtk2 fp-units-x11 || true
         fpc -Pi386 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
@@ -152,9 +141,9 @@ jobs:
       shell: bash
       run: |
         if [ "${{ matrix.target }}" = "windows-i386" ]; then
-          fpc -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+          fpc -Pi386 -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
         else
-          fpc -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+          fpc -Px86_64 -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
         fi
 
     # ==========================================
@@ -178,50 +167,24 @@ jobs:
         run: fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
-    # 5. NETBSD VIRTUAL BUILD STEPS
-    # ==========================================
-    - name: Build on NetBSD x86_64
-      if: matrix.target == 'netbsd-x86_64'
-      uses: vmactions/netbsd-vm@v1
-      with:
-        usesh: true
-        prepare: pkg_add fpc libX11 libXext || true
-        run: fpc -Tnetbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    - name: Build on NetBSD i386
-      if: matrix.target == 'netbsd-i386'
-      uses: vmactions/netbsd-vm@v1
-      with:
-        usesh: true
-        arch: i386
-        prepare: pkg_add fpc libX11 libXext || true
-        run: fpc -Tnetbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    # ==========================================
-    # 6. OPENBSD VIRTUAL BUILD STEPS
-    # ==========================================
-    - name: Build on OpenBSD Layouts
-      if: matrix.target == 'openbsd-x86_64'
-      uses: vmactions/openbsd-vm@v1
-      with:
-        usesh: true
-        prepare: pkg_add -I fpc libX11 libXext || true
-        run: fpc -Topenbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    # ==========================================
-    # 7. MACOS (DARWIN) HOST BUILD STEPS
+    # 5. MACOS (DARWIN) HOST BUILD STEPS
     # ==========================================
     - name: Install FPC and X11 Dependencies on macOS Host
       if: matrix.os == 'macos-latest'
       run: |
         brew update
         brew install fpc xquartz fontconfig
+        echo "/opt/homebrew/bin" >> $GITHUB_PATH
+        echo "/usr/local/bin" >> $GITHUB_PATH
 
     - name: Build on Darwin macOS Targets
       if: matrix.os == 'macos-latest'
       run: |
+        export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+        
         if [ "${{ matrix.target }}" = "darwin-macos-aarch64" ]; then
-          fpc -Paarch64 -Tdarwin -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          # Added -Fl/opt/X11/lib framework search flag to pass XQuartz location directly to linker [1]
+          fpc -Paarch64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
         else
-          fpc -Px86_64 -Tdarwin -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          fpc -Px86_64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
         fi
