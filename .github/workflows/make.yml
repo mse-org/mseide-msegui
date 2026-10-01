@@ -81,7 +81,7 @@ jobs:
     # ==========================================
     - name: Cache ARM32 OS Container Environment
       if: matrix.target == 'linux-rpi-arm32'
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.run-on-arch-cache
         key: run-on-arch-cache-armv7-v1
@@ -99,7 +99,7 @@ jobs:
 
     - name: Cache AArch64 OS Container Environment
       if: matrix.target == 'linux-rpi-aarch64'
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ~/.run-on-arch-cache
         key: run-on-arch-cache-aarch64-v1
