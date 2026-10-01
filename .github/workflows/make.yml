@@ -88,7 +88,7 @@ jobs:
 
     - name: Build on Linux RPi ARM32
       if: matrix.target == 'linux-rpi-arm32'
-      uses: uraimo/run-on-arch-action@v2
+      uses: uraimo/run-on-arch-action@v3
       with:
         arch: armv7
         distro: ubuntu_latest
@@ -106,7 +106,7 @@ jobs:
 
     - name: Build on Linux RPi AArch64
       if: matrix.target == 'linux-rpi-aarch64'
-      uses: uraimo/run-on-arch-action@v2
+      uses: uraimo/run-on-arch-action@v3
       with:
         arch: aarch64
         distro: ubuntu_latest
