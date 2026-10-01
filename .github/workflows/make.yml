@@ -145,7 +145,14 @@ jobs:
       if: matrix.target == 'windows-i386'
       shell: bash
       run: |
-        fpc -Pi386 -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+        CROSS=$(find /c/ -maxdepth 7 -type f -name "ppcross386.exe" 2>/dev/null | head -n 1)
+        if [ -z "$CROSS" ]; then
+          echo "ppcross386.exe not found. Compilers available:"
+          find /c/ -maxdepth 7 -type f -name "ppc*.exe" 2>/dev/null
+          exit 1
+        fi
+        echo "Using cross compiler: $CROSS"
+        "$CROSS" -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
 
     # ==========================================
     # 4. FREEBSD VIRTUAL BUILD STEPS
