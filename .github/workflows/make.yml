@@ -123,6 +123,7 @@ jobs:
       uses: gcarreno/setup-lazarus@v3
       with:
         lazarus-version: stable
+        with-cache: true # Forces GitHub to cache the download so SourceForge outages won't break builds
 
     - name: Add FPC binary path to Bash environment on Windows
       if: matrix.os == 'windows-latest'
