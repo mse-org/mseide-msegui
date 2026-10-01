@@ -72,15 +72,14 @@ jobs:
       run: |
         sudo dpkg --add-architecture i386
         sudo apt-get update
-        # Installs 32-bit execution layers and development headers to allow the OOTB compiler to link
         sudo apt-get -y install unzip libc6:i386 libx11-dev:i386 libxext-dev:i386
         
-        curl -sL "https://github.com/fredvs/freepascal-ootb/releases/download/3.2.2/fpc-ootb-324-i386-linux_glibc20.zip" -o fpc-ootb.zip
+        curl -sL "https://github.com" -o fpc-ootb.zip
         mkdir -p fpc-linux32
         unzip -q fpc-ootb.zip -d fpc-linux32
         
-        # Dynamically locate the binary inside the extracted zip structure
-        OOTB_BIN=$(find fpc-linux32 -type f -name "fpc-ootb" | head -n 1)
+        # Explicit path targeting to avoid empty string lookups
+        OOTB_BIN="fpc-linux32/fpc-ootb/fpc-ootb"
         chmod +x "$OOTB_BIN"
         
         "$OOTB_BIN" -Tlinux -Pi386 -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
@@ -154,9 +153,8 @@ jobs:
         mkdir -p fpc-win32
         unzip -q fpc-ootb-win32.zip -d fpc-win32
         
-        # Windows 64-bit runner runs the 32-bit OOTB compiler out-of-the-box natively
-        OOTB_WIN_BIN=$(find fpc-win32 -type f -name "fpc-ootb.exe" | head -n 1)
-        
+        # Explicit path targeting bypasses broken internal zip find iterations
+        OOTB_WIN_BIN="fpc-win32/fpc-ootb/fpc-ootb.exe"
         "$OOTB_WIN_BIN" -Twin32 -Pi386 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
 
     # ==========================================
@@ -182,8 +180,11 @@ jobs:
         run: |
           curl -sL "https://github.com" -o fpc-ootb-dist.tar.gz
           mkdir -p fpc-ootb
+          # --strip-components=1 ensures files unpack directly into fpc-ootb without nested folder layers
           tar -xzf fpc-ootb-dist.tar.gz -C fpc-ootb --strip-components=1
-          ./fpc-ootb/fpc-ootb -Topenbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          
+          # Injects exact framework path maps (-Fl) to tell OpenBSD where core system X11 libraries reside
+          ./fpc-ootb/fpc-ootb -Topenbsd -Fl/usr/X11R6/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 6. MACOS (DARWIN) HOST BUILD STEPS
