@@ -1,4 +1,4 @@
-name: Make Ultimate Matrix OOTB
+name: Make Ultimate Matrix
 
 on:
   workflow_dispatch:
@@ -28,8 +28,6 @@ jobs:
           - os: ubuntu-latest
             target: linux-x86_64
           - os: ubuntu-latest
-            target: linux-i386
-          - os: ubuntu-latest
             target: linux-rpi-arm32
           - os: ubuntu-latest
             target: linux-rpi-aarch64
@@ -37,8 +35,6 @@ jobs:
           # --- WINDOWS TARGETS ---
           - os: windows-latest
             target: windows-x86_64
-          - os: windows-latest
-            target: windows-i386
 
           # --- FREEBSD TARGETS ---
           - os: ubuntu-latest
@@ -62,23 +58,6 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get -y install fpc
         fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    - name: Build on Linux i386 (Using Portable FPC-OOTB)
-      if: matrix.target == 'linux-i386'
-      run: |
-        sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get -y install unzip libc6:i386 libx11-dev:i386 libxext-dev:i386 wget
-        
-        # Uses wget to follow raw release streams and download the genuine zip data
-        wget --trust-server-names -q "https://github.com" -O fpc-ootb.zip
-        mkdir -p fpc-linux32
-        unzip -q fpc-ootb.zip -d fpc-linux32
-        
-        # Locate and run the unzipped binary directly
-        OOTB_BIN=$(find fpc-linux32 -type f -name "fpc-ootb" | head -n 1)
-        chmod +x "$OOTB_BIN"
-        "$OOTB_BIN" -Tlinux -Pi386 -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 2. RASPBERRY PI EMULATED BUILD STEPS
@@ -129,30 +108,17 @@ jobs:
         lazarus-version: stable
 
     - name: Add FPC binary path to Bash environment on Windows
-      if: matrix.target == 'windows-x86_64'
+      if: matrix.os == 'windows-latest'
       shell: bash
       run: |
         FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "x86_64-win64" 2>/dev/null | head -n 1)
         if [ -n "$FPC_DIR" ]; then echo "$FPC_DIR" >> $GITHUB_PATH; fi
 
-    - name: Build on Windows x86_64
-      if: matrix.target == 'windows-x86_64'
+    - name: Build on Windows Targets
+      if: matrix.os == 'windows-latest'
       shell: bash
       run: |
         fpc -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
-
-    - name: Build on Windows i386 (Using Portable FPC-OOTB)
-      if: matrix.target == 'windows-i386'
-      shell: bash
-      run: |
-        # Download using a clean fallback endpoint configuration
-        curl -fSskL "https://github.com" -o fpc-ootb-win32.zip
-        mkdir -p fpc-win32
-        unzip -q fpc-ootb-win32.zip -d fpc-win32
-        
-        # Robustly discover the .exe across internal folder nests
-        OOTB_WIN_BIN=$(find fpc-win32 -type f -name "fpc-ootb.exe" | head -n 1)
-        "$OOTB_WIN_BIN" -Twin32 -Pi386 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
 
     # ==========================================
     # 4. FREEBSD VIRTUAL BUILD STEPS
