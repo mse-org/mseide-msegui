@@ -28,8 +28,6 @@ jobs:
           - os: ubuntu-latest
             target: linux-x86_64
           - os: ubuntu-latest
-            target: linux-i386
-          - os: ubuntu-latest
             target: linux-rpi-arm32
           - os: ubuntu-latest
             target: linux-rpi-aarch64
@@ -37,18 +35,12 @@ jobs:
           # --- WINDOWS TARGETS ---
           - os: windows-latest
             target: windows-x86_64
-          - os: windows-latest
-            target: windows-i386
 
           # --- FREEBSD TARGETS ---
           - os: ubuntu-latest
             target: freebsd-x86_64
-          - os: ubuntu-latest
-            target: freebsd-aarch64
 
           # --- MACOS (DARWIN) TARGETS ---
-          - os: macos-latest
-            target: darwin-macos-x86_64
           - os: macos-latest
             target: darwin-macos-aarch64
 
@@ -66,15 +58,6 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get -y install fpc
         fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    - name: Build on Linux i386
-      if: matrix.target == 'linux-i386'
-      run: |
-        sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get -y install fpc fp-units-i386 gcc-multilib libx11-6:i386 libxext6:i386
-        # Invokes the explicit 64-to-32 bit host cross-compiler binary layout name
-        ppcross386 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 2. RASPBERRY PI EMULATED BUILD STEPS
@@ -124,35 +107,18 @@ jobs:
       with:
         lazarus-version: stable
 
-    - name: Install Lazarus/FPC on Windows (32-bit)
-      if: matrix.target == 'windows-i386'
-      uses: gcarreno/setup-lazarus@v3
-      with:
-        lazarus-version: stable
-        include-cross-builder: true
-
     - name: Add FPC binary path to Bash environment on Windows
       if: matrix.os == 'windows-latest'
       shell: bash
       run: |
-        # Map the primary executable path
         FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "x86_64-win64" 2>/dev/null | head -n 1)
         if [ -n "$FPC_DIR" ]; then echo "$FPC_DIR" >> $GITHUB_PATH; fi
-        
-        # Explicitly map the secondary cross-compiler path required for 32-bit compilation targets
-        FPC_CROSS_DIR=$(find /c/ -maxdepth 4 -type d -name "i386-win32" 2>/dev/null | head -n 1)
-        if [ -n "$FPC_CROSS_DIR" ]; then echo "$FPC_CROSS_DIR" >> $GITHUB_PATH; fi
 
     - name: Build on Windows Targets
       if: matrix.os == 'windows-latest'
       shell: bash
       run: |
-        if [ "${{ matrix.target }}" = "windows-i386" ]; then
-          # Runs using host cross-compiler mapping context cleanly
-          fpc -Pi386 -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
-        else
-          fpc -Px86_64 -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
-        fi
+        fpc -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
 
     # ==========================================
     # 4. FREEBSD VIRTUAL BUILD STEPS
@@ -162,16 +128,6 @@ jobs:
       uses: vmactions/freebsd-vm@v1
       with:
         usesh: true
-        prepare: pkg update && pkg install -y fpc libX11 libXext
-        run: fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    - name: Build on FreeBSD aarch64
-      if: matrix.target == 'freebsd-aarch64'
-      uses: vmactions/freebsd-vm@v1
-      with:
-        usesh: true
-        arch: aarch64
-        sync: nfs
         prepare: pkg update && pkg install -y fpc libX11 libXext
         run: fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
@@ -190,15 +146,4 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-        
-        if [ "${{ matrix.target }}" = "darwin-macos-x86_64" ]; then
-          # Pull the pre-bundled cross-compiler add-ons directly from Heanet global distribution tree
-          curl -sL "https://heanet.ie" -o fpc-intel.dmg
-          sudo hdiutil attach fpc-intel.dmg
-          sudo installer -pkg /Volumes/fpc-3.2.2.intel-macosx/fpc-3.2.2.intel-macosx.pkg -target /
-          sudo hdiutil detach /Volumes/fpc-3.2.2.intel-macosx
-          
-          fpc -Px86_64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-        else
-          fpc -Paarch64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-        fi
+        fpc -Paarch64 -Tdarwin -Fl/opt/X11/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
