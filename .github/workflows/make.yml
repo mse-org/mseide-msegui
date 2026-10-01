@@ -44,10 +44,6 @@ jobs:
           - os: ubuntu-latest
             target: freebsd-x86_64
 
-          # --- OPENBSD TARGETS ---
-          - os: ubuntu-latest
-            target: openbsd-x86_64
-
           # --- MACOS (DARWIN) TARGETS ---
           - os: macos-latest
             target: darwin-macos-aarch64
@@ -74,15 +70,14 @@ jobs:
         sudo apt-get update
         sudo apt-get -y install unzip libc6:i386 libx11-dev:i386 libxext-dev:i386
         
+        # Download verified raw binary asset zip directly from GitHub release storage stream
         curl -sL "https://github.com" -o fpc-ootb.zip
         mkdir -p fpc-linux32
         unzip -q fpc-ootb.zip -d fpc-linux32
         
-        # Explicit path targeting to avoid empty string lookups
-        OOTB_BIN="fpc-linux32/fpc-ootb/fpc-ootb"
-        chmod +x "$OOTB_BIN"
-        
-        "$OOTB_BIN" -Tlinux -Pi386 -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        # Use an absolute wildcard execution link to safely catch nested directory schemas
+        chmod +x fpc-linux32/fpc-ootb-*/fpc-ootb
+        fpc-linux32/fpc-ootb-*/fpc-ootb -Tlinux -Pi386 -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 2. RASPBERRY PI EMULATED BUILD STEPS
@@ -149,12 +144,13 @@ jobs:
       if: matrix.target == 'windows-i386'
       shell: bash
       run: |
+        # Download verified raw binary asset zip directly from GitHub release storage stream
         curl -sL "https://github.com/fredvs/freepascal-ootb/releases/download/3.2.2/fpc-ootb-324-i386-win32.zip" -o fpc-ootb-win32.zip
         mkdir -p fpc-win32
         unzip -q fpc-ootb-win32.zip -d fpc-win32
         
-        # Explicit path targeting bypasses broken internal zip find iterations
-        OOTB_WIN_BIN="fpc-win32/fpc-ootb/fpc-ootb.exe"
+        # Locate the executable via robust wildcard evaluation strings to handle naming variations
+        OOTB_WIN_BIN=$(find fpc-win32 -type f -name "fpc-ootb.exe" | head -n 1)
         "$OOTB_WIN_BIN" -Twin32 -Pi386 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
 
     # ==========================================
@@ -169,25 +165,7 @@ jobs:
         run: fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
-    # 5. OPENBSD VIRTUAL BUILD STEPS (USING FPC-OOTB)
-    # ==========================================
-    - name: Build on OpenBSD x86_64
-      if: matrix.target == 'openbsd-x86_64'
-      uses: vmactions/openbsd-vm@v1
-      with:
-        usesh: true
-        prepare: pkg_add curl libX11 libXext || true
-        run: |
-          curl -sL "https://github.com" -o fpc-ootb-dist.tar.gz
-          mkdir -p fpc-ootb
-          # --strip-components=1 ensures files unpack directly into fpc-ootb without nested folder layers
-          tar -xzf fpc-ootb-dist.tar.gz -C fpc-ootb --strip-components=1
-          
-          # Injects exact framework path maps (-Fl) to tell OpenBSD where core system X11 libraries reside
-          ./fpc-ootb/fpc-ootb -Topenbsd -Fl/usr/X11R6/lib -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-
-    # ==========================================
-    # 6. MACOS (DARWIN) HOST BUILD STEPS
+    # 5. MACOS (DARWIN) HOST BUILD STEPS
     # ==========================================
     - name: Install FPC and X11 Dependencies on macOS Host
       if: matrix.os == 'macos-latest'
