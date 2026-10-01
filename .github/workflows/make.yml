@@ -28,6 +28,8 @@ jobs:
           - os: ubuntu-latest
             target: linux-x86_64
           - os: ubuntu-latest
+            target: linux-i386
+          - os: ubuntu-latest
             target: linux-rpi-arm32
           - os: ubuntu-latest
             target: linux-rpi-aarch64
@@ -35,6 +37,8 @@ jobs:
           # --- WINDOWS TARGETS ---
           - os: windows-latest
             target: windows-x86_64
+          - os: windows-latest
+            target: windows-i386
 
           # --- FREEBSD TARGETS ---
           - os: ubuntu-latest
@@ -58,6 +62,21 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get -y install fpc
         fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    # 32-bit x86 userland runs natively in a Docker container on the
+    # 64-bit runner, so no emulation or cross compiler is needed.
+    - name: Build on Linux i386
+      if: matrix.target == 'linux-i386'
+      run: |
+        docker run --rm \
+          -e DEBIAN_FRONTEND=noninteractive \
+          -v "$PWD":/work -w /work \
+          i386/debian:bookworm \
+          bash -c '
+            apt-get update &&
+            apt-get install -y fpc &&
+            fpc -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+          '
 
     # ==========================================
     # 2. RASPBERRY PI EMULATED BUILD STEPS
@@ -101,8 +120,8 @@ jobs:
     # ==========================================
     # 3. WINDOWS HOST BUILD STEPS
     # ==========================================
-    - name: Install Lazarus/FPC on Windows (64-bit)
-      if: matrix.target == 'windows-x86_64'
+    - name: Install Lazarus/FPC on Windows
+      if: startsWith(matrix.target, 'windows-')
       uses: gcarreno/setup-lazarus@v3
       with:
         lazarus-version: stable
@@ -114,11 +133,19 @@ jobs:
         FPC_DIR=$(find /c/ -maxdepth 4 -type d -name "x86_64-win64" 2>/dev/null | head -n 1)
         if [ -n "$FPC_DIR" ]; then echo "$FPC_DIR" >> $GITHUB_PATH; fi
 
-    - name: Build on Windows Targets
-      if: matrix.os == 'windows-latest'
+    - name: Build on Windows x86_64
+      if: matrix.target == 'windows-x86_64'
       shell: bash
       run: |
         fpc -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+
+    # Cross-compile to 32-bit. The Lazarus 64-bit Windows installer ships
+    # ppcross386.exe and the i386-win32 RTL units.
+    - name: Build on Windows i386
+      if: matrix.target == 'windows-i386'
+      shell: bash
+      run: |
+        fpc -Pi386 -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
 
     # ==========================================
     # 4. FREEBSD VIRTUAL BUILD STEPS
