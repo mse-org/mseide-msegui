@@ -80,7 +80,9 @@ jobs:
       if: matrix.target == 'linux-i386'
       run: |
         sudo dpkg --add-architecture i386
-        sudo apt-get update && sudo apt-get -y install fpc gcc-multilib libx11-6:i386 libxext6:i386
+        sudo apt-get update && sudo apt-get -y install fpc-utils fp-compiler gcc-multilib libx11-6:i386 libxext6:i386
+        # Install the 32-bit compiler binary package explicitly provided by Ubuntu
+        sudo apt-get -y install fp-units-base fp-units-rtl fp-units-fcl fp-units-gfx fp-units-gtk2 fp-units-x11 || true
         fpc -Pi386 -Tlinux -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
@@ -125,11 +127,18 @@ jobs:
     # ==========================================
     # 3. WINDOWS HOST BUILD STEPS
     # ==========================================
-    - name: Install Lazarus/FPC on Windows
-      if: matrix.os == 'windows-latest'
+    - name: Install Lazarus/FPC on Windows (64-bit)
+      if: matrix.target == 'windows-x86_64'
       uses: gcarreno/setup-lazarus@v3
       with:
         lazarus-version: stable
+
+    - name: Install Lazarus/FPC on Windows (32-bit)
+      if: matrix.target == 'windows-i386'
+      uses: gcarreno/setup-lazarus@v3
+      with:
+        lazarus-version: stable
+        include-cross-builder: true
 
     - name: Add FPC binary path to Bash environment on Windows
       if: matrix.os == 'windows-latest'
@@ -143,58 +152,61 @@ jobs:
       shell: bash
       run: |
         if [ "${{ matrix.target }}" = "windows-i386" ]; then
-          fpc -Pi386 -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+          fpc -Twin32 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
         else
-          fpc -Px86_64 -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
+          fpc -Twin64 -Fulib/common/* -Fulib/common/kernel/windows apps/ide/mseide.pas
         fi
 
     # ==========================================
     # 4. FREEBSD VIRTUAL BUILD STEPS
     # ==========================================
-    - name: Build on FreeBSD Layouts
-      if: startsWith(matrix.target, 'freebsd-')
+    - name: Build on FreeBSD x86_64
+      if: matrix.target == 'freebsd-x86_64'
       uses: vmactions/freebsd-vm@v1
       with:
         usesh: true
-        prepare: |
-          pkg update
-          pkg install -y fpc libX11 libXext
-        run: |
-          if [ "${{ matrix.target }}" = "freebsd-aarch64" ]; then
-            fpc -Paarch64 -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-          else
-            fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-          fi
+        prepare: pkg update && pkg install -y fpc libX11 libXext
+        run: fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    - name: Build on FreeBSD aarch64
+      if: matrix.target == 'freebsd-aarch64'
+      uses: vmactions/freebsd-vm@v1
+      with:
+        usesh: true
+        arch: aarch64
+        prepare: pkg update && pkg install -y fpc libX11 libXext
+        run: fpc -Tfreebsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 5. NETBSD VIRTUAL BUILD STEPS
     # ==========================================
-    - name: Build on NetBSD Layouts
-      if: startsWith(matrix.target, 'netbsd-')
+    - name: Build on NetBSD x86_64
+      if: matrix.target == 'netbsd-x86_64'
       uses: vmactions/netbsd-vm@v1
       with:
         usesh: true
-        prepare: |
-          pkg_add fpc libX11 libXext
-        run: |
-          if [ "${{ matrix.target }}" = "netbsd-i386" ]; then
-            fpc -Pi386 -Tnetbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-          else
-            fpc -Tnetbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
-          fi
+        prepare: pkg_add fpc libX11 libXext || true
+        run: fpc -Tnetbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+
+    - name: Build on NetBSD i386
+      if: matrix.target == 'netbsd-i386'
+      uses: vmactions/netbsd-vm@v1
+      with:
+        usesh: true
+        arch: i386
+        prepare: pkg_add fpc libX11 libXext || true
+        run: fpc -Tnetbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 6. OPENBSD VIRTUAL BUILD STEPS
     # ==========================================
     - name: Build on OpenBSD Layouts
-      if: startsWith(matrix.target, 'openbsd-')
+      if: matrix.target == 'openbsd-x86_64'
       uses: vmactions/openbsd-vm@v1
       with:
         usesh: true
-        prepare: |
-          pkg_add -I fpc libX11 libXext
-        run: |
-          fpc -Topenbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
+        prepare: pkg_add -I fpc libX11 libXext || true
+        run: fpc -Topenbsd -Fulib/common/* -Fulib/common/kernel/linux apps/ide/mseide.pas
 
     # ==========================================
     # 7. MACOS (DARWIN) HOST BUILD STEPS
