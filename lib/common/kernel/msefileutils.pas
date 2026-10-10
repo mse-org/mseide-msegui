@@ -1184,11 +1184,11 @@ var
  info: fileinfoty;
 begin
 {$ifdef bsd}
-if (fileexists(filename)) or (directoryexists(filename)) then 
+if (fileexists(filename)) or (directoryexists(filename)) then
  result := true else result := false;
 {$else}
  result:= sys_getfileinfo(filename,info);
-{$endif}  
+{$endif}
 end;
 
 function findfile(const filename: filenamety): boolean; overload;
@@ -1199,7 +1199,7 @@ begin
  result:= fileexists(filename);
 {$else}
  result:= sys_getfileinfo(filename,info) and (info.extinfo1.filetype <> ft_dir);
-{$endif} 
+{$endif}
 end;
 
 function finddir(const filename: filenamety): boolean;
@@ -1422,11 +1422,11 @@ begin
   path:= quotefilename(ar1);
  end
  else begin
+ syserror(sys_tosysfilepath(path));
   if quoted then begin
    path:= quotefilename(path);
   end;
-  syserror(sys_tosysfilepath(path));
- end;
+  end;
 end;
 
 function tomsefilepath(const path: filenamety;
