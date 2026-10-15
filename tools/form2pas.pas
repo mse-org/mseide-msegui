@@ -64,13 +64,13 @@ begin
     {$endif}
     splitstring(ar1[int1],ar2,widechar(','));
     if (length(ar2) < 1) or (length(ar2)>2) then begin
-     errorhalt('Invalid parameter: '+ar1[int1]);
+     errorhalt(ansistring('Invalid parameter: '+ar1[int1]));
     end;
     if length(ar2) > 1 then begin
-     unitname:= ar2[1];
+     unitname:= ansistring(ar2[1]);
     end
     else begin
-     unitname:= removefileext(filename(ar2[0]));
+     unitname:= ansistring(removefileext(filename(ar2[0])));
     end;
     stream:= ttextstream.Create(ar2[0],fm_read);
     try
@@ -78,8 +78,9 @@ begin
     finally
      stream.free;
     end;
-    writestdout(
-    'Converting file "'+ar2[0]+'" class "'+formclass+'" unit "'+unitname+'"''.',true);
+    writestdout(ansistring(
+    'Converting file "'+ar2[0]+'" class "'+msestring(formclass)+
+                         '" unit "'+msestring(unitname)+'".'),true);
     formtexttoobjsource(ar2[0],formclass,unitname);
    end;
   end;
