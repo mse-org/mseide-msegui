@@ -24,7 +24,6 @@ uses
 
 const
  defaultmidimaxdatasize = 1000000;
-// defaulttimescaleus = 1000000*60/(120*120);
  defaulttempo = 120; //beats per minute
  defaultticksperbeat = 120;
 
@@ -34,6 +33,10 @@ const
  mc_tempo = 81;
  mc_trackname = 3;
  mc_instrumentname = 4;
+
+ midistatus_sysex = $f0;
+ midistatus_sysexcont = $f7;
+ midistatus_meta = $ff;
 
 type
  midierrorty = (em_ok,em_nostream,em_fileformat,em_notrack,em_trackdata);
@@ -84,7 +87,8 @@ type
 
  tmidistream = class(tbufstream)
   private
-   ftrackcount: integer;
+   fnumberoftracks: integer;
+   ftrackcount: integer; //remaining bytes of the current track
    ftimedivision: longword;
    ftracksize: longword;
    fmetadata: string;
@@ -95,19 +99,20 @@ type
    function readtrackbyte(out adata: byte): boolean;
    function readtrackdatabyte(out adata: byte): boolean; //check bit 7
    function readtrackword(out adata: word): boolean;
-   function readtracklongword(out adata: word): boolean;
+   function readtracklongword(out adata: longword): boolean;
    function readtrackdata(out adata; const acount: integer): boolean; overload;
    function readtrackvarlength(out adata: longword): boolean;
 
    function readbyte(out adata: byte): boolean;
    function readword(out adata: word): boolean;
-   function readlongword(out adata: word): boolean;
+   function readlongword(out adata: longword): boolean;
    function readchunkheader(out adata: midichunkheaderty): boolean;
 
    function checkchunkheader(const aid: idstringty;
                                          const asize: integer): boolean;
    function readfileheader(out adata: midifileheaderty): boolean;
    function skip(const adist: longword): boolean;
+   function skiptrackrest: boolean;
   public
    constructor create(ahandle: integer); override;
    function initfile: boolean;
@@ -115,6 +120,7 @@ type
    function skiptrack: boolean;
    function readtrackdata(out adata: trackeventinfoty): boolean; overload;
    function getmetadata(const alen: integer; out avalue: longword): boolean;
+   property numberoftracks: integer read fnumberoftracks;
    property timedivision: longword read ftimedivision;
    property metadata: string read fmetadata;
    property maxdatasize: longword read fmaxdatasize write fmaxdatasize
@@ -135,12 +141,19 @@ type
   disabled: boolean;
   trackname: string;
   instrumentname: string;
-  keysig: byte;
+  keysig: word; //sharps (>0) or flats (<0) shl 8 or minor
+  haskeysig: boolean;
   tempo: longword; //micro seconds per quarter note
   timesig: longword;
   channels: midichannelsty;
  end;
  trackinfoarty = array of trackinfoty;
+
+ tempochangety = record
+  tick: longword;
+  tempo: longword; //micro seconds per quarter note
+ end;
+ tempochangearty = array of tempochangety;
 
  trackbufferarty = array of trackeventinfoty;
  trackbufferararty = array of trackbufferarty;
@@ -150,6 +163,7 @@ type
    fstream: tmidistream;
    factive: boolean;
    fontrackevent: trackeventty;
+   fonfinished: notifyeventty;
    fstarttime: longword;
    feventtime: longword;
    ftimer: tsimpletimer;
@@ -160,6 +174,13 @@ type
    ftimescale: real; //miditicks to us
    ftempo: real;
    ftimesum: real;
+   ftempochanges: tempochangearty;
+   ftempoindex: integer;
+   fticks: longword;
+   fstarttempo: real;
+   fpending: boolean;
+   fpendingtime: longword;
+   procedure addtempochange(const atick: longword; const atempo: longword);
    procedure setstream(const avalue: tmidistream);
    procedure setactive(const avalue: boolean);
    procedure settempo(const avalue: real);
@@ -178,11 +199,13 @@ type
                        const aerror: midierrorty): boolean; {$ifdef FPC}inline;{$endif}
    procedure processevent;
    procedure dotrackevent; virtual;
+   procedure dofinished; virtual;
    procedure dotimer(const sender: tobject);
   public
    constructor create(aowner: tcomponent); override;
    destructor destroy; override;
    procedure loadtracks;
+   procedure rewind;
    property active: boolean read factive write setactive;
    property stream: tmidistream read fstream write setstream;
                                 //owns the stream
@@ -190,6 +213,7 @@ type
    property tempo: real read ftempo write settempo; //beats per minute
   published
    property ontrackevent: trackeventty read fontrackevent write fontrackevent;
+   property onfinished: notifyeventty read fonfinished write fonfinished;
  end;
 
 const
@@ -235,24 +259,26 @@ const
 function swap(const avalue: word): word; {$ifdef FPC}inline;{$endif}
                                                 overload;
 begin
- result:= (avalue shl 8) or (avalue shr 8);
+ result:= ((avalue and $ff) shl 8) or (avalue shr 8);
 end;
 
 procedure swap1(var avalue: word); {$ifdef FPC}inline;{$endif}
                                                  overload;
 begin
- avalue:= (avalue shl 8) or (avalue shr 8);
+ avalue:= ((avalue and $ff) shl 8) or (avalue shr 8);
 end;
 
 function swap(const avalue: longword): longword; {$ifdef FPC}inline;{$endif}
                                                             overload;
 begin
- result:= (swap(word(avalue)) shl 16) or swap(word(avalue shr 16));
+ result:= (longword(swap(word(avalue and $ffff))) shl 16) or
+                                           swap(word(avalue shr 16));
 end;
 
 procedure swap1(var avalue: longword); {$ifdef FPC}inline;{$endif} overload;
 begin
- avalue:= (swap(word(avalue)) shl 16) or swap(word(avalue shr 16));
+ avalue:= (longword(swap(word(avalue and $ffff))) shl 16) or
+                                           swap(word(avalue shr 16));
 end;
 
 { tmidistream }
@@ -260,7 +286,6 @@ end;
 constructor tmidistream.create(ahandle: integer);
 begin
  fmaxdatasize:= defaultmidimaxdatasize;
-// ftimescaleus:= defaulttimescaleus;
  inherited;
 end;
 
@@ -275,7 +300,7 @@ begin
  swap1(adata);
 end;
 
-function tmidistream.readlongword(out adata: word): boolean;
+function tmidistream.readlongword(out adata: longword): boolean;
 begin
  result:= read(adata,sizeof(adata)) = sizeof(adata);
  swap1(adata);
@@ -317,7 +342,7 @@ begin
  end;
 end;
 
-function tmidistream.readtracklongword(out adata: word): boolean;
+function tmidistream.readtracklongword(out adata: longword): boolean;
 var
  int1: integer;
 begin
@@ -360,8 +385,11 @@ begin
 end;
 
 function tmidistream.readfileheader(out adata: midifileheaderty): boolean;
+var
+ header1: midichunkheaderty;
 begin
- result:= checkchunkheader('MThd',6);
+ result:= readchunkheader(header1) and (header1.id = 'MThd') and
+                              (header1.size >= sizeof(adata));
  if result then begin
   result:= read(adata,sizeof(adata)) = sizeof(adata);
   if result then begin
@@ -369,6 +397,9 @@ begin
     swap1(formattype);
     swap1(numberoftracks);
     swap1(timedivision);
+   end;
+   if header1.size > sizeof(adata) then begin
+    result:= skip(header1.size - sizeof(adata));
    end;
   end;
  end;
@@ -379,10 +410,12 @@ var
  header: midifileheaderty;
 begin
  ftracknum:= -1;
+ fnumberoftracks:= 0;
+ ftrackcount:= 0;
  result:= readfileheader(header);
  if result then begin
   with header do begin
-   ftrackcount:= numberoftracks;
+   fnumberoftracks:= numberoftracks;
    ftimedivision:= timedivision;
   end;
   result:= ftimedivision > 0;
@@ -393,6 +426,8 @@ function tmidistream.starttrack: boolean;
 var
  header: midichunkheaderty;
 begin
+ result:= skiptrackrest;
+ if not result then exit;
  repeat
   result:= readchunkheader(header);
   if result then begin
@@ -400,6 +435,7 @@ begin
     ftracksize:= header.size;
     if id = 'MTrk' then begin
      ftrackcount:= ftracksize;
+     fstatus:= 0;
      inc(ftracknum);
      break;
     end;
@@ -413,6 +449,8 @@ function tmidistream.skiptrack: boolean;
 var
  header: midichunkheaderty;
 begin
+ result:= skiptrackrest;
+ if not result then exit;
  repeat
   result:= readchunkheader(header);
   if result then begin
@@ -438,71 +476,37 @@ begin
  result:= seek(adist,socurrent)-lint1 = adist;
 end;
 
+function tmidistream.skiptrackrest: boolean;
+begin
+ result:= true;
+ if ftrackcount > 0 then begin
+  result:= skip(ftrackcount);
+  ftrackcount:= 0;
+ end;
+end;
+
 function tmidistream.readtrackvarlength(out adata: longword): boolean;
 var
  by1: byte;
+ int1: integer;
 begin
- result:= true;
+ result:= false;
  adata:= 0;
- while result and (ftrackcount > 0) do begin
-  dec(ftrackcount);
-  result:= read(by1,1) = 1;
-  adata:= (adata shl 7) or by1 and $7f;
+ for int1:= 0 to 3 do begin
+  if not readtrackbyte(by1) then begin
+   break;
+  end;
+  adata:= (adata shl 7) or (by1 and $7f);
   if by1 and $80 = 0 then begin
+   result:= true;
    break;
   end;
  end;
 end;
-{
-function tmidistream.readtrackevent(out adata: trackeventinfoty): boolean;
-var
- stat1: byte;
- lwo1: longword;
- rea1: real;
-begin
- fillchar(adata,sizeof(adata),0);
- result:= readtrackvarlength(adata.delta);
- if not result then exit;
-
- if adata.delta <> 0 then begin
-  ftimesum:= ftimesum + adata.delta*ftimescaleus;
-  adata.delta:= round(ftimesum);
-  ftimesum:= ftimesum - adata.delta;
- end;
-
- result:= readtrackbyte(stat1);
- if not result then exit;
- if (stat1 and $80) <> 0 then begin
-  fstatus:= stat1;
-  result:= readtrackdatabyte(adata.event.par1);
-  if not result then exit;
- end
- else begin
-  adata.event.par1:= stat1;
-  stat1:= fstatus;
- end;
- adata.event.kind:= messagetable[(stat1 shr 4) and $7];
- if adata.event.kind = mmk_system then begin
-  result:= readtrackvarlength(lwo1) and (lwo1 <= fmaxdatasize);
-  if not result then exit;
-  setlength(fmetadata,lwo1);
-  if lwo1 > 0 then begin
-   result:= readtrackdata(pointer(fmetadata)^,lwo1);
-  end;
- end
- else begin
-  adata.event.channel:= stat1 and $0f;
-  if parcount[adata.event.kind] > 1 then begin
-   result:= readtrackdatabyte(adata.event.par2);
-  end;
- end;
-end;
-}
 function tmidistream.readtrackdata(out adata: trackeventinfoty): boolean;
 var
  stat1: byte;
  lwo1: longword;
-// rea1: real;
 begin
  fillchar(adata,sizeof(adata),0);
  adata.event.track:= ftracknum;
@@ -511,17 +515,20 @@ begin
  if not result then exit;
  result:= readtrackbyte(stat1);
  if not result then exit;
- if (stat1 and $80) <> 0 then begin
-  fstatus:= stat1;
-  result:= readtrackdatabyte(adata.event.par1);
+ if stat1 >= $f0 then begin
+  adata.event.kind:= mmk_system;
+  adata.event.channel:= stat1 and $0f;
+  case stat1 of
+   midistatus_meta: begin
+    result:= readtrackdatabyte(adata.event.par1);
+   end;
+   midistatus_sysex,midistatus_sysexcont: begin
+   end;
+   else begin
+    result:= false;
+   end;
+  end;
   if not result then exit;
- end
- else begin
-  adata.event.par1:= stat1;
-  stat1:= fstatus;
- end;
- adata.event.kind:= midimessagetable[(stat1 shr 4) and $7];
- if adata.event.kind = mmk_system then begin
   result:= readtrackvarlength(lwo1) and (lwo1 <= fmaxdatasize);
   if not result then exit;
   setlength(fmetadata,lwo1);
@@ -530,6 +537,18 @@ begin
   end;
  end
  else begin
+  if (stat1 and $80) <> 0 then begin
+   fstatus:= stat1;
+   result:= readtrackdatabyte(adata.event.par1);
+   if not result then exit;
+  end
+  else begin
+   adata.event.par1:= stat1;
+   stat1:= fstatus;
+   result:= (stat1 and $80) <> 0;
+   if not result then exit;
+  end;
+  adata.event.kind:= midimessagetable[(stat1 shr 4) and $7];
   adata.event.channel:= stat1 and $0f;
   if midiparcount[adata.event.kind] > 1 then begin
    result:= readtrackdatabyte(adata.event.par2);
@@ -579,13 +598,32 @@ end;
 
 procedure tmidisource.clear;
 begin
- fstate:= fstate - loadstates;
+ fstate:= fstate - loadstates - [mss_endoftrack];
+ fpending:= false;
  ftracks:= nil;
  ftrackbuffer:= nil;
  feventbuffer:= nil;
- ftempo:= defaulttempo;
+ settempo(defaulttempo);
  feventindex:= 0;
  ftimesum:= 0;
+ ftempochanges:= nil;
+ ftempoindex:= 0;
+ fticks:= 0;
+end;
+
+procedure tmidisource.addtempochange(const atick: longword;
+                                             const atempo: longword);
+var
+ int1: integer;
+begin
+ int1:= length(ftempochanges);
+ setlength(ftempochanges,int1+1);
+ while (int1 > 0) and (ftempochanges[int1-1].tick > atick) do begin
+  ftempochanges[int1]:= ftempochanges[int1-1];
+  dec(int1);
+ end;
+ ftempochanges[int1].tick:= atick;
+ ftempochanges[int1].tempo:= atempo;
 end;
 
 procedure tmidisource.setstream(const avalue: tmidistream);
@@ -601,7 +639,13 @@ begin
  if factive <> avalue then begin
   factive:= avalue;
   if avalue then begin
-   start;
+   try
+    start;
+   except
+    factive:= false;
+    stop;
+    raise;
+   end;
   end
   else begin
    stop;
@@ -621,17 +665,32 @@ begin
  end;
 end;
 
+procedure tmidisource.dofinished;
+begin
+ factive:= false;
+ include(fstate,mss_endoftrack);
+ if assigned(fonfinished) then begin
+  fonfinished(self);
+ end;
+end;
+
 procedure tmidisource.dotimer(const sender: tobject);
 begin
- dotrackevent;
- processevent;
+ if factive and fpending then begin
+  fpending:= false;
+  dotrackevent;
+  if factive then begin
+   processevent;
+  end;
+ end;
 end;
 
 procedure tmidisource.processevent;
 var
- lwo1: longword;
+ lwo1,lwo2: longword;
 begin
- while feventindex <= high(feventbuffer) do begin
+ fpending:= false;
+ while factive and (feventindex <= high(feventbuffer)) do begin
   ftrackevent:= feventbuffer[feventindex];
   inc(feventindex);
   with ftrackevent do begin
@@ -639,14 +698,31 @@ begin
     dotrackevent;
    end
    else begin
-    ftimesum:= ftimesum +delta*ftimescale;
+    lwo2:= delta;
+    while (ftempoindex <= high(ftempochanges)) and
+             (ftempochanges[ftempoindex].tick <= fticks + lwo2) do begin
+     if ftempochanges[ftempoindex].tick > fticks then begin
+      lwo1:= ftempochanges[ftempoindex].tick - fticks;
+      ftimesum:= ftimesum + lwo1*ftimescale;
+      fticks:= fticks + lwo1;
+      lwo2:= lwo2 - lwo1;
+     end;
+     settempo(60000000/ftempochanges[ftempoindex].tempo);
+     inc(ftempoindex);
+    end;
+    ftimesum:= ftimesum + lwo2*ftimescale;
+    fticks:= fticks + lwo2;
     lwo1:= round(ftimesum);
     ftimesum:= ftimesum - lwo1;
     feventtime:= feventtime + lwo1;
     ftimer.interval:= feventtime;
+    fpending:= true;
     break;
    end;
   end;
+ end;
+ if factive and not fpending then begin
+  dofinished;
  end;
 end;
 
@@ -666,33 +742,48 @@ procedure tmidisource.loadtracks;
 var
  int1,int2,int3: integer;
  trackdata: trackeventinfoty;
+ lwo1,lwo2,lwo3: longword;
 begin
  initstream;
  if not (mss_tracksloaded in fstate) then begin
-  setlength(ftracks,fstream.ftrackcount);
+  setlength(ftracks,fstream.fnumberoftracks);
   setlength(ftrackbuffer,length(ftracks));
   for int1:= 0 to high(ftracks) do begin
    checkresult(fstream.starttrack,em_notrack);
    with ftracks[int1] do begin
     int2:= 0;
+    lwo1:= 0;
+    lwo2:= 0;
     while true do begin
      checkresult(fstream.readtrackdata(trackdata),em_trackdata);
+     lwo2:= lwo2 + trackdata.delta;
      with trackdata.event do begin
       case kind of
        mmk_noteoff,mmk_noteon,mmk_notepressure,
        mmk_controller,mmk_programchange,mmk_channelpressure,
        mmk_pitchbend: begin
+        trackdata.delta:= trackdata.delta + lwo1;
+        lwo1:= 0;
         int3:= additemindex(ftrackbuffer[int1],typeinfo(trackbufferarty),int2);
         ftrackbuffer[int1][int3]:= trackdata;
         include(channels,midichannelty(trackdata.event.channel and $0f));
        end;
        mmk_system: begin
+        lwo1:= lwo1 + trackdata.delta;
         case par1 of
          mc_keysig: begin
-          keysig:= par2;
+          checkresult(fstream.getmetadata(2,lwo3),em_trackdata);
+          keysig:= lwo3;
+          haskeysig:= true;
          end;
          mc_tempo: begin
-          checkresult(fstream.getmetadata(3,tempo),em_trackdata);
+          checkresult(fstream.getmetadata(3,lwo3),em_trackdata);
+          if lwo3 > 0 then begin
+           if tempo = 0 then begin
+            tempo:= lwo3;
+           end;
+           addtempochange(lwo2,lwo3);
+          end;
          end;
          mc_timesig: begin
           checkresult(fstream.getmetadata(4,timesig),em_trackdata);
@@ -716,9 +807,13 @@ begin
     setlength(ftrackbuffer[int1],int2);
    end;
   end;
-  if (ftracks <> nil) and (ftracks[0].tempo > 0) then begin
-   tempo:= 60000000/ftracks[0].tempo;
+  ftempoindex:= 0;
+  while (ftempoindex <= high(ftempochanges)) and
+                        (ftempochanges[ftempoindex].tick = 0) do begin
+   tempo:= 60000000/ftempochanges[ftempoindex].tempo;
+   inc(ftempoindex);
   end;
+  fstarttempo:= ftempo;
   include(fstate,mss_tracksloaded);
  end;
 end;
@@ -756,13 +851,6 @@ begin
   end;
   setlength(ar1,int3);
   setlength(feventbuffer,int2);
-  {
-  for int3:= 0 to high(ar1) do begin
-   with ar1[int3] do begin
-    time:= time + po^.delta; //init
-   end;
-  end;
-  }
   lwo1:= 0;
   for int1:= 0 to int2 - 1 do begin
    with ar1[0] do begin
@@ -793,27 +881,68 @@ begin
  end;
 end;
 
-{
-    fstarttime:= timestamp;
-    feventtime:= fstarttime;
-    processevent;
-}
 procedure tmidisource.checkdata;
 begin
  mergeevents;
 end;
 
+procedure tmidisource.rewind;
+begin
+ ftimer.enabled:= false;
+ fpending:= false;
+ exclude(fstate,mss_endoftrack);
+ feventindex:= 0;
+ ftimesum:= 0;
+ fticks:= 0;
+ ftempoindex:= 0;
+ while (ftempoindex <= high(ftempochanges)) and
+                       (ftempochanges[ftempoindex].tick = 0) do begin
+  inc(ftempoindex);
+ end;
+ if mss_tracksloaded in fstate then begin
+  settempo(fstarttempo);
+ end;
+ if factive then begin
+  fstarttime:= timestamp;
+  feventtime:= fstarttime;
+  processevent;
+ end;
+end;
+
 procedure tmidisource.start;
 begin
  checkdata;
+ if mss_endoftrack in fstate then begin
+  factive:= false;
+  rewind;
+  factive:= true;
+ end;
  fstarttime:= timestamp;
- feventtime:= fstarttime;
- processevent;
+ if fpending then begin
+  feventtime:= fstarttime + fpendingtime;
+  ftimer.interval:= feventtime;
+ end
+ else begin
+  if feventindex = 0 then begin
+   fstarttempo:= ftempo;
+  end;
+  feventtime:= fstarttime;
+  processevent;
+ end;
 end;
 
 procedure tmidisource.stop;
+var
+ int1: integer;
 begin
  ftimer.enabled:= false;
+ if fpending then begin
+  int1:= integer(feventtime - timestamp);
+  if int1 < 0 then begin
+   int1:= 0;
+  end;
+  fpendingtime:= int1;
+ end;
 end;
 
 procedure tmidisource.settempo(const avalue: real);
@@ -827,7 +956,7 @@ end;
 function tmidisource.ticksperbeat: integer;
 begin
  result:= defaultticksperbeat;
- if fstream <> nil then begin
+ if (fstream <> nil) and (fstream.timedivision > 0) then begin
   result:= fstream.timedivision;
  end;
 end;
