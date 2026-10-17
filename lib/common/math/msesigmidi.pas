@@ -454,6 +454,7 @@ begin
      frelease.value:= par2*paramscale;
      tdoubleoutputconn1(freleaseoutlin).fvalue:= frelease.value;
      tdoubleoutputconn1(freleaseout).fvalue:= scalevalue(frelease);
+     tdoubleoutputconn1(ftrigout).fvalue:= ftrigvalue; //release the envelope
     end;
      else; // For case statment added to make compiler happy.
    end;
@@ -1189,7 +1190,8 @@ begin
  puint1:= (aevent.track shl 5) or aevent.channel;
  internalfind(puint1,{$ifdef FPC}@{$endif}checkeventindex);
  if findexresult = -1 then begin
-  puint1:= puint1 or ($ffffffff shl 5); //-1
+ {puint1:= puint1 or ($ffffffff shl 5);} //-1
+  puint1:= puint1 or (ptruint(-1) shl 5); //all bits set, also on 64-bit
   internalfind(puint1,{$ifdef FPC}@{$endif}checkeventindex);
  end;
  result:= findexresult;
