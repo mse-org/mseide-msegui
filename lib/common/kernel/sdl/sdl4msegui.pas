@@ -651,6 +651,7 @@ type
  function SDL_CreateRenderer(window: cardinal; index: integer; flags: Cardinal): SDL_Renderer; cdecl; external SDLLibName;
  function SDL_CreateTexture(renderer: SDL_Renderer; format: Cardinal; access: SDL_TextureAccess; w,h: integer): SDL_Texture; cdecl; external SDLLibName;
  function SDL_GetRenderer(window: cardinal): SDL_Renderer; cdecl; external SDLLibName;
+ function SDL_RenderSetClipRect(renderer: SDL_Renderer; rect: PSDL_Rect): LongInt; cdecl; external SDLLibName;
  function SDL_CreateSoftwareRenderer(surface: PSDL_Surface): SDL_Renderer; cdecl; external SDLLibName;
  procedure SDL_DestroyRenderer(renderer: SDL_Renderer); cdecl; external SDLLibName;
  function SDL_CreateTextureFromSurface(renderer: SDL_Renderer; surface: PSDL_Surface): SDL_Texture; cdecl; external SDLLibName;

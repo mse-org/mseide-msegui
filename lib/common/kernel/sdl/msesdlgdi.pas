@@ -16,6 +16,7 @@ uses
 
 const
  radtodeg = 360/(2*pi);
+ 
 
 procedure init;
 procedure deinit; 
@@ -29,6 +30,9 @@ function sdlgetdefaultfontnames: defaultfontnamesty;
 implementation
 uses
  mseguiintf,msegraphutils,msesysintf1,sysutils,msegenericgdi;
+ 
+  var
+ fgrgb,bgrgb: rgbtriplety;
  
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
@@ -139,6 +143,74 @@ begin
  SDL_CheckError('destroygc');
 end;
 
+
+procedure gdi_changegc(var drawinfo: drawinfoty);
+var
+ ar1: rectarty;
+ int1: integer;
+ rect1: SDL_Rect;
+ x1,y1,x2,y2: integer;
+begin
+ with drawinfo.gcvalues^,drawinfo.gc do begin
+ 
+   if gvm_colorbackground in mask then begin
+   bgrgb:= colortorgb(colorbackground);
+   writeln('BG raw=',inttohex(longword(colorbackground),8),
+           ' rgb=',bgrgb.red,',',bgrgb.green,',',bgrgb.blue,' res=',bgrgb.res);
+  end;
+  if gvm_colorforeground in mask then begin
+   fgrgb:= colortorgb(colorforeground);
+   writeln('FG raw=',inttohex(longword(colorforeground),8),
+           ' rgb=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue,' res=',fgrgb.res);
+  end;
+ 
+  if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
+  end;
+  if gvm_rasterop in mask then begin
+  end;
+  if gvm_brush in mask then begin
+  end;
+  if gvm_brushorigin in mask then begin
+  end;
+  if gvm_clipregion in mask then begin
+   if clipregion <> 0 then begin
+    ar1:= gui_regiontorects(clipregion);
+    if ar1 <> nil then begin
+     // bounding box of all rects (SDL2 has only one clip rect)
+     x1:= ar1[0].pos.x;
+     y1:= ar1[0].pos.y;
+     x2:= x1 + ar1[0].size.cx;
+     y2:= y1 + ar1[0].size.cy;
+     for int1:= 1 to high(ar1) do begin
+      if ar1[int1].pos.x < x1 then x1:= ar1[int1].pos.x;
+      if ar1[int1].pos.y < y1 then y1:= ar1[int1].pos.y;
+      if ar1[int1].pos.x + ar1[int1].size.cx > x2 then
+                                 x2:= ar1[int1].pos.x + ar1[int1].size.cx;
+      if ar1[int1].pos.y + ar1[int1].size.cy > y2 then
+                                 y2:= ar1[int1].pos.y + ar1[int1].size.cy;
+     end;
+     rect1.x:= x1 + cliporigin.x;
+     rect1.y:= y1 + cliporigin.y;
+     rect1.w:= x2 - x1;
+     rect1.h:= y2 - y1;
+     SDL_RenderSetClipRect(handle,@rect1);
+    end
+    else begin
+     rect1.x:= 0; rect1.y:= 0; rect1.w:= 0; rect1.h:= 0;   // empty region
+     SDL_RenderSetClipRect(handle,@rect1);
+    end;
+   end
+   else begin
+    SDL_RenderSetClipRect(handle,nil);                     // no clipping
+   end;
+   SDL_CheckError('SDL_RenderSetClipRect');
+  end;
+  if gvm_font in mask then begin
+  end;
+ end;
+end;
+
+{
 procedure gdi_changegc(var drawinfo: drawinfoty);
 var
  rgbcolor: rgbtriplety;
@@ -184,6 +256,7 @@ begin
   end;
  end;
 end;
+}
 
 procedure gdi_getcanvasclass(var drawinfo: drawinfoty); //gdifunc
 begin
@@ -209,37 +282,46 @@ begin
  end;
 end;
 
-procedure drawsingleline(renderer: SDL_Renderer; x1,y1,x2,y2,awidth: integer; acolor: rgbtriplety);
+procedure drawsingleline(renderer: SDL_Renderer; const origin: pointty;
+                 x1,y1,x2,y2,awidth: integer; acolor: rgbtriplety);
 begin
+ inc(x1,origin.x); inc(y1,origin.y);
+ inc(x2,origin.x); inc(y2,origin.y);
  //choose the best performance method
- if awidth=0 then begin
-  if (x1=x2) or (y1=y2) then
-   lineRGBA(renderer, x1, y1, x2, y2, acolor.red, acolor.green, acolor.blue, 255-acolor.res)
+ if awidth = 0 then begin
+  if (x1 = x2) or (y1 = y2) then
+   lineRGBA(renderer,x1,y1,x2,y2,acolor.red,acolor.green,acolor.blue,255-acolor.res)
   else
-   aalineRGBA(renderer, x1, y1, x2, y2, acolor.red, acolor.green, acolor.blue, 255-acolor.res);
- end else begin
-  thickLineRGBA(renderer, x1, y1, x2, y2, awidth, acolor.red, acolor.green, acolor.blue, 255-acolor.res);
+   aalineRGBA(renderer,x1,y1,x2,y2,acolor.red,acolor.green,acolor.blue,255-acolor.res);
+ end
+ else begin
+  thickLineRGBA(renderer,x1,y1,x2,y2,awidth,
+                      acolor.red,acolor.green,acolor.blue,255-acolor.res);
  end;
 end;
 
 procedure gdi_drawlines(var drawinfo: drawinfoty);
 var
  int1,lwidth: integer;
- startpoint: pointty;
  rgb: rgbtriplety;
+ pp: ppointaty;
+ org: pointty;
 begin
- with drawinfo, points do begin
-  startpoint.x:= points^.x;
-  startpoint.y:= points^.y;
+writeln('gdi_drawlines lines count=',drawinfo.points.count,
+        ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+ with drawinfo do begin
+  if points.count < 2 then exit;
+  pp:= ppointaty(points.points);
+  org:= origin;
   rgb:= colortorgb(acolorforeground);
   lwidth:= (gcvalues^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
-  for int1:= 1 to count-1 do begin
-   drawsingleline(drawinfo.gc.handle, ppointaty(points)^[int1-1].x, ppointaty(points)^[int1-1].y,
-     ppointaty(points)^[int1].x, ppointaty(points)^[int1].y, lwidth, rgb);
+  for int1:= 1 to points.count-1 do begin
+   drawsingleline(gc.handle,org,pp^[int1-1].x,pp^[int1-1].y,
+                                pp^[int1].x,pp^[int1].y,lwidth,rgb);
   end;
-  if closed then begin
-   drawsingleline(drawinfo.gc.handle, ppointaty(points)^[int1].x, ppointaty(points)^[int1].y,
-     startpoint.x, startpoint.y, lwidth, rgb);
+  if points.closed then begin
+   drawsingleline(gc.handle,org,pp^[points.count-1].x,pp^[points.count-1].y,
+                                pp^[0].x,pp^[0].y,lwidth,rgb);
   end;
  end;
 end;
@@ -248,14 +330,22 @@ procedure gdi_drawlinesegments(var drawinfo: drawinfoty);
 var
  int1,lwidth: integer;
  rgb: rgbtriplety;
+ pp: ppointaty;
+ org: pointty;
 begin
- with drawinfo, drawinfo.points do begin
+writeln('gdi_drawlinesegments lines count=',drawinfo.points.count,
+        ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+writeln('drawlines acolorfg=',inttohex(longword(drawinfo.acolorforeground),8),
+        ' gcfg=',inttohex(longword(drawinfo.gcvalues^.colorforeground),8),
+        ' cachedfg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+ with drawinfo do begin
+  pp:= ppointaty(points.points);
+  org:= origin;
   rgb:= colortorgb(acolorforeground);
   lwidth:= (gcvalues^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
-  for int1:= 0 to count div 2 - 1 do begin
-   drawsingleline(drawinfo.gc.handle, ppointaty(points)^[int1-1].x, ppointaty(points)^[int1-1].y,
-     ppointaty(points)^[int1].x, ppointaty(points)^[int1].y, lwidth, rgb);
-   inc(points,2);
+  for int1:= 0 to points.count div 2 - 1 do begin
+   drawsingleline(gc.handle,org,pp^[2*int1].x,pp^[2*int1].y,
+                                pp^[2*int1+1].x,pp^[2*int1+1].y,lwidth,rgb);
   end;
  end;
 end;
@@ -266,11 +356,14 @@ var
 begin
  with drawinfo, rect.rect^ do begin
   rgb:= colortorgb(acolorforeground);
-  aaellipseRGBA(gc.handle, pos.x, pos.y, round(cx/2), round(cy/2), 
-    rgb.red, rgb.green, rgb.blue, 255-rgb.res);
+  // aaellipseRGBA wants center + radii, rect is the bounding box
+  aaellipseRGBA(gc.handle,
+                origin.x + pos.x + cx div 2,
+                origin.y + pos.y + cy div 2,
+                cx div 2, cy div 2,
+                rgb.red,rgb.green,rgb.blue,255-rgb.res);
  end;
 end;
-
 procedure getarcinfo(const info: drawinfoty; 
                     out xstart,ystart,xend,yend: integer);
 var
@@ -291,10 +384,39 @@ begin
 end;
 
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
+var
+ s: ansistring;
+ i: integer;
+ ptext: pwidechar;
+ text_x, text_y: integer;
 begin
+ with drawinfo, text16pos do begin
+  if count > 0 then begin
+   setlength(s, count);
+   ptext := pwidechar(text);
+   
+   for i := 0 to count - 1 do begin
+    s[i + 1] := char(ord(ptext[i]) and $ff);
+   end;
+   
+   // Horizontally center: If it's shifted too far right, 
+   // we subtract half of the total text width (count * 8 pixels total / 2 = count * 4)
+   text_x := pos^.x + origin.x - (count * 4);
+   
+   // Vertically center: Adjust this offset to lift the text up from the bottom.
+   // Let's use a fine-tuned -4 pixel adjustment to lock it right in the middle!
+   text_y := pos^.y + origin.y - 4;
+
+   stringRGBA(gc.handle, text_x, text_y, pchar(s),
+              fgrgb.red, fgrgb.green, fgrgb.blue, 255);
+              
+   SDL_RenderPresent(SDL_Renderer(gc.handle));
+  end;
+ end;
  SDL_CheckError('drawstring16');
 end;
 
+{
 procedure gdi_fillrect(var drawinfo: drawinfoty);
 var
  rect1: SDL_Rect;
@@ -305,6 +427,27 @@ begin
  rect1.h:= drawinfo.rect.rect^.cy;
  SDL_RenderFillRect(drawinfo.gc.handle,@rect1);
  SDL_CheckError('SDL_RenderFillRect');
+end;
+}
+
+procedure gdi_fillrect(var drawinfo: drawinfoty);
+var
+ rect1: SDL_Rect;
+begin
+with drawinfo do begin
+  rect1.x:= rect.rect^.x + origin.x;
+  rect1.y:= rect.rect^.y + origin.y;
+  rect1.w:= rect.rect^.cx;
+  rect1.h:= rect.rect^.cy;
+  
+  writeln('fillrect x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
+        ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+  if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
+  
+  SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
+  SDL_RenderFillRect(gc.handle,@rect1);
+  SDL_CheckError('SDL_RenderFillRect');
+ end;
 end;
 
 procedure gdi_fillelipse(var drawinfo: drawinfoty);
@@ -539,4 +682,8 @@ end;
 initialization
  gdinumber:= registergdi(sdlgetgdifuncs);
 }
+
+initialization
+ fgrgb.red:= 0;   fgrgb.green:= 0;   fgrgb.blue:= 0;   fgrgb.res:= 0;
+ bgrgb.red:= 255; bgrgb.green:= 255; bgrgb.blue:= 255; bgrgb.res:= 0;
 end.
