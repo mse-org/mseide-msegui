@@ -1040,7 +1040,7 @@ begin
      end else if (e.window.event = SDL_WINDOWEVENT_RESIZED) 
       or (e.window.event = SDL_WINDOWEVENT_SIZE_CHANGED) then begin
       SDL_GetWindowSurface(winid);
-      //postconfigureevent(winid);
+      postconfigureevent(winid);
       SDL_CheckError('resized');
      end else if (e.window.event = SDL_WINDOWEVENT_EXPOSED) then begin
       gui_getwindowrect(winid,rect1);
@@ -1234,30 +1234,35 @@ begin
     classname:= widgetclassname;
    end;
   end;
+
+  // Spawns the clean top-level window with correct maximize and resize decorations
   if (pos=wp_screencentered) then begin
    id:= SDL_CreateWindow(classname,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,rect1.cx,rect1.cy,windowstyleex);
   end else begin
    id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,windowstyleex);
   end;
+
+  // FIX: Drop the temporary utility window created by createapphandle 
+  // to instantly clean up the duplicate taskbar icon issue!
+  if (applicationwindow <> 0) and (applicationwindow <> id) then begin
+   SDL_DestroyWindow(applicationwindow);
+   applicationwindow := 0;
+  end;
+
   result:= SDL_CheckError('createwindow');
   if (transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
    if transientfor <> 0 then begin
     ownerwindow:= transientfor;
    end;
-   if transientfor = 0 then begin
+   if (transientfor = 0) and (parent = 0) then begin 
     SDL_SetWindowPosition(id,0,0);
    end;
   end else begin
    if setgroup and (groupleader = 0) or (wo_groupleader in options) then begin
     groupleaderwindow:= id;
    end;
-   {if not (pos = wp_default) and (parent = 0) then begin
-    result:= gui_reposwindow(id,rect);
-   end else begin
-    result:= gue_ok;
-   end;}
   end;
-  if icon <> 0 then begin
+  if (icon <> 0) and (parent = 0) then begin 
    gui_setwindowicon(id,icon,iconmask);
    if (groupleaderwindow = id) then begin
     gui_setwindowicon(applicationwindow,icon,iconmask);
