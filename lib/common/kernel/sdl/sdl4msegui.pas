@@ -486,7 +486,7 @@ const
 
 type
  SDL_WindowFlags = UInt32;
-
+ function SDL_SetHint(name, value: pchar): boolean; cdecl; external SDLLibName;
  function SDL_CreateWindow(title: PChar; x, y, w, h: integer; flags: SDL_WindowFlags): winidty; 
    cdecl; external SDLLibName;
  procedure SDL_DestroyWindow(window: winidty); cdecl; external SDLLibName;
