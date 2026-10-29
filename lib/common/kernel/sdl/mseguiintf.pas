@@ -488,8 +488,8 @@ function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
                            gchandle: longword): gdierrorty;
 begin
  result:= gde_pixmap;
- pixmap:= SDL_CreateRGBSurfaceFrom(image.pixels,image.size.cx,image.size.cy,32,image.size.cx*4,0,0,0,0);
- //SDL_SaveBMP_toFile(pixmap,'xx.bmp');
+ pixmap:= SDL_CreateRGBSurfaceFrom(image.pixels,image.size.cx,image.size.cy,32,
+                                   image.size.cx*4,0,0,0,0);
  SDL_CheckError('imagetopixmap');
  result:= gde_ok;
 end;
@@ -1584,7 +1584,7 @@ begin
  result.y:= rect1.y;
  result.cx:= rect1.w;
  result.cy:= rect1.h;
- debugwriteln('workarea');
+// debugwriteln('workarea');
 end;
 
 

@@ -93,56 +93,61 @@ begin
  end;
 end;
 
+var
+ dummysurface: PSDL_Surface;     // unit level, created on first use
+
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
- int1, int2, int3: integer;
+ int3: integer;
  arenderer: ptruint;
- pinfo: PSDL_RendererInfo;
 begin
  with drawinfo.creategc do begin
   gcpo^.gdifuncs:= gui_getgdifuncs;
   error:= gde_creategc;
   case kind of
    gck_pixmap: begin
-    //SDL_SaveBMP_toFile(paintdevice,'creategc.bmp');
     gcpo^.handle:= SDL_CreateSoftwareRenderer(paintdevice);
     error:= SDL_CheckErrorGDI('creategc');
    end;
    gck_screen: begin
-    //choose the best renderer supported
-    int3:= -1;
-    arenderer:= SDL_CreateRenderer(paintdevice,int3,SDL_RENDERER_SOFTWARE{SDL_RENDERER_ACCELERATED});
-    error:= gde_ok;
-    {//wait for final release SDL 2, we use software renderer only
-     //at the moment some bugs in SDL 2 with DirectX and OpenGL/ES
-    if (arenderer=0) or (SDL_GetError<>'') then begin
-     SDL_DestroyRenderer(arenderer);
-     int1:= SDL_GetNumRenderDrivers;
-     for int2:= 1 to int1 do begin
-      if SDL_GetRenderDriverInfo(int2,pinfo)=0 then begin
-       debugwriteln(pinfo^.name+' w = '+inttostr(pinfo^.max_texture_width)+' h = '+inttostr(pinfo^.max_texture_width));
-       arenderer:= SDL_CreateRenderer(paintdevice,int2,SDL_RENDERER_ACCELERATED);
-       if (arenderer=0) or (SDL_GetError<>'') then begin
-        error:= SDL_CheckErrorGDI('creategc');
-        SDL_DestroyRenderer(arenderer);
-       end else begin
-        break;
-       end;
-      end;
+    if paintdevice = 0 then begin
+     // no window: measuring canvas used by fonts, never draws
+     if dummysurface = 0 then begin
+      dummysurface:= SDL_CreateRGBSurface(0,1,1,32,
+                       $00FF0000,$0000FF00,$000000FF,$FF000000);
      end;
-    end;}
+     arenderer:= SDL_CreateSoftwareRenderer(dummysurface);
+    end
+    else begin
+     int3:= -1;
+     arenderer:= SDL_CreateRenderer(paintdevice,int3,SDL_RENDERER_SOFTWARE);
+    end;
     gcpo^.handle:= arenderer;
+    if arenderer <> 0 then begin
+     error:= gde_ok;
+    end;
+   end;
+   else begin
+    // printer/metafile: not supported, same dummy so nothing crashes
+    if dummysurface = 0 then begin
+     dummysurface:= SDL_CreateRGBSurface(0,1,1,32,
+                      $00FF0000,$0000FF00,$000000FF,$FF000000);
+    end;
+    gcpo^.handle:= SDL_CreateSoftwareRenderer(dummysurface);
+    if gcpo^.handle <> 0 then begin
+     error:= gde_ok;
+    end;
    end;
   end;
  end;
 end;
-
 procedure gdi_destroygc(var drawinfo: drawinfoty);
-begin 
- SDL_DestroyRenderer(drawinfo.gc.handle);
- SDL_CheckError('destroygc');
+begin
+ if drawinfo.gc.handle <> 0 then begin
+  SDL_DestroyRenderer(drawinfo.gc.handle);
+  SDL_CheckError('destroygc');
+ end;
 end;
-
 
 procedure gdi_changegc(var drawinfo: drawinfoty);
 var
@@ -150,20 +155,25 @@ var
  int1: integer;
  rect1: SDL_Rect;
  x1,y1,x2,y2: integer;
+ rgbcolor: rgbtriplety;   // add to the var section
+
 begin
  with drawinfo.gcvalues^,drawinfo.gc do begin
  
-   if gvm_colorbackground in mask then begin
-   bgrgb:= colortorgb(colorbackground);
-   writeln('BG raw=',inttohex(longword(colorbackground),8),
-           ' rgb=',bgrgb.red,',',bgrgb.green,',',bgrgb.blue,' res=',bgrgb.res);
-  end;
   if gvm_colorforeground in mask then begin
-   fgrgb:= colortorgb(colorforeground);
-   writeln('FG raw=',inttohex(longword(colorforeground),8),
-           ' rgb=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue,' res=',fgrgb.res);
-  end;
- 
+ rgbcolor:= colortorgb(colorforeground);
+ fgrgb.red:= rgbcolor.blue;
+ fgrgb.green:= rgbcolor.green;
+ fgrgb.blue:= rgbcolor.red;
+ fgrgb.res:= rgbcolor.res;
+end;
+if gvm_colorbackground in mask then begin
+ rgbcolor:= colortorgb(colorbackground);
+ bgrgb.red:= rgbcolor.blue;
+ bgrgb.green:= rgbcolor.green;
+ bgrgb.blue:= rgbcolor.red;
+ bgrgb.res:= rgbcolor.res;
+end;
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
   end;
   if gvm_rasterop in mask then begin
@@ -307,8 +317,8 @@ var
  pp: ppointaty;
  org: pointty;
 begin
-writeln('gdi_drawlines lines count=',drawinfo.points.count,
-        ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+//writeln('gdi_drawlines lines count=',drawinfo.points.count,
+  //      ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
  with drawinfo do begin
   if points.count < 2 then exit;
   pp:= ppointaty(points.points);
@@ -333,11 +343,13 @@ var
  pp: ppointaty;
  org: pointty;
 begin
+{
 writeln('gdi_drawlinesegments lines count=',drawinfo.points.count,
         ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
 writeln('drawlines acolorfg=',inttohex(longword(drawinfo.acolorforeground),8),
         ' gcfg=',inttohex(longword(drawinfo.gcvalues^.colorforeground),8),
         ' cachedfg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+}
  with drawinfo do begin
   pp:= ppointaty(points.points);
   org:= origin;
@@ -388,47 +400,33 @@ var
  s: ansistring;
  i: integer;
  ptext: pwidechar;
- text_x, text_y: integer;
+ c: integer;
 begin
+writeln('drawstring16 count=',drawinfo.text16pos.count,
+        ' pos=',drawinfo.text16pos.pos^.x,',',drawinfo.text16pos.pos^.y,
+        ' origin=',drawinfo.origin.x,',',drawinfo.origin.y);
  with drawinfo, text16pos do begin
   if count > 0 then begin
    setlength(s, count);
-   ptext := pwidechar(text);
+   ptext:= pwidechar(text);
+   for i:= 0 to count - 1 do begin
+    c:= ord(ptext[i]);
+    if c > 127 then c:= ord('?');      // the 8x8 font only has ASCII
+    s[i + 1]:= char(c);
+   end;{
    
-   for i := 0 to count - 1 do begin
-    s[i + 1] := char(ord(ptext[i]) and $ff);
-   end;
    
-   // Horizontally center: If it's shifted too far right, 
-   // we subtract half of the total text width (count * 8 pixels total / 2 = count * 4)
-   text_x := pos^.x + origin.x - (count * 4);
-   
-   // Vertically center: Adjust this offset to lift the text up from the bottom.
-   // Let's use a fine-tuned -4 pixel adjustment to lock it right in the middle!
-   text_y := pos^.y + origin.y - 4;
-
-   stringRGBA(gc.handle, text_x, text_y, pchar(s),
-              fgrgb.red, fgrgb.green, fgrgb.blue, 255);
-              
-   SDL_RenderPresent(SDL_Renderer(gc.handle));
+   stringRGBA(gc.handle, pos^.x + origin.x - (count * 4),
+              pos^.y + origin.y - 4, pchar(s),
+              fgrgb.red, fgrgb.green, fgrgb.blue, 255 - fgrgb.res);
+ }
+ 
+ stringRGBA(gc.handle, pos^.x + origin.x, pos^.y + origin.y - 7, pchar(s),
+           fgrgb.red, fgrgb.green, fgrgb.blue, 255 - fgrgb.res);
   end;
  end;
  SDL_CheckError('drawstring16');
 end;
-
-{
-procedure gdi_fillrect(var drawinfo: drawinfoty);
-var
- rect1: SDL_Rect;
-begin
- rect1.x:= drawinfo.rect.rect^.x;
- rect1.y:= drawinfo.rect.rect^.y;
- rect1.w:= drawinfo.rect.rect^.cx;
- rect1.h:= drawinfo.rect.rect^.cy;
- SDL_RenderFillRect(drawinfo.gc.handle,@rect1);
- SDL_CheckError('SDL_RenderFillRect');
-end;
-}
 
 procedure gdi_fillrect(var drawinfo: drawinfoty);
 var
@@ -440,8 +438,9 @@ with drawinfo do begin
   rect1.w:= rect.rect^.cx;
   rect1.h:= rect.rect^.cy;
   
-  writeln('fillrect x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
-        ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+//  writeln('fillrect x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
+  //      ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+ 
   if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
   
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
@@ -476,10 +475,11 @@ end;
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  rect1,rect2: SDL_rect;
- maskbefore: tsimplebitmap;
  atexture: SDL_Texture;
- asurface: PSDL_Surface;
- pt1: pointty;
+ asurface,msurface: PSDL_Surface;
+ sp,mp: CSDL_Surface;
+ p,pm: PLongword;
+ x,y: integer;
 begin
  with drawinfo,copyarea,gcvalues^ do begin
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
@@ -494,45 +494,65 @@ begin
   rect2.w:= destrect^.cx;
   rect2.h:= destrect^.cy;
 
-
-  //pt1:= addpoint(makepoint(destrect^.x,destrect^.y),origin);
-  //SDL_SaveBMP_toFile(tcanvas1(source).fdrawinfo.paintdevice,'source.bmp');
-  //SDL_SaveBMP_toFile(drawinfo.paintdevice,'target.bmp');
-  asurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,0,0,0,0);
+  asurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
+                       $00FF0000,$0000FF00,$000000FF,$FF000000);
   SDL_unlockSurface(tcanvas1(source).fdrawinfo.paintdevice);
   SDL_unlockSurface(asurface);
-  SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1, asurface, nil);
-  //SDL_SaveBMP_toFile(asurface,'clip.bmp');
+  SDL_SetSurfaceBlendMode(tcanvas1(source).fdrawinfo.paintdevice,
+                                                    SDL_BLENDMODE_NONE);
+  SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,nil);
+  sp:= CSDL_Surface(ptruint(asurface));
+
+ // writeln('copyarea first pixel=',inttohex(PLongword(sp^.pixels)^,8),
+   //       ' mask=',drawinfo.copyarea.mask <> nil);
+
+  if drawinfo.copyarea.mask <> nil then begin
+   // alpha from the mask: white = visible, black = transparent
+   msurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
+                        $00FF0000,$0000FF00,$000000FF,$FF000000);
+   SDL_unlockSurface(drawinfo.copyarea.mask.handle);
+   SDL_unlockSurface(msurface);
+   SDL_SetSurfaceBlendMode(drawinfo.copyarea.mask.handle,SDL_BLENDMODE_NONE);
+   SDL_UpperBlit(drawinfo.copyarea.mask.handle,@rect1,msurface,nil);
+   mp:= CSDL_Surface(ptruint(msurface));
+   for y:= 0 to sp^.h-1 do begin
+    p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+    pm:= PLongword(ptruint(mp^.pixels) + ptruint(y*mp^.pitch));
+    for x:= 0 to sp^.w-1 do begin
+     if (pm^ and $00FFFFFF) <> 0 then begin
+      p^:= p^ or $FF000000;           // visible
+     end
+     else begin
+      p^:= p^ and $00FFFFFF;          // transparent
+     end;
+     inc(p);
+     inc(pm);
+    end;
+   end;
+   SDL_FreeSurface(msurface);
+  end
+  else begin
+   // no mask: make everything opaque
+   for y:= 0 to sp^.h-1 do begin
+    p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+    for x:= 0 to sp^.w-1 do begin
+     p^:= p^ or $FF000000;
+     inc(p);
+    end;
+   end;
+  end;
+
   atexture:= SDL_CreateTextureFromSurface(drawinfo.gc.handle,asurface);
   if atexture<>0 then begin
+   SDL_SetTextureBlendMode(atexture,SDL_BLENDMODE_BLEND);
    if SDL_RenderCopy(drawinfo.gc.handle, atexture, nil, @rect2)=0 then begin
-    //SDL_RenderPresent(drawinfo.gc.handle);
     SDL_CheckError('rendercopy');
-    //SDL_SaveBMP_toFile(drawinfo.paintdevice,'result.bmp');
    end;
   end;
   SDL_DestroyTexture(atexture);
   SDL_FreeSurface(asurface);
-  {if mask<>nil then begin
-   asurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,0,0,0,0);
-   SDL_unlockSurface(mask.handle);
-   SDL_unlockSurface(asurface);
-   SDL_UpperBlit(mask.handle,@rect1, asurface, nil);
-   //SDL_UpperBlitScaled(mask.handle,@rect1, asurface, nil);
-   atexture:= SDL_CreateTextureFromSurface(drawinfo.gc.handle,asurface);
-   SDL_SetRenderDrawBlendMode(atexture,SDL_BLENDMODE_ADD);
-   if atexture<>0 then begin
-    if SDL_RenderCopy(drawinfo.gc.handle, atexture, nil, @rect2)=0 then begin
-     SDL_RenderPresent(drawinfo.gc.handle);
-     SDL_CheckError('rendercopy');
-    end;
-   end;
-   SDL_DestroyTexture(atexture);
-   SDL_FreeSurface(asurface); 
-  end;}
  end;
 end;
-
 procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
 begin
  //dummy
@@ -586,12 +606,22 @@ end;
 
 procedure gdi_getfonthighres(var drawinfo: drawinfoty);
 begin
- 
 end;
 
 procedure gdi_getfont(var drawinfo: drawinfoty);
 begin
- 
+ with drawinfo.getfont,fontdata^ do begin
+  font:= 1;               // nonzero fake handle, there is only one font
+  fonthighres:= 0;
+  basefont:= 1;
+  ascent:= 7;
+  descent:= 1;
+  linespacing:= 8;
+  realheight:= 8;
+  caretshift:= 0;
+  linewidth:= 1;
+ end;
+ drawinfo.getfont.ok:= true;
 end;
 
 procedure gdi_freefontdata(var drawinfo: drawinfoty);
@@ -600,14 +630,33 @@ end;
 
 procedure gdi_gettext16width(var drawinfo: drawinfoty);
 begin
+ with drawinfo.gettext16width do begin
+  result:= count * 8;
+ end;
 end;
 
 procedure gdi_getchar16widths(var drawinfo: drawinfoty);
+var
+ int1: integer;
+ po1: pinteger;
 begin
+ with drawinfo.getchar16widths do begin
+  po1:= resultpo;
+  for int1:= 0 to count-1 do begin
+   po1^:= 8;
+   inc(po1);
+  end;
+ end;
 end;
 
 procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
 begin
+ with drawinfo.getfontmetrics.resultpo^ do begin
+  leftbearing:= 0;
+  width:= 8;
+  rightbearing:= 0;
+  sum:= 8;
+ end;
 end;
 
 procedure init;
