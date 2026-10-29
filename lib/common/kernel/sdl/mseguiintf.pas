@@ -1754,7 +1754,8 @@ end;
 
 function gui_init: guierrorty;
 begin
- SDL_SetHint('SDL_VIDEODRIVER', 'wayland,x11'); // force to use wayland if availablea
+ // Tells SDL2 your ideal preference hierarchy depending on which OS it runs on
+ SDL_SetHint('SDL_VIDEODRIVER', 'wayland,cocoa,windows,x11');
  SDL_Init(SDL_INIT_EVERYTHING);
  SDL_CheckError('Init video');
  mousewindow:= 0;
