@@ -13,7 +13,7 @@ unit mseguiintf;
 
 interface
 uses
- mseapplication,msetypes,msegraphutils, msesys, 
+ math,mseapplication,msetypes,msegraphutils, msesys, 
   mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,msestrings,msesystypes,
  sdl4msegui,msesdlgdi,dateutils,msegenericgdi;
@@ -1754,6 +1754,8 @@ end;
 
 function gui_init: guierrorty;
 begin
+ SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
+ Set8087CW($1372);
  // Tells SDL2 your ideal preference hierarchy depending on which OS it runs on
  SDL_SetHint('SDL_VIDEODRIVER', 'wayland,cocoa,windows,x11');
  SDL_Init(SDL_INIT_EVERYTHING);
