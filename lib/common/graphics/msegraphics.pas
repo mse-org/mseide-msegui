@@ -7329,8 +7329,8 @@ begin
 end;
 
 initialization
-{$ifdef mse_flushgdi}
- flushgdi:= true;
+{$if defined(mse_flushgdi) or defined(usesdl)}
+  flushgdi:= true;
 {$endif}
 // setlength(gdifuncs,1); //item 0 = system default
 // gdifuncs[0]:= gui_getgdifuncs;

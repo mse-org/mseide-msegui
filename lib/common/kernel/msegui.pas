@@ -2605,7 +2605,7 @@ type
    fcontainer: winidty;
    fownerwidget: twidget;
    fcanvas: tcanvas;
-   {$ifndef use_singlecanvas}
+   {$if not defined(use_singlecanvas) and not defined(usesdl)}
    fasynccanvas: tcanvas;
    {$endif}
    fmodalresult: modalresultty;
@@ -14595,7 +14595,7 @@ begin
  with tcanvas1(window.fcanvas) do begin
   fstate:= fstate - changedmask; //state invalid
  end; 
- {$ifndef use_singlecanvas}
+ {$if not defined(use_singlecanvas) and not defined(usesdl)}
  result:= fwindow.fasynccanvas;
  {$else}
  result:= fwindow.fcanvas;
@@ -15986,7 +15986,7 @@ begin
  fownerwidget:= aowner;
  fownerwidget.fwindow:= self;
  fcanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
- {$ifndef use_singlecanvas}
+   {$if not defined(use_singlecanvas) and not defined(usesdl)}
  fasynccanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
   {$endif}
  fscrollnotifylist:= tnotifylist.create;
@@ -16011,7 +16011,7 @@ begin
  end;
  destroywindow;
  fcanvas.free;
- {$ifndef use_singlecanvas}
+   {$if not defined(use_singlecanvas) and not defined(usesdl)}
  fasynccanvas.free;
  {$endif}
  inherited;
@@ -16022,7 +16022,7 @@ end;
 procedure twindow.setasynccanvas(const acanvas: tcanvas);
 begin
  include(fstate,tws_canvasoverride);
- {$ifndef use_singlecanvas}
+   {$if not defined(use_singlecanvas) and not defined(usesdl)}
  acanvas.initflags(fasynccanvas);
  {$endif}
  fownerwidget.fontcanvaschanged;
@@ -16032,7 +16032,7 @@ procedure twindow.releaseasynccanvas;
 begin
  if tws_canvasoverride in fstate then begin
   exclude(fstate,tws_canvasoverride);
-  {$ifndef use_singlecanvas}
+   {$if not defined(use_singlecanvas) and not defined(usesdl)}
   fasynccanvas.initflags(fasynccanvas);
   {$endif}
  end;
@@ -16126,7 +16126,7 @@ begin
   gdierror(fcanvas.creategc(fwindow.id,gck_screen,gc),self);
   gc.paintdevicesize:= fownerwidget.fwidgetrect.size;
   fcanvas.linktopaintdevice(fwindow.id,gc{,fowner.fwidgetrect.size},nullpoint);
-  {$ifndef use_singlecanvas}
+   {$if not defined(use_singlecanvas) and not defined(usesdl)}
   gdierror(fasynccanvas.creategc(fwindow.id,gck_screen,gc),self);
   fasynccanvas.linktopaintdevice(fwindow.id,gc,{fowner.fwidgetrect.size,}nullpoint);
   {$endif}
@@ -16158,7 +16158,7 @@ begin
   appinst.unregisterwindow(self);
  end;
  fcanvas.unlink;
- {$ifndef use_singlecanvas}
+   {$if not defined(use_singlecanvas) and not defined(usesdl)}
  fasynccanvas.unlink;
  {$endif}
  if fwindow.id <> 0 then begin
@@ -16920,7 +16920,7 @@ procedure twindow.sizechanged;
 begin
  exclude(fstate,tws_sizevalid);
  tcanvas1(fcanvas).updatesize(fownerwidget.fwidgetrect.size);
- {$ifndef use_singlecanvas}
+ {$if not defined(use_singlecanvas) and not defined(usesdl)}
  tcanvas1(fasynccanvas).updatesize(fownerwidget.fwidgetrect.size);
  {$endif}
  if fobjectlinker <> nil then begin
