@@ -298,10 +298,12 @@ begin
 end;
 
 function gui_copytoclipboard(const value: msestring): guierrorty;
-         //todo: copy msechars to clipboard, win95?
+var
+ s: ansistring;
 begin
  result:= gue_clipboard;
- SDL_SetClipboardText(pchar(value));
+ s:= stringtoutf8ansi(value);          // UTF-16 -> UTF-8
+ SDL_SetClipboardText(pchar(s));
  result:= SDL_CheckError('copytoclipboard');
 end;
 
@@ -312,13 +314,15 @@ begin
 end;
 
 function gui_pastefromclipboard(out value: msestring): guierrorty;
-var               //todo: get msechars from clipboard, win95?
- data: thandle;
- po1: pointer;
- str1: string;
+var
+ po: pchar;
 begin
  result:= gue_clipboard;
- value:= SDL_GetClipboardText;
+ value:= '';
+ po:= pchar(SDL_GetClipboardText);
+ if po <> nil then begin
+  value:= utf8tostring(po,length(po));  // UTF-8 -> UTF-16
+ end;
  result:= SDL_CheckError('pastefromclipboard');
 end;
 
