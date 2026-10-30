@@ -34,6 +34,8 @@ const
 {$endif}
 
 function getapplicationwindow: winidty;
+function ismonopixmap(pixmap: pixmapty): boolean;
+procedure removemonopixmap(pixmap: pixmapty);
 
 implementation
 
@@ -425,7 +427,7 @@ begin
  result:= SDL_CreateRGBSurface(0,size.cx,size.cy,32,0,0,0,0);
  SDL_CheckError('createpixmap');
 end;
-
+{
 function gui_createbitmapfromdata(const size: sizety; datapo: pbyte;
              msbitfirst: boolean = false; dwordaligned: boolean = false;
              bottomup: boolean = false): pixmapty;
@@ -437,9 +439,10 @@ begin
  result:= SDL_CreateRGBSurfaceFrom(datapo,size.cx,size.cy,32,0,0,0,0,0);
  SDL_CheckError('createpixmapfromdata');
 end;
-
+}
 function gui_freepixmap(pixmap: pixmapty): gdierrorty;
 begin
+ removemonopixmap(pixmap);
  SDL_FreeSurface(pixmap);
  SDL_CheckError('freepixmap');
 end;
@@ -476,28 +479,192 @@ begin
  freemem(data);
 end;
 
-function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety; gchandle: longword): gdierrorty;
+const
+ monomsbfirst = false;   // bit order of mono data: flip if arrows are mirrored
+ monoinvert = false;     // polarity of mono data: flip if arrows are inverted
+
+function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
+                                       gchandle: longword): gdierrorty;
 begin
  with CSDL_Surface(pixmap)^ do begin
-  image.pixels:= pixels; 
+  image.pixels:= pixels;
+  image.kind:= bmk_rgb;
   image.bgr:= false;
   image.size.cx:= w;
   image.size.cy:= h;
-  image.length:= w*h;
+  image.linebytes:= pitch;
+  image.linelength:= pitch div 4;
+  image.length:= (pitch div 4)*h;
  end;
  result:= gde_ok;
- SDL_CheckError('pixmatoimage'); 
+ SDL_CheckError('pixmatoimage');
+end;
+
+var
+ monopixmaps: array of ptruint;
+
+procedure addmonopixmap(pixmap: pixmapty);
+begin
+ setlength(monopixmaps,length(monopixmaps)+1);
+ monopixmaps[high(monopixmaps)]:= ptruint(pixmap);
+end;
+
+procedure removemonopixmap(pixmap: pixmapty);
+var
+ i: integer;
+begin
+ for i:= 0 to high(monopixmaps) do begin
+  if monopixmaps[i] = ptruint(pixmap) then begin
+   monopixmaps[i]:= monopixmaps[high(monopixmaps)];
+   setlength(monopixmaps,high(monopixmaps));
+   break;
+  end;
+ end;
+end;
+
+function ismonopixmap(pixmap: pixmapty): boolean;
+var
+ i: integer;
+begin
+ result:= false;
+ for i:= 0 to high(monopixmaps) do begin
+  if monopixmaps[i] = ptruint(pixmap) then begin
+   result:= true;
+   break;
+  end;
+ end;
 end;
 
 function gui_imagetopixmap(const image: imagety; out pixmap: pixmapty;
                            gchandle: longword): gdierrorty;
+var
+ sp: CSDL_Surface;
+ x,y,lb: integer;
+ src: pbyte;
+ srcl: PLongword;
+ dst: PLongword;
+ b: byte;
+ bit: boolean;
+ rmask,bmask: longword;
 begin
  result:= gde_pixmap;
- pixmap:= SDL_CreateRGBSurfaceFrom(image.pixels,image.size.cx,image.size.cy,32,
-                                   image.size.cx*4,0,0,0,0);
+ if image.bgr then begin
+  rmask:= $000000FF;
+  bmask:= $00FF0000;
+ end
+ else begin
+  rmask:= $00FF0000;
+  bmask:= $000000FF;
+ end;
+ pixmap:= SDL_CreateRGBSurface(0,image.size.cx,image.size.cy,32,
+                                      rmask,$0000FF00,bmask,$FF000000);
+ 
+ if image.kind = bmk_mono then addmonopixmap(pixmap);
+                                      
+ if pixmap = 0 then begin
+  SDL_CheckError('imagetopixmap');
+  exit;
+ end;
+ sp:= CSDL_Surface(ptruint(pixmap));
+ lb:= image.linebytes;
+ for y:= 0 to image.size.cy-1 do begin
+  src:= pbyte(ptruint(image.pixels) + ptruint(y*lb));
+  dst:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+  case image.kind of
+   bmk_rgb: begin
+    srcl:= PLongword(src);
+    for x:= 0 to image.size.cx-1 do begin
+     dst^:= srcl^ or $FF000000;
+     inc(srcl);
+     inc(dst);
+    end;
+   end;
+   bmk_gray: begin
+    for x:= 0 to image.size.cx-1 do begin
+     b:= src^;
+     dst^:= $FF000000 or (longword(b) shl 16) or (longword(b) shl 8) or b;
+     inc(src);
+     inc(dst);
+    end;
+   end;
+   bmk_mono: begin
+    for x:= 0 to image.size.cx-1 do begin
+     b:= pbyte(ptruint(src) + ptruint(x shr 3))^;
+     if monomsbfirst then begin
+      bit:= ((b shr (7 - (x and 7))) and 1) <> 0;
+     end
+     else begin
+      bit:= ((b shr (x and 7)) and 1) <> 0;
+     end;
+     if bit <> monoinvert then begin
+      dst^:= $FFFFFFFF;
+     end
+     else begin
+      dst^:= $FF000000;
+     end;
+     inc(dst);
+    end;
+   end;
+  end;
+ end;
  SDL_CheckError('imagetopixmap');
  result:= gde_ok;
 end;
+
+function gui_createbitmapfromdata(const size: sizety; datapo: pbyte;
+             msbitfirst: boolean = false; dwordaligned: boolean = false;
+             bottomup: boolean = false): pixmapty;
+var
+ sp: CSDL_Surface;
+ x,y,bytesperline,srcy: integer;
+ src: pbyte;
+ dst: PLongword;
+ b: byte;
+ bit: boolean;
+begin
+ result:= SDL_CreateRGBSurface(0,size.cx,size.cy,32,
+                  $00FF0000,$0000FF00,$000000FF,$FF000000);
+ if result = 0 then begin
+  SDL_CheckError('createpixmapfromdata');
+  exit;
+ end;
+ sp:= CSDL_Surface(ptruint(result));
+ if dwordaligned then begin
+  bytesperline:= ((size.cx + 31) div 32) * 4;
+ end
+ else begin
+  bytesperline:= (size.cx + 7) div 8;
+ end;
+ for y:= 0 to size.cy-1 do begin
+  if bottomup then begin
+   srcy:= size.cy - 1 - y;
+  end
+  else begin
+   srcy:= y;
+  end;
+  src:= pbyte(ptruint(datapo) + ptruint(srcy*bytesperline));
+  dst:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+  for x:= 0 to size.cx-1 do begin
+   b:= pbyte(ptruint(src) + ptruint(x shr 3))^;
+   if msbitfirst then begin
+    bit:= ((b shr (7 - (x and 7))) and 1) <> 0;
+   end
+   else begin
+    bit:= ((b shr (x and 7)) and 1) <> 0;
+   end;
+   if bit then begin
+    dst^:= $FFFFFFFF;
+   end
+   else begin
+    dst^:= $FF000000;
+   end;
+   inc(dst);
+  end;
+ end;
+ addmonopixmap(result);
+ SDL_CheckError('createpixmapfromdata');
+end;
+//
 
 function gui_setwindowfocus(id: winidty): guierrorty;
 begin
@@ -505,6 +672,8 @@ begin
  SDL_ShowWindow(id);
  result:= SDL_CheckError('setwindowfocus');
 end;
+
+
 
 function gui_setappfocus(id: winidty): guierrorty;
 begin
@@ -1613,8 +1782,8 @@ end;
 
 function gui_init: guierrorty;
 begin
+  // Wayland/Mesa libraries expect masked FPU exceptions
  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
- Set8087CW($1372);
  // Tells SDL2 your ideal preference hierarchy depending on which OS it runs on
  SDL_SetHint('SDL_VIDEODRIVER', 'wayland,cocoa,windows,x11');
  SDL_Init(SDL_INIT_EVERYTHING);

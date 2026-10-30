@@ -19,7 +19,7 @@ interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,msepointer,
- msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
+ msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,math,
  msesimplewidgets,msebitmap,typinfo,msesplitter,mseobjectpicker,msetabs,
  mseassistiveclient
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
@@ -1720,6 +1720,7 @@ var
  str1: string;
  widget1: twidget;
 begin
+ {$ifndef usesdl} // TODO
  if fo_savepos in foptions then begin
   rect1:= widgetrect;
   with rect1 do begin
@@ -1733,6 +1734,8 @@ begin
   widgetrect:= rect1;
   application.postevent(tobjectevent.create(ek_checkscreenrange,ievent(self)));
  end;
+ {$endif}
+ 
  if fo_savezorder in foptions then begin
   str1:= '~';
   str1:= reader.readstring('stackedunder',str1);
@@ -1820,6 +1823,7 @@ begin
     writer.writestring('stackedunder','');
    end;
   end;
+   {$ifndef usesdl}
   if  fo_savepos in foptions then begin
    with window.normalwindowrect do begin
     writer.writeinteger('x',x);
@@ -1828,6 +1832,7 @@ begin
     writer.writeinteger('cy',cy);
    end;
   end;
+ {$endif}
  end;
 end;
 

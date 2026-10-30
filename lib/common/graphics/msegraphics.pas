@@ -33,17 +33,17 @@ const
  defaultfontalias = 'stf_default';
 
  invalidgchandle = ptruint(-1);
- 
-type 
- childbounds = record  // for wo_transparentbackground     
+
+type
+ childbounds = record  // for wo_transparentbackground
   left: integer;
   top: integer;
   height: integer;
   width: integer;
- end; 
- 
+ end;
+
 var
- mse_formchild : array of childbounds; // for wo_transparentbackground       
+ mse_formchild : array of childbounds; // for wo_transparentbackground
 
 type
  gckindty = (gck_screen,gck_pixmap,gck_printer,gck_metafile);
@@ -1470,13 +1470,13 @@ type
 var
  gdilockcount: integer;
  gdilockthread: threadty;
- 
+
 procedure setchildbounds(const sender: TObject);
 var
 // x, y : integer;  // Note: Local variable "y" not used
 x : integer;
 begin
-   
+
 setlength(mse_formchild,0);
 
 if sender is tmseform then
@@ -1537,7 +1537,7 @@ if sender is tmseform then
   mse_formchild[length(mse_formchild) - 1].width  := tcustombooleanedit(tmseform(sender).Children[X]).width;
   mse_formchild[length(mse_formchild) - 1].height  := tcustombooleanedit(tmseform(sender).Children[X]).height;
   end;
- 
+
  end;
 
 procedure initdefaultvalues(var avalue: edgecolorinfoty);
@@ -1755,7 +1755,7 @@ begin
  application.lock();
  gdilockthread:= sys_getcurrentthread();
  if (gdilockcount = 0) and not application.ismainthread then begin
- {$ifndef usesdl} 
+ {$ifndef usesdl}
   gui_disconnectmaineventqueue();
  {$endif}
  end;
@@ -1768,7 +1768,7 @@ begin
  if gdilockcount = 0 then begin
   gdilockthread:= 0;
   if not application.ismainthread then begin
-{$ifndef usesdl} 
+{$ifndef usesdl}
   gui_connectmaineventqueue();
  {$endif}
    end;

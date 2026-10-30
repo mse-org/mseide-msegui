@@ -11,8 +11,8 @@ unit msesdlgdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- msegraphics,msetypes,msestrings,mseguiglob,sdl4msegui,msebitmap,
- msesysutils,sdl2_gfxprimitives;
+ msegraphics,msetypes,msestrings,mseguiglob,sdl4msegui,msebitmap,mseftfontcache,
+ msefontcache, msesysutils,sdl2_gfxprimitives;
 
 const
  radtodeg = 360/(2*pi);
@@ -61,6 +61,97 @@ const
    defaultfontname,         'Courier New',
   //stf_helvetica stf_roman          stf_courier
     'Arial',     'Times New Roman', 'Courier New');
+
+type
+ tsdlftfontcache = class(tftfontcache)
+  protected
+   procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
+                                      const bitmap: pbitmapdataty); override;
+  public
+   procedure drawstring16(var drawinfo: drawinfoty;
+                                    const afont: fontty); override;
+ end;
+
+var
+ ffontcache: tsdlftfontcache;
+ currentfont: fontty;      // set in gdi_changegc
+
+function fontcache: tsdlftfontcache;
+begin
+ if ffontcache = nil then begin
+  tsdlftfontcache.create(tftfontcache(ffontcache));
+ end;
+ result:= ffontcache;
+end;
+
+procedure tsdlftfontcache.drawglyph(var drawinfo: drawinfoty;
+                     const pos: pointty; const bitmap: pbitmapdataty);
+var
+ surf: PSDL_Surface;
+ sp: CSDL_Surface;
+ tex: SDL_Texture;
+ rect1: SDL_Rect;
+ x,y: integer;
+ src: pbyte;
+ dst: PLongword;
+ fgpix: longword;
+begin
+ with bitmap^ do begin
+  if (width <= 0) or (height <= 0) then begin
+   exit;
+  end;
+  surf:= SDL_CreateRGBSurface(0,width,height,32,
+                  $00FF0000,$0000FF00,$000000FF,$FF000000);
+  if surf = 0 then begin
+   exit;
+  end;
+  sp:= CSDL_Surface(ptruint(surf));
+  fgpix:= (longword(fgrgb.red) shl 16) or (longword(fgrgb.green) shl 8) or
+                                                          fgrgb.blue;
+  src:= pbyte(@data);
+  for y:= 0 to height-1 do begin
+   // rows are stored bottom-up: write them from the last row up
+   dst:= PLongword(ptruint(sp^.pixels) + ptruint((height-1-y)*sp^.pitch));
+   for x:= 0 to width-1 do begin
+    dst^:= (longword(src^) shl 24) or fgpix;
+    inc(src);
+    inc(dst);
+   end;
+  end;
+  tex:= SDL_CreateTextureFromSurface(drawinfo.gc.handle,surf);
+  if tex <> 0 then begin
+   SDL_SetTextureBlendMode(tex,SDL_BLENDMODE_BLEND);
+   rect1.x:= pos.x;               // already includes origin and left bearing
+   rect1.y:= pos.y - height;      // CHANGED: pos.y is the bottom edge of the glyph
+   rect1.w:= width;
+   rect1.h:= height;
+   SDL_RenderCopy(drawinfo.gc.handle,tex,nil,@rect1);
+   SDL_DestroyTexture(tex);
+  end;
+  SDL_FreeSurface(surf);
+ end;
+end;
+
+procedure tsdlftfontcache.drawstring16(var drawinfo: drawinfoty;
+                                                  const afont: fontty);
+var
+ rect1: rectty;
+ rect2: SDL_Rect;
+begin
+ if df_opaque in drawinfo.gc.drawingflags then begin
+  if textbackgroundrect(drawinfo,afont,rect1) then begin
+   rect2.x:= rect1.x + drawinfo.origin.x;   // check: see item 2 below
+   rect2.y:= rect1.y + drawinfo.origin.y;
+   rect2.w:= rect1.cx;
+   rect2.h:= rect1.cy;
+   SDL_SetRenderDrawBlendMode(drawinfo.gc.handle,SDL_BLENDMODE_NONE);
+   SDL_SetRenderDrawColor(drawinfo.gc.handle,bgrgb.red,bgrgb.green,
+                                      bgrgb.blue,255 - bgrgb.res);
+   SDL_RenderFillRect(drawinfo.gc.handle,@rect2);
+  end;
+ end;
+ inherited;
+end;
 
 function sdlgetdefaultfontnames: defaultfontnamesty;
 begin
@@ -227,8 +318,10 @@ end;
    end;
    SDL_CheckError('SDL_RenderSetClipRect');
   end;
-  if gvm_font in mask then begin
+   if gvm_font in mask then begin
+   currentfont:= font;
   end;
+  
  end;
 end;
 
@@ -363,44 +456,7 @@ begin
  SDL_CheckError('drawarc');
 end;
 
-procedure gdi_drawstring16(var drawinfo: drawinfoty);
-var
- s: ansistring;
- i,c: integer;
- ptext: pwidechar;
- rect1: SDL_Rect;
-begin
- with drawinfo, text16pos do begin
- {
-writeln('DRAWSTR count=',drawinfo.text16pos.count,
-        ' opaque=',df_opaque in drawinfo.gc.drawingflags,
-        ' x=',drawinfo.text16pos.pos^.x);
-    }    
-         if count > 0 then begin
-   if df_opaque in gc.drawingflags then begin
-    // selected text etc.: fill the background first (8x8 font: ascent 7, descent 1)
-    rect1.x:= pos^.x + origin.x;
-    rect1.y:= pos^.y + origin.y - 7;
-    rect1.w:= count * 8;
-    rect1.h:= 8;
-    SDL_SetRenderDrawBlendMode(gc.handle,SDL_BLENDMODE_NONE);
-    SDL_SetRenderDrawColor(gc.handle,bgrgb.red,bgrgb.green,bgrgb.blue,
-                                                           255 - bgrgb.res);
-    SDL_RenderFillRect(gc.handle,@rect1);
-   end;
-   setlength(s, count);
-   ptext:= pwidechar(text);
-   for i:= 0 to count - 1 do begin
-    c:= ord(ptext[i]);
-    if c > 127 then c:= ord('?');
-    s[i + 1]:= char(c);
-   end;
-   stringRGBA(gc.handle, pos^.x + origin.x, pos^.y + origin.y - 7, pchar(s),
-              fgrgb.red, fgrgb.green, fgrgb.blue, 255 - fgrgb.res);
-  end;
- end;
- SDL_CheckError('drawstring16');
-end;
+
 procedure gdi_fillrect(var drawinfo: drawinfoty);
 var
  rect1: SDL_Rect;
@@ -419,12 +475,47 @@ end;
 //  writeln('fillrect x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
   //      ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
  
- // if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
+  if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
   
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
   SDL_RenderFillRect(gc.handle,@rect1);
   SDL_CheckError('SDL_RenderFillRect');
  end;
+end;
+
+procedure gdi_getfont(var drawinfo: drawinfoty);
+begin
+ fontcache.getfont(drawinfo);
+end;
+
+procedure gdi_freefontdata(var drawinfo: drawinfoty);
+begin
+ if ffontcache <> nil then begin
+ // fontcache.freefontdata(drawinfo);
+ end;
+end;
+
+procedure gdi_gettext16width(var drawinfo: drawinfoty);
+begin
+ fontcache.gettext16width(drawinfo);
+end;
+
+procedure gdi_getchar16widths(var drawinfo: drawinfoty);
+begin
+ fontcache.getchar16widths(drawinfo);
+end;
+
+procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
+begin
+ fontcache.getfontmetrics(drawinfo);
+end;
+
+procedure gdi_drawstring16(var drawinfo: drawinfoty);
+begin
+ if currentfont <> 0 then begin
+  fontcache.drawstring16(drawinfo,currentfont);
+ end;
+ SDL_CheckError('drawstring16');
 end;
 
 procedure gdi_fillelipse(var drawinfo: drawinfoty);
@@ -462,6 +553,8 @@ var
  sp,mp,dp,dsp: CSDL_Surface;
  p,pm,pd: PLongword;
  x,y: integer;
+ mono: boolean;
+ fgpix: longword;
 begin
  with drawinfo,copyarea,gcvalues^ do begin
   rect1.x:= sourcerect^.x;
@@ -472,16 +565,8 @@ begin
   rect2.y:= destrect^.y;
   rect2.w:= destrect^.cx;
   rect2.h:= destrect^.cy;
-{
-  if rect1.w <= 2 then begin
-   writeln('CARET mode=',ord(drawinfo.copyarea.copymode),
-     ' srcispixmap=',df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags,
-     ' dstispixmap=',df_canvasispixmap in drawinfo.gc.drawingflags,
-     ' src=',rect1.x,',',rect1.y,' dest=',rect2.x,',',rect2.y);
-  end;
-}
+
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
-   // source is the window: read its pixels into the destination pixmap
    if df_canvasispixmap in drawinfo.gc.drawingflags then begin
     dsp:= CSDL_Surface(ptruint(drawinfo.paintdevice));
     SDL_RenderReadPixels(tcanvas1(source).fdrawinfo.gc.handle,@rect1,$16362004,
@@ -490,6 +575,8 @@ begin
    end;
    exit;
   end;
+
+  mono:= ismonopixmap(tcanvas1(source).fdrawinfo.paintdevice);
 
   asurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
                        $00FF0000,$0000FF00,$000000FF,$FF000000);
@@ -500,7 +587,24 @@ begin
   SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,nil);
   sp:= CSDL_Surface(ptruint(asurface));
 
-  if drawinfo.copyarea.mask <> nil then begin
+  if mono then begin
+   // mono glyph: set bits take the foreground color, clear bits are transparent
+   fgpix:= $FF000000 or (longword(fgrgb.red) shl 16) or
+                        (longword(fgrgb.green) shl 8) or fgrgb.blue;
+   for y:= 0 to sp^.h-1 do begin
+    p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+    for x:= 0 to sp^.w-1 do begin
+     if (p^ and $00FFFFFF) <> 0 then begin
+      p^:= fgpix;
+     end
+     else begin
+      p^:= 0;
+     end;
+     inc(p);
+    end;
+   end;
+  end
+  else if drawinfo.copyarea.mask <> nil then begin
    msurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
                         $00FF0000,$0000FF00,$000000FF,$FF000000);
    SDL_unlockSurface(drawinfo.copyarea.mask.handle);
@@ -539,8 +643,6 @@ begin
                         $00FF0000,$0000FF00,$000000FF,$FF000000);
    dp:= CSDL_Surface(ptruint(dsurface));
    SDL_RenderReadPixels(drawinfo.gc.handle,@rect2,$16362004,dp^.pixels,dp^.pitch);
- //  writeln('XOR src0=',inttohex(PLongword(sp^.pixels)^,8),
-   //        ' dest0=',inttohex(PLongword(dp^.pixels)^,8));
    for y:= 0 to sp^.h-1 do begin
     p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
     pd:= PLongword(ptruint(dp^.pixels) + ptruint(y*dp^.pitch));
@@ -553,13 +655,13 @@ begin
    SDL_FreeSurface(dsurface);
   end;
 
-   atexture:= SDL_CreateTextureFromSurface(drawinfo.gc.handle,asurface);
+  atexture:= SDL_CreateTextureFromSurface(drawinfo.gc.handle,asurface);
   if atexture<>0 then begin
    SDL_SetTextureBlendMode(atexture,SDL_BLENDMODE_BLEND);
    SDL_RenderCopy(drawinfo.gc.handle, atexture, nil, @rect2);
    if (rect2.w <= 2) and
         not (df_canvasispixmap in drawinfo.gc.drawingflags) then begin
-    SDL_RenderPresent(drawinfo.gc.handle);   // test: show caret steps at once
+    SDL_RenderPresent(drawinfo.gc.handle);
    end;
   end;
   SDL_DestroyTexture(atexture);
@@ -620,57 +722,6 @@ end;
 
 procedure gdi_getfonthighres(var drawinfo: drawinfoty);
 begin
-end;
-
-procedure gdi_getfont(var drawinfo: drawinfoty);
-begin
- with drawinfo.getfont,fontdata^ do begin
-  font:= 1;               // nonzero fake handle, there is only one font
-  fonthighres:= 0;
-  basefont:= 1;
-  ascent:= 7;
-  descent:= 1;
-  linespacing:= 8;
-  realheight:= 8;
-  caretshift:= 0;
-  linewidth:= 1;
- end;
- drawinfo.getfont.ok:= true;
-end;
-
-procedure gdi_freefontdata(var drawinfo: drawinfoty);
-begin
-end;
-
-procedure gdi_gettext16width(var drawinfo: drawinfoty);
-begin
- with drawinfo.gettext16width do begin
-  result:= count * 8;
- end;
-end;
-
-procedure gdi_getchar16widths(var drawinfo: drawinfoty);
-var
- int1: integer;
- po1: pinteger;
-begin
- with drawinfo.getchar16widths do begin
-  po1:= resultpo;
-  for int1:= 0 to count-1 do begin
-   po1^:= 8;
-   inc(po1);
-  end;
- end;
-end;
-
-procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
-begin
- with drawinfo.getfontmetrics.resultpo^ do begin
-  leftbearing:= 0;
-  width:= 8;
-  rightbearing:= 0;
-  sum:= 8;
- end;
 end;
 
 procedure init;
