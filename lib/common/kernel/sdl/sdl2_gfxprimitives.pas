@@ -2817,7 +2817,6 @@ var
 	xmh, xph, xmi, xpi, xmj, xpj, xmk, xpk: integer;
 
 begin 
-
 	(*
 	* Sanity check radii 
 	*)

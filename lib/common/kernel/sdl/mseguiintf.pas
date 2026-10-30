@@ -167,6 +167,7 @@ function GetCharacterPlacementW(DC: HDC; p2: PWideChar; p3, p4: Integer;
 {$endif}
 
 var
+ lastbutton: integer;
  canshutdown: integer;
  //widgetclass: atom;
  //childwidgetclass: atom;
@@ -910,6 +911,8 @@ function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  rect1: rectty;
 begin
+
+
  result:= gue_resizewindow;
  rect1:= getclientrect(id);
  if not ((rect.x=rect1.x) and (rect.y=rect1.y) and 
@@ -987,9 +990,9 @@ var
  release1: boolean;
  mousewheel1: mousewheelty;
  pt1: pointty;
- numevents: integer;
+ buttons: integer;
  mx, my: integer;
- btn: mousebuttonty; // FIX 1: Correct native MSEgui type name!
+ btn: mousebuttonty;
 begin
  result:= nil;
  if gui_hasevent then begin
@@ -1004,7 +1007,8 @@ begin
     end;
     SDL_WINDOWEVENT : begin
      winid:= SDL_GetWindowFromID(e.window.window);
-     if (e.window.event = SDL_WINDOWEVENT_ENTER) or (e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED) then begin
+     if (e.window.event = SDL_WINDOWEVENT_ENTER) or
+                     (e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED) then begin
       if (winid = applicationwindow) and (lastfocuswindow <> 0) then begin
        if windowvisible(lastfocuswindow) then begin
         gui_setwindowfocus(lastfocuswindow);
@@ -1031,7 +1035,8 @@ begin
         end;
        end;
       end;
-     end else if (e.window.event = SDL_WINDOWEVENT_LEAVE) or (e.window.event = SDL_WINDOWEVENT_FOCUS_LOST) then begin
+     end else if (e.window.event = SDL_WINDOWEVENT_LEAVE) or
+                     (e.window.event = SDL_WINDOWEVENT_FOCUS_LOST) then begin
       if mousewindow = winid then mousewindow:= 0;
       result:= twindowevent.create(ek_leavewindow,winid);
      end else if (e.window.event = SDL_WINDOWEVENT_CLOSE) then begin
@@ -1040,7 +1045,7 @@ begin
       end else begin
        result:= twindowevent.create(ek_close,winid);
       end;
-     end else if (e.window.event = SDL_WINDOWEVENT_RESIZED) 
+     end else if (e.window.event = SDL_WINDOWEVENT_RESIZED)
       or (e.window.event = SDL_WINDOWEVENT_SIZE_CHANGED) then begin
       postconfigureevent(winid);
       SDL_CheckError('resized');
@@ -1065,10 +1070,10 @@ begin
     end;
     SDL_TEXTINPUT: begin
      charbuffer:= charbuffer + pchar(e.text.text);
-     result:= tkeyevent.create(e.text.window,false,key_none,key_none,shiftstate,
-                                    charbuffer,e.text.timestamp);
+     result:= tkeyevent.create(SDL_GetWindowFromID(e.text.window),false,
+                  key_none,key_none,shiftstate,charbuffer,e.text.timestamp);
      break;
-    end; 
+    end;
     SDL_KEYDOWN : begin
      key1:= SDL_KeyCodeToKey(e.key.keysym.sym);
      shiftstate:= SDL_GetShiftState(e.key);
@@ -1088,71 +1093,89 @@ begin
      break;
     end;
     SDL_MOUSEBUTTONDOWN: begin
-     shiftstate1:= sdlmousetoshiftstate(e.button.state);
+     // real button mask from SDL, the e.button record has wrong fields
+     buttons:= SDL_GetMouseState(@mx, @my);
+     if (buttons and 1) <> 0 then begin
+      lastbutton:= 1;
+      btn:= mb_left;
+     end
+     else if (buttons and 2) <> 0 then begin
+      lastbutton:= 2;
+      btn:= mb_middle;
+     end
+     else if (buttons and 4) <> 0 then begin
+      lastbutton:= 3;
+      btn:= mb_right;
+     end
+     else begin
+      lastbutton:= 1;
+      btn:= mb_left;
+     end;
+     shiftstate1:= sdlmousetoshiftstate(buttons);
      shiftstate1:= shiftstate1+shiftstate;
      release1:= false;
-     
-     winid := SDL_GetWindowFromID(e.button.window);
-     mousewindow := winid;
-     
-     SDL_GetMouseState(@mx, @my);
-     pt1.x := mx;
-     pt1.y := my;
-     
-     // FIX 2: Explicitly map native SDL button ids to MSEgui's mousebuttonty enums
-     case e.button.button of
-       1: btn := mb_left;
-       2: btn := mb_middle;
-       3: btn := mb_right;
-       else btn := mb_left;
-     end;
-     
+
+     winid:= SDL_GetWindowFromID(e.button.window);
+     mousewindow:= winid;
+
+     pt1.x:= mx;
+     pt1.y:= my;
+
      result:= tmouseevent.create(winid,release1,
       btn,mw_none,
       pt1,shiftstate1, e.button.timestamp);
      break;
     end;
-    SDL_MOUSEMOTION: begin
-     shiftstate1:= sdlmousetoshiftstate(e.motion.state);
+          SDL_MOUSEMOTION: begin
+     buttons:= SDL_GetMouseState(@mx, @my);
+     shiftstate1:= sdlmousetoshiftstate(buttons);
      shiftstate1:= shiftstate1+shiftstate;
+     if (buttons and 1) <> 0 then begin
+      shiftstate1:= shiftstate1 + [ss_left];
+     end;
+     if (buttons and 2) <> 0 then begin
+      shiftstate1:= shiftstate1 + [ss_middle];
+     end;
+     if (buttons and 4) <> 0 then begin
+      shiftstate1:= shiftstate1 + [ss_right];
+     end;
      release1:= false;
-     
-     winid := SDL_GetWindowFromID(e.motion.window);
-     mousewindow := winid;
-     
-     SDL_GetMouseState(@mx, @my);
-     pt1.x := mx;
-     pt1.y := my;
-     
+
+     winid:= SDL_GetWindowFromID(e.motion.window);
+     mousewindow:= winid;
+
+     pt1.x:= mx;
+     pt1.y:= my;
+
      result:= tmouseevent.create(winid,release1,
-      checkbutton(e.motion.state),mw_none,
+      mb_none,mw_none,
       pt1,shiftstate1, e.motion.timestamp);
      break;
     end;
     SDL_MOUSEBUTTONUP: begin
-     shiftstate1:= sdlmousetoshiftstate(e.button.state);
+     // the mask is already 0 on release: use the button remembered on press
+     buttons:= SDL_GetMouseState(@mx, @my);
+     shiftstate1:= sdlmousetoshiftstate(buttons);
      shiftstate1:= shiftstate1+shiftstate;
      release1:= true;
-     
-     winid := SDL_GetWindowFromID(e.button.window);
-     
-     SDL_GetMouseState(@mx, @my);
+
+     winid:= SDL_GetWindowFromID(e.button.window);
+
      if (mx = 0) and (my = 0) then begin
-      pt1 := gui_getpointerpos;
+      pt1:= gui_getpointerpos;
       subpoint1(pt1, getclientrect(winid).pos);
-     end else begin
-      pt1.x := mx;
-      pt1.y := my;
+     end
+     else begin
+      pt1.x:= mx;
+      pt1.y:= my;
      end;
-     
-     // FIX 3: Explicitly map native SDL button release ids to mousebuttonty enums
-     case e.button.button of
-       1: btn := mb_left;
-       2: btn := mb_middle;
-       3: btn := mb_right;
-       else btn := mb_left;
+
+     case lastbutton of
+      2: btn:= mb_middle;
+      3: btn:= mb_right;
+      else btn:= mb_left;
      end;
-     
+
      result:= tmouseevent.create(winid,release1,
       btn,mw_none,
       pt1,shiftstate1, e.button.timestamp);
@@ -1164,13 +1187,13 @@ begin
       subpoint1(pt1,getclientrect(mousewindow).pos);
       inc(mousewheelpos,e.wheel.y);
       while mousewheelpos >= wheelstep do begin
-       result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,mb_none,mw_up,pt1,
-              shiftstate,e.wheel.timestamp);
+       result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,
+              mb_none,mw_up,pt1,shiftstate,e.wheel.timestamp);
        dec(mousewheelpos,wheelstep);
       end;
       while mousewheelpos <= -wheelstep do begin
-       result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,mb_none,mw_down,pt1,
-              shiftstate,e.wheel.timestamp);
+       result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,
+              mb_none,mw_down,pt1,shiftstate,e.wheel.timestamp);
        inc(mousewheelpos,wheelstep);
       end;
      end;
@@ -1185,174 +1208,6 @@ begin
  end;
 end;
 
-
-{
-function gui_getevent: tmseevent;
-var
- e: SDL_Event;
- rect1: rectty;
- winid: winidty;
- key1: keyty;
- shiftstate1: shiftstatesty;
- release1: boolean;
- mousewheel1: mousewheelty;
- pt1: pointty;
- numevents: integer;
-begin
- result:= nil;
- if gui_hasevent then begin
-  SDL_PumpEvents;
- end;
- while true do begin
-  //if SDL_PeepEvents(@e, numevents, SdlGetEvent, SDL_FIRSTEVENT, SDL_LASTEVENT)>0 then begin
-  if (SDL_PollEvent(@e)>0) then begin
-   case e.type_ of
-    SDL_QUITEV:  begin
-     application.postevent(tmseevent.create(ek_terminate));
-     break;
-    end;
-    SDL_WINDOWEVENT : begin
-     winid:= SDL_GetWindowFromID(e.window.window);
-     if (e.window.event = SDL_WINDOWEVENT_ENTER) or (e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED) then begin
-      if (winid = applicationwindow) and (lastfocuswindow <> 0) then begin
-       if windowvisible(lastfocuswindow) then begin
-        gui_setwindowfocus(lastfocuswindow);
-       end
-       else begin
-        if application.activewindow <> nil then begin
-         gui_setwindowfocus(application.activewindow.winid);
-        end
-        else begin
-         if application.mainwindow <> nil then begin
-          gui_setwindowfocus(application.mainwindow.winid);
-         end;
-        end;
-       end;
-      end
-      else begin
-       if windowvisible(winid) then begin
-        lastfocuswindow:= winid;
-        if e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED then begin
-         result:= twindowevent.create(ek_focusin,winid);
-        end else if e.window.event = SDL_WINDOWEVENT_ENTER then begin
-         result:= twindowevent.create(ek_enterwindow,winid)
-        end;
-       end;
-      end;
-     end else if (e.window.event = SDL_WINDOWEVENT_LEAVE) or (e.window.event = SDL_WINDOWEVENT_FOCUS_LOST) then begin
-      result:= twindowevent.create(ek_leavewindow,winid);
-     end else if (e.window.event = SDL_WINDOWEVENT_CLOSE) then begin
-      if winid = applicationwindow then begin
-       result:= tmseevent.create(ek_terminate);
-      end else begin
-       result:= twindowevent.create(ek_close,winid);
-      end;
-     end else if (e.window.event = SDL_WINDOWEVENT_RESIZED) 
-      or (e.window.event = SDL_WINDOWEVENT_SIZE_CHANGED) then begin
-      SDL_GetWindowSurface(winid);
-      postconfigureevent(winid);
-      SDL_CheckError('resized');
-     end else if (e.window.event = SDL_WINDOWEVENT_EXPOSED) then begin
-      gui_getwindowrect(winid,rect1);
-      result:= twindowrectevent.create(ek_expose,winid,rect1,nullpoint);
-     end else if (e.window.event = SDL_WINDOWEVENT_MOVED) then begin
-      //postconfigureevent(winid);
-     end else if (e.window.event = SDL_WINDOWEVENT_HIDDEN) then begin
-      result:= twindowevent.create(ek_hide,winid);
-     end else if (e.window.event = SDL_WINDOWEVENT_SHOWN) then begin
-      result:= twindowevent.create(ek_show,winid);
-     end;
-     if winid = sizingwindow then begin
-      inc(eventlooping);
-      try
-       tapplication1(application).eventloop(true);
-      finally
-       dec(eventlooping);
-      end;
-     end;
-     break;
-    end;
-    SDL_TEXTINPUT: begin
-     charbuffer:= charbuffer + pchar(e.text.text);
-     result:= tkeyevent.create(e.text.window,false,key_none,key_none,shiftstate,
-                                    charbuffer,e.text.timestamp);
-     break;
-    end; 
-    SDL_KEYDOWN : begin
-     key1:= SDL_KeyCodeToKey(e.key.keysym.sym);
-     shiftstate:= SDL_GetShiftState(e.key);
-     if key1 = key_escape then begin
-      escapepressed:= true;
-     end;
-     result:= tkeyevent.create(SDL_GetWindowFromID(e.key.window),false,
-       key1,key1,shiftstate,charbuffer,e.key.timestamp);
-     break;
-    end;
-    SDL_KEYUP : begin
-     key1:= SDL_KeyCodeToKey(e.key.keysym.sym);
-     shiftstate:= SDL_GetShiftState(e.key);
-     result:= tkeyevent.create(SDL_GetWindowFromID(e.key.window),true,
-       key1,key1,shiftstate,charbuffer,e.key.timestamp);
-     charbuffer:= '';
-     break;
-    end;
-    SDL_MOUSEBUTTONDOWN: begin
-     shiftstate1:= sdlmousetoshiftstate(e.button.state);
-     shiftstate1:= shiftstate1+shiftstate;
-     release1:= false;
-     result:= tmouseevent.create(SDL_GetWindowFromID(e.button.window),release1,
-      checkbuttonindex(e.button.button),mw_none,
-      makepoint(e.button.x,e.button.y),shiftstate1, e.button.timestamp);
-     break;
-    end;
-    SDL_MOUSEMOTION: begin
-     shiftstate1:= sdlmousetoshiftstate(e.motion.state);
-     shiftstate1:= shiftstate1+shiftstate;
-     release1:= false;
-     result:= tmouseevent.create(SDL_GetWindowFromID(e.motion.window),release1,
-      checkbutton(e.motion.state),mw_none,
-      makepoint(e.motion.x,e.motion.y),shiftstate1, e.motion.timestamp);
-     break;
-    end;
-    SDL_MOUSEBUTTONUP: begin
-     shiftstate1:= sdlmousetoshiftstate(e.button.state);
-     shiftstate1:= shiftstate1+shiftstate;
-     release1:= true;
-     result:= tmouseevent.create(SDL_GetWindowFromID(e.button.window),release1,
-      checkbuttonindex(e.button.button),mw_none,
-      makepoint(e.button.x,e.button.y),shiftstate1, e.button.timestamp);
-     break;
-    end;
-    SDL_MOUSEWHEEL: begin
-     if mousewindow <> 0 then begin
-      //e.wheel.x ( - -> left + -> right )
-      //e.wheel.y ( - -> up   + -> down )
-      pt1:= gui_getpointerpos;
-      subpoint1(pt1,getclientrect(mousewindow).pos);
-      inc(mousewheelpos,e.wheel.y);
-      while mousewheelpos >= wheelstep do begin
-       result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,mb_none,mw_up,pt1,
-              shiftstate,e.wheel.timestamp);
-       dec(mousewheelpos,wheelstep);
-      end;
-      while mousewheelpos <= -wheelstep do begin
-       result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,mb_none,mw_down,pt1,
-              shiftstate,e.wheel.timestamp);
-       inc(mousewheelpos,wheelstep);
-      end;
-     end;
-     break;
-    end;
-    SDL_USEREVENT: begin
-     result:= tmseevent(e.user.data1);
-     break;
-    end;
-   end;
-  end;
- end;
- //SDL_CheckError('getevent');
-end;
-}
 function gui_postevent(event: tmseevent): guierrorty;
 var
  sdlevent: SDL_Event;

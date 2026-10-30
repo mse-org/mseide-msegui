@@ -95,7 +95,9 @@ end;
 
 var
  dummysurface: PSDL_Surface;     // unit level, created on first use
-
+var
+ windowrenderer: ptruint;
+ 
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
  int3: integer;
@@ -123,6 +125,11 @@ begin
      arenderer:= SDL_CreateRenderer(paintdevice,int3,SDL_RENDERER_SOFTWARE);
     end;
     gcpo^.handle:= arenderer;
+ 
+        if arenderer <> 0 then begin
+     windowrenderer:= arenderer;
+    end;
+ 
     if arenderer <> 0 then begin
      error:= gde_ok;
     end;
@@ -141,8 +148,12 @@ begin
   end;
  end;
 end;
+
 procedure gdi_destroygc(var drawinfo: drawinfoty);
 begin
+ if drawinfo.gc.handle = windowrenderer then begin
+  windowrenderer:= 0;
+ end;
  if drawinfo.gc.handle <> 0 then begin
   SDL_DestroyRenderer(drawinfo.gc.handle);
   SDL_CheckError('destroygc');
@@ -177,6 +188,7 @@ end;
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
   end;
   if gvm_rasterop in mask then begin
+  //writeln('rasterop=',ord(rasterop));
   end;
   if gvm_brush in mask then begin
   end;
@@ -220,54 +232,6 @@ end;
  end;
 end;
 
-{
-procedure gdi_changegc(var drawinfo: drawinfoty);
-var
- rgbcolor: rgbtriplety;
- ar1: rectarty;
- int1: integer;
- rect1: SDL_Rect;
- pt1: pointty;
-begin
- with drawinfo.gcvalues^,drawinfo.gc do begin
-  if gvm_colorbackground in mask then begin
-   rgbcolor:= colortorgb(colorbackground);
-   SDL_SetRenderDrawColor(handle,rgbcolor.red,rgbcolor.green,rgbcolor.blue,255-rgbcolor.res);
-   SDL_CheckError('SetRenderDrawColor');
-  end;
-  if gvm_colorforeground in mask then begin
-   rgbcolor:= colortorgb(colorforeground);
-   SDL_SetRenderDrawColor(handle,rgbcolor.red,rgbcolor.green,rgbcolor.blue,255-rgbcolor.res);
-   SDL_CheckError('SetRenderDrawColor');
-  end;
-  if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
-  end;
-  if gvm_rasterop in mask then begin
-  end;
-  if gvm_brush in mask then begin
-  end;
-  if gvm_brushorigin in mask then begin
-  end;
-  if gvm_clipregion in mask then begin
-   if clipregion <> 0 then begin
-    ar1:= gui_regiontorects(clipregion);
-    if ar1<>nil then begin
-     //pt1:= addpoint(ar1[0].pos,cliporigin);
-     //rect1.x:= pt1.x;
-     //rect1.y:= pt1.y;
-     //rect1.w:= ar1[0].size.cx;
-     //rect1.h:= ar1[0].size.cy;
-     //cliporigin:= ar1[0].pos;
-     //SDL_RenderSetViewport(drawinfo.gc.handle,@rect1);
-    end;
-   end;
-  end;
-  if gvm_font in mask then begin
-  end;
- end;
-end;
-}
-
 procedure gdi_getcanvasclass(var drawinfo: drawinfoty); //gdifunc
 begin
  //dummy
@@ -281,8 +245,9 @@ end;
 
 procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
 begin
- //SDL_RenderClear(drawinfo.gc.handle);
- //SDL_CheckError('flush');
+ if windowrenderer <> 0 then begin
+  SDL_RenderPresent(windowrenderer);
+ end;
 end;
 
 procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
@@ -350,6 +315,7 @@ writeln('drawlines acolorfg=',inttohex(longword(drawinfo.acolorforeground),8),
         ' gcfg=',inttohex(longword(drawinfo.gcvalues^.colorforeground),8),
         ' cachedfg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
 }
+//writeln('gdi_drawlinesegments');
  with drawinfo do begin
   pp:= ppointaty(points.points);
   org:= origin;
@@ -366,6 +332,7 @@ procedure gdi_drawellipse(var drawinfo: drawinfoty);
 var
  rgb: rgbtriplety;
 begin
+//writeln('gdi_drawellipse');
  with drawinfo, rect.rect^ do begin
   rgb:= colortorgb(acolorforeground);
   // aaellipseRGBA wants center + radii, rect is the bounding box
@@ -376,6 +343,7 @@ begin
                 rgb.red,rgb.green,rgb.blue,255-rgb.res);
  end;
 end;
+
 procedure getarcinfo(const info: drawinfoty; 
                     out xstart,ystart,xend,yend: integer);
 var
@@ -398,36 +366,41 @@ end;
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
 var
  s: ansistring;
- i: integer;
+ i,c: integer;
  ptext: pwidechar;
- c: integer;
+ rect1: SDL_Rect;
 begin
-writeln('drawstring16 count=',drawinfo.text16pos.count,
-        ' pos=',drawinfo.text16pos.pos^.x,',',drawinfo.text16pos.pos^.y,
-        ' origin=',drawinfo.origin.x,',',drawinfo.origin.y);
  with drawinfo, text16pos do begin
-  if count > 0 then begin
+ {
+writeln('DRAWSTR count=',drawinfo.text16pos.count,
+        ' opaque=',df_opaque in drawinfo.gc.drawingflags,
+        ' x=',drawinfo.text16pos.pos^.x);
+    }    
+         if count > 0 then begin
+   if df_opaque in gc.drawingflags then begin
+    // selected text etc.: fill the background first (8x8 font: ascent 7, descent 1)
+    rect1.x:= pos^.x + origin.x;
+    rect1.y:= pos^.y + origin.y - 7;
+    rect1.w:= count * 8;
+    rect1.h:= 8;
+    SDL_SetRenderDrawBlendMode(gc.handle,SDL_BLENDMODE_NONE);
+    SDL_SetRenderDrawColor(gc.handle,bgrgb.red,bgrgb.green,bgrgb.blue,
+                                                           255 - bgrgb.res);
+    SDL_RenderFillRect(gc.handle,@rect1);
+   end;
    setlength(s, count);
    ptext:= pwidechar(text);
    for i:= 0 to count - 1 do begin
     c:= ord(ptext[i]);
-    if c > 127 then c:= ord('?');      // the 8x8 font only has ASCII
+    if c > 127 then c:= ord('?');
     s[i + 1]:= char(c);
-   end;{
-   
-   
-   stringRGBA(gc.handle, pos^.x + origin.x - (count * 4),
-              pos^.y + origin.y - 4, pchar(s),
+   end;
+   stringRGBA(gc.handle, pos^.x + origin.x, pos^.y + origin.y - 7, pchar(s),
               fgrgb.red, fgrgb.green, fgrgb.blue, 255 - fgrgb.res);
- }
- 
- stringRGBA(gc.handle, pos^.x + origin.x, pos^.y + origin.y - 7, pchar(s),
-           fgrgb.red, fgrgb.green, fgrgb.blue, 255 - fgrgb.res);
   end;
  end;
  SDL_CheckError('drawstring16');
 end;
-
 procedure gdi_fillrect(var drawinfo: drawinfoty);
 var
  rect1: SDL_Rect;
@@ -437,11 +410,16 @@ with drawinfo do begin
   rect1.y:= rect.rect^.y + origin.y;
   rect1.w:= rect.rect^.cx;
   rect1.h:= rect.rect^.cy;
-  
+ { 
+  if rect1.w <= 2 then begin
+ writeln('thin fill x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
+         ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+end;
+}
 //  writeln('fillrect x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
   //      ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
  
-  if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
+ // if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
   
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
   SDL_RenderFillRect(gc.handle,@rect1);
@@ -453,9 +431,10 @@ procedure gdi_fillelipse(var drawinfo: drawinfoty);
 var
  rgb: rgbtriplety;
 begin
+//writeln('gdi_fillelipse');
  with drawinfo, rect.rect^ do begin
   rgb:= colortorgb(acolorforeground);
-  filledEllipseRGBA(gc.handle, pos.x, pos.y, round(cx/2), round(cy/2), 
+  filledEllipseRGBA(gc.handle, pos.x + origin.x, pos.y + origin.y, round(cx/2), round(cy/2), 
   rgb.red, rgb.green, rgb.blue, 255-rgb.res);
  end;
 end;
@@ -472,19 +451,19 @@ begin
  end;
 end;
 
+var
+ invertblend: cardinal;
+
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  rect1,rect2: SDL_rect;
  atexture: SDL_Texture;
- asurface,msurface: PSDL_Surface;
- sp,mp: CSDL_Surface;
- p,pm: PLongword;
+ asurface,msurface,dsurface: PSDL_Surface;
+ sp,mp,dp,dsp: CSDL_Surface;
+ p,pm,pd: PLongword;
  x,y: integer;
 begin
  with drawinfo,copyarea,gcvalues^ do begin
-  if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
-   exit;
-  end;
   rect1.x:= sourcerect^.x;
   rect1.y:= sourcerect^.y;
   rect1.w:= sourcerect^.cx;
@@ -493,6 +472,24 @@ begin
   rect2.y:= destrect^.y;
   rect2.w:= destrect^.cx;
   rect2.h:= destrect^.cy;
+{
+  if rect1.w <= 2 then begin
+   writeln('CARET mode=',ord(drawinfo.copyarea.copymode),
+     ' srcispixmap=',df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags,
+     ' dstispixmap=',df_canvasispixmap in drawinfo.gc.drawingflags,
+     ' src=',rect1.x,',',rect1.y,' dest=',rect2.x,',',rect2.y);
+  end;
+}
+  if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
+   // source is the window: read its pixels into the destination pixmap
+   if df_canvasispixmap in drawinfo.gc.drawingflags then begin
+    dsp:= CSDL_Surface(ptruint(drawinfo.paintdevice));
+    SDL_RenderReadPixels(tcanvas1(source).fdrawinfo.gc.handle,@rect1,$16362004,
+         pointer(ptruint(dsp^.pixels) + ptruint(rect2.y*dsp^.pitch + rect2.x*4)),
+         dsp^.pitch);
+   end;
+   exit;
+  end;
 
   asurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
                        $00FF0000,$0000FF00,$000000FF,$FF000000);
@@ -503,11 +500,7 @@ begin
   SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,nil);
   sp:= CSDL_Surface(ptruint(asurface));
 
- // writeln('copyarea first pixel=',inttohex(PLongword(sp^.pixels)^,8),
-   //       ' mask=',drawinfo.copyarea.mask <> nil);
-
   if drawinfo.copyarea.mask <> nil then begin
-   // alpha from the mask: white = visible, black = transparent
    msurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
                         $00FF0000,$0000FF00,$000000FF,$FF000000);
    SDL_unlockSurface(drawinfo.copyarea.mask.handle);
@@ -520,10 +513,10 @@ begin
     pm:= PLongword(ptruint(mp^.pixels) + ptruint(y*mp^.pitch));
     for x:= 0 to sp^.w-1 do begin
      if (pm^ and $00FFFFFF) <> 0 then begin
-      p^:= p^ or $FF000000;           // visible
+      p^:= p^ or $FF000000;
      end
      else begin
-      p^:= p^ and $00FFFFFF;          // transparent
+      p^:= p^ and $00FFFFFF;
      end;
      inc(p);
      inc(pm);
@@ -532,7 +525,6 @@ begin
    SDL_FreeSurface(msurface);
   end
   else begin
-   // no mask: make everything opaque
    for y:= 0 to sp^.h-1 do begin
     p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
     for x:= 0 to sp^.w-1 do begin
@@ -542,17 +534,39 @@ begin
    end;
   end;
 
-  atexture:= SDL_CreateTextureFromSurface(drawinfo.gc.handle,asurface);
+  if drawinfo.copyarea.copymode = rop_xor then begin
+   dsurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
+                        $00FF0000,$0000FF00,$000000FF,$FF000000);
+   dp:= CSDL_Surface(ptruint(dsurface));
+   SDL_RenderReadPixels(drawinfo.gc.handle,@rect2,$16362004,dp^.pixels,dp^.pitch);
+ //  writeln('XOR src0=',inttohex(PLongword(sp^.pixels)^,8),
+   //        ' dest0=',inttohex(PLongword(dp^.pixels)^,8));
+   for y:= 0 to sp^.h-1 do begin
+    p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+    pd:= PLongword(ptruint(dp^.pixels) + ptruint(y*dp^.pitch));
+    for x:= 0 to sp^.w-1 do begin
+     p^:= ((p^ xor pd^) and $00FFFFFF) or $FF000000;
+     inc(p);
+     inc(pd);
+    end;
+   end;
+   SDL_FreeSurface(dsurface);
+  end;
+
+   atexture:= SDL_CreateTextureFromSurface(drawinfo.gc.handle,asurface);
   if atexture<>0 then begin
    SDL_SetTextureBlendMode(atexture,SDL_BLENDMODE_BLEND);
-   if SDL_RenderCopy(drawinfo.gc.handle, atexture, nil, @rect2)=0 then begin
-    SDL_CheckError('rendercopy');
+   SDL_RenderCopy(drawinfo.gc.handle, atexture, nil, @rect2);
+   if (rect2.w <= 2) and
+        not (df_canvasispixmap in drawinfo.gc.drawingflags) then begin
+    SDL_RenderPresent(drawinfo.gc.handle);   // test: show caret steps at once
    end;
   end;
   SDL_DestroyTexture(atexture);
   SDL_FreeSurface(asurface);
  end;
 end;
+
 procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
 begin
  //dummy

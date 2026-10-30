@@ -248,45 +248,44 @@ type
 {*
  *  \brief Mouse motion event structure (event.motion.*)
  }
- SDL_MouseMotionEvent = record
+SDL_MouseMotionEvent = record
   type_: cardinal;
   timestamp: cardinal;
   window: cardinal;
-  state: byte; //**< The current button state */
-  padding1: byte;
-  padding2: byte;
-  padding3: byte;
-  x: integer; //**< X coordinate, relative to window */
-  y: integer; //**< Y coordinate, relative to window */
-  xrel: integer; //**< The relative motion in the X direction */
-  yrel: integer; //**< The relative motion in the Y direction */
+  which: cardinal;       //**< The mouse instance id (was missing) */
+  state: cardinal;       //**< The current button state (was a byte) */
+  x: integer;            //**< X coordinate, relative to window */
+  y: integer;            //**< Y coordinate, relative to window */
+  xrel: integer;         //**< The relative motion in the X direction */
+  yrel: integer;         //**< The relative motion in the Y direction */
  end;
-
 {*
  *  \brief Mouse button event structure (event.button.*)
  }
- SDL_MouseButtonEvent = record
-  type_: cardinal; //**< ::SDL_MOUSEBUTTONDOWN or ::SDL_MOUSEBUTTONUP */
+  SDL_MouseButtonEvent = record
+  type_: cardinal;       //**< ::SDL_MOUSEBUTTONDOWN or ::SDL_MOUSEBUTTONUP */
   timestamp: cardinal;
   window: cardinal;
-  button: byte; //**< The mouse button index */
-  state: byte; //**< ::SDL_PRESSED or ::SDL_RELEASED */
-  padding1: byte;
-  padding2: byte;
-  x: integer; //**< X coordinate, relative to window */
-  y: integer; //**< Y coordinate, relative to window */  
+  which: cardinal;       //**< The mouse instance id (was missing) */
+  button: byte;          //**< The mouse button index */
+  state: byte;           //**< ::SDL_PRESSED or ::SDL_RELEASED */
+  clicks: byte;          //**< 1 for single-click, 2 for double-click, ... */
+  padding: byte;
+  x: integer;            //**< X coordinate, relative to window */
+  y: integer;            //**< Y coordinate, relative to window */
  end;
-
 {*
  *  \brief Mouse wheel event structure (event.wheel.*)
  }
-  SDL_MouseWheelEvent = record
-   type_ : cardinal;        //**< ::SDL_MOUSEWHEEL */
-   timestamp : cardinal;
-   window : winidty;        //**< The window with mouse focus, if any */
-   x: integer;              //**< The amount scrolled horizontally */
-   y: integer;              //**< The amount scrolled vertically */
-  end;
+ SDL_MouseWheelEvent = record
+  type_: cardinal;       //**< ::SDL_MOUSEWHEEL */
+  timestamp: cardinal;
+  window: winidty;       //**< The window with mouse focus, if any */
+  which: cardinal;       //**< The mouse instance id (was missing) */
+  x: integer;            //**< The amount scrolled horizontally */
+  y: integer;            //**< The amount scrolled vertically */
+  direction: cardinal;   //**< SDL 2.0.4 and later, harmless on older versions */
+ end;
 
 {*
  *  \brief Joystick axis motion event structure (event.jaxis.*)
@@ -655,6 +654,11 @@ type
  function SDL_CreateSoftwareRenderer(surface: PSDL_Surface): SDL_Renderer; cdecl; external SDLLibName;
  procedure SDL_DestroyRenderer(renderer: SDL_Renderer); cdecl; external SDLLibName;
  function SDL_CreateTextureFromSurface(renderer: SDL_Renderer; surface: PSDL_Surface): SDL_Texture; cdecl; external SDLLibName;
+ function SDL_ComposeCustomBlendMode(srcColorFactor,dstColorFactor,colorOperation,
+                   srcAlphaFactor,dstAlphaFactor,alphaOperation: cardinal): cardinal;
+                   cdecl; external SDLLibName;
+ function SDL_SetTextureBlendModeU(texture: SDL_Texture; blendMode: cardinal): integer;
+                   cdecl; external SDLLibName name 'SDL_SetTextureBlendMode';
  function SDL_QueryTexture(texture: SDL_Texture; format: PCardinal;
                            access: PSdlTextureAccess; w, h: PInteger): integer; cdecl; external SDLLibName;
  function SDL_QueryTexturePixels(texture: SDL_Texture; pixels: pointer; pitch: pinteger): integer; cdecl; external SDLLibName;
@@ -662,6 +666,9 @@ type
  function SDL_GetTextureColorMod(texture: SDL_Texture; var r, g, b: Uint8): Integer; cdecl; external SDLLibName;
  function SDL_SetTextureAlphaMod(textureID: SDL_Texture; alpha: byte): integer; cdecl; external SDLLibName;
  function SDL_GetTextureAlphaMod(textureID: SDL_Texture; var alpha: byte): integer; cdecl; external SDLLibName;
+  function SDL_RenderReadPixels(renderer: SDL_Renderer; rect: pointer;
+          format: cardinal; pixels: pointer; pitch: integer): integer;
+          cdecl; external SDLLibName;
  function SDL_GetTextureHandle(texture: SDL_Texture): integer; cdecl; external SDLLibName;
  function SDL_SetTextureBlendMode(texture: SDL_Texture; blendMode: SDL_BlendMode): Integer; cdecl; external SDLLibName;
  function SDL_GetTextureBlendMode(texture: SDL_Texture; var blendMode: SDL_BlendMode): Integer; cdecl; external SDLLibName;
@@ -1125,10 +1132,10 @@ implementation
  begin
   err:= SDL_GetError;
   if err<>'' then begin
-   debugwriteln('SDL error = ' + ref + ' : ' + err);
+   //debugwriteln('SDL error = ' + ref + ' : ' + err);
    SDL_ClearError;
   end else begin
-   debugwriteln('Success = ' + ref);
+   //debugwriteln('Success = ' + ref);
    result:= gue_ok;
   end;
  end;
@@ -1139,10 +1146,10 @@ implementation
  begin
   err:= SDL_GetError;
   if err<>'' then begin
-   debugwriteln('SDL error = ' + ref + ' : ' + err);
+  // debugwriteln('SDL error = ' + ref + ' : ' + err);
    SDL_ClearError;
   end else begin
-   debugwriteln('Success = ' + ref);
+  // debugwriteln('Success = ' + ref);
    result:= gde_ok;
   end;
  end;
