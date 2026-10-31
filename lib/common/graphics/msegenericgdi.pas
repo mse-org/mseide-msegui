@@ -1203,20 +1203,9 @@ begin
 end;
 
 procedure gdi_regsubregion(var drawinfo: drawinfoty); //gdifunc
-{$ifdef usesdl}
-var
- rect1: SDL_Rect;
-{$endif}
 begin
  with drawinfo.regionoperation do begin
   regionop(pregioninfoty(source)^,pregioninfoty(dest)^,reop_sub);
-{$ifdef usesdl}
-  rect1.x:= rect.x;
-  rect1.y:= rect.y;
-  rect1.w:= rect.cx;
-  rect1.h:= rect.cy;
-  SDL_RenderSetViewport(drawinfo.gc.handle,@rect1);
-{$endif}
  end;
 end;
 

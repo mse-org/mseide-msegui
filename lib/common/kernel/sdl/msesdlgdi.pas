@@ -33,6 +33,7 @@ uses
  
   var
  fgrgb,bgrgb: rgbtriplety;
+ framecount: integer;
  
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
@@ -122,7 +123,7 @@ begin
   if tex <> 0 then begin
    SDL_SetTextureBlendMode(tex,SDL_BLENDMODE_BLEND);
    rect1.x:= pos.x;               // already includes origin and left bearing
-   rect1.y:= pos.y - height;      // CHANGED: pos.y is the bottom edge of the glyph
+   rect1.y:= pos.y - height;      // pos.y is the bottom edge of the glyph
    rect1.w:= width;
    rect1.h:= height;
    SDL_RenderCopy(drawinfo.gc.handle,tex,nil,@rect1);
@@ -200,9 +201,11 @@ begin
   case kind of
    gck_pixmap: begin
     gcpo^.handle:= SDL_CreateSoftwareRenderer(paintdevice);
+  //  writeln('CREATEGC screen handle=',arenderer);
     error:= SDL_CheckErrorGDI('creategc');
    end;
    gck_screen: begin
+  // writeln('CREATEGC screen paintdevice=',paintdevice);
     if paintdevice = 0 then begin
      // no window: measuring canvas used by fonts, never draws
      if dummysurface = 0 then begin
@@ -257,29 +260,36 @@ var
  int1: integer;
  rect1: SDL_Rect;
  x1,y1,x2,y2: integer;
- rgbcolor: rgbtriplety;   // add to the var section
-
+ rgbcolor: rgbtriplety;
 begin
  with drawinfo.gcvalues^,drawinfo.gc do begin
- 
   if gvm_colorforeground in mask then begin
- rgbcolor:= colortorgb(colorforeground);
- fgrgb.red:= rgbcolor.blue;
- fgrgb.green:= rgbcolor.green;
- fgrgb.blue:= rgbcolor.red;
- fgrgb.res:= rgbcolor.res;
-end;
-if gvm_colorbackground in mask then begin
- rgbcolor:= colortorgb(colorbackground);
- bgrgb.red:= rgbcolor.blue;
- bgrgb.green:= rgbcolor.green;
- bgrgb.blue:= rgbcolor.red;
- bgrgb.res:= rgbcolor.res;
-end;
+   rgbcolor:= colortorgb(colorforeground);
+   fgrgb.red:= rgbcolor.blue;
+   fgrgb.green:= rgbcolor.green;
+   fgrgb.blue:= rgbcolor.red;
+   fgrgb.res:= rgbcolor.res;
+   {
+   writeln('FG raw=',inttohex(longword(colorforeground),8),
+           ' colortorgb=',rgbcolor.red,',',rgbcolor.green,',',rgbcolor.blue,
+           ' stored=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+ }          
+  end;
+  if gvm_colorbackground in mask then begin
+   rgbcolor:= colortorgb(colorbackground);
+   bgrgb.red:= rgbcolor.blue;
+   bgrgb.green:= rgbcolor.green;
+   bgrgb.blue:= rgbcolor.red;
+   bgrgb.res:= rgbcolor.res;
+   {
+   writeln('BG raw=',inttohex(longword(colorbackground),8),
+           ' colortorgb=',rgbcolor.red,',',rgbcolor.green,',',rgbcolor.blue,
+            ' stored=',bgrgb.red,',',bgrgb.green,',',bgrgb.blue);
+   }
+  end;
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
   end;
   if gvm_rasterop in mask then begin
-  //writeln('rasterop=',ord(rasterop));
   end;
   if gvm_brush in mask then begin
   end;
@@ -318,10 +328,9 @@ end;
    end;
    SDL_CheckError('SDL_RenderSetClipRect');
   end;
-   if gvm_font in mask then begin
+  if gvm_font in mask then begin
    currentfont:= font;
   end;
-  
  end;
 end;
 
@@ -330,10 +339,32 @@ begin
  //dummy
 end;
 
-procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
+function firstredrow(sp: CSDL_Surface): integer;
+var
+ y: integer;
+ p: PLongword;
 begin
+ result:= -1;
+ for y:= 0 to sp^.h-1 do begin
+  p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch) + 40); // x = 10
+  if (p^ and $00FFFFFF) = $00FF0000 then begin
+   result:= y;
+   exit;
+  end;
+ end;
+end;
+
+procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
+var
+ vp: SDL_Rect;
+begin
+ vp.x:= 0;
+ vp.y:= 0;
+ vp.w:= 0;
+ vp.h:= 0;
+ SDL_RenderGetViewport(drawinfo.gc.handle,@vp);
+ //writeln('VIEWPORT ',vp.x,',',vp.y,' ',vp.w,'x',vp.h);
  SDL_RenderPresent(drawinfo.gc.handle);
- //SDL_CheckError('endpaint');
 end;
 
 procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
@@ -466,6 +497,9 @@ with drawinfo do begin
   rect1.y:= rect.rect^.y + origin.y;
   rect1.w:= rect.rect^.cx;
   rect1.h:= rect.rect^.cy;
+  
+// writeln('FILL ',rect1.x,',',rect1.y,' ',rect1.w,'x',rect1.h,' gc=',gc.handle);
+  
  { 
   if rect1.w <= 2 then begin
  writeln('thin fill x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
@@ -475,7 +509,7 @@ end;
 //  writeln('fillrect x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
   //      ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
  
-  if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
+ // if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
   
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
   SDL_RenderFillRect(gc.handle,@rect1);
@@ -510,9 +544,16 @@ begin
  fontcache.getfontmetrics(drawinfo);
 end;
 
+
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
 begin
  if currentfont <> 0 then begin
+ {
+    writeln('STR count=',drawinfo.text16pos.count,
+          ' pos=',drawinfo.text16pos.pos^.x,',',drawinfo.text16pos.pos^.y,
+          ' origin=',drawinfo.origin.x,',',drawinfo.origin.y,
+          ' dstpix=',df_canvasispixmap in drawinfo.gc.drawingflags);
+ }
   fontcache.drawstring16(drawinfo,currentfont);
  end;
  SDL_CheckError('drawstring16');
@@ -545,6 +586,7 @@ end;
 var
  invertblend: cardinal;
 
+
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  rect1,rect2: SDL_rect;
@@ -556,6 +598,7 @@ var
  mono: boolean;
  fgpix: longword;
 begin
+
  with drawinfo,copyarea,gcvalues^ do begin
   rect1.x:= sourcerect^.x;
   rect1.y:= sourcerect^.y;
@@ -668,6 +711,7 @@ begin
   SDL_FreeSurface(asurface);
  end;
 end;
+
 
 procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
 begin

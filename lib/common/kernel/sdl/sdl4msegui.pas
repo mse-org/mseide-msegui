@@ -485,6 +485,7 @@ const
 
 type
  SDL_WindowFlags = UInt32;
+ 
  function SDL_SetHint(name, value: pchar): boolean; cdecl; external SDLLibName;
  function SDL_CreateWindow(title: PChar; x, y, w, h: integer; flags: SDL_WindowFlags): winidty; 
    cdecl; external SDLLibName;
@@ -645,8 +646,10 @@ type
   max_texture_width: integer;                //**< The maximimum texture width */
   max_texture_height: integer;               //**< The maximimum texture height */
  end;
- PSDL_RendererInfo = ^SDL_RendererInfo;
+  PSDL_RendererInfo = ^SDL_RendererInfo;
  
+  function SDL_RenderFlush(renderer: SDL_Renderer): integer; cdecl; external SDLLibName;
+   function SDL_GetRendererOutputSize(renderer: SDL_Renderer; w, h: pinteger): integer; cdecl; external SDLLibName;
  function SDL_CreateRenderer(window: cardinal; index: integer; flags: Cardinal): SDL_Renderer; cdecl; external SDLLibName;
  function SDL_CreateTexture(renderer: SDL_Renderer; format: Cardinal; access: SDL_TextureAccess; w,h: integer): SDL_Texture; cdecl; external SDLLibName;
  function SDL_GetRenderer(window: cardinal): SDL_Renderer; cdecl; external SDLLibName;
@@ -680,7 +683,7 @@ type
  function SDL_RenderDrawLine(renderer: SDL_Renderer; x1, y1, x2, y2: integer): integer; cdecl; external SDLLibName;
  function SDL_RenderDrawLines(renderer: SDL_Renderer; const points: PSDL_Point; count: integer): integer; cdecl; external SDLLibName;
  function SDL_RenderDrawPoints(renderer: SDL_Renderer; const points: PSDL_Point; count: integer): integer; cdecl; external SDLLibName;
- 
+  procedure SDL_RenderGetViewport(renderer: SDL_Renderer; rect: PSDL_Rect); cdecl; external SDLLibName; 
  function SDL_RenderDrawRect(renderer: SDL_Renderer; const rect: PSDL_Rect): integer; cdecl; external SDLLibName;
  function SDL_RenderFillRect(renderer: SDL_Renderer; const rect: PSDL_Rect): integer; cdecl; external SDLLibName;
  function SDL_RenderDrawPoint(renderer: SDL_Renderer; x: integer; y: integer): integer; cdecl; external SDLLibName;

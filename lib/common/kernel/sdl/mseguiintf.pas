@@ -169,6 +169,7 @@ function GetCharacterPlacementW(DC: HDC; p2: PWideChar; p3, p4: Integer;
 {$endif}
 
 var
+ 
  lastbutton: integer;
  canshutdown: integer;
  //widgetclass: atom;
@@ -1005,12 +1006,22 @@ begin
  result:= iswindowvisible(handle);
 end;
 
+const
+ disablewindowmove = false;   // set to true for the second run
+
 function gui_movewindowrect(id: winidty; const dist: pointty;
                                              const rect: rectty): guierrorty;
 var
  asource: PSDL_Surface;
  rectsrc, rectdest: SDL_Rect;
 begin
+// writeln('MOVEWIN dist=',dist.x,',',dist.y,
+  //       ' rect=',rect.x,',',rect.y,' ',rect.cx,'x',rect.cy);
+         
+  if disablewindowmove then begin
+  result:= gue_scroll;     // let MSEgui repaint the area instead
+  exit;
+ end;
  gdi_lock;
  asource:= SDL_GetWindowSurface(id);
  if asource <> 0 then begin
@@ -1020,21 +1031,19 @@ begin
   rectsrc.h:= rect.cy;
   rectdest.x:= rect.x+dist.x;
   rectdest.y:= rect.y+dist.y;
-  rectdest.w:= rect.cx; //+dist.x;
-  rectdest.h:= rect.cy; //+dist.y;
+  rectdest.w:= rect.cx;
+  rectdest.h:= rect.cy;
   SDL_unlockSurface(asource);
   SDL_UpperBlit(asource,@rectsrc, asource, @rectdest);
   SDL_UpdateWindowSurface(id);
-  SDL_FreeSurface(asource);
   result:= gue_ok;
  end
  else begin
   result:= gue_scroll;
  end;
  gdi_unlock;
-
- result:= SDL_CheckError('movewindowrect');
 end;
+
 
 function getclientrect(winid: winidty; windowrect: prectty = nil): rectty;
                      //screen origin
@@ -1085,9 +1094,10 @@ var
  rect1: rectty;
 begin
 
-
  result:= gue_resizewindow;
  rect1:= getclientrect(id);
+//  writeln('REPOS req=',rect.x,',',rect.y,' ',rect.cx,'x',rect.cy,
+  //       ' now=',rect1.x,',',rect1.y,' ',rect1.cx,'x',rect1.cy);
  if not ((rect.x=rect1.x) and (rect.y=rect1.y) and 
   (rect.cx=rect1.cx) and (rect.cy=rect1.cy)) then begin
   SDL_SetWindowPosition(id,rect.x,rect.y);
@@ -1095,7 +1105,7 @@ begin
   SDL_GetWindowSurface(id);
   result:= SDL_CheckError('reposwindow');
   //if configuredwindow <> id then begin
-  // postconfigureevent(id);
+ //  postconfigureevent(id);
   //end;
  end else begin
   result:= gue_ok;
