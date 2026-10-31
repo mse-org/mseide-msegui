@@ -31,9 +31,8 @@ implementation
 uses
  mseguiintf,msegraphutils,msesysintf1,sysutils,msegenericgdi;
  
-  var
+var
  fgrgb,bgrgb: rgbtriplety;
- framecount: integer;
  
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
@@ -355,16 +354,8 @@ begin
 end;
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
-var
- vp: SDL_Rect;
 begin
- vp.x:= 0;
- vp.y:= 0;
- vp.w:= 0;
- vp.h:= 0;
- SDL_RenderGetViewport(drawinfo.gc.handle,@vp);
- //writeln('VIEWPORT ',vp.x,',',vp.y,' ',vp.w,'x',vp.h);
- SDL_RenderPresent(drawinfo.gc.handle);
+  SDL_RenderPresent(drawinfo.gc.handle);
 end;
 
 procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
