@@ -307,7 +307,7 @@ end;
 function sys_getcommandlinearguments: msestringarty;
 begin
  {$ifdef FPC}{$checkpointer off}{$endif}
- result:= parsecommandline(msestring(cmdline)); //todo: use unicode
+ result:= parsecommandline(pmsechar(getcommandlinew()));
  {$ifdef FPC}{$checkpointer default}{$endif}
 end;
 
@@ -794,7 +794,7 @@ begin
 {$ifdef FPC}
  with info,win32threadinfoty(platformdata) do begin
   handle:= beginthread(@threadexec,@info,id,stacksize);
-  
+
   if handle = 0 then begin
    result:= sye_thread;
   end

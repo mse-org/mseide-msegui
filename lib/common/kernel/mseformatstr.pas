@@ -19,7 +19,7 @@ unit mseformatstr;     //stringwandelroutinen 31.5.99 mse
 {$endif}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  classes,mclasses,msetypes,msestrings,SysUtils,msemacros,mseglob

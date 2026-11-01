@@ -12,6 +12,7 @@ unit msegdbutils;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 //{$define mse_usedebugbreakprocess}
+{$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -872,7 +873,7 @@ begin
  fsourcefiles:= tmsestringhashdatalist.create();
 // fsourcefiles:= thashedmsestrings.create;
  fstoptime:= emptydatetime;
- {$if defined(UNIX)}
+ {$if defined(UNIX) and not defined(dragonfly)}
  ftargetterminal:= tpseudoterminal.create;
  ftargetterminal.input.oninputavailable:= {$ifdef FPC}@{$endif}targetfrom;
  ftargetconsole:= tcustommseprocess.create(nil);
@@ -890,7 +891,7 @@ begin
  closegdb;
  inherited;
  fsourcefiles.free;
- {$if defined(UNIX)}
+ {$if defined(UNIX) and not defined(dragonfly)}
  ftargetconsole.free;
  ftargetterminal.free;
  {$endif}
@@ -1007,10 +1008,11 @@ begin
   else begin
    unsetenv(lcmessages);
   end;
+  clicommand('set debuginfod enabled off');
   clicommand('set breakpoint pending on');
   clicommand('set height 0');
   clicommand('set width 0');
-  {$ifdef UNIX}
+ {$if defined(UNIX) and not defined(dragonfly)}
   {
   bo1:= true;
   if synccommand('-gdb-show inferior-tty') = gdb_ok then begin
@@ -1449,7 +1451,7 @@ begin
         end;
         fprocid:= 0;
         getprocid(fprocid);
-        {$ifdef UNIX}
+        {$if defined(UNIX) and not defined(dragonfly)}
         if not fnewconsole then begin
          ftargetterminal.restart;
         end;
@@ -1883,8 +1885,10 @@ end;
 
 procedure tgdbmi.killtargetconsole;
 begin
+ {$if not defined(dragonfly)}
  ftargetconsole.kill;
  ftargetterminal.outecho:= false;
+ {$endif)}
 end;
 
 function tgdbmi.createtargetconsole: boolean;
@@ -1893,7 +1897,8 @@ var
  pts,ptsn,ptsh: msestring;
 begin
  result:= false;
- if fxtermcommand <> '' then begin
+ {$if not defined(dragonfly)}
+  if fxtermcommand <> '' then begin
   ptsn:= '';
   ftargetterminal.outecho:= true;
   pts:= msestring(ftargetterminal.devicename);
@@ -1913,6 +1918,7 @@ begin
   ftargetconsole.active:= true;
   result:= ftargetconsole.running;
  end;
+ {$endif)}
 end;
 
 procedure tgdbmi.xtermfrom(const sender: tpipereader);
@@ -4833,6 +4839,7 @@ end;
 
 procedure tgdbmi.targetwriteln(const avalue: string);
 begin
+ {$if not defined(dragonfly)}
  if running then begin
   {$ifdef UNIX}
   ftargetterminal.output.writeln(avalue);
@@ -4840,6 +4847,7 @@ begin
   fgdbto.writeln(avalue);
   {$endif}
  end;
+ {$endif}
 end;
 
 function tgdbmi.downloading: boolean;
@@ -4889,7 +4897,7 @@ begin
   fgdberror.overloadsleepus:= avalue;
  end;
 }
- {$if defined(UNIX)}
+ {$if defined(UNIX) and not defined(dragonfly)}
   ftargetterminal.input.overloadsleepus:= avalue;
 {$endif}
 end;
@@ -4960,8 +4968,10 @@ end;
 destructor tpseudoterminal.destroy;
 begin
  closeinp;
+ {$if not defined(dragonfly)}
  foutput.releasehandle;
  finput.releasehandle;
+ {$endif)}
  foutput.free;
  finput.free;
  if fpty <> invalidfilehandle then begin

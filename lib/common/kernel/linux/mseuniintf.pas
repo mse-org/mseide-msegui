@@ -10,6 +10,7 @@
 unit mseuniintf; //X11
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  msegraphics,msetypes{msestrings};

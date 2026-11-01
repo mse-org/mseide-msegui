@@ -9,7 +9,7 @@
 }
 unit msesysintf; //linux, freebsd, openbsd, dragonfly, netbsd
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 {$ifdef mse_debuglock}
  {$define mse_debugmutex}
 {$endif}
@@ -28,7 +28,7 @@ interface
 
 uses
 baseunix,
- msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads, {$if defined(bsd) or defined(darwin)} cwstring {$else} msecwstring {$endif},{$endif}msetypes,
+ msesys,msesystypes,msesetlocale,{$ifdef FPC}cthreads, {$if defined(bsd) or defined(darwin) or defined(freebsd)} cwstring {$else} msecwstring {$endif},{$endif}msetypes,
  mselibc,msectypes,
  msestrings,msestream,classes;
  
@@ -66,7 +66,7 @@ uses
  msesysintf1,sysutils,msesysutils,msefileutils,msearrayutils
  {$ifdef FPC},dateutils{$else},DateUtils,classes_del{$endif},msedate
  {$ifdef mse_debugmutex},mseapplication{$endif}
- {$if defined(freebsd) or defined(dragonfly)},msedynload{$endif};
+ {$if defined(freebsd)},msedynload{$endif};
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -204,7 +204,7 @@ begin
  end;
 end;
 
-{$if defined(freebsd) or defined(dragonfly)}
+{$if defined(freebsd)}
 {$packrecords c}
 type
  procstat = record
@@ -1504,7 +1504,7 @@ begin
  sigaction(sigio,@info,nil);
 end;
 
-{$if defined(freebsd) or defined(dragonfly)}
+{$if defined(freebsd)}
 procedure initfreebsd();
 begin
  haslibprocstat:= checkprocaddresses(['libprocstat.so.1','libprocstat.so'],
@@ -1517,7 +1517,7 @@ end;
 
 initialization
  setsighandlers;
-{$if defined(freebsd) or defined(dragonfly)}
+{$if defined(freebsd)}
  initfreebsd();
 {$endif}
 end.

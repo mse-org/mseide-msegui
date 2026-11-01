@@ -11,7 +11,7 @@ unit msefilechange;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
-
+{$R-}{$Q-}
 interface
 
 uses
@@ -152,7 +152,11 @@ procedure DirChanged(SigNum : Integer; context: psiginfo; p: pointer); cdecl;
 begin
  if SigNum = dirinfosig then begin
   if fchangethread <> nil then begin
-   fchangethread.changesignal(context^._sigpoll.si_fd);
+   {$ifdef dragonfly}
+   fchangethread.changesignal(context^.si_fd);
+   {$else}
+    fchangethread.changesignal(context^._sigpoll.si_fd);
+  {$endif} 
   end;
  end;
 end;

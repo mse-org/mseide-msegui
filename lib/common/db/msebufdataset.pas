@@ -20,6 +20,7 @@
 unit msebufdataset;
 {$ifdef FPC}
  {$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}
+ {$R-}{$Q-}
  {$define mse_hasvtunicodestring}
 {$endif}
 

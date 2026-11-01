@@ -11,7 +11,7 @@ unit msethread;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  {$ifdef FPC}{$ifdef UNIX}cthreads,{$endif}classes{$else}Classes{$endif},

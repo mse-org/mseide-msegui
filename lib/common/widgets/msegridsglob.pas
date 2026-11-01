@@ -9,6 +9,7 @@
 }
 unit msegridsglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$R-}{$Q-}
 interface
 
 type

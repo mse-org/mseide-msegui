@@ -9,12 +9,13 @@
 }
 unit msex11gdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
+{$R-}{$Q-}
 interface
 uses
- {$ifdef FPC}mxlib{$else}Xlib{$endif},mxft,
- {$ifdef FPC}mx,mxutil,dynlibs,{$endif}
+ mxlib,mxft,
+ {$ifdef FPC}dynlibs,{$endif}
  msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
- msectypes,mxrender,msefontconfig,msetriaglob;
+ msectypes,msefontconfig,msetriaglob;
 
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
                  const adepth: integer);
@@ -102,7 +103,6 @@ type
    0: (d: x11fontdatadty;);
    1: (_bufferspace: fontdatapty;);
  end;
-
 
 {$ifndef staticxft}
 var //xft functions
@@ -397,9 +397,10 @@ begin
   rgbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardrgb24);
   argbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardargb32);
  end;
- if not noxft then begin
+ 
+  if not noxft then begin
   fhasxft:= fhasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
-  if fhasxft then begin
+   if fhasxft then begin
    fhasxft:= xftinit(nil);
    if fhasxft then begin
     fhasxft:= xftinitftlibrary();
@@ -412,6 +413,7 @@ begin
  else begin
   fhasxft:= false;
  end;
+
   for propnum:= low(fontpropertiesty) to high(fontpropertiesty) do begin
    fontpropnames[propnum]:= fontpropertynames[propnum].name;
   end;
@@ -1050,7 +1052,7 @@ begin
  with x11gcty(drawinfo.gc.platformdata).d do begin
   if xftdraw = nil then begin
    xftdraw:= xftdrawcreate(appdisp,drawinfo.paintdevice,
-                                                 mxlib.pvisual(defvisual),0);
+                                                 pvisual(defvisual),0);
    xftdrawpic:= xftdrawpicture(xftdraw);
    attr.poly_edge:= polyedgesmooth;
    attr.poly_mode:= polymodeprecise;
@@ -2223,8 +2225,8 @@ var
  destcopygc: tgc;
  dpic2: tpicture;
  ddev2: paintdevicety;
-label
- endlab,endlab2;
+ endlab: boolean = false;
+ endlab2: boolean = false;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2340,19 +2342,24 @@ begin
         end;
        end
        else begin
-        goto endlab2;
+        endlab2 := true;
        end;
       end
       else begin
-       goto endlab2;
+       endlab2 := true;
       end;
-      spd:= bitmap;
+      if endlab2 = false then spd:= bitmap;
      end
      else begin
+     if endlab2 = false then
+     begin
       spd:= tcanvas1(source).fdrawinfo.paintdevice;
       x1:= x;
       y1:= y;
      end;
+     end;
+     if endlab2 = false then
+     begin
      spic:= xrendercreatepicture(appdisp,spd,bitmaprenderpictformat,
                       sourceformats,@sattributes);
      format1:= screenrenderpictformat;
@@ -2445,12 +2452,14 @@ begin
      end;
      xrenderfreepicture(appdisp,dpic);
      checkddevcopy(); //possibly rgb -> gray conversion
-endlab2:
+     end;
+
      if maskpic <> 0 then begin
       xrenderfreepicture(appdisp,maskpic);
      end;
      if bitmapgc2 <> nil then begin
-      xfreegc(appdisp,bitmapgc2);
+      xfreegc(
+      appdisp,bitmapgc2);
      end;
      if bitmap <> 0 then begin
       xfreepixmap(appdisp,bitmap);
@@ -2553,8 +2562,11 @@ endlab2:
       if dkind = bmk_mono then begin //convert to monochrome
        pixmap:= gui_createpixmap(size,0,skind);
        if pixmap = 0 then begin
-        goto endlab;
+        endlab := true ;
        end;
+       
+       if endlab = false then
+       begin
        pixmapgc:= xcreategc(appdisp,pixmap,gcgraphicsexposures,@xvalues);
        if pixmapgc <> nil then begin
         xcopyarea(appdisp,tcanvas1(source).fdrawinfo.paintdevice,pixmap,
@@ -2594,6 +2606,7 @@ endlab2:
         xfreegc(appdisp,pixmapgc);
        end;
        xfreepixmap(appdisp,pixmap);
+       end;
       end
       else begin
               //convert from monochrome
@@ -2631,7 +2644,7 @@ endlab2:
    if copymode <> gcrasterop then begin
     xsetfunction(appdisp,tgc(gc.handle),integer(gcrasterop));
    end;
-endlab:
+
    if pixmap2 <> 0 then begin
     xfreepixmap(appdisp,pixmap2);
    end;
@@ -3247,7 +3260,7 @@ const
   (n: 'XRenderSetPictureClipRegion';
                      d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRegion)
   );
-
+  
 var
  handle: tlibhandle;
 begin

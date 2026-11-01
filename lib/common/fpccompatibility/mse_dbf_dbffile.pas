@@ -11,6 +11,7 @@ interface
   {$warn 6058 off}
  {$endif}
 {$endif}
+{$R-}{$Q-}
 
 {$I mse_dbf_common.inc}
 

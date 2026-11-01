@@ -13,6 +13,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  **********************************************************************}
 {$ifdef FPC}{$mode objfpc}{$endif}
+{$R-}{$Q-}
 
 {$define unicodeversion}
 {$if fpc_fullversion >= 30000}
@@ -99,7 +100,7 @@ Const
  libiconvname='c';  // is in libc under Linux.
 {$endif}
 
-{$if defined(darwin) or defined(freebsd) or defined(dragonfly) or defined(openbsd) and not defined(freebsd5)}
+{$if defined(darwin) or defined(freebsd) or defined(openbsd) and not defined(freebsd5)}
  prefix = 'lib';
 {$else}
  prefix = '';

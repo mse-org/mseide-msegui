@@ -18,6 +18,10 @@ unit mseguiintf; //X11
 {$define glibc-table}
 {$endif}
 
+{$if defined(linux) and defined(cpuaarch64)}
+{$define glibc-table}
+{$endif}
+
 {$if defined(darwin)}
 {$define glibc-table}
 {$endif}
@@ -25,6 +29,8 @@ unit mseguiintf; //X11
 {$if defined(linux) and defined(CPUI386)}
 {$define glibc-table}
 {$endif}
+
+{$R-}{$Q-}
 
 interface
 {$ifndef mse_allwarnings}
@@ -48,12 +54,13 @@ interface
 {$ifdef mse_debugshow}
  {$define mse_debug}
 {$endif}
+
 uses
- {$ifdef FPC}mxlib{$else}Xlib{$endif},msetypes,mseapplication,msesys,
- msegraphutils,mseevent,msepointer,mseguiglob,msesystypes,{msestockobjects,}
- msethread{$ifdef FPC},mx,mxutil,dynlibs{$endif},
- mselibc,msectypes,msesysintf,msegraphics,
- msestrings,mxft,mxrender,mxrandr,mshape;
+  mxlib, mxrandr, mxft, msetypes, mseapplication, msesys,
+  msegraphutils, mseevent, msepointer, mseguiglob, msesystypes,{msestockobjects,}
+  msethread{$ifdef FPC},dynlibs{$endif},
+  mselibc, msectypes, msesysintf, msegraphics,
+  msestrings, mshape, mseclasses, msebitmap;
 
 {$ifdef FPC}
  {$define xbooleanresult}
@@ -338,7 +345,11 @@ const
  {$ifdef darwin}
  Xlibmodulename = 'libX11.dylib';
  {$else}
+  {$if defined(netbsd) or defined(openbsd) or defined(dragonfly)}
+  Xlibmodulename = 'libX11.so';
+ {$else}
   Xlibmodulename = 'libX11.so.6';
+ {$endif}
  {$endif}
  
  sXlib = Xlibmodulename;
@@ -464,6 +475,8 @@ type
    TXICCEncodingStyle = (XStringStyle,XCompoundTextStyle,XTextStyle,
      XStdICCTextStyle,XUTF8StringStyle);
   }
+function CustomErrorHandler(dpy: PDisplay; err: PXErrorEvent): cint; cdecl;
+  
 function XSetWMHints(Display: PDisplay; W: xid; WMHints: PXWMHints): cint; cdecl;
                               external sXLib name 'XSetWMHints';
 function XSetForeground(Display: PDisplay; GC: TGC;
@@ -530,11 +543,14 @@ function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
 
+var
+mse_shapebmp: tmaskedbitmap;
+
 implementation
 uses
  msebits,msekeyboard,sysutils,msesysutils,msefileutils,msedatalist,msedragglob
  {$ifdef with_sm},sm,ice{$endif},msesonames,msegui,mseactions,msex11gdi,
- msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,mseclasses,
+ msearrayutils,msesysintf1,msesysdnd,classes,rtlconsts,
  mseglob,msetimer,mseprocess,mseprocmonitor,typinfo
  {$ifdef mse_debug},mseformatstr{$endif};
 {$ifndef mse_allwarnings}
@@ -899,6 +915,25 @@ var
 // lastshiftstate: shiftstatesty;
  clipboardbuffers: array[clipboardbufferty] of clipboardinfoty;
  fidnum: integer;
+ DefaultErrorHandler: TXErrorHandler;
+
+function CustomErrorHandler(dpy: PDisplay; err: PXErrorEvent): cint; cdecl;
+begin
+  if (err^.error_code = 8) and (err^.request_code = 42) then
+  begin
+    Result := 0; // Explicitly assign 0 to the X11 C-return register
+    Exit;        // Exit safely without running the DefaultErrorHandler
+  end;
+
+  if (err^.error_code = 3) and (err^.request_code = 15) then
+  begin
+    Result := 0;
+    Exit;
+  end;
+
+  Result := DefaultErrorHandler(dpy, err);
+end;
+
 
 procedure deleteitemat(var dest: atomarty; index: integer); overload;
 begin
@@ -1762,11 +1797,13 @@ begin
 //  xflush(appdisp);    //windowmanager has to work
   sleep(5*int1);
   inc(int1);
- until (int1 > 45);
+ until (int1 > 8);
+ 
  if raiseexception and not result then begin
-  raise exception.Create('not decorated');
+  // raise exception.Create('not decorated');
  end;
 end;
+
 
 function gui_setwindowstate(id: winidty; size: windowsizety;
                                         visible: boolean): guierrorty;
@@ -4082,12 +4119,12 @@ var
  colormap1: tcolormap;
  opt1: windowtypeoptionty;
 // valall: ptruint;
- 
+// shapebmp: tmaskedbitmap;
  // shape from Xext
  xgcv :TXGCValues;
  pmap : pixmapty;
  shape_gc : TGC;
- win_gc : TGC;
+// win_gc : TGC;
  begin
  gdi_lock;
  with awindow,x11windowty(platformdata).d do begin
@@ -4145,6 +4182,8 @@ var
     depth,  copyfromparent,visual,
       valuemask,@attributes);
 
+ DefaultErrorHandler := XSetErrorHandler(@CustomErrorHandler);
+
 //////////////////////////////////////////////
  if (wo_onalldesktops in options.options) then
  begin
@@ -4163,8 +4202,11 @@ var
 //////////////////////////////////////////////
 
   if (mse_hasxext = true) and  ((wo_rounded in options.options) or (wo_ellipse in options.options)
-  or (wo_transparentbackground  in options.options) or (wo_transparentbackgroundround  in options.options)
-  or (wo_transparentbackgroundellipse in options.options)) then
+  or (wo_customshape in options.options) 
+  or (wo_transparentbackground in options.options)
+  or (wo_transparentbackgroundround in options.options)
+  //or (wo_transparentbackgroundellipse in options.options)
+  ) then
  begin
  // shape
   //* create a graphics context for drawing on the window */
@@ -4173,7 +4215,7 @@ var
   xgcv.line_width := 1;
   xgcv.line_style := LineSolid;
 
-  win_gc := XCreateGC(appdisp, id, GCForeground or GCLineWidth or GCLineStyle, @xgcv);
+ // win_gc := XCreateGC(appdisp, id, GCForeground or GCLineWidth or GCLineStyle, @xgcv);
 
  //* create the pixmap that we'll use for shaping the window */
   pmap := XCreatePixmap(appdisp, id, width, height, 1);
@@ -4211,6 +4253,11 @@ XSetForeground(appdisp, shape_gc, 1);
             end;
        end;
   end else
+   if (wo_customshape in options.options) then
+  begin
+    XCopyArea(appdisp, mse_shapebmp.mask.handle, pmap, shape_gc, 0, 0, width, height, 0, 0);
+  end else
+  {
   if (wo_transparentbackgroundellipse in options.options) then
    begin
     if length(mse_formchild) = 0 then
@@ -4228,6 +4275,7 @@ XSetForeground(appdisp, shape_gc, 1);
             end;  
         end;              
  end else
+ }
   if (wo_transparentbackgroundround in options.options) then
   begin
      if length(mse_formchild) = 0 then
@@ -4413,7 +4461,6 @@ end;
    xdeleteproperty(appdisp,id,xdndatoms[xdnd_aware]);
   end;
  end;
- 
   gdi_unlock;
 end;
 

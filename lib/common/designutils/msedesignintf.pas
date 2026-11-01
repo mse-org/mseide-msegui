@@ -8,6 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit msedesignintf;
+ {$R-}{$Q-}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 {$ifndef mse_methodswap}

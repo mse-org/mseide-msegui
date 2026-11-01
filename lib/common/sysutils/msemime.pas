@@ -9,6 +9,7 @@
 }
 unit msemime;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  msegui,msedrag,msestrings,msetypes,msegraphutils,mseglob,mseguiglob,mseclasses,

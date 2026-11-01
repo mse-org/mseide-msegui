@@ -15,7 +15,7 @@ unit mseedit;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
-
+{$R-}{$Q-}
 interface
 uses
  msegui,mseeditglob,msegraphics,msegraphutils,msedatalist,

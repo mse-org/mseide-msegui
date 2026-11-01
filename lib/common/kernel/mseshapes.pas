@@ -10,7 +10,7 @@
 unit mseshapes;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  msegraphics,msegraphutils,mseguiglob,msegui,mseevent,mserichstring,msebitmap,

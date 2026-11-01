@@ -12,6 +12,7 @@ unit msebucketlist;
 // deprecated, use t*hashdatalist in msehash.pas instead
 //
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 
 interface
 uses

@@ -19,6 +19,7 @@ unit mclasses;
 {$ifdef FPC}
  {$mode objfpc}
  {$h+}
+ {$R-}{$Q-}
  { determine the type of the resource/form file }
  {$define Win16Res}
  {$define classesinline}

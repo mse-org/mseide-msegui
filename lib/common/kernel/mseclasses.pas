@@ -10,6 +10,7 @@
 unit mseclasses;
 {$ifdef FPC}
  {$mode objfpc}{$h+}{$interfaces corba}
+ {$R-}{$Q-}
 {$endif}
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
@@ -76,11 +77,25 @@ const
   {$else}
   platformtext = 'i386-openbsd';
   {$endif}
- {$else}
+  {$else}
+  {$ifdef netbsd}
+   {$ifdef CPU64}
+  platformtext = 'x86_64-netbsd';
+   {$else}
+  platformtext = 'i386-netbsd';
+   {$endif} 
+  {$else}
+  {$ifdef dragonflybsd}
+   {$ifdef CPU64}
+  platformtext = 'x86_64-dragonflybsd';
+   {$else}
+  platformtext = 'i386-dragonflybsd';
+   {$endif}
+  {$else}
   {$ifdef bsd}
    {$ifdef CPUAARCH64}
    platformtext = 'aarch64-bsd';
-  {$else}
+   {$else}
    {$ifdef CPUamd64}
   platformtext = 'x86_64-bsd';
    {$else}
@@ -95,6 +110,8 @@ const
    {$endif}
   {$endif}
  {$endif}
+{$endif}
+{$endif}
 {$endif}
 {$endif}
 {$endif}

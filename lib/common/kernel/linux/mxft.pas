@@ -1,8 +1,9 @@
 unit mxft;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
- {$ifdef FPC}mx,{$endif}mxlib,mxrender,mselibc,msectypes,msefontconfig;
+ mxlib,mselibc,msectypes,msefontconfig;
 
 {
   Automatically converted by H2Pas 0.99.16 from Xft.h
@@ -24,6 +25,7 @@ uses
  {$ALIGN 4}
  {$MINENUMSIZE 4}
 {$ENDIF}
+
 
 type           //from fontconfig.h, XftCompat.h
  XftType = (

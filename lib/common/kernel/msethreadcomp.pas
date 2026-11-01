@@ -10,7 +10,7 @@
 unit msethreadcomp;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  mseclasses,msethread,classes,mclasses,mseevent,msetypes,msestrings,mseapplication;

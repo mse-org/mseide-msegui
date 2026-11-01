@@ -9,6 +9,7 @@
 }
 unit msesetlocale;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  mselibc,msesys;
@@ -17,7 +18,7 @@ function getcodeset(): string;
 
 implementation
 uses
-{$if defined(openbsd) or defined(darwin)} cwstring {$else} msecwstring {$endif} ,sysutils,msestrings,mseformatstr,msetypes,msesysintf;
+{$if defined(openbsd) or defined(darwin) or defined(freebsd)} cwstring {$else} msecwstring {$endif} ,sysutils,msestrings,mseformatstr,msetypes,msesysintf;
 
 function getlocstr(const id: integer; const defaultvalue: string): string;
 var
@@ -213,17 +214,22 @@ begin
  {$ifdef FPC}{$checkpointer off}{$endif}
   ch1:= nl_langinfo(p_cs_precedes)^;
   ch2:= nl_langinfo(p_sep_by_space)^;
-  if (ch1 in [#0,#1]) and (ch2 in [#0,#1]) then begin
+  // Ensure both lookup indices fall within the [0..1] array boundaries
+  if (ord(ch1) in [0..1]) and (ord(ch2) in [0..1]) then begin
    currencyformat:= currfo[ord(ch1),ord(ch2)];
    ch3:= nl_langinfo(p_sign_posn)^;
    if ord(ch3) in [0..4] then begin
     negcurrformat:= negcurrfo[ord(ch1),ord(ch2),ord(ch3)];
    end;
   end;
+
   ch1:= nl_langinfo(frac_digits)^;
-  if byte(ch1) < 127 then begin
+  if (byte(ch1) < 127) and (ord(ch1) <= 9) then begin
    currencydecimals:= ord(ch1);
+  end else begin
+   currencydecimals:= 2; // Safe fallback
   end;
+
 {$else} //bsd
  if currencystring <> '' then begin
   ch1:= #0;

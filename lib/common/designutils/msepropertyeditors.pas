@@ -10,7 +10,7 @@
 unit msepropertyeditors;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  classes,mclasses,TypInfo,msedesignintf,msetypes,msestrings,sysutils,
@@ -1044,7 +1044,7 @@ uses
  msetexteditor,mserichstringeditor,
  msegraphicstream,msedate,
  mseformatbmpicoread{$ifdef FPC},mseformatjpgread,mseformatpngread,
- mseformatpnmread,mseformattgaread,mseformatxpmread,mseformattiffread{$endif},
+ mseformatpnmread,mseformattgaread,mseformatxpmread,mseformatwebpread,mseformattiffread{$endif},
  msestat,msestatfile,msefileutils,
  msedesigner,variants,mseeditglob,msepropertyeditorsmodule,objectinspector;
 {$ifndef mse_allwarnings}

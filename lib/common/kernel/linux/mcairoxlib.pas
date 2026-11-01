@@ -16,22 +16,23 @@ unit mCairoXlib;
 
  Translation of cairo-xlib.h version 1.4
  by Jeffrey Pohlmeyer 
- updated to version 1.4 by Luiz Américo Pereira Câmara 2007
+ updated to version 1.4 by Luiz Americo Pereira Camara 2007
  
  - Translation and addition of cairo-xlib-xrender.h
  - updated to version 1.12
- by Valdinilson Lourenço da Cunha 2012
+ by Valdinilson Lourenco da Cunha 2012
 
  As per original authors wish, this file is dual licensed LGPL-MPL see the original file
   cairo.pp for the full license.
 }
 
 {$mode ObjFpc}
+{$R-}{$Q-}
 
 interface
 
 uses
-  Cairo, mx, mxlib, mxrender;
+  Cairo, mxlib;
   
 function  cairo_xlib_surface_create(dpy: PDisplay; drawable: TDrawable; visual: PVisual; width, height: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;
 function  cairo_xlib_surface_create_for_bitmap(dpy: PDisplay; bitmap: TPixmap; screen: PScreen; width, height: LongInt): Pcairo_surface_t; cdecl; external LIB_CAIRO;

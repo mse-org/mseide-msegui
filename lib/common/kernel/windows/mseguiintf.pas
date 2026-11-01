@@ -15,7 +15,7 @@ interface
 uses
  windows,messages,mseapplication,msetypes,msegraphutils,msesys,
  mseevent,msepointer,mseguiglob,msegraphics,
- msethread,mseformatstr,{msesysintf,}msestrings,msesystypes,msewinglob;
+ msethread,mseformatstr,{msesysintf,}msestrings,msesystypes,msewinglob, msebitmap;
 
 type
  syseventty = record
@@ -60,11 +60,14 @@ var
  gccount: integer;
 {$endif}
 
+var
+mse_shapebmp: tmaskedbitmap;
+
 implementation
 //todo: 19.10.03 rasterops for textout
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd,msebitmap
+ msesystimer,msegdi32gdi,msesysintf1,msedynload,msewindnd
  {$ifdef mse_debugzorder},typinfo{$endif} ;
 
 type
@@ -2944,6 +2947,10 @@ var
  ownerwindow: winidty;
  region, region2 : THandle;
  x, deco_x, deco_y : integer;
+// shapebmp: tmaskedbitmap;
+ //rgn, rectrgn: HRGN;
+ y, startx: integer;
+ 
 begin
  fillchar(awindow,sizeof(awindow),0);
  with awindow,win32windowty(awindow.platformdata).d,options do begin
@@ -3029,8 +3036,7 @@ begin
     groupleaderwindow:= id;
    end;
   end;
-  
-  
+    
   
   if id = 0 then begin
    result:= gue_createwindow;
@@ -3082,6 +3088,8 @@ begin
     DeleteObject(region2);
     DeleteObject(region);
    end else
+   
+   {
    if wo_transparentbackgroundellipse in options then
   begin
    if length(mse_formchild) = 0 then
@@ -3111,6 +3119,42 @@ begin
     DeleteObject(region2);
     DeleteObject(region);
    end else
+   }
+if (wo_customshape in options)
+then
+begin
+    region := CreateRectRgn(0, 0, 0, 0);
+    
+     mse_shapebmp.options := [bmo_graymask];
+     mse_shapebmp.mask.size := mse_shapebmp.size;  
+    
+    for y := 0 to mse_shapebmp.size.cy - 1 do
+    begin
+      x := 0;
+      while x < mse_shapebmp.size.cx do
+      begin
+        if (mse_shapebmp.pixels[x, y] and $FFFFFF) > $7F7F7F then 
+        begin
+          Inc(x);
+          Continue;
+        end;
+
+       startx := x;
+        // Collect everything that is "dark"
+        while (x < mse_shapebmp.size.cx) and ((mse_shapebmp.pixels[x, y] and $FFFFFF) <= $7F7F7F) do
+          Inc(x);
+ 
+        region2 := CreateRectRgn(startx, y, x, y + 1);
+        CombineRgn(region, region, region2, RGN_OR);
+        DeleteObject(region2);
+      end;
+    end;
+
+    // Apply the custom region to the window handle
+    SetWindowRgn(id, region, True);
+
+end else
+ 
    if wo_transparentbackgroundround in options then
    begin
     if length(mse_formchild) = 0 then

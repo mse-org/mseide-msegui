@@ -10,7 +10,8 @@
 unit msebitmap;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+ {$R-}{$Q-}
+ 
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

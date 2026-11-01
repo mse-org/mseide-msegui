@@ -27,10 +27,10 @@ unit mxrandr;
  *	    Keith Packard, Intel Corporation
  */}
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
- msectypes,mx,mxlib;
+ msectypes,mxlib;
 
 {$packrecords c}
 

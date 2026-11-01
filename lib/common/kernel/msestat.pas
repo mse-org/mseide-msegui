@@ -1,3 +1,4 @@
+
 { MSEgui Copyright (c) 1999-2015 by Martin Schreiber
 
     See the file COPYING.MSE, included in this distribution,
@@ -9,7 +10,7 @@
 }
 unit msestat;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
-
+{$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

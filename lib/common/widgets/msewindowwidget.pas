@@ -9,6 +9,7 @@
 }
 unit msewindowwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  classes,mclasses,mseclasses,msegui,msetypes,msegraphutils,mseguiintf,msewidgets,

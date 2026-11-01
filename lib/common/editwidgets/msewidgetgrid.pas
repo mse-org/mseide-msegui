@@ -14,7 +14,7 @@ unit msewidgetgrid;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
-
+{$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

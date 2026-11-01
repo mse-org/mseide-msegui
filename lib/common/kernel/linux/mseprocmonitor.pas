@@ -9,6 +9,7 @@
 }
 unit mseprocmonitor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$R-}{$Q-}
 interface
 uses
  msesystypes,mseglob,msetypes,mselibc;

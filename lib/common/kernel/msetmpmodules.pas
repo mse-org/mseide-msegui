@@ -9,6 +9,7 @@
 }
 unit msetmpmodules;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  classes,mclasses,mseclasses;

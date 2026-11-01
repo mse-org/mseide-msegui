@@ -17,10 +17,10 @@ unit msestream;
   {$define mse_hasvtunicodestring}
  {$endif}
 {$endif}
+{$R-}{$Q-}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
-
 
 interface
 {$ifndef mse_allwarnings}

@@ -9,6 +9,7 @@
 }
 unit msecrc;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$mode objfpc}
 interface
 
 function crc32(const data: pbyte; const length: integer): longword; overload;

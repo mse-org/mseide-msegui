@@ -15,7 +15,7 @@ unit msegrids;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
-
+{$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -5224,9 +5224,8 @@ var
  pt1: pointty;
  sizebefore: sizety;
  linemerged: boolean;
-
-label
- endlab,endlab2;
+ endlab : boolean = false;
+ endlab2 : boolean = false;
 begin
  with cellinfoty(canvas.drawinfopo^) do begin
   if cell.col >= 0 then begin
@@ -5247,9 +5246,11 @@ begin
    with tcolheader(headers1.fitems[int1]) do begin
     linemerged:= cmf_rline in fmergeflags;
     if fmergeflags * [cmf_v,cmf_h] <> [] then begin
-     goto endlab;
+     endlab := true;
     end;
-    if fcolor <> cl_parent then begin
+    if endlab = false then
+    begin
+     if fcolor <> cl_parent then begin
      fcellinfo.color:= fcolor;
     end;
     inc(fcellrect.cx,fmergedcx);
@@ -5264,7 +5265,11 @@ begin
      face1:= fface;
     end;
    end;
+   end;
   end;
+  
+  if endlab = false then
+  begin
   canvas.move(pt1);
   updatecellrect(frame1);
   ftextinfo.dest:= fcellinfo.innerrect;
@@ -5290,11 +5295,15 @@ begin
   end;
   canvas.restore;
   if calcautocellsize then begin
-   goto endlab2;
+   endlab2 := true;
   end;
   drawcelloverlay(canvas,frame1);
   canvas.remove(makepoint(0,pt1.y));
-endlab:
+    
+  end; //endlab:
+  
+ if endlab2 = false then
+ begin   
   if (flinewidth > 0) and not linemerged then begin
    linewidthbefore:= canvas.linewidth;
    if flinewidth = 1 then begin
@@ -5308,7 +5317,8 @@ endlab:
    canvas.linewidth:= linewidthbefore;
   end;
   canvas.remove(makepoint(pt1.x,0));
-endlab2:
+
+  end; //endlab2:
   fcellrect.size:= sizebefore;
  end;
 end;

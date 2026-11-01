@@ -10,6 +10,7 @@
 unit msefiledialog;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 
 interface
 {$ifndef mse_allwarnings}
@@ -1636,7 +1637,7 @@ end;
 
 procedure tfiledialogfo.formoncreate(const sender: TObject);
 var
-strz : string = '';
+strz : msestring = '';
 begin
  if MSEFallbackLang = 'zh' then strz := '             ';
 

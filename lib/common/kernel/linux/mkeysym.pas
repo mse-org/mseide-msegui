@@ -11,7 +11,7 @@ XK_A   XKc_A
 }
 
 Unit mkeysym;
-
+{$R-}{$Q-}
 Interface
 
 {* default keysyms *}

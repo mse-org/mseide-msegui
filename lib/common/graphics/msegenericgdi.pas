@@ -1123,13 +1123,13 @@ begin
 end;
 
 procedure gdi_moveregion(var drawinfo: drawinfoty); //gdifunc
+{$ifndef usesdl}
 var
  int1,int2: integer;
  po1: pstripety;
-{$ifdef usesdl}
- rect1: SDL_Rect;
 {$endif}
 begin
+ {$ifndef usesdl}
  with drawinfo.regionoperation do begin
   with pregioninfoty(dest)^ do begin
    stripestart:= stripestart + rect.y;
@@ -1152,14 +1152,8 @@ begin
     end;
    end;
   end;
-{$ifdef usesdl}
-  rect1.x:= rect.x;
-  rect1.y:= rect.y;
-  rect1.w:= rect.cx;
-  rect1.h:= rect.cy;
-  //SDL_RenderSetViewport(drawinfo.gc.handle,@rect1);
-{$endif}
  end;
+{$endif}
 end;
 
 procedure gdi_regionisempty(var drawinfo: drawinfoty); //gdifunc

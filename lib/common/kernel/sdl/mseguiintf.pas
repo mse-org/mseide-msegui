@@ -669,6 +669,7 @@ end;
 
 function gui_setwindowfocus(id: winidty): guierrorty;
 begin
+ writeln('GUI setwindowfocus ',id); 
  result:= gue_windowfocus;
  SDL_ShowWindow(id);
  result:= SDL_CheckError('setwindowfocus');
@@ -868,18 +869,21 @@ end;
 
 function gui_showwindow(id: winidty): guierrorty;
 begin
+ writeln('GUI showwindow ',id); 
  SDL_ShowWindow(id);
  result:= SDL_CheckError('showwindow');
 end;
 
 function gui_hidewindow(id: winidty): guierrorty;
 begin
+ writeln('GUI hidewindow ',id); 
  SDL_HideWindow(id);
  result:= SDL_CheckError('HideWindow');
 end;
 
 function gui_raisewindow(id: winidty): guierrorty;
 begin
+ writeln('GUI raisewindow ',id);
  SDL_RaiseWindow(id);
  result:= SDL_CheckError('raisewindow');
 end;
@@ -1006,8 +1010,6 @@ begin
  result:= iswindowvisible(handle);
 end;
 
-const
- disablewindowmove = false;   // set to true for the second run
 
 function gui_movewindowrect(id: winidty; const dist: pointty;
                                              const rect: rectty): guierrorty;
@@ -1017,11 +1019,7 @@ var
 begin
 // writeln('MOVEWIN dist=',dist.x,',',dist.y,
   //       ' rect=',rect.x,',',rect.y,' ',rect.cx,'x',rect.cy);
-         
-  if disablewindowmove then begin
-  result:= gue_scroll;     // let MSEgui repaint the area instead
-  exit;
- end;
+    
  gdi_lock;
  asource:= SDL_GetWindowSurface(id);
  if asource <> 0 then begin
@@ -1190,6 +1188,9 @@ begin
     end;
     SDL_WINDOWEVENT : begin
      winid:= SDL_GetWindowFromID(e.window.window);
+          writeln('WINEVENT win=',winid,' event=',e.window.event,
+             ' app=',applicationwindow,' lastfocus=',lastfocuswindow);
+     
      if (e.window.event = SDL_WINDOWEVENT_ENTER) or
                      (e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED) then begin
       if (winid = applicationwindow) and (lastfocuswindow <> 0) then begin

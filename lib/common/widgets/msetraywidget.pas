@@ -14,6 +14,7 @@ unit msetraywidget;
   {$define mse_usedbus}
  {$endif}
 {$endif}
+{$R-}{$Q-}
 interface
 uses
  msetypes,mseclasses,classes,mclasses,msesimplewidgets,mseguiglob,msebitmap,
@@ -21,8 +22,8 @@ uses
  mseevent,mseglob,msegraphics,msestrings,msetimer,msemenus,msegraphutils
  {$ifdef mse_usedbus},msestatusnotifieritem{$endif};
 
-const
- trayoptionswidget = [ow_appinactivehint];
+ const
+  trayoptionswidget = [ow_appinactivehint];
 
 type
  traywidgetoptionty = (two_usedbus);
@@ -330,12 +331,10 @@ begin
 end;
 
 procedure ttraywidget.objectevent(const sender: tobject;
-  const event: objecteventty);
+                                  const event: objecteventty);
 begin
- inherited;
- if (sender = fimagelist) and (event = oe_changed) then begin
-  iconchanged(nil);
- end;
+  // Restore the pristine, original framework lifecycle event mapping.
+  inherited objectevent(sender, event);
 end;
 
 procedure ttraywidget.setimagelist(const avalue: timagelist);
@@ -371,26 +370,6 @@ begin
  if not (csloading in componentstate) then begin
   settrayhint;
  end;
-end;
-
-procedure ttraywidget.dopopup(var amenu: tpopupmenu;
-               var mouseinfo: mouseeventinfoty);
-begin
- {$ifdef mswindows}
- if ownswindow then begin
-  gui_settrayhint(windowpo^,'');
-  try
-   inherited;
-  finally
-   gui_settrayhint(windowpo^,hint);
-  end;
- end
- else begin
-  inherited;
- end;
- {$else}
- inherited;
- {$endif}
 end;
 
 procedure ttraywidget.showmessage(const amessage: msestring;
@@ -444,10 +423,42 @@ begin
   fmessageid:= 0;
  end;
 end;
+///
 
 procedure ttraywidget.dotimer(const sender: tobject);
 begin
- cancelmessage;
+  cancelmessage;
+end;
+
+procedure ttraywidget.dopopup(var amenu: tpopupmenu;
+                              var mouseinfo: mouseeventinfoty);
+begin
+
+ {$ifdef mse_usedbus}
+   if hasdbus then begin
+    if (amenu <> nil) and (owner <> nil) and (owner is twidget) then begin
+      amenu.show(twidget(owner), mouseinfo.pos); 
+    end;
+    exit;
+  end;
+ {$endif}
+
+ {$ifdef mswindows}
+ if ownswindow then begin
+  gui_settrayhint(windowpo^,'');
+  try
+   inherited;
+  finally
+   gui_settrayhint(windowpo^,hint);
+  end;
+ end
+ else begin
+  inherited;
+ end;
+ {$else}
+ inherited;
+ {$endif}
+ 
 end;
 
 procedure ttraywidget.setcaption(const avalue: msestring);

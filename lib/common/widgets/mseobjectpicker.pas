@@ -10,7 +10,7 @@
 unit mseobjectpicker;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  mseevent,mseglob,mseguiglob,mseclasses,msegui,msegraphics,msegraphutils,

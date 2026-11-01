@@ -2,7 +2,7 @@
 
 unit mselibc;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  {$ifndef win64}initc,{$endif}msectypes{$ifndef FPC},msetypes{$endif};
@@ -208,6 +208,12 @@ type
   intmax_t = Int64;
   uintmax_t = QWord;
 
+{$ifdef dragonfly}
+  timespec = record
+    tv_sec: int64;  // DragonFly time_t is 64-bit
+    tv_nsec: int64; // DragonFly tv_nsec is 64-bit (long)
+  end;
+{$else}
  {$if defined(CPU32) and defined(openbsd)}
  timespec = record
   tv_sec: int64;
@@ -218,6 +224,7 @@ type
   tv_sec: __time_t;
   tv_nsec: clong;
  end;
+ {$endif} 
  {$endif} 
 
  TTimeSpec = timespec;
@@ -596,7 +603,6 @@ const
    O_RDWR = $0002;     //* open for reading and writing */
    O_ACCMODE = $0003;  //* mask for above modes */
 
-   O_NONBLOCK = $0004; //* no delay */
    O_APPEND = $0008;   //* set append mode */
    O_SHLOCK = $0010;   //* open with shared file lock */
    O_EXLOCK = $0020;   //* open with exclusive file lock */
@@ -621,11 +627,18 @@ const
 //* Defined by POSIX 1003.1-2008; BSD default, but reserve for future use. */
    O_TTY_INIT = $00080000; //* Restore default termios attributes */
 
-   O_CLOEXEC = $00100000;
+{$ifdef dragonfly}
+   O_CLOEXEC = $00020000;
+   O_NONBLOCK = $00000004; //* no delay */
+{$else}   
+ O_CLOEXEC = $00100000;  
+  O_NONBLOCK = $0004; //* no delay */
+{$endif}
 
 {$endif}
 
 {$ifdef linux}
+
    F_DUPFD   = 0;
    F_GETFD   = 1;
    F_SETFD   = 2;
@@ -762,6 +775,17 @@ const
    NOTE_TRACKERR = $00000002;   //* could not track child */
    NOTE_CHILD = $00000004;      //* am a child process */
 
+{$ifdef dragonfly}
+type
+  kevent_t = record
+    ident: qword;      // Use qword to guarantee 8 bytes on 64-bit
+    filter: smallint;  // 2 bytes
+    flags: word;       // 2 bytes
+    fflags: longword;  // 4 bytes
+    data: int64;       // 8 bytes
+    udata: pointer;    // 8 bytes
+  end;
+{$else}
 type
  kevent_t = record
   ident: uintptr_t;  //* identifier for this event */
@@ -771,6 +795,8 @@ type
   data: intptr_t;
   udata: pointer;    //* opaque user data identifier */
  end;
+{$endif} 
+ 
  pkevent_t = ^kevent_t;
  
   function kqueue(): cint; cdecl; external clib name 'kqueue' + LIBC_SUFFIX;
@@ -903,14 +929,21 @@ type
  {$endif} // arm64
 
  {$else} //bsd
-{$if defined(freebsd) or defined(dragonfly) or defined(netbsd) or defined(darwin)}
+{$if defined(freebsd) or defined(netbsd) or defined(darwin)}
  ino_t = cuint32;
  mode_t = cuint16;
  {$endif}
+ 
  {$if defined(openbsd)}
  ino_t = cuint64;
  mode_t = cuint64;
  {$endif}
+ 
+ {$if defined(dragonfly)}
+  ino_t = cuint64;  // 8 bytes
+  mode_t = cuint32; // 4 bytes
+  {$endif}
+ 
  n_link_t = cuint16;
  uid_t = cuint32;
  gid_t = cuint32;
@@ -919,9 +952,14 @@ type
  blksize_t = cuint32;
  fflags_t = cuint32;
 
+{$if defined(dragonfly)}
+  _stat = record  // Remove 'packed'
+ {$else}
  _stat = packed record
-{$if defined(freebsd) or defined(dragonfly) or defined(netbsd) or defined(darwin) }
-   st_dev: __dev_t;          //* inode's device */
+ {$endif}
+
+{$if defined(freebsd) or defined(netbsd) or defined(darwin) }
+  st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
   st_mode: mode_t;          //* inode protection mode */
   st_nlink: n_link_t;       //* number of hard links */
@@ -942,6 +980,29 @@ type
   st_lspare: cint32;
   st_birthtim: timespec;    //* time of file creation */
   {$endif}
+  
+{$if defined(dragonfly)}
+    st_ino: cuint64;      
+    st_nlink: cuint32;    
+    st_dev: cuint32;      
+    st_mode: cuint16;     
+    st_padding1: cuint16; // Explicit padding often needed
+    st_uid: cuint32;      
+    st_gid: cuint32;      
+    st_rdev: cuint32;     
+    
+    st_atime: cint64;      st_atime_nsec: cint64; 
+    st_mtime: cint64;      st_mtime_nsec: cint64; 
+    st_ctime: cint64;      st_ctime_nsec: cint64; 
+    
+    st_size: cint64;      
+    st_blocks: cint64;    
+    st_blksize: cuint32;  
+    st_flags: cuint32;    
+    st_gen: cuint32;      
+    st_lspare: cint32;    
+    st_birthtime: cint64; st_birthtime_nsec: cint64;
+ {$endif}
  
   {$if defined(openbsd)}
  st_dev: cuint64;          //* inode's device */
@@ -1054,7 +1115,32 @@ type
  blksize_t = cuint32;
  fflags_t = cuint32;
  
- {$if not defined(openbsd)} 
+  {$if defined(dragonfly)}
+  st_ino: cuint64;            //* inode's number */
+  st_nlink: cuint32;       //* number of hard links */
+  st_dev: cuint32;          //* inode's device */
+  st_mode: cuint16;          //* inode protection mode */
+  st_pad1: cuint16;          
+  st_uid: uid_t;            //* user ID of the file's owner */
+  st_gid: gid_t;            //* group ID of the file's group */
+  st_rdev: __dev_t;         //* device type */
+  st_atime: culong;         //* time of last access */
+  st_atime_nsec: culong;
+  st_mtime: culong;         //* time of last data modification */
+  st_mtime_nsec: culong;
+  st_ctime: culong;         //* time of last file status change */
+  st_ctime_nsec: culong;
+  st_size: cuint64;           //* file size, in bytes */
+  st_blocks: blkcnt_t;      //* blocks allocated for file */
+  st_blksize: blksize_t;    //* optimal blocksize for I/O */
+  st_flags: fflags_t;       //* user defined flags for file */
+  st_gen: cuint32;          //* file generation number */
+  st_lspare: cint32;
+  st_qspare1: cint64;  
+  st_qspare2: cint64;    
+  {$endif}
+  
+ {$if defined(netbsd) or defined(darwin) or defined(freebsd)} 
  _stat = packed record
   st_dev: __dev_t;          //* inode's device */
   st_ino: ino_t;            //* inode's number */
@@ -1854,29 +1940,30 @@ type
   end;
   Ppthread_mutexattr_t = ^pthread_mutexattr_t;
  
-  {$if not defined(netbsd) and not defined(darwin)}
+ {$if defined(dragonfly)}
+  pthread_mutexattr_t = pointer;
+ {$elseif defined(netbsd)}
   pthread_mutexattr_t = record
-   case integer of
-    0:( __mutexkind : longint);
-    1:(buffer: pointer);
+    ptma_magic : cint;
+    ptma_private: pointer;
   end;
-  {$else}
-   {$if defined(darwin)}
-   pthread_mutexattr_t = record
-   sig: {$ifdef cpu64}int64{$else}longint{$endif}; 
-   opaque: array[0..{$ifdef cpu64}56{$else}40{$endif}-1] of byte;
-   end;
-   {$else}  // netbsd
-   pthread_mutexattr_t = record
-   ptma_magic : cint;
-   ptma_private: pointer;
+{$elseif defined(darwin)}
+  pthread_mutexattr_t = record
+    sig: {$ifdef cpu64}int64{$else}longint{$endif}; 
+    opaque: array[0..{$ifdef cpu64}56{$else}40{$endif}-1] of byte;
   end;
-  {$endif}
-  {$endif}
+{$else}
+  // Linux / Others
+  pthread_mutexattr_t = record
+    case integer of
+      0:( __mutexkind : longint);
+      1:(buffer: pointer);
+  end;
+{$endif}
  
   Ppthread_t = ^pthread_t;
   
-  {$if not defined(darwin)}
+  {$if not defined(darwin) and not defined(Dragonfly)}
   pthread_t = culong;
   {$else}
   pthread_t = ptruint;
@@ -1898,6 +1985,9 @@ type
        __stacksize : size_t;
     end;
  
+  {$if defined(dragonfly)}
+  pthread_attr_t = pointer;
+  {$else}
   {$if not defined(darwin)}
   pthread_attr_t = __pthread_attr_s;
   {$else}
@@ -1906,6 +1996,7 @@ type
     opaque: array[0..{$ifdef cpu64}56{$else}36{$endif}-1] of byte;
     end;   
   {$endif}
+   {$endif}
 
   Ppthread_attr_t = ^pthread_attr_t;
 
@@ -1916,6 +2007,9 @@ type
    Psem_t = ^sem_t;
    //sem_t = array[0..__SIZEOF_SEM_T-1] of byte;
    //{
+   {$ifdef dragonfly}
+  sem_t = pointer; // DragonFly sem_t is a pointer
+  {$else}   
    {$if not defined(darwin)}
    sem_t = record
         __sem_lock : _pthread_fastlock;
@@ -1924,6 +2018,7 @@ type
      end;
    {$else}
    sem_t                = cint;   
+   {$endif}
    {$endif}
        
  //    }
@@ -1992,6 +2087,18 @@ type
  end;
  Psiginfo = ^_siginfo;
  
+ {$ifdef dragonfly}
+  _siginfo = record
+    si_signo: cint;
+    si_errno: cint;
+    si_code: cint;
+    si_pad: cint; // 4-byte padding to align the union on 64-bit
+    case integer of
+      0: (_pad: array[0..111] of byte); // Ensure 128 bytes total
+      6: (si_addr: pointer;             // DragonFly si_addr
+          si_fd: cint);                 // si_fd follows si_addr in DragonFly sigpoll
+  end;
+ {$else}
   _siginfo = record
       si_signo : cint;
       si_errno : cint;
@@ -2005,7 +2112,8 @@ type
         5: (_sigfault: _si_sigfault);
         6: (_sigpoll: _si_sigpoll);
    end;
-    
+ {$endif} 
+   
  siginfo_t = _siginfo;
  Psiginfo_t = ^siginfo_t;
  Tsiginfo_t = siginfo_t;
@@ -2045,29 +2153,58 @@ const
 type
    P__sigset_t = ^__sigset_t;
 
+{$ifdef dragonfly}
+   __sigset_t = record
+        __val : array[0..3] of dword;
+     end;
+{$else}   
 {$ifndef darwin}
    __sigset_t = record
         __val : array[0..(_SIGSET_NWORDS)-1] of dword;
      end;
 {$else}     
    __sigset_t = array[0..0] of cuint;
-{$endif}   
+{$endif}  
+{$endif}  
      
   sigset_t = __sigset_t;
   Psigset_t = ^sigset_t;
   TSigset = __sigset_t;
   PSigset = ^TSigset;
 
+{$ifdef dragonfly}
+TSigActionEx = record // Remove 'packed' to allow natural C alignment
+  sa_sigaction: TSigActionHandlerEx;
+  sa_flags: Integer;
+  sa_mask: __sigset_t;
+   // NO sa_restorer!
+end;
+{$else} 
  TSigActionEx = packed record
                 sa_sigaction: TSigActionHandlerEx;
                 sa_mask: __sigset_t;
                 sa_flags: Integer;
                 sa_restorer: TRestoreHandler;
                 end;
+ {$endif} 
+
 type
   __sighandler_t = procedure(SigNum: Integer); cdecl;
   TSignalHandler = __sighandler_t;
    P_sigaction = ^_sigaction;
+  
+  {$ifdef dragonfly} 
+   _sigaction = record
+    case integer of
+      1: (
+          sa_handler: __sighandler_t;
+          sa_flags: longint;   // 4 bytes
+          sa_mask: __sigset_t; // 16 bytes (4 x 32-bit dwords)
+          // NO sa_restorer here!
+         );
+      2: (__sigaction_handler: __sighandler_t);
+  end;
+  {$else}
    _sigaction = record // Renamed, avoid conflict with sigaction function
      case integer of
        1: (sa_handler : __sighandler_t;
@@ -2078,6 +2215,8 @@ type
        // Kylix compatibility
        2: (__sigaction_handler: __sighandler_t);
    end;
+  {$endif} 
+  
   TSigAction = _sigaction;
   PSigAction = ^TSigAction;
    __sigaction = _sigaction;
@@ -2118,6 +2257,9 @@ const
 type
   Ppthread_mutex_t = ^pthread_mutex_t;
 
+{$ifdef dragonfly}
+  pthread_mutex_t = pointer;
+{$else}
  {$if not defined(netbsd) and not defined(darwin)}  
   pthread_mutex_t = array[0..__SIZEOF_PTHREAD_MUTEX_T-1] of byte;
 {$else}
@@ -2138,6 +2280,7 @@ type
          ptm_recursed: dword;
          ptm_spare2: pointer;
       end;
+{$endif}
 {$endif}
 {$endif}
 
@@ -2258,22 +2401,37 @@ type
        end;
 {$else}
  dirent64 = record
-        {$if defined(dragonfly) or defined(netbsd) or defined(darwin)}
+        {$if defined(netbsd) or defined(darwin)}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
         d_type: cuint8;               //* file type, see below */
         d_namlen: cuint8;             //* length of string in d_name */
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
-
-        {$if defined(freebsd) and defined(cpuamd64)}
+        
+        {$if defined(dragonfly)}
+        d_fileno: cuint64;   // 8 bytes: inode number
+        d_reclen: cuint16;   // 2 bytes: length of this record <-- SHOULD BE HERE
+        d_type: cuint8;      // 1 byte: file type
+        d_unused1: cuint8;   // 1 byte: padding
+        d_namlen: cuint16;   // 2 bytes: length of string in d_name
+        d_unused2: cuint16;  // 2 bytes: padding
+        d_name: array[0..255] of char;
+        {$endif}
+        
+        
+        {$if defined(freebsd)}
+        
+        {$if defined(freebsd12)} // freebsd <= 12
+        
+        {$if defined(freebsd) and (defined(cpuamd64) or defined(cpu32))}
         d_fileno: cuint32;            //* file number of entry */
         d_reclen: cuint16;            //* length of this record */
         d_type: cuint8;               //* file type, see below */
         d_namlen: cuint8;             //* length of string in d_name */
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
-
+                 
         {$if defined(freebsd) and defined(cpuaarch64)}
         d_fileno: cuint32;          //* file number of entry */
         d_off : __off64_t;
@@ -2284,7 +2442,35 @@ type
         d_pad1:  cuint16;
         d_name: array[0..255] of char;        //* name must be no longer than this */
         {$endif}
-
+        
+        {$else}
+           // freebsd >= 13
+        {$if defined(freebsd) and (defined(cpuamd64) or defined(cpu32))}
+            d_fileno: cuint64;      // 8 bytes
+            d_off:    clonglong;    // 8 bytes
+            d_reclen: cuint16;      // 2 bytes
+            d_type:   cuint8;       // 1 byte
+            d_pad0:   cuint8;       // 1 byte
+            d_namlen: cuint16;      // 2 bytes
+            d_pad1:   cuint16;      // 2 bytes
+            d_name:   array[0..255] of char;
+        {$endif}
+        {$endif}
+                 
+         {$if defined(freebsd) and defined(cpuaarch64)}
+         d_fileno: cuint64;          //* file number of entry */
+         d_off : __off64_t;
+         d_reclen: cuint16;            //* length of this record */
+         d_type:  cuint8;               //* file type, see below */
+         d_pad0: cuint8;
+         d_namlen: cuint16;             //* length of string in d_name */
+         d_pad1:  cuint16;
+         d_name: array[0..255] of char;        //* name must be no longer than this */
+        {$endif}
+       
+        {$endif}
+        
+        
         {$if defined(openbsd) and defined(cpu64)}
         d_fileno: cuint32;          //* file number of entry */
         d_off : __off64_t;
@@ -2680,6 +2866,14 @@ type
       revents : smallint;
    end;
 
+{$if defined(dragonfly)}
+function poll(__fds: Ppollfd; __nfds: nfds_t; __timeout: longint): cint;
+  cdecl; external clib name 'poll';
+
+function ppoll(__fds: Ppollfd; __nfds: nfds_t; __timeout: ptimespec;
+               __ss: psigset_t): cint;
+  cdecl; external clib name 'ppoll';
+{$else}
 {$if defined(netbsd)} 
 function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                                 __ss: p__sigset_t): cint
@@ -2688,7 +2882,7 @@ function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll';
                                               
 {$else}
-{$if (defined(linux) or defined(darwin)) and (defined(CPUX86_64) or defined(CPUi386))}
+{$if (defined(linux) or defined(darwin)) and (defined(CPUX86_64) or defined(CPUi386) or defined(CPUaarch64))}
 
 function poll(__fds: Ppollfd; __nfds:nfds_t; __timeout:longint): cint
                                               cdecl; external clib name 'poll' + LIBC_SUFFIX;
@@ -2704,6 +2898,7 @@ function ppoll (__fds: ppollfd;__nfds: nfds_t; __timeout: ptimespec;
                                              __ss: p__sigset_t): cint
                                            cdecl; external clib name 'ppoll';
 
+{$endif}
 {$endif}
 {$endif}
                                
@@ -3282,7 +3477,7 @@ function connect(__fd:longint; const __addr: sockaddr;
 function connect(__fd:longint; __addr:Psockaddr;
                  __len:socklen_t):longint;cdecl;external clib name 'connect' + LIBC_SUFFIX; overload;
 {$ifdef linux}
-function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len' + LIBC_SUFFIX;
+function __libc_sa_len(__af: sa_family_t): Integer; cdecl;external clib name '__libc_sa_len' + LIBC_SUFFIX2;
 {$else}
   //use len field of FreeBSD struct
 {$endif}
@@ -3297,7 +3492,7 @@ function htons(__hostshort:uint16_t):uint16_t;cdecl;external clib name 'htons' +
 procedure freeaddrinfo(__ai:Paddrinfo);cdecl;external clib name 'freeaddrinfo' + LIBC_SUFFIX;
 function ntohs(__netshort:uint16_t):uint16_t;cdecl;external clib name 'ntohs' + LIBC_SUFFIX;
 
-function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror' + LIBC_SUFFIX;
+function gai_strerror(__ecode:longint):Pchar;cdecl;external clib name 'gai_strerror' + LIBC_SUFFIX2;
 function syscall(SysNo: Longint): Integer; cdecl; varargs;
                                     external clib name 'syscall' + LIBC_SUFFIX;
 
@@ -3590,6 +3785,6 @@ end;
 
 initialization
  initlibc();
-finalization
+ finalization
  finalizelibinfo(rtlibinfo);
 end.

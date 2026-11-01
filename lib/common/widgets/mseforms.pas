@@ -14,12 +14,12 @@ unit mseforms;
 {$ifndef mse_no_ifi}
  {$define mse_with_ifi}
 {$endif}
-
+{$R-}{$Q-}
 interface
 uses
  msewidgets,msemenus,msegraphics,mseapplication,msegui,msegraphutils,mseevent,
  msetypes,msestrings,mseglob,mseguiglob,mseguiintf,msedragglob,msepointer,
- msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,math,
+ msemenuwidgets,msestat,msestatfile,mseclasses,classes,mclasses,msedock,
  msesimplewidgets,msebitmap,typinfo,msesplitter,mseobjectpicker,msetabs,
  mseassistiveclient
  {$ifdef mse_with_ifi},mseifiglob,mseificompglob,mseificomp{$endif};
@@ -1069,6 +1069,7 @@ begin
  end;
  if not (acs_dooncreatecalled in factstate) then begin
   dooncreate;
+   
  end;
  if not load then begin
 //  autoreadstat;
@@ -1166,6 +1167,9 @@ begin
    beginsuspendgloballoading;
    try
     foncreate(self);
+    if (wo_transparentbackground in foptionswindow) or 
+     //  (wo_transparentbackgroundellipse in foptionswindow) or 
+       (wo_transparentbackgroundround in foptionswindow) then SetChildBounds(self);
    finally
     endsuspendgloballoading;
    end;
@@ -1720,7 +1724,6 @@ var
  str1: string;
  widget1: twidget;
 begin
- {$ifndef usesdl} // TODO
  if fo_savepos in foptions then begin
   rect1:= widgetrect;
   with rect1 do begin
@@ -1734,8 +1737,6 @@ begin
   widgetrect:= rect1;
   application.postevent(tobjectevent.create(ek_checkscreenrange,ievent(self)));
  end;
- {$endif}
- 
  if fo_savezorder in foptions then begin
   str1:= '~';
   str1:= reader.readstring('stackedunder',str1);
@@ -1823,7 +1824,6 @@ begin
     writer.writestring('stackedunder','');
    end;
   end;
-   {$ifndef usesdl}
   if  fo_savepos in foptions then begin
    with window.normalwindowrect do begin
     writer.writeinteger('x',x);
@@ -1832,7 +1832,6 @@ begin
     writer.writeinteger('cy',cy);
    end;
   end;
- {$endif}
  end;
 end;
 

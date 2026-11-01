@@ -30,13 +30,13 @@ in this Software without prior written authorization from The Open Group.
 unit mshape;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
-
+{$R-}{$Q-}
 {$PACKRECORDS C}
 
 interface
 
 uses
-  dynlibs, ctypes, mx, mxlib, mxutil;
+  dynlibs, ctypes, mxlib;
 
 
 const

@@ -1850,7 +1850,7 @@ uses
  rtlconsts,msefileutils,typinfo,{$ifdef FPC}dbconst{$else}dbconst_del{$endif},
  msearrayutils,mseformatstr,msebits,msefloattostr,msebufdataset,
  msereal,variants,msedate,msesys,sysconst
- {,msedbgraphics}{$ifdef unix},{$if defined(openbsd) or defined(darwin)} cwstring {$else} msecwstring {$endif}{$endif};
+ {,msedbgraphics}{$ifdef unix},{$if defined(openbsd) or defined(darwin) or defined(freebsd)} cwstring {$else} msecwstring {$endif}{$endif};
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
   {$warn 5089 off}
@@ -2862,7 +2862,7 @@ begin
   try
    result:= msestring(sender.asstring);
   except
-  {$if not defined(openbsd) and not defined(darwin)}
+  {$if not defined(openbsd) and not defined(darwin) and not defined(freebsd)}
    on e: eiconv do begin
     //no crash by iconverror
    end

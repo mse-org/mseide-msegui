@@ -10,7 +10,7 @@
 unit msepipestream;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
-
+{$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}
@@ -333,7 +333,7 @@ procedure tpipereader.terminate(const noclosehandle: boolean = false);
 var
  by1: byte;
  begin
-  
+   
  if fthread <> nil then begin
   fthread.terminate;
   if fthread.running then begin

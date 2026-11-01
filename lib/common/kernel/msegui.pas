@@ -15087,6 +15087,9 @@ end;
 function twidget.trycancelmodal(const newactive: twindow): boolean;
               //called by twindow.internalactivate, true if accepted
 begin
+{$ifdef usesdl}
+ writeln('MODAL trycancel');
+{$endif}
  result:= false;
 end;
 
@@ -16851,7 +16854,9 @@ begin
    win1:= fmousewinid;
    processleavewindow;
    fmousewinid:= win1;
+   writeln('MODAL begin');
    result:= beginmodal(self,showinfo);
+   writeln('MODAL returned');
    if (fmodalwindow = nil) then begin
     if not (aps_cancelloop in appinst.fstate) then begin
      window1:= fwantedactivewindow;
@@ -16905,6 +16910,10 @@ end;
 
 procedure twindow.endmodal;
 begin
+{$ifdef usesdl}
+ writeln('MODAL endmodal called');
+ dump_stack(output,get_frame);
+{$endif}
  appinst.endmodal(self);
 end;
 
@@ -19366,6 +19375,10 @@ begin
  {$ifdef mse_debugwindowfocus}
       debugwriteln('trycancelmodal true '+window.fownerwidget.name+' '+hextostr(winid,8));
  {$endif}
+ {$ifdef usesdl}
+  writeln('APP set cancelloop');
+  dump_stack(output,get_frame);
+{$endif}
       include(appinst.fstate,aps_cancelloop);
       appinst.ffocuslockwindow:= nil;
       appinst.ffocuslocktransientfor:= nil;
@@ -19763,12 +19776,23 @@ var
  modalinfo: modalinfoty;
 
 begin       //eventloop
+
+{$ifdef usesdl}
+ writeln('EVENTLOOP called looplocked=',aps_looplocked in fstate);
+{$endif}
+
  if aps_looplocked in fstate then begin
   exit;
  end;
  if not ismainthread then begin
   raise exception.create('Eventloop must be in main thread.');
  end;
+ {$ifdef usesdl}
+ writeln('EVENTLOOP enter level=',flooplevel,' modalend=',
+         (fcurrmodalinfo <> nil) and fcurrmodalinfo^.modalend,
+         ' cancel=',aps_cancelloop in fstate,' exit=',aps_exitloop in fstate,
+         ' terminated=',terminated);
+{$endif}
 
  inc(flooplevel);
  if fcurrmodalinfo = nil then begin
@@ -20235,10 +20259,22 @@ begin
     sender.fmodalwidget:= widget;
    end;
   end;
-  sender.activate;
+    sender.activate;
+{$ifdef usesdl}
+  writeln('APP before eventloop: cancelloop=',aps_cancelloop in fstate,
+          ' exitloop=',aps_exitloop in fstate,' looplocked=',aps_looplocked in fstate,
+          ' terminated=',terminated,' modalend=',modalinfo.modalend);
+{$endif}
   if fstate * [aps_cancelloop,aps_exitloop] = [] then begin
    try
+{$ifdef usesdl}
+    writeln('APP eventloop enter');
+{$endif}
     eventloop;
+{$ifdef usesdl}
+    writeln('APP eventloop returned: cancelloop=',aps_cancelloop in fstate,
+            ' exitloop=',aps_exitloop in fstate,' modalend=',modalinfo.modalend);
+{$endif}
    finally
     with showinfo^ do begin
      if (widget <> nil) then begin
@@ -21105,6 +21141,10 @@ end;
 
 procedure tguiapplication.exitloop;  //used in win32 cancelshutdown
 begin
+{$ifdef usesdl}
+  writeln('APP set exitloop');
+  dump_stack(output,get_frame);
+{$endif}
  include(fstate,aps_exitloop);
 end;
 

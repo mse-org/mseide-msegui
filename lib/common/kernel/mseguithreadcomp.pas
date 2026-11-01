@@ -9,6 +9,7 @@
 }
 unit mseguithreadcomp;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  msethreadcomp,msegui,msetypes{msestrings};

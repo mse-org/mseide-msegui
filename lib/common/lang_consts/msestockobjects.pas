@@ -10,7 +10,7 @@
 unit msestockobjects;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-
+{$R-}{$Q-}
 interface
 uses
  msetypes,msegraphics,mseglob,msegui,msebitmap,msegraphutils,mseclasses,

@@ -9,6 +9,7 @@
 }
 unit msefloattostr;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  msestrings,msetypes;

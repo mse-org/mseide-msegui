@@ -9,6 +9,7 @@
 }
 unit msesizingform;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  mseforms,mseclasses,mseobjectpicker,msegui,mseguiglob,msepointer,msetypes,

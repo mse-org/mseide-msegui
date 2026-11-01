@@ -9,6 +9,7 @@
 }
 unit mseassistiveserver;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 interface
 uses
  mseguiglob,mseglob,msestrings,mseinterfaces,mseact,mseshapes,

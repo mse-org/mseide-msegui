@@ -14,6 +14,7 @@
 unit msefiledialogx;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$R-}{$Q-}
 
 interface
 
@@ -41,7 +42,7 @@ uses
  SysUtils,msemenuwidgets,msescrollbar,msedragglob,mserichstring,msetimer,
  {$ifdef BGRABITMAP_USE_MSEGUI}BGRABitmap,BGRADefaultBitmap,BGRABitmapTypes,
  {$endif}mseformatbmpicoread,mseformatjpgread,mseformatpngread,
- mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage,msebitmap;
+ mseformatwebpread,mseformatpnmread,mseformattgaread,mseformatxpmread,mseimage,msebitmap;
 
 const
   defaultlistviewoptionsfile = defaultlistviewoptions + [lvo_readonly, lvo_horz];
@@ -1376,7 +1377,7 @@ end;
 {$else} 
 function tfiledialogxfo.LoadImage(const AFileName: msestring): msestring;
 begin
- result := imImage.bitmap.tryLoadFromFile(tosysfilepath(AFileName));
+ result := msestring(imImage.bitmap.tryLoadFromFile(tosysfilepath(AFileName)));
 // if result <> '' then imImage.Bitmap := tbitmapcomp2.bitmap;
 end;
 {$endif}  
@@ -1459,7 +1460,7 @@ begin
 
  if (lowercase(fileext(filename.Value)) = 'xpm') or
     (lowercase(fileext(filename.Value)) = 'jpeg') or
-  //   (lowercase(fileext(filename.Value)) = 'ico') or
+     (lowercase(fileext(filename.Value)) = 'webp') or
       (lowercase(fileext(filename.Value)) = 'bmp') or
       (lowercase(fileext(filename.Value)) ='png') or
       (lowercase(fileext(filename.Value)) = 'jpg') then
@@ -2533,7 +2534,7 @@ end;
 
 procedure tfiledialogxfo.onformcreated(const Sender: TObject);
 var
-strz : string = '';
+strz : msestring = '';
 begin
  if MSEFallbackLang = 'zh' then strz := '             ';
  fcourseid := -1;

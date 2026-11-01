@@ -10,6 +10,7 @@
 unit msedrag;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
+{$R-}{$Q-}
 
 interface
 uses
@@ -186,7 +187,7 @@ begin
  enddrag;
  ftimer.free;
  for int1:= 0 to high(fsysdndobjects) do begin
-  freeandnil(fsysdndobjects[int1]);
+  freeandnil(fsysdndobjects[int1].dragobj);
  end;
  inherited;
 end;
