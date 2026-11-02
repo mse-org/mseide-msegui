@@ -1,14 +1,18 @@
 { MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
-    See the file COPYING.MSE, included in this distribution,
+    See the file COPYING.MSE, included in this Second, where the error is raised from. At the places in that code that call error(gde_invalidsaveindex,...), add this line just before each call, so the call chain is printed:distribution,
     for details about the copyright.
 
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
+
 unit msesdlgdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+
+//{$define sdl8x8font}
+
 interface
 uses
  msegraphics,msetypes,msestrings,mseguiglob,sdl4msegui,msebitmap,mseftfontcache,
@@ -510,43 +514,112 @@ end;
 
 procedure gdi_getfont(var drawinfo: drawinfoty);
 begin
+{$ifdef sdl8x8font}
+ with drawinfo.getfont,fontdata^ do begin
+  font:= 1;
+  fonthighres:= 0;
+  basefont:= 1;
+  ascent:= 7;
+  descent:= 1;
+  linespacing:= 8;
+  realheight:= 8;
+  caretshift:= 0;
+  linewidth:= 1;
+ end;
+ drawinfo.getfont.ok:= true;
+{$else}
  fontcache.getfont(drawinfo);
+{$endif}
 end;
 
 procedure gdi_freefontdata(var drawinfo: drawinfoty);
 begin
- if ffontcache <> nil then begin
- // fontcache.freefontdata(drawinfo);
- end;
+{$ifndef sdl8x8font}
+ // left empty on purpose (freeing here crashed at exit)
+{$endif}
 end;
 
 procedure gdi_gettext16width(var drawinfo: drawinfoty);
 begin
+{$ifdef sdl8x8font}
+ drawinfo.gettext16width.result:= drawinfo.gettext16width.count * 8;
+{$else}
  fontcache.gettext16width(drawinfo);
+{$endif}
 end;
 
 procedure gdi_getchar16widths(var drawinfo: drawinfoty);
+{$ifdef sdl8x8font}
+var
+ int1: integer;
+ po1: pinteger;
+{$endif}
 begin
+{$ifdef sdl8x8font}
+ with drawinfo.getchar16widths do begin
+  po1:= resultpo;
+  for int1:= 0 to count-1 do begin
+   po1^:= 8;
+   inc(po1);
+  end;
+ end;
+{$else}
  fontcache.getchar16widths(drawinfo);
+{$endif}
 end;
 
 procedure gdi_getfontmetrics(var drawinfo: drawinfoty);
 begin
+{$ifdef sdl8x8font}
+ with drawinfo.getfontmetrics.resultpo^ do begin
+  leftbearing:= 0;
+  width:= 8;
+  rightbearing:= 0;
+  sum:= 8;
+ end;
+{$else}
  fontcache.getfontmetrics(drawinfo);
+{$endif}
 end;
 
-
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
+{$ifdef sdl8x8font}
+var
+ s: ansistring;
+ i,c: integer;
+ ptext: pwidechar;
+ rect1: SDL_Rect;
+{$endif}
 begin
+{$ifdef sdl8x8font}
+ with drawinfo, text16pos do begin
+  if count > 0 then begin
+   if df_opaque in gc.drawingflags then begin
+    rect1.x:= pos^.x + origin.x;
+    rect1.y:= pos^.y + origin.y - 7;
+    rect1.w:= count * 8;
+    rect1.h:= 8;
+    SDL_SetRenderDrawBlendMode(gc.handle,SDL_BLENDMODE_NONE);
+    SDL_SetRenderDrawColor(gc.handle,bgrgb.red,bgrgb.green,bgrgb.blue,
+                                                           255 - bgrgb.res);
+    SDL_RenderFillRect(gc.handle,@rect1);
+   end;
+   setlength(s,count);
+   ptext:= pwidechar(text);
+   for i:= 0 to count-1 do begin
+    c:= ord(ptext[i]);
+    if c > 127 then c:= ord('?');
+    s[i+1]:= char(c);
+   end;
+   stringRGBA(gc.handle,pos^.x + origin.x,pos^.y + origin.y - 7,pchar(s),
+              fgrgb.red,fgrgb.green,fgrgb.blue,255 - fgrgb.res);
+  end;
+ end;
+{$else}
  if currentfont <> 0 then begin
- {
-    writeln('STR count=',drawinfo.text16pos.count,
-          ' pos=',drawinfo.text16pos.pos^.x,',',drawinfo.text16pos.pos^.y,
-          ' origin=',drawinfo.origin.x,',',drawinfo.origin.y,
-          ' dstpix=',df_canvasispixmap in drawinfo.gc.drawingflags);
- }
   fontcache.drawstring16(drawinfo,currentfont);
  end;
+{$endif}
  SDL_CheckError('drawstring16');
 end;
 
@@ -603,9 +676,12 @@ begin
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
    if df_canvasispixmap in drawinfo.gc.drawingflags then begin
     dsp:= CSDL_Surface(ptruint(drawinfo.paintdevice));
-    SDL_RenderReadPixels(tcanvas1(source).fdrawinfo.gc.handle,@rect1,$16362004,
-         pointer(ptruint(dsp^.pixels) + ptruint(rect2.y*dsp^.pitch + rect2.x*4)),
-         dsp^.pitch);
+       if (rect1.w > 0) and (rect1.h > 0) and (rect2.x >= 0) and (rect2.y >= 0) and
+       (rect2.x + rect1.w <= dsp^.w) and (rect2.y + rect1.h <= dsp^.h) then begin
+     SDL_RenderReadPixels(tcanvas1(source).fdrawinfo.gc.handle,@rect1,$16362004,
+          pointer(ptruint(dsp^.pixels) + ptruint(rect2.y*dsp^.pitch + rect2.x*4)),
+          dsp^.pitch);
+    end;
    end;
    exit;
   end;

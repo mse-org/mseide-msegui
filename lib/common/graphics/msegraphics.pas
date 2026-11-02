@@ -4393,7 +4393,11 @@ begin
   if count > 0 then begin
    system.move(stack[count-1],stack[count],sizeof(canvasvaluesty));
   end
-  else begin
+    else begin
+{$ifdef usesdl}
+   writeln('SAVE with empty stack');
+   dump_stack(output,get_frame);
+{$endif}
    error(gde_invalidsaveindex,'save 0');
   end;
   fvaluepo:= @stack[count];
@@ -4438,16 +4442,27 @@ var
  achanged: canvasstatesty;
 begin
  with fvaluestack do begin
-  if index >= count then begin
+
+    if index >= count then begin
+{$ifdef usesdl}
+   writeln('RESTORE tolerated: index=',index,' count=',count);
+   exit(index);
+{$else}
    error(gde_invalidsaveindex,inttostrmse(index));
-//index:= count-1;
+{$endif}
   end;
-  if index < 0 then begin
+
+     if index < 0 then begin
    if count < 2 then begin
+{$ifdef usesdl}
+    writeln('RESTORE nothing saved: index=',index,' count=',count);
+    dump_stack(output,get_frame);
+{$endif}
     error(gde_invalidsaveindex,inttostrmse(index));
    end;
    index:= count - 2;
   end;
+
   achanged:= [];
   for int1:= count-1 downto index + 1 do begin
    achanged:= achanged + stack[int1].changed;

@@ -1757,9 +1757,22 @@ begin
 end;
 
 procedure tpopupmenuwidget.paint(const canvas: tcanvas);
+{$ifdef usesdl}
+var
+ d1,d2: integer;
+{$endif}
 begin
  if not (mls_valid in flayout.state) then begin
+{$ifdef usesdl}
+  d1:= canvas.save;
+  canvas.restore(d1);
+{$endif}
   updatelayout();
+{$ifdef usesdl}
+  d2:= canvas.save;
+  canvas.restore(d2);
+  writeln('MENUPAINT stack depth before=',d1,' after=',d2);
+{$endif}
  end;
  inherited;
 end;

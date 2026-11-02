@@ -10716,6 +10716,9 @@ begin
    end;
    canvas.target:= obj1;
   end;
+  {$ifdef usesdl}
+  writeln('PAINT restore widget=',name,' class=',classname,' saveindex=',saveindex);
+ {$endif}
   canvas.restore(saveindex);
   if bo1 then begin
    face1:= getactface;
@@ -16533,6 +16536,11 @@ var
  mini1: boolean;
  mydesktop: integer;
 begin
+{$ifdef usesdl}
+ writeln('HIDE windowevent=',windowevent,
+         ' wsvisible=',ws_visible in fownerwidget.fwidgetstate,
+         ' active=',appinst.factivewindow = self);
+{$endif}
  releasemouse;
  fstate:= fstate - [tws_posvalid,tws_sizevalid,tws_windowshowpending];
 {$ifdef mse_debugconfigure}
@@ -16551,9 +16559,15 @@ begin
   if fwindow.id <> 0 then begin
    if tws_windowvisible in fstate then begin
     exclude(fstate,tws_transientforminimized);
+  
+   {$ifdef usesdl}
+    if not windowevent then begin
+  {$else}
     if not windowevent or (appinst.factivewindow = self) then begin
+  {$endif}
      endmodal;
-    end;
+     end;
+   
     if (fsyscontainer <> sywi_none) or (fcontainer <> 0) then begin
      exclude(fstate,tws_windowvisible);
      if not windowevent then begin
@@ -18854,6 +18868,9 @@ procedure tinternalapplication.processshowingevent(event: twindowevent);
 var
  window: twindow;
 begin
+{$ifdef usesdl}
+ writeln('SHOWEVENT show=',event.kind = ek_show,' win=',event.fwinid);
+{$endif}
  if findwindow(event.fwinid,window) then begin
   if event.kind = ek_show then begin
    if window.windowpos in windowmaximizedstates then begin
@@ -19887,6 +19904,11 @@ begin       //eventloop
      try
       try
        bo1:= false;
+{$ifdef usesdl}
+ if not (ord(event.kind) in [9,29]) then begin
+        writeln('LOOP event kind=',ord(event.kind),' level=',flooplevel);
+       end;
+{$endif}
        fonapplicationeventlist.doevent(event,bo1);
        if not bo1 then begin
         case event.kind of

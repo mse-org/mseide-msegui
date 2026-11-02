@@ -45,7 +45,7 @@ begin
   inherited create(errortexts[error]+'.');
  end
  else begin
-  text:= errortexts[error]+ ' ' + text;
+ text:= errortexts[error]+ ' ' + text;
   ch1:= text[length(text)];
   if (ch1 <> '.') and (ch1 <> c_return) and (ch1 <> c_linefeed) then begin
    text:= text + '.';

@@ -486,16 +486,23 @@ const
 
 function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
                                        gchandle: longword): gdierrorty;
+var
+ sp: CSDL_Surface;
+ y: integer;
 begin
- with CSDL_Surface(pixmap)^ do begin
-  image.pixels:= pixels;
-  image.kind:= bmk_rgb;
-  image.bgr:= false;
-  image.size.cx:= w;
-  image.size.cy:= h;
-  image.linebytes:= pitch;
-  image.linelength:= pitch div 4;
-  image.length:= (pitch div 4)*h;
+ sp:= CSDL_Surface(ptruint(pixmap));
+ image.kind:= bmk_rgb;
+ image.bgr:= false;
+ image.size.cx:= sp^.w;
+ image.size.cy:= sp^.h;
+ image.linelength:= sp^.w;               // longwords per row
+ image.linebytes:= sp^.w*4;
+ image.length:= sp^.w*sp^.h;             // longwords in total
+ image.pixels:= gui_allocimagemem(image.length);   // owned by MSEgui
+ for y:= 0 to sp^.h-1 do begin
+  move(pointer(ptruint(sp^.pixels) + ptruint(y*sp^.pitch))^,
+       pointer(ptruint(image.pixels) + ptruint(y*image.linebytes))^,
+       image.linebytes);
  end;
  result:= gde_ok;
  SDL_CheckError('pixmatoimage');
@@ -1232,6 +1239,7 @@ begin
      end else if (e.window.event = SDL_WINDOWEVENT_RESIZED)
       or (e.window.event = SDL_WINDOWEVENT_SIZE_CHANGED) then begin
       postconfigureevent(winid);
+      // writeln('SDL_WINDOWEVENT_RESIZED');
       SDL_CheckError('resized');
      end else if (e.window.event = SDL_WINDOWEVENT_EXPOSED) then begin
       gui_getwindowrect(winid,rect1);
