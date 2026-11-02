@@ -491,6 +491,10 @@ var
  y: integer;
 begin
  sp:= CSDL_Surface(ptruint(pixmap));
+  if (pixmap = 0) or (sp^.pixels = nil) or (sp^.w <= 0) or (sp^.h <= 0) then begin
+  result:= gde_pixmap;
+  exit;
+ end;
  image.kind:= bmk_rgb;
  image.bgr:= false;
  image.size.cx:= sp^.w;
@@ -676,7 +680,6 @@ end;
 
 function gui_setwindowfocus(id: winidty): guierrorty;
 begin
- writeln('GUI setwindowfocus ',id); 
  result:= gue_windowfocus;
  SDL_ShowWindow(id);
  result:= SDL_CheckError('setwindowfocus');
@@ -876,21 +879,18 @@ end;
 
 function gui_showwindow(id: winidty): guierrorty;
 begin
- writeln('GUI showwindow ',id); 
  SDL_ShowWindow(id);
  result:= SDL_CheckError('showwindow');
 end;
 
 function gui_hidewindow(id: winidty): guierrorty;
 begin
- writeln('GUI hidewindow ',id); 
  SDL_HideWindow(id);
  result:= SDL_CheckError('HideWindow');
 end;
 
 function gui_raisewindow(id: winidty): guierrorty;
 begin
- writeln('GUI raisewindow ',id);
  SDL_RaiseWindow(id);
  result:= SDL_CheckError('raisewindow');
 end;
@@ -1024,9 +1024,6 @@ var
  asource: PSDL_Surface;
  rectsrc, rectdest: SDL_Rect;
 begin
-// writeln('MOVEWIN dist=',dist.x,',',dist.y,
-  //       ' rect=',rect.x,',',rect.y,' ',rect.cx,'x',rect.cy);
-    
  gdi_lock;
  asource:= SDL_GetWindowSurface(id);
  if asource <> 0 then begin
@@ -1101,17 +1098,14 @@ begin
 
  result:= gue_resizewindow;
  rect1:= getclientrect(id);
-//  writeln('REPOS req=',rect.x,',',rect.y,' ',rect.cx,'x',rect.cy,
-  //       ' now=',rect1.x,',',rect1.y,' ',rect1.cx,'x',rect1.cy);
+
  if not ((rect.x=rect1.x) and (rect.y=rect1.y) and 
   (rect.cx=rect1.cx) and (rect.cy=rect1.cy)) then begin
   SDL_SetWindowPosition(id,rect.x,rect.y);
   SDL_SetWindowSize(id,rect.cx,rect.cy);
   SDL_GetWindowSurface(id);
   result:= SDL_CheckError('reposwindow');
-  //if configuredwindow <> id then begin
- //  postconfigureevent(id);
-  //end;
+ 
  end else begin
   result:= gue_ok;
  end;
@@ -1195,9 +1189,7 @@ begin
     end;
     SDL_WINDOWEVENT : begin
      winid:= SDL_GetWindowFromID(e.window.window);
-          writeln('WINEVENT win=',winid,' event=',e.window.event,
-             ' app=',applicationwindow,' lastfocus=',lastfocuswindow);
-     
+      
      if (e.window.event = SDL_WINDOWEVENT_ENTER) or
                      (e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED) then begin
       if (winid = applicationwindow) and (lastfocuswindow <> 0) then begin
@@ -1239,7 +1231,6 @@ begin
      end else if (e.window.event = SDL_WINDOWEVENT_RESIZED)
       or (e.window.event = SDL_WINDOWEVENT_SIZE_CHANGED) then begin
       postconfigureevent(winid);
-      // writeln('SDL_WINDOWEVENT_RESIZED');
       SDL_CheckError('resized');
      end else if (e.window.event = SDL_WINDOWEVENT_EXPOSED) then begin
       gui_getwindowrect(winid,rect1);
@@ -1483,6 +1474,7 @@ begin
   end;
   result:= gue_createwindow;
   rect1:= rect;
+  classname:= widgetclassname; 
 
   if not ((transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> [])) then begin
    if parent <> 0 then begin
@@ -1631,7 +1623,6 @@ begin
  result.y:= rect1.y;
  result.cx:= rect1.w;
  result.cy:= rect1.h;
-// debugwriteln('workarea');
 end;
 
 

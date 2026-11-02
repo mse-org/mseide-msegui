@@ -204,11 +204,9 @@ begin
   case kind of
    gck_pixmap: begin
     gcpo^.handle:= SDL_CreateSoftwareRenderer(paintdevice);
-  //  writeln('CREATEGC screen handle=',arenderer);
     error:= SDL_CheckErrorGDI('creategc');
    end;
    gck_screen: begin
-  // writeln('CREATEGC screen paintdevice=',paintdevice);
     if paintdevice = 0 then begin
      // no window: measuring canvas used by fonts, never draws
      if dummysurface = 0 then begin
@@ -272,11 +270,6 @@ begin
    fgrgb.green:= rgbcolor.green;
    fgrgb.blue:= rgbcolor.red;
    fgrgb.res:= rgbcolor.res;
-   {
-   writeln('FG raw=',inttohex(longword(colorforeground),8),
-           ' colortorgb=',rgbcolor.red,',',rgbcolor.green,',',rgbcolor.blue,
-           ' stored=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
- }          
   end;
   if gvm_colorbackground in mask then begin
    rgbcolor:= colortorgb(colorbackground);
@@ -284,11 +277,6 @@ begin
    bgrgb.green:= rgbcolor.green;
    bgrgb.blue:= rgbcolor.red;
    bgrgb.res:= rgbcolor.res;
-   {
-   writeln('BG raw=',inttohex(longword(colorbackground),8),
-           ' colortorgb=',rgbcolor.red,',',rgbcolor.green,',',rgbcolor.blue,
-            ' stored=',bgrgb.red,',',bgrgb.green,',',bgrgb.blue);
-   }
   end;
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
   end;
@@ -401,8 +389,6 @@ var
  pp: ppointaty;
  org: pointty;
 begin
-//writeln('gdi_drawlines lines count=',drawinfo.points.count,
-  //      ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
  with drawinfo do begin
   if points.count < 2 then exit;
   pp:= ppointaty(points.points);
@@ -427,14 +413,7 @@ var
  pp: ppointaty;
  org: pointty;
 begin
-{
-writeln('gdi_drawlinesegments lines count=',drawinfo.points.count,
-        ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
-writeln('drawlines acolorfg=',inttohex(longword(drawinfo.acolorforeground),8),
-        ' gcfg=',inttohex(longword(drawinfo.gcvalues^.colorforeground),8),
-        ' cachedfg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
-}
-//writeln('gdi_drawlinesegments');
+
  with drawinfo do begin
   pp:= ppointaty(points.points);
   org:= origin;
@@ -493,20 +472,8 @@ with drawinfo do begin
   rect1.w:= rect.rect^.cx;
   rect1.h:= rect.rect^.cy;
   
-// writeln('FILL ',rect1.x,',',rect1.y,' ',rect1.w,'x',rect1.h,' gc=',gc.handle);
-  
- { 
-  if rect1.w <= 2 then begin
- writeln('thin fill x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
-         ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
-end;
-}
-//  writeln('fillrect x=',rect1.x,' y=',rect1.y,' w=',rect1.w,' h=',rect1.h,
-  //      ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
- 
- // if (fgrgb.red = 0) and (fgrgb.green = 0) and (fgrgb.blue = 0) then exit;
-  
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
+  
   SDL_RenderFillRect(gc.handle,@rect1);
   SDL_CheckError('SDL_RenderFillRect');
  end;
@@ -627,7 +594,6 @@ procedure gdi_fillelipse(var drawinfo: drawinfoty);
 var
  rgb: rgbtriplety;
 begin
-//writeln('gdi_fillelipse');
  with drawinfo, rect.rect^ do begin
   rgb:= colortorgb(acolorforeground);
   filledEllipseRGBA(gc.handle, pos.x + origin.x, pos.y + origin.y, round(cx/2), round(cy/2), 
@@ -653,16 +619,15 @@ var
 
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
- rect1,rect2: SDL_rect;
+ rect1,rect2,dr: SDL_rect;
  atexture: SDL_Texture;
  asurface,msurface,dsurface: PSDL_Surface;
  sp,mp,dp,dsp: CSDL_Surface;
  p,pm,pd: PLongword;
- x,y: integer;
+ x,y,tx,ty: integer;
  mono: boolean;
  fgpix: longword;
 begin
-
  with drawinfo,copyarea,gcvalues^ do begin
   rect1.x:= sourcerect^.x;
   rect1.y:= sourcerect^.y;
@@ -676,12 +641,9 @@ begin
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
    if df_canvasispixmap in drawinfo.gc.drawingflags then begin
     dsp:= CSDL_Surface(ptruint(drawinfo.paintdevice));
-       if (rect1.w > 0) and (rect1.h > 0) and (rect2.x >= 0) and (rect2.y >= 0) and
-       (rect2.x + rect1.w <= dsp^.w) and (rect2.y + rect1.h <= dsp^.h) then begin
-     SDL_RenderReadPixels(tcanvas1(source).fdrawinfo.gc.handle,@rect1,$16362004,
-          pointer(ptruint(dsp^.pixels) + ptruint(rect2.y*dsp^.pitch + rect2.x*4)),
-          dsp^.pitch);
-    end;
+    SDL_RenderReadPixels(tcanvas1(source).fdrawinfo.gc.handle,@rect1,$16362004,
+         pointer(ptruint(dsp^.pixels) + ptruint(rect2.y*dsp^.pitch + rect2.x*4)),
+         dsp^.pitch);
    end;
    exit;
   end;
@@ -694,11 +656,30 @@ begin
   SDL_unlockSurface(asurface);
   SDL_SetSurfaceBlendMode(tcanvas1(source).fdrawinfo.paintdevice,
                                                     SDL_BLENDMODE_NONE);
-  SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,nil);
+
+  // CHANGED: tile the source if the destination is larger
+  if ((rect2.w > rect1.w) or (rect2.h > rect1.h)) and
+                                    (rect1.w > 0) and (rect1.h > 0) then begin
+   ty:= 0;
+   while ty < rect2.h do begin
+    tx:= 0;
+    while tx < rect2.w do begin
+     dr.x:= tx;
+     dr.y:= ty;
+     dr.w:= rect1.w;
+     dr.h:= rect1.h;
+     SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,@dr);
+     inc(tx,rect1.w);
+    end;
+    inc(ty,rect1.h);
+   end;
+  end
+  else begin
+   SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,nil);
+  end;
   sp:= CSDL_Surface(ptruint(asurface));
 
   if mono then begin
-   // mono glyph: set bits take the foreground color, clear bits are transparent
    fgpix:= $FF000000 or (longword(fgrgb.red) shl 16) or
                         (longword(fgrgb.green) shl 8) or fgrgb.blue;
    for y:= 0 to sp^.h-1 do begin
@@ -778,7 +759,6 @@ begin
   SDL_FreeSurface(asurface);
  end;
 end;
-
 
 procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
 begin

@@ -976,7 +976,7 @@ type
    constructor create(const user: tobject; const intf: icanvas); virtual;
    destructor destroy; override;
    class function getclassgdifuncs: pgdifunctionaty; virtual;
-
+   function debugstackcount: integer;
    procedure updatewindowoptions(var aoptions: internalwindowoptionsty); virtual;
    function creategc(const apaintdevice: paintdevicety; const akind: gckindty;
                 var gc: gcty; const aprintername: msestring = ''): gdierrorty;
@@ -4394,10 +4394,7 @@ begin
    system.move(stack[count-1],stack[count],sizeof(canvasvaluesty));
   end
     else begin
-{$ifdef usesdl}
-   writeln('SAVE with empty stack');
-   dump_stack(output,get_frame);
-{$endif}
+
    error(gde_invalidsaveindex,'save 0');
   end;
   fvaluepo:= @stack[count];
@@ -4436,28 +4433,25 @@ begin
  finalize(values);
 end;
 
+{$ifdef usesdl}
+var
+ dbgbigpops: integer;
+{$endif}
+
 function tcanvas.restore(index: integer = -1): integer;
 var
  int1: integer;
  achanged: canvasstatesty;
 begin
+
  with fvaluestack do begin
 
     if index >= count then begin
-{$ifdef usesdl}
-   writeln('RESTORE tolerated: index=',index,' count=',count);
-   exit(index);
-{$else}
    error(gde_invalidsaveindex,inttostrmse(index));
-{$endif}
   end;
 
      if index < 0 then begin
    if count < 2 then begin
-{$ifdef usesdl}
-    writeln('RESTORE nothing saved: index=',index,' count=',count);
-    dump_stack(output,get_frame);
-{$endif}
     error(gde_invalidsaveindex,inttostrmse(index));
    end;
    index:= count - 2;
@@ -7079,6 +7073,11 @@ end;
 procedure tcanvas.updatewindowoptions(var aoptions: internalwindowoptionsty);
 begin
  //dummy
+end;
+
+function tcanvas.debugstackcount: integer;
+begin
+ result:= fvaluestack.count;
 end;
 
 procedure tcanvas.updatesize(const asize: sizety);

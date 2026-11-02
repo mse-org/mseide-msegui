@@ -1166,22 +1166,27 @@ var
  dirent: dirent64;
  po1: pdirent64;
  statbuffer: _stat64;
- //stat1: tstatbuf;
- str1: string;
+ str1,strtmp: string;
  error: boolean;
 begin
  result:= false;
+ po1:= nil;
+ strtmp:= '';
  with stream,dirinfo,dirstreamlinuxty(platformdata) do begin
   if not ((include <> []) and (fa_all in exclude)) then begin
    while true do begin
-  //    if (readdir64_r(d.dir,@dirent,@po1) = 0) and
-      if (readdir64_r(d.dir) <> nil) and
-          (po1 <> nil) then begin
+    po1:= readdir64_r(d.dir);
+    if po1 <> nil then begin
+     dirent:= po1^;
      with info do begin
       str1:= dirent.d_name;
+      if (str1 = strtmp) or (trim(str1) = '') then begin
+       break;
+      end;
+      strtmp:= str1;
       name:= str1;
       if checkfilename(info.name,stream) then begin
-       if d.needsstat or d.needstype and 
+       if d.needsstat or d.needstype and
        ((dirent.d_type = dt_unknown) or (dirent.d_type = dt_lnk)) then begin
         error:= stat64(pchar(string(d.dirpath)+str1),@statbuffer) <> 0;
        end

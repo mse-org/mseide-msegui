@@ -1088,22 +1088,26 @@ begin
    end;
    freemem(pointer(source));
   end;
-{$ifdef usesdl}//SDL_RenderSetViewport(drawinfo.gc.handle,nil);
-{$endif}
  end;
 end;
 
 procedure gdi_copyregion(var drawinfo: drawinfoty); //gdifunc
-var
-// int1: integer;
- {$ifdef usesdl}rect1: SDL_Rect;{$endif}
-
 begin
  with drawinfo.regionoperation do begin
+  if (source = 0) or (ptruint(source) < 65536) then begin
+   dest:= 0;
+   exit;
+  end;
   getmem(pointer(dest),sizeof(regioninfoty));
   move(pointer(source)^,pointer(dest)^,sizeof(regioninfoty));
   with pregioninfoty(dest)^ do begin
    if datasize > 0 then begin
+    if pregioninfoty(source)^.datapo = nil then begin
+     datasize:= 0;
+     datapo:= nil;
+     buffersize:= 0;
+     exit;
+    end;
     getmem(datapo,datasize);
     move(pregioninfoty(source)^.datapo^,datapo^,datasize);
    end
@@ -1112,16 +1116,8 @@ begin
    end;
    buffersize:= datasize;
   end;
- {$ifdef usesdl}
-  rect1.x:= rect.x;
-  rect1.y:= rect.y;
-  rect1.w:= rect.cx;
-  rect1.h:= rect.cy;
-  //SDL_RenderSetViewport(drawinfo.gc.handle,@rect1);
-{$endif}
  end;
 end;
-
 procedure gdi_moveregion(var drawinfo: drawinfoty); //gdifunc
 {$ifndef usesdl}
 var
