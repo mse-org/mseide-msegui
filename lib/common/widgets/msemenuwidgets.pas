@@ -1771,7 +1771,6 @@ begin
 {$ifdef usesdl}
   d2:= canvas.save;
   canvas.restore(d2);
-  writeln('MENUPAINT stack depth before=',d1,' after=',d2);
 {$endif}
  end;
  inherited;
