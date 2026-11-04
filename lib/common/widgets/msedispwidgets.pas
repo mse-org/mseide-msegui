@@ -574,6 +574,9 @@ end;
 procedure tdispwidget.dopaintforeground(const canvas: tcanvas);
 begin
  inherited;
+ if finfo.font = nil then begin
+  finfo.font:= getfont;          // font not set yet: use the widget font
+ end;
  if not (dwf_cleared in fflags) or (ftext <> '') then begin
   drawtext(canvas,finfo);
   if finfo.text.text = '' then begin

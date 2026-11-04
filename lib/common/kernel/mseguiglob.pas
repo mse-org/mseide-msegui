@@ -403,6 +403,11 @@ const
 
 procedure guierror(error: guierrorty; text: string); overload;
 begin
+ if ord(error) > 100 then begin
+  writeln('BAD guierror1 value=',ord(error));
+  dump_stack(output,get_frame);
+  flush(output);
+ end;
  if error = gue_ok then begin
   exit;
  end;
@@ -412,6 +417,11 @@ end;
 procedure guierror(error: guierrorty; sender: tobject;
                        text: string = ''); overload;
 begin
+ if ord(error) > 100 then begin
+  writeln('BAD guierror value=',ord(error),' sender=',ptruint(sender));
+  dump_stack(output,get_frame);
+  flush(output);
+ end;
  if error = gue_ok then begin
   exit;
  end;

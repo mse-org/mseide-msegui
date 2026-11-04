@@ -44,11 +44,12 @@ begin
  if text = '' then begin
   inherited create(errortexts[error]+'.');
  end
- else begin
- text:= errortexts[error]+ ' ' + text;
-  ch1:= text[length(text)];
-  if (ch1 <> '.') and (ch1 <> c_return) and (ch1 <> c_linefeed) then begin
-   text:= text + '.';
+  else begin
+  if (error >= 0) and (error <= high(errortexts)) then begin
+   text:= errortexts[error]+ ' ' + text;
+  end
+  else begin
+   text:= 'unknown error '+inttostr(error)+' '+ text;
   end;
   inherited create(text);
  end;
