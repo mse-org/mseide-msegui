@@ -8,6 +8,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 unit mseguiintf;
+{$warn 5033 on}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
@@ -334,11 +335,16 @@ var
  flag: SDL_WindowFlags;
 begin
  flag:= SDL_GetWindowFlags(id);
- case flag of
-  SDL_WINDOW_FULLSCREEN: result:= wsi_fullscreen;
-  SDL_WINDOW_MAXIMIZED: result:= wsi_maximized;
-  SDL_WINDOW_MINIMIZED: result:= wsi_minimized;
- else
+ if (flag and SDL_WINDOW_MINIMIZED) <> 0 then begin
+  result:= wsi_minimized;
+ end
+ else if (flag and SDL_WINDOW_MAXIMIZED) <> 0 then begin
+  result:= wsi_maximized;
+ end
+ else if (flag and SDL_WINDOW_FULLSCREEN) <> 0 then begin
+  result:= wsi_fullscreen;
+ end
+ else begin
   result:= wsi_normal;
  end;
 end;
@@ -363,23 +369,34 @@ end;
 
 function gui_setwindowstate(id: winidty; size: windowsizety;
                             visible: boolean): guierrorty;
+var
+ flags: SDL_WindowFlags;
 begin
- case size of 
-  wsi_normal: SDL_ShowWindow(id);
+ result:= gue_ok;
+ flags:= SDL_GetWindowFlags(id);
+ case size of
+  wsi_normal: begin
+   // only map/restore the window if it is not already visible and normal
+   if ((flags and SDL_WINDOW_SHOWN) = 0) or
+        ((flags and (SDL_WINDOW_MINIMIZED or SDL_WINDOW_MAXIMIZED)) <> 0) then begin
+    SDL_ShowWindow(id);
+   end;
+  end;
   wsi_minimized: SDL_MinimizeWindow(id);
   wsi_maximized: SDL_MaximizeWindow(id);
   wsi_fullscreen: SDL_SetWindowFullscreen(id,true);
   wsi_fullscreenvirt: SDL_SetWindowFullscreen(id,true);
  end;
- SDL_CheckError('setwindowstate');
+ result:= SDL_CheckError('setwindowstate');
 end;
 
 function gui_getpointerpos: pointty;
 var
  x,y: integer;
 begin
- //SDL_GetMouseState(@x,@y);
- SDL_GetRelativeMouseState(@x,@y);
+ x:= 0;
+ y:= 0;
+ SDL_GetGlobalMouseState(@x,@y);   // screen coordinates
  SDL_CheckError('getpointerpos');
  result.x:= x;
  result.y:= y;
@@ -683,6 +700,7 @@ begin
  result:= gue_windowfocus;
  SDL_ShowWindow(id);
  result:= SDL_CheckError('setwindowfocus');
+
 end;
 
 
@@ -1056,10 +1074,21 @@ begin
 end;
 
 function gui_getwindowrect(id: winidty; out rect: rectty): guierrorty;
-            //screen origin
+var
+ x,y,w,h: integer;
 begin
- rect:= getclientrect(id);
- result:= gue_ok;
+ fillchar(rect,sizeof(rect),0);      // always return a defined rectangle
+ x:= 0;
+ y:= 0;
+ w:= 0;
+ h:= 0;
+ SDL_GetWindowPosition(id,x,y);
+ SDL_GetWindowSize(id,w,h);
+ rect.x:= x;
+ rect.y:= y;
+ rect.cx:= w;
+ rect.cy:= h;
+ result:= SDL_CheckError('getwindowrect');
 end;
 
 function gui_getwindowpos(id: winidty; out pos: pointty): guierrorty;
@@ -1078,13 +1107,13 @@ var
 procedure postconfigureevent(const id: winidty);
 var
  rect1: rectty;
- pt1: pointty;
 begin
  configuredwindow:= id;
  if gui_getwindowsize(id) <> wsi_minimized then begin
   gui_getwindowrect(id,rect1);
-  gui_postevent(twindowrectevent.create(ek_configure,id,
-                          rect1,pt1));
+  if (rect1.cx > 0) and (rect1.cy > 0) then begin
+   gui_postevent(twindowrectevent.create(ek_configure,id,rect1,nullpoint));
+  end;
  end
  else begin
   gui_postevent(twindowevent.create(ek_hide,id));
@@ -1094,44 +1123,62 @@ end;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  rect1: rectty;
+ ww,wh: integer;
 begin
-
+ if (rect.cx <= 0) or (rect.cy <= 0) then begin
+  result:= gue_ok;
+  exit;
+ end;
  result:= gue_resizewindow;
  rect1:= getclientrect(id);
-
- if not ((rect.x=rect1.x) and (rect.y=rect1.y) and 
-  (rect.cx=rect1.cx) and (rect.cy=rect1.cy)) then begin
-  SDL_SetWindowPosition(id,rect.x,rect.y);
-  SDL_SetWindowSize(id,rect.cx,rect.cy);
-  SDL_GetWindowSurface(id);
-  result:= SDL_CheckError('reposwindow');
+  if not ((rect.x=rect1.x) and (rect.y=rect1.y) and
+         (rect.cx=rect1.cx) and (rect.cy=rect1.cy)) then begin
+  if (rect.x < 20000) and (rect.y < 20000) then begin  // TEST: ignore absurd positions
+   SDL_SetWindowPosition(id,rect.x,rect.y);
+  end
+  else begin
  
- end else begin
+  end;
+ 
+  ww:= 0;
+  wh:= 0;
+  SDL_GetWindowSize(id,ww,wh);
+  if (ww <> rect.cx) or (wh <> rect.cy) then begin
+   SDL_SetWindowSize(id,rect.cx,rect.cy);
+  end;
+  result:= SDL_CheckError('reposwindow');
+ end
+ else begin
   result:= gue_ok;
  end;
 end;
 
 function gui_getdecoratedwindowrect(id: winidty; out arect: rectty): guierrorty;
 begin
- gui_getwindowrect(id,arect);
- result:= gue_ok;
+ fillchar(arect,sizeof(arect),0);
+ result:= gui_getwindowrect(id,arect);
 end;
 
 function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
                                     out clientrect: rectty): guierrorty;
-//var
-// rect1: rectty;
 begin
- result:= gue_resizewindow;
+ fillchar(clientrect,sizeof(clientrect),0);
  gui_getwindowrect(id,clientrect);
- SDL_SetWindowPosition(id,rect.x,rect.y);
+ if (rect.cx > 0) and (rect.cy > 0) and
+              (rect.x < 20000) and (rect.y < 20000) then begin
+  SDL_SetWindowPosition(id,rect.x,rect.y);
+ end
+ else begin
+ end;
  result:= SDL_CheckError('setdecoratewindowrect');
 end;
 
 function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;
 begin
  result:= gue_resizewindow;
- SDL_SetWindowPosition(id,rect.x,rect.y);
+ if (rect.x < 20000) and (rect.y < 20000) then begin
+  SDL_SetWindowPosition(id,rect.x,rect.y);
+ end;
  result:= SDL_CheckError('setembeddedwindowrect');
 end;
 
@@ -1189,8 +1236,7 @@ begin
     end;
     SDL_WINDOWEVENT : begin
      winid:= SDL_GetWindowFromID(e.window.window);
-      
-     if (e.window.event = SDL_WINDOWEVENT_ENTER) or
+        if (e.window.event = SDL_WINDOWEVENT_ENTER) or
                      (e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED) then begin
       if (winid = applicationwindow) and (lastfocuswindow <> 0) then begin
        if windowvisible(lastfocuswindow) then begin
@@ -1228,16 +1274,19 @@ begin
       end else begin
        result:= twindowevent.create(ek_close,winid);
       end;
-     end else if (e.window.event = SDL_WINDOWEVENT_RESIZED)
+          end else if (e.window.event = SDL_WINDOWEVENT_RESIZED)
       or (e.window.event = SDL_WINDOWEVENT_SIZE_CHANGED) then begin
       postconfigureevent(winid);
+      // new: after a size change the whole window must be repainted
+      gui_getwindowrect(winid,rect1);
+      application.postevent(twindowrectevent.create(ek_expose,winid,rect1,nullpoint));
       SDL_CheckError('resized');
      end else if (e.window.event = SDL_WINDOWEVENT_EXPOSED) then begin
       gui_getwindowrect(winid,rect1);
       result:= twindowrectevent.create(ek_expose,winid,rect1,nullpoint);
-     end else if (e.window.event = SDL_WINDOWEVENT_MOVED) then begin
-     end else if (e.window.event = SDL_WINDOWEVENT_HIDDEN) then begin
-      result:= twindowevent.create(ek_hide,winid);
+          end else if (e.window.event = SDL_WINDOWEVENT_MOVED) then begin
+      postconfigureevent(winid);
+     end else if (e.window.event = SDL_WINDOWEVENT_HIDDEN) then begin  result:= twindowevent.create(ek_hide,winid);
      end else if (e.window.event = SDL_WINDOWEVENT_SHOWN) then begin
       result:= twindowevent.create(ek_show,winid);
      end;
@@ -1445,11 +1494,14 @@ end;
 function gui_createwindow(const rect: rectty;
                              var options: internalwindowoptionsty;
                              var awindow: windowty): guierrorty;
+const
+ testkeepappwindow = false;  // set to true for the test: do not destroy applicationwindow
 var
  windowstyleex: SDL_WindowFlags;
  rect1: rectty;
  classname: pchar;
  ownerwindow: winidty;
+ ww,wh: integer;
 begin
  fillchar(awindow,sizeof(awindow),0);
  with awindow,options do begin
@@ -1484,6 +1536,13 @@ begin
    end;
   end;
 
+  // hint-sized popups must not take the focus (X11 only: on Wayland the
+  // tooltip flag needs a parent window and the window disappears)
+  if (wo_popup in options) and (rect1.cx <= 100) and (rect1.cy <= 100) and
+                      (string(SDL_GetCurrentVideoDriver) = 'x11') then begin
+   windowstyleex:= windowstyleex or $00040000;      // SDL_WINDOW_TOOLTIP
+  end;
+  
   // Spawns the clean top-level window with correct maximize and resize decorations
   if (pos=wp_screencentered) then begin
    id:= SDL_CreateWindow(classname,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,rect1.cx,rect1.cy,windowstyleex);
@@ -1493,12 +1552,17 @@ begin
 
   // FIX: Drop the temporary utility window created by createapphandle 
   // to instantly clean up the duplicate taskbar icon issue!
-  if (applicationwindow <> 0) and (applicationwindow <> id) then begin
+  if (not testkeepappwindow) and
+                 (applicationwindow <> 0) and (applicationwindow <> id) then begin
    SDL_DestroyWindow(applicationwindow);
    applicationwindow := 0;
   end;
 
   result:= SDL_CheckError('createwindow');
+  ww:= 0;
+  wh:= 0;
+  SDL_GetWindowPosition(id,ww,wh);
+
   if (transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
    if transientfor <> 0 then begin
     ownerwindow:= transientfor;
@@ -1519,7 +1583,6 @@ begin
   end;
  end;
 end;
-
 function gui_getparentwindow(const awindow: winidty): winidty;
 begin
  result:= awindow;
@@ -1590,35 +1653,35 @@ end;
 
 function gui_getscreenrect(const id: winidty): rectty; //0 -> virtual screen
 var
-// info: tmonitorinfo;
  arect: SDL_Rect;
 begin
-{ info.cbsize:= sizeof(info);
- if (id = 0) or not getmonitorinfo(monitorfromwindow(id,monitor_defaulttonearest),
-                                                       @info) then begin
-  result.x:= getsystemmetrics(sm_xvirtualscreen);
-  result.y:= getsystemmetrics(sm_yvirtualscreen);
-  result.cx:= getsystemmetrics(sm_cxvirtualscreen);
-  result.cy:= getsystemmetrics(sm_cyvirtualscreen);
-  if result.cx = 0 then begin
-   result.cx:= getsystemmetrics(sm_cxscreen)
-  end;
-  if result.cy = 0 then begin
-   result.cy:= getsystemmetrics(sm_cyscreen)
-  end;
- end
- else begin
-  result:= rectty(info.rcmonitor);
-  winrecttorect(result);
- end;}
- gui_getwindowrect(id,result);
+ fillchar(arect,sizeof(arect),0);
+ SDL_GetDisplayBounds(0,@arect);
+ if (arect.w <= 0) or (arect.h <= 0) then begin
+  arect.x:= 0;
+  arect.y:= 0;
+  arect.w:= 1024;          // fallback: MSEgui must never see an empty screen
+  arect.h:= 768;
+ end;
+ result.x:= arect.x;
+ result.y:= arect.y;
+ result.cx:= arect.w;
+ result.cy:= arect.h;
+ SDL_CheckError('getscreenrect');
 end;
 
 function gui_getworkarea(id: winidty): rectty;
 var
  rect1: SDL_Rect;
 begin
+ fillchar(rect1,sizeof(rect1),0);
  SDL_GetDisplayBounds(0,@rect1);
+ if (rect1.w <= 0) or (rect1.h <= 0) then begin
+  rect1.x:= 0;
+  rect1.y:= 0;
+  rect1.w:= 1024;
+  rect1.h:= 768;
+ end;
  result.x:= rect1.x;
  result.y:= rect1.y;
  result.cx:= rect1.w;

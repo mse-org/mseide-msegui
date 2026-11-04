@@ -129,6 +129,7 @@ begin
    rect1.y:= pos.y - height;      // pos.y is the bottom edge of the glyph
    rect1.w:= width;
    rect1.h:= height;
+     
    SDL_RenderCopy(drawinfo.gc.handle,tex,nil,@rect1);
    SDL_DestroyTexture(tex);
   end;
@@ -346,8 +347,16 @@ begin
 end;
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
+var
+ rw,rh,ww,wh: integer;
 begin
-  SDL_RenderPresent(drawinfo.gc.handle);
+ rw:= 0;
+ rh:= 0;
+ ww:= 0;
+ wh:= 0;
+ SDL_GetRendererOutputSize(drawinfo.gc.handle,@rw,@rh);
+ SDL_GetWindowSize(winidty(drawinfo.paintdevice),ww,wh);
+ SDL_RenderPresent(drawinfo.gc.handle);
 end;
 
 procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
@@ -619,12 +628,12 @@ var
 
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
- rect1,rect2,dr: SDL_rect;
+ rect1,rect2: SDL_rect;
  atexture: SDL_Texture;
  asurface,msurface,dsurface: PSDL_Surface;
  sp,mp,dp,dsp: CSDL_Surface;
  p,pm,pd: PLongword;
- x,y,tx,ty: integer;
+ x,y: integer;
  mono: boolean;
  fgpix: longword;
 begin
@@ -648,35 +657,20 @@ begin
    exit;
   end;
 
+  if (rect1.w <= 0) or (rect1.h <= 0) or (rect2.w <= 0) or (rect2.h <= 0) then begin
+   exit;
+  end;
+
   mono:= ismonopixmap(tcanvas1(source).fdrawinfo.paintdevice);
 
-  asurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
+  // surface at the SOURCE size: SDL_RenderCopy scales it to rect2
+  asurface:= SDL_CreateRGBSurface(0,rect1.w,rect1.h,32,
                        $00FF0000,$0000FF00,$000000FF,$FF000000);
   SDL_unlockSurface(tcanvas1(source).fdrawinfo.paintdevice);
   SDL_unlockSurface(asurface);
   SDL_SetSurfaceBlendMode(tcanvas1(source).fdrawinfo.paintdevice,
                                                     SDL_BLENDMODE_NONE);
-
-  // CHANGED: tile the source if the destination is larger
-  if ((rect2.w > rect1.w) or (rect2.h > rect1.h)) and
-                                    (rect1.w > 0) and (rect1.h > 0) then begin
-   ty:= 0;
-   while ty < rect2.h do begin
-    tx:= 0;
-    while tx < rect2.w do begin
-     dr.x:= tx;
-     dr.y:= ty;
-     dr.w:= rect1.w;
-     dr.h:= rect1.h;
-     SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,@dr);
-     inc(tx,rect1.w);
-    end;
-    inc(ty,rect1.h);
-   end;
-  end
-  else begin
-   SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,nil);
-  end;
+  SDL_UpperBlit(tcanvas1(source).fdrawinfo.paintdevice,@rect1,asurface,nil);
   sp:= CSDL_Surface(ptruint(asurface));
 
   if mono then begin
@@ -696,7 +690,7 @@ begin
    end;
   end
   else if drawinfo.copyarea.mask <> nil then begin
-   msurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
+   msurface:= SDL_CreateRGBSurface(0,rect1.w,rect1.h,32,
                         $00FF0000,$0000FF00,$000000FF,$FF000000);
    SDL_unlockSurface(drawinfo.copyarea.mask.handle);
    SDL_unlockSurface(msurface);
@@ -729,7 +723,8 @@ begin
    end;
   end;
 
-  if drawinfo.copyarea.copymode = rop_xor then begin
+  if (drawinfo.copyarea.copymode = rop_xor) and
+              (rect1.w = rect2.w) and (rect1.h = rect2.h) then begin
    dsurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
                         $00FF0000,$0000FF00,$000000FF,$FF000000);
    dp:= CSDL_Surface(ptruint(dsurface));

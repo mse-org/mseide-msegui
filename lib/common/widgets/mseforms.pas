@@ -1732,8 +1732,8 @@ begin
    cx:= reader.readinteger('cx',cx,0);
    cy:= reader.readinteger('cy',cy,0);
   end;
-//  setclippedwidgetrect(rect1);
-  rect1:= clipinrect(rect1,application.screenrect); //shift into screen
+  
+   rect1:= clipinrect(rect1,application.screenrect); //shift into screen
   widgetrect:= rect1;
   application.postevent(tobjectevent.create(ek_checkscreenrange,ievent(self)));
  end;

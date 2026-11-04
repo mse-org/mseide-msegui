@@ -3015,7 +3015,7 @@ end;
 {
 procedure tfont.sethandle(const Value: fontty);
 begin
- if fhandlepo^ <> value then begin
+l
   releasefont(fhandlepo^);
   fhandlepo^ := Value;
   dochanged([cs_font]);

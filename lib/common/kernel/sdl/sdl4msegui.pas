@@ -609,7 +609,7 @@ const
    
 type
  SDL_Cursor = ptruint;
-
+  function SDL_GetGlobalMouseState(x,y: pinteger): cardinal; cdecl; external SDLLibName;
  function SDL_GetMouseState(x,y: pinteger): byte; cdecl; external SDLLibName;
  function SDL_GetRelativeMouseState(x,y: pinteger): byte; cdecl; external SDLLibName;
  procedure SDL_WarpMouseInWindow(window: cardinal; x, y: integer); cdecl; external SDLLibName;
@@ -647,7 +647,7 @@ type
   max_texture_height: integer;               //**< The maximimum texture height */
  end;
   PSDL_RendererInfo = ^SDL_RendererInfo;
- 
+  function SDL_GetCurrentVideoDriver: pchar; cdecl; external SDLLibName;
   function SDL_RenderFlush(renderer: SDL_Renderer): integer; cdecl; external SDLLibName;
    function SDL_GetRendererOutputSize(renderer: SDL_Renderer; w, h: pinteger): integer; cdecl; external SDLLibName;
  function SDL_CreateRenderer(window: cardinal; index: integer; flags: Cardinal): SDL_Renderer; cdecl; external SDLLibName;
@@ -1129,17 +1129,15 @@ implementation
   SDL_SaveBMP_RW(surface,SDL_RWFromFile(filename, 'wb'), 1)
  end;
  
- function SDL_CheckError(ref: string): guierrorty;
+  function SDL_CheckError(ref: string): guierrorty;
  var
   err: pchar;
  begin
+  result:= gue_ok;
   err:= SDL_GetError;
   if err<>'' then begin
    //debugwriteln('SDL error = ' + ref + ' : ' + err);
    SDL_ClearError;
-  end else begin
-   //debugwriteln('Success = ' + ref);
-   result:= gue_ok;
   end;
  end;
 
@@ -1147,13 +1145,11 @@ implementation
  var
   err: pchar;
  begin
+  result:= gde_ok;
   err:= SDL_GetError;
   if err<>'' then begin
-  // debugwriteln('SDL error = ' + ref + ' : ' + err);
+   //debugwriteln('SDL error = ' + ref + ' : ' + err);
    SDL_ClearError;
-  end else begin
-  // debugwriteln('Success = ' + ref);
-   result:= gde_ok;
   end;
  end;
 
