@@ -418,21 +418,17 @@ begin
  SDL_WarpMouseInWindow(mousewindow,x+dist.x,y+dist.y);
  result:= SDL_CheckError('movepointer');
 end;
-
 function gui_grabpointer(id: winidty): guierrorty;
 begin
- {setcapture(id);
- if getcapture = id then begin}
-  result:= gue_ok;
- {end
- else begin
-  result:= gue_capturemouse;
- end;}
+ SDL_CaptureMouse(1);       // keep receiving mouse events outside the window
+ SDL_ClearError;            // not every platform supports it, ignore the error
+ result:= gue_ok;
 end;
 
 function gui_ungrabpointer: guierrorty;
 begin
- //releasecapture;
+ SDL_CaptureMouse(0);
+ SDL_ClearError;
  result:= gue_ok;
 end;
 
@@ -1356,6 +1352,7 @@ begin
      result:= tmouseevent.create(winid,release1,
       btn,mw_none,
       pt1,shiftstate1, e.button.timestamp);
+      writeln('DOWN ',pt1.x,',',pt1.y,' btn=',ord(btn));
      break;
     end;
           SDL_MOUSEMOTION: begin
@@ -1382,6 +1379,7 @@ begin
      result:= tmouseevent.create(winid,release1,
       mb_none,mw_none,
       pt1,shiftstate1, e.motion.timestamp);
+     if buttons <> 0 then writeln('MOVE ',pt1.x,',',pt1.y,' mask=',buttons);
      break;
     end;
     SDL_MOUSEBUTTONUP: begin
@@ -1411,6 +1409,7 @@ begin
      result:= tmouseevent.create(winid,release1,
       btn,mw_none,
       pt1,shiftstate1, e.button.timestamp);
+      writeln('UP ',pt1.x,',',pt1.y,' btn=',ord(btn));
      break;
     end;
     SDL_MOUSEWHEEL: begin

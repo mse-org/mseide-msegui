@@ -740,6 +740,8 @@ type
 
 // event
 
+ function SDL_CaptureMouse(enabled: integer): integer; cdecl; external SDLLibName;
+
  procedure SDL_PumpEvents; cdecl; external SDLLibName;
  function SDL_PeepEvents(events: PSDL_Event; var numevents: integer; action: SDL_EventAction;
                         minType, maxType: cardinal): integer; cdecl; external SDLLibName;
