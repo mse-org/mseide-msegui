@@ -1121,7 +1121,8 @@ end;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  rect1: rectty;
- ww,wh: integer;
+ ww,wh,px,py: integer;
+ flags: SDL_WindowFlags;
 begin
  if (rect.cx <= 0) or (rect.cy <= 0) then begin
   result:= gue_ok;
@@ -1129,15 +1130,21 @@ begin
  end;
  result:= gue_resizewindow;
  rect1:= getclientrect(id);
-  if not ((rect.x=rect1.x) and (rect.y=rect1.y) and
+ if not ((rect.x=rect1.x) and (rect.y=rect1.y) and
          (rect.cx=rect1.cx) and (rect.cy=rect1.cy)) then begin
-  if (rect.x < 20000) and (rect.y < 20000) then begin  // TEST: ignore absurd positions
-   SDL_SetWindowPosition(id,rect.x,rect.y);
+  flags:= SDL_GetWindowFlags(id);
+  if (flags and $00080000) <> 0 then begin
+   // wayland popup: position is relative to the parent window
+   px:= 0;
+   py:= 0;
+   if groupleaderwindow <> 0 then begin
+    SDL_GetWindowPosition(groupleaderwindow,px,py);
+   end;
+   SDL_SetWindowPosition(id,rect.x-px,rect.y-py);
   end
   else begin
-
+   SDL_SetWindowPosition(id,rect.x,rect.y);
   end;
-
   ww:= 0;
   wh:= 0;
   SDL_GetWindowSize(id,ww,wh);
@@ -1234,7 +1241,7 @@ begin
     end;
     SDL_WINDOWEVENT : begin
      winid:= SDL_GetWindowFromID(e.window.window);
-        if (e.window.event = SDL_WINDOWEVENT_ENTER) or
+       if (e.window.event = SDL_WINDOWEVENT_ENTER) or
                      (e.window.event = SDL_WINDOWEVENT_FOCUS_GAINED) then begin
       if (winid = applicationwindow) and (lastfocuswindow <> 0) then begin
        if windowvisible(lastfocuswindow) then begin
@@ -1493,17 +1500,21 @@ begin
  result:= gue_ok;
 end;
 
+const
+ waylandpopups = false;   // true: real Wayland popups, currently hides the main window
+
 function gui_createwindow(const rect: rectty;
                              var options: internalwindowoptionsty;
                              var awindow: windowty): guierrorty;
-const
- testkeepappwindow = false;  // set to true for the test: do not destroy applicationwindow
 var
  windowstyleex: SDL_WindowFlags;
+ popupflags: SDL_WindowFlags;
  rect1: rectty;
  classname: pchar;
  ownerwindow: winidty;
- ww,wh: integer;
+ drv: string;
+ px,py,mx1,my1: integer;
+
 begin
  fillchar(awindow,sizeof(awindow),0);
  with awindow,options do begin
@@ -1530,7 +1541,8 @@ begin
   rect1:= rect;
   classname:= widgetclassname;
 
-  if not ((transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> [])) then begin
+  if not ((transientfor <> 0) or
+                 (options * [wo_popup,wo_message,wo_notaskbar] <> [])) then begin
    if parent <> 0 then begin
     classname:= childwidgetclassname;
    end else begin
@@ -1538,34 +1550,60 @@ begin
    end;
   end;
 
-  // hint-sized popups must not take the focus (X11 only: on Wayland the
-  // tooltip flag needs a parent window and the window disappears)
-  if (wo_popup in options) and (rect1.cx <= 100) and (rect1.cy <= 100) and
-                      (string(SDL_GetCurrentVideoDriver) = 'x11') then begin
-   windowstyleex:= windowstyleex or $00040000;      // SDL_WINDOW_TOOLTIP
+  // popups: X11 small hints must not take the focus (tooltip flag),
+  // Wayland menus must be real popups, otherwise the compositor places them
+    drv:= string(SDL_GetCurrentVideoDriver);
+  popupflags:= 0;
+  if wo_popup in options then begin
+   if (drv = 'wayland') and waylandpopups then begin
+    popupflags:= $00080000;         // SDL_WINDOW_POPUP_MENU, test only
+   end
+   else if (drv = 'x11') and (rect1.cx <= 100) and (rect1.cy <= 100) then begin
+    popupflags:= $00040000;         // SDL_WINDOW_TOOLTIP
+   end;
   end;
+  windowstyleex:= windowstyleex or popupflags;
 
-  // Spawns the clean top-level window with correct maximize and resize decorations
   if (pos=wp_screencentered) then begin
-   id:= SDL_CreateWindow(classname,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,rect1.cx,rect1.cy,windowstyleex);
+   id:= SDL_CreateWindow(classname,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
+                                         rect1.cx,rect1.cy,windowstyleex);
   end else begin
-   id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,windowstyleex);
+   id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,
+                                                              windowstyleex);
   end;
 
-  // FIX: Drop the temporary utility window created by createapphandle
-  // to instantly clean up the duplicate taskbar icon issue!
-  if (not testkeepappwindow) and
-                 (applicationwindow <> 0) and (applicationwindow <> id) then begin
+  if (id = 0) and (popupflags <> 0) then begin
+   // SDL refused the popup (for example no parent window): plain window
+  // writeln('POPUP create failed: ',string(SDL_GetError));
+   SDL_ClearError;
+   windowstyleex:= windowstyleex and (not popupflags);
+   id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,
+                                                              windowstyleex);
+  end;
+
+  // Drop the temporary utility window created by createapphandle
+  // to clean up the duplicate taskbar icon
+  if (applicationwindow <> 0) and (applicationwindow <> id) then begin
    SDL_DestroyWindow(applicationwindow);
-   applicationwindow := 0;
+   applicationwindow:= 0;
   end;
 
   result:= SDL_CheckError('createwindow');
-  ww:= 0;
-  wh:= 0;
-  SDL_GetWindowPosition(id,ww,wh);
 
-  if (transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
+    px:= 0;
+  py:= 0;
+  mx1:= 0;
+  my1:= 0;
+  if id <> 0 then begin
+   SDL_GetWindowPosition(id,px,py);
+  end;
+  if lastfocuswindow <> 0 then begin
+   SDL_GetWindowPosition(lastfocuswindow,mx1,my1);
+  end;
+
+
+  if (transientfor <> 0) or
+                 (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
    if transientfor <> 0 then begin
     ownerwindow:= transientfor;
    end;
@@ -1585,6 +1623,7 @@ begin
   end;
  end;
 end;
+
 function gui_getparentwindow(const awindow: winidty): winidty;
 begin
  result:= awindow;

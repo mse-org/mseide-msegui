@@ -21,13 +21,13 @@ type
   w,h: integer;
  end;
  PSDL_Rect = ^SDL_Rect;
- 
+
  SDL_Point = record
   x: integer;
   y: integer;
  end;
  PSDL_Point = ^SDL_Point;
- 
+
  SDL_Color = record
   r: byte;
   g: byte;
@@ -93,7 +93,7 @@ type
   //* Stored position and size for windowed mode */
   windowed: SDL_Rect;
   SDL_DisplayMode fullscreen_mode;
-  
+
   float brightness;
   Uint16 *gamma;
   Uint16 *saved_gamma;        /* (just offset into gamma) */
@@ -110,7 +110,7 @@ type
   SDL_Window *prev;
   SDL_Window *next;
  end;}
- 
+
  // file type
 
  TStdio = record
@@ -154,11 +154,11 @@ type
 
  SDL_RWops = TSDL_RWops;
 
- 
+
  {$I sdl_EventConsts.inc}
- 
+
 type
- 
+
  SDL_scancode = 0..SDL_NUM_SCANCODES;
 
 const
@@ -166,7 +166,7 @@ const
  SDL_WINDOWEVENT_SHOWN = 1;          // Window has been shown */
  SDL_WINDOWEVENT_HIDDEN = 2;         // Window has been hidden */
  SDL_WINDOWEVENT_EXPOSED = 3;        // Window has been exposed and should be redrawn */
- SDL_WINDOWEVENT_MOVED = 4;          // Window has been moved to data1, data2 
+ SDL_WINDOWEVENT_MOVED = 4;          // Window has been moved to data1, data2
  SDL_WINDOWEVENT_RESIZED = 5;        // Window has been resized to data1xdata2 */
  SDL_WINDOWEVENT_SIZE_CHANGED = 6;   // The window size has changed, either as a result of an API call or through the system or user changing the window size. */
  SDL_WINDOWEVENT_MINIMIZED = 7;      // Window has been minimized */
@@ -177,14 +177,14 @@ const
  SDL_WINDOWEVENT_FOCUS_GAINED = 12;   // Window has gained keyboard focus */
  SDL_WINDOWEVENT_FOCUS_LOST = 13;     // Window has lost keyboard focus */
  SDL_WINDOWEVENT_CLOSE = 14;          // The window manager requests that the window be closed */
- 
+
  TEXT_SIZE = 32;
- 
+
  // mouse button state
  SDL_BUTTON_LMASK = (1 << ((1)-1));
  SDL_BUTTON_MMASK = (1 << ((2)-1));
  SDL_BUTTON_RMASK = (1 << ((3)-1));
- 
+
 type
  SDL_KeyCode = longword;
  SDL_KeyMod = longword;
@@ -195,7 +195,7 @@ type
   scancode: SDL_scancode; //**< SDL physical key code - see ::SDL_Scancode for details */
   sym: SDL_KeyCode; //**< SDL virtual key code - see ::SDL_Keycode for details */
   mods: SDL_KeyMod; //**< current key modifiers */
-  unicode: cardinal; //**< \deprecated use SDL_TextInputEvent instead */ 
+  unicode: cardinal; //**< \deprecated use SDL_TextInputEvent instead */
  end;
 
 {*
@@ -223,7 +223,7 @@ type
   repeat_: byte; //**< Non-zero if this is a key repeat */
   padding2: byte;
   padding3: byte;
-  keysym: SDL_Keysym; //**< The key that was pressed or released */       
+  keysym: SDL_Keysym; //**< The key that was pressed or released */
  end;
 
 {*
@@ -361,7 +361,7 @@ SDL_MouseMotionEvent = record
   state: byte;             //**< The current button state */
   button: byte;            //**< The button changing state */
   padding1: byte;
- end; 
+ end;
 
  SDL_MultiGestureEvent = record
   type_ : cardinal;        //**< ::SDL_MULTIGESTURE */
@@ -371,7 +371,7 @@ SDL_MouseMotionEvent = record
   dTheta: double;
   dDist: double;
   x: double;  //currently 0...1. Change to screen coords?
-  y: double;  
+  y: double;
   numFingers: Uint16;
   padding: Uint16;
  end;
@@ -446,11 +446,11 @@ SDL_MouseMotionEvent = record
     //* Touch events */
     SDL_FINGERDOWN,SDL_FINGERUP: (tfinger: SDL_TouchFingerEvent);
     //SDL_FINGERMOTION,
-    SDL_TOUCHBUTTONDOWN,SDL_TOUCHBUTTONUP: (tbutton: SDL_TouchButtonEvent);  
+    SDL_TOUCHBUTTONDOWN,SDL_TOUCHBUTTONUP: (tbutton: SDL_TouchButtonEvent);
     //* Gesture events */
     SDL_DOLLARGESTURE: (dgesture: SDL_DollarGestureEvent);
     SDL_MULTIGESTURE: (mgesture: SDL_MultiGestureEvent);
-    SDL_DROPFILE : (drop: SDL_DropEvent);  
+    SDL_DROPFILE : (drop: SDL_DropEvent);
     SDL_USEREVENT: (user: SDL_User_Event);
   end;
   PSDL_Event = ^SDL_Event;
@@ -459,7 +459,7 @@ SDL_MouseMotionEvent = record
 
   SDL_EventFilter = function (userdata: pointer; event: PSDL_Event): integer;
 
-  SDL_EventArray = array of SDL_Event; 
+  SDL_EventArray = array of SDL_Event;
 
  function SDL_Init( flags : Cardinal ) : Integer; cdecl; external SDLLibName;
  procedure SDL_Quit; cdecl; external SDLLibName;
@@ -485,9 +485,9 @@ const
 
 type
  SDL_WindowFlags = UInt32;
- 
+
  function SDL_SetHint(name, value: pchar): boolean; cdecl; external SDLLibName;
- function SDL_CreateWindow(title: PChar; x, y, w, h: integer; flags: SDL_WindowFlags): winidty; 
+ function SDL_CreateWindow(title: PChar; x, y, w, h: integer; flags: SDL_WindowFlags): winidty;
    cdecl; external SDLLibName;
  procedure SDL_DestroyWindow(window: winidty); cdecl; external SDLLibName;
  procedure SDL_ShowWindow(window: winidty); cdecl; external SDLLibName;
@@ -510,7 +510,7 @@ type
  function SDL_UpdateWindowSurface(window: winidty): integer; cdecl; external SDLLibName;
  function SDL_GetDisplayBounds(displayIndex: integer; rect: PSDL_Rect): integer; cdecl; external SDLLibName;
 
-// error 
+// error
  function SDL_GetError: pchar; cdecl; external SDLLibName;
  procedure SDL_ClearError; cdecl; external SDLLibName;
  function SDL_CheckError(ref: string): guierrorty;
@@ -531,7 +531,7 @@ type
  function SDL_SemValue(sem: semty): cardinal; cdecl; external SDLLibName;
  function SDL_SemTryWait(sem: semty): integer; cdecl; external SDLLibName;
  procedure SDL_WaitThread(thread: pointer; status:pinteger); cdecl; external SDLLibName;
- 
+
 // mouse
 const
  curwidth = 32;
@@ -606,13 +606,13 @@ const
       $ff,$ff,$ff,$ff,
       $ff,$ff,$ff,$ff
    );
-   
+
 type
  SDL_Cursor = ptruint;
   function SDL_GetGlobalMouseState(x,y: pinteger): cardinal; cdecl; external SDLLibName;
  function SDL_GetMouseState(x,y: pinteger): byte; cdecl; external SDLLibName;
  function SDL_GetRelativeMouseState(x,y: pinteger): byte; cdecl; external SDLLibName;
- procedure SDL_WarpMouseInWindow(window: cardinal; x, y: integer); cdecl; external SDLLibName;
+ procedure SDL_WarpMouseInWindow(window: winidty; x, y: integer); cdecl; external SDLLibName;
  function SDL_CreateCursor(const data: pbyte; const Umask: pbyte; w,h,hot_x,hot_y: integer): SDL_Cursor; cdecl; external SDLLibName;
  function SDL_CreateColorCursor(surface: PSDL_Surface; hot_x, hot_y: integer): SDL_Cursor; cdecl; external SDLLibName;
 
@@ -620,10 +620,10 @@ type
 
 // 2D renderer
 const
- SDL_RENDERER_SOFTWARE = $00000001;         //**< The renderer is a software fallback */ 
- SDL_RENDERER_ACCELERATED = $00000002;      //**< The renderer uses hardware 
+ SDL_RENDERER_SOFTWARE = $00000001;         //**< The renderer is a software fallback */
+ SDL_RENDERER_ACCELERATED = $00000002;      //**< The renderer uses hardware
                                             //      acceleration */
- SDL_RENDERER_PRESENTVSYNC = $00000004;     //**< Present is synchronized 
+ SDL_RENDERER_PRESENTVSYNC = $00000004;     //**< Present is synchronized
                                             //      with the refresh rate */
  SDL_RENDERER_TARGETTEXTURE = $00000008;     //**< The renderer supports
 
@@ -650,9 +650,9 @@ type
   function SDL_GetCurrentVideoDriver: pchar; cdecl; external SDLLibName;
   function SDL_RenderFlush(renderer: SDL_Renderer): integer; cdecl; external SDLLibName;
    function SDL_GetRendererOutputSize(renderer: SDL_Renderer; w, h: pinteger): integer; cdecl; external SDLLibName;
- function SDL_CreateRenderer(window: cardinal; index: integer; flags: Cardinal): SDL_Renderer; cdecl; external SDLLibName;
+ function SDL_CreateRenderer(window: winidty; index: integer; flags: Cardinal): SDL_Renderer; cdecl; external SDLLibName;
  function SDL_CreateTexture(renderer: SDL_Renderer; format: Cardinal; access: SDL_TextureAccess; w,h: integer): SDL_Texture; cdecl; external SDLLibName;
- function SDL_GetRenderer(window: cardinal): SDL_Renderer; cdecl; external SDLLibName;
+function SDL_GetRenderer(window: winidty): SDL_Renderer; cdecl; external SDLLibName;
  function SDL_RenderSetClipRect(renderer: SDL_Renderer; rect: PSDL_Rect): LongInt; cdecl; external SDLLibName;
  function SDL_CreateSoftwareRenderer(surface: PSDL_Surface): SDL_Renderer; cdecl; external SDLLibName;
  procedure SDL_DestroyRenderer(renderer: SDL_Renderer); cdecl; external SDLLibName;
@@ -683,7 +683,7 @@ type
  function SDL_RenderDrawLine(renderer: SDL_Renderer; x1, y1, x2, y2: integer): integer; cdecl; external SDLLibName;
  function SDL_RenderDrawLines(renderer: SDL_Renderer; const points: PSDL_Point; count: integer): integer; cdecl; external SDLLibName;
  function SDL_RenderDrawPoints(renderer: SDL_Renderer; const points: PSDL_Point; count: integer): integer; cdecl; external SDLLibName;
-  procedure SDL_RenderGetViewport(renderer: SDL_Renderer; rect: PSDL_Rect); cdecl; external SDLLibName; 
+  procedure SDL_RenderGetViewport(renderer: SDL_Renderer; rect: PSDL_Rect); cdecl; external SDLLibName;
  function SDL_RenderDrawRect(renderer: SDL_Renderer; const rect: PSDL_Rect): integer; cdecl; external SDLLibName;
  function SDL_RenderFillRect(renderer: SDL_Renderer; const rect: PSDL_Rect): integer; cdecl; external SDLLibName;
  function SDL_RenderDrawPoint(renderer: SDL_Renderer; x: integer; y: integer): integer; cdecl; external SDLLibName;
@@ -722,7 +722,7 @@ type
  function SDL_LowerBlit(src: PSDL_Surface; const srcrect: PSDL_Rect; dst: PSDL_Surface; dstrect: PSDL_Rect): integer; cdecl; external SDLLibName;
  function SDL_LockSurface(surface: PSDL_Surface): integer; cdecl; external SDLLibName;
  procedure SDL_UnlockSurface(surface: PSDL_Surface); cdecl; external SDLLibName;
- function SDL_ConvertPixels(width: integer; 
+ function SDL_ConvertPixels(width: integer;
                             height: integer;
                             src_format: Uint32;
                             const src: pointer;
@@ -1120,7 +1120,7 @@ implementation
    include(result,ss_repeat);
   end;
  end;
- 
+
  function SDL_LoadBMPFromFile(filename: PAnsiChar): PSDL_Surface;
  begin
   SDL_LoadBMP_RW(SDL_RWFromFile(filename, 'rb'), 1)
@@ -1130,7 +1130,7 @@ implementation
  begin
   SDL_SaveBMP_RW(surface,SDL_RWFromFile(filename, 'wb'), 1)
  end;
- 
+
   function SDL_CheckError(ref: string): guierrorty;
  var
   err: pchar;
@@ -1184,5 +1184,5 @@ implementation
    SDL_BUTTON_RMASK: include(result,ss_right);
   end;
  end;
- 
+
 end.

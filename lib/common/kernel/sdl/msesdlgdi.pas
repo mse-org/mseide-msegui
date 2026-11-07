@@ -195,12 +195,16 @@ var
 var
  windowrenderer: ptruint;
 
+
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
  int3: integer;
  arenderer: ptruint;
 begin
  with drawinfo.creategc do begin
+//  writeln('CREATEGC kind=',ord(kind),
+  //        ' paintdevice=',inttohex(ptruint(paintdevice),16));
+
   gcpo^.gdifuncs:= gui_getgdifuncs;
   error:= gde_creategc;
   case kind of
@@ -218,16 +222,14 @@ begin
      arenderer:= SDL_CreateSoftwareRenderer(dummysurface);
     end
     else begin
+
      int3:= -1;
      arenderer:= SDL_CreateRenderer(paintdevice,int3,SDL_RENDERER_SOFTWARE);
+
     end;
     gcpo^.handle:= arenderer;
-
-        if arenderer <> 0 then begin
-     windowrenderer:= arenderer;
-    end;
-
     if arenderer <> 0 then begin
+     windowrenderer:= arenderer;
      error:= gde_ok;
     end;
    end;
