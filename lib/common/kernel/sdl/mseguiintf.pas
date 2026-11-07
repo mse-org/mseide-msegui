@@ -14,14 +14,14 @@ unit mseguiintf;
 
 interface
 uses
- math,mseapplication,msetypes,msegraphutils, msesys, 
+ math,mseapplication,msetypes,msegraphutils, msesys,
   mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,msestrings,msesystypes,
  sdl4msegui,msesdlgdi,dateutils,msegenericgdi;
 
 type
  syseventty = SDL_Event;
-   
+
 const
  wheelstep = 120;
 
@@ -47,7 +47,7 @@ uses
 type
 
  trayinfoty = record
- end; 
+ end;
  win32windowdty = record
   trayinfo: trayinfoty;
   istaskbar: boolean;
@@ -68,11 +68,11 @@ type
 {$endif}
 
 const
- 
+
  widgetclassname = 'msetoplevelwidget';
  childwidgetclassname = 'msechildwidget';
  wndextrabytes = sizeof(wndextrainfoty);
-  
+
  mouseidletime = 100; //milliseconds
  {
   cursorshapety = (cr_default,cr_none,cr_arrow,cr_cross,cr_wait,cr_ibeam,
@@ -148,7 +148,7 @@ const
  SM_YVIRTUALSCREEN = 77;
  SM_CXVIRTUALSCREEN = 78;
  SM_CYVIRTUALSCREEN = 79;
- 
+
 type
  hmonitor = thandle;
  {tMONITORINFO = record
@@ -158,7 +158,7 @@ type
   dwFlags: DWORD;
  end;
  pmonitorinfo = ^tmonitorinfo;}
- 
+
 {$ifdef FPC}
 type
   TKeyboardState = array[0..255] of Byte;
@@ -170,7 +170,7 @@ function GetCharacterPlacementW(DC: HDC; p2: PWideChar; p3, p4: Integer;
 {$endif}
 
 var
- 
+
  lastbutton: integer;
  canshutdown: integer;
  //widgetclass: atom;
@@ -195,7 +195,7 @@ type
  tsimplebitmap1 = class(tsimplebitmap);
  tcanvas1 = class(tcanvas);
 
- 
+
 {$ifdef FPC}
 {function GetNextWindow(winidty: winidty; uCmd: UINT): winidty; stdcall;
              external user32 name 'GetWindow';
@@ -242,10 +242,10 @@ const
       CFS_FORCE_POSITION              = $0020;
       CFS_CANDIDATEPOS                = $0040;
       CFS_EXCLUDE                     = $0080;
-      
+
 var
  hasimm32: boolean;
-             
+
 function getapplicationwindow: winidty;
 begin
  result:= applicationwindow;
@@ -420,6 +420,7 @@ begin
 end;
 function gui_grabpointer(id: winidty): guierrorty;
 begin
+ //writeln('GRAB');
  SDL_CaptureMouse(1);       // keep receiving mouse events outside the window
  SDL_ClearError;            // not every platform supports it, ignore the error
  result:= gue_ok;
@@ -427,6 +428,7 @@ end;
 
 function gui_ungrabpointer: guierrorty;
 begin
+ //writeln('UNGRAB');
  SDL_CaptureMouse(0);
  SDL_ClearError;
  result:= gue_ok;
@@ -475,9 +477,9 @@ begin
  end;
 end;
 
-var 
+var
  imagememalloc: integer;
- 
+
 function gui_allocimagemem(length: integer): plongwordaty;
 begin
  if length = 0 then begin
@@ -583,9 +585,9 @@ begin
  end;
  pixmap:= SDL_CreateRGBSurface(0,image.size.cx,image.size.cy,32,
                                       rmask,$0000FF00,bmask,$FF000000);
- 
+
  if image.kind = bmk_mono then addmonopixmap(pixmap);
-                                      
+
  if pixmap = 0 then begin
   SDL_CheckError('imagetopixmap');
   exit;
@@ -878,7 +880,7 @@ begin
  with psetwindowownerinfoty(ptruint(param))^ do begin
   if getwindowlong(id,gwl_winidtyparent) = oldowner then begin
    setwindowlong(id,gwl_winidtyparent,newowner);
-  end;  
+  end;
  end;
  result:= true;
 end;}
@@ -938,7 +940,7 @@ begin
  //need to fixed
  for int1:= 0 to high(ids) do begin
   zorders[int1]:= int1;
- end; 
+ end;
  result:= gue_ok;
  {foundcount:= 0;
  id1:= gettopwindow(0);
@@ -1099,7 +1101,7 @@ end;
 
 var
  configuredwindow: winidty;
- 
+
 procedure postconfigureevent(const id: winidty);
 var
  rect1: rectty;
@@ -1133,9 +1135,9 @@ begin
    SDL_SetWindowPosition(id,rect.x,rect.y);
   end
   else begin
- 
+
   end;
- 
+
   ww:= 0;
   wh:= 0;
   SDL_GetWindowSize(id,ww,wh);
@@ -1155,7 +1157,7 @@ begin
  result:= gui_getwindowrect(id,arect);
 end;
 
-function gui_setdecoratedwindowrect(id: winidty; const rect: rectty; 
+function gui_setdecoratedwindowrect(id: winidty; const rect: rectty;
                                     out clientrect: rectty): guierrorty;
 begin
  fillchar(clientrect,sizeof(clientrect),0);
@@ -1183,7 +1185,7 @@ var
  sizingwindow: winidty;
  eventlooping: integer;
  escapepressed: boolean;
- 
+
 {procedure gui_wakeup;
 begin
  windows.postmessage(applicationwindow,wakeupmessage,0,0);
@@ -1299,7 +1301,7 @@ begin
     SDL_TEXTINPUT: begin
      charbuffer:= charbuffer + pchar(e.text.text);
      result:= tkeyevent.create(SDL_GetWindowFromID(e.text.window),false,
-                  key_none,key_none,shiftstate,charbuffer,e.text.timestamp);
+                  key_none,key_none,shiftstate,charbuffer,e.text.timestamp*1000);
      break;
     end;
     SDL_KEYDOWN : begin
@@ -1309,14 +1311,14 @@ begin
       escapepressed:= true;
      end;
      result:= tkeyevent.create(SDL_GetWindowFromID(e.key.window),false,
-       key1,key1,shiftstate,charbuffer,e.key.timestamp);
+       key1,key1,shiftstate,charbuffer,e.key.timestamp*1000);
      break;
     end;
     SDL_KEYUP : begin
      key1:= SDL_KeyCodeToKey(e.key.keysym.sym);
      shiftstate:= SDL_GetShiftState(e.key);
      result:= tkeyevent.create(SDL_GetWindowFromID(e.key.window),true,
-       key1,key1,shiftstate,charbuffer,e.key.timestamp);
+       key1,key1,shiftstate,charbuffer,e.key.timestamp*1000);
      charbuffer:= '';
      break;
     end;
@@ -1349,10 +1351,10 @@ begin
      pt1.x:= mx;
      pt1.y:= my;
 
-     result:= tmouseevent.create(winid,release1,
+       result:= tmouseevent.create(winid,release1,
       btn,mw_none,
-      pt1,shiftstate1, e.button.timestamp);
-      writeln('DOWN ',pt1.x,',',pt1.y,' btn=',ord(btn));
+      pt1,shiftstate1, e.button.timestamp*1000);
+      //writeln('DOWN ',pt1.x,',',pt1.y,' btn=',ord(btn));
      break;
     end;
           SDL_MOUSEMOTION: begin
@@ -1378,8 +1380,9 @@ begin
 
      result:= tmouseevent.create(winid,release1,
       mb_none,mw_none,
-      pt1,shiftstate1, e.motion.timestamp);
-     if buttons <> 0 then writeln('MOVE ',pt1.x,',',pt1.y,' mask=',buttons);
+      pt1,shiftstate1, e.motion.timestamp*1000);
+
+    // if buttons <> 0 then writeln('MOVE ',pt1.x,',',pt1.y,' mask=',buttons);
      break;
     end;
     SDL_MOUSEBUTTONUP: begin
@@ -1406,10 +1409,10 @@ begin
       else btn:= mb_left;
      end;
 
-     result:= tmouseevent.create(winid,release1,
+    result:= tmouseevent.create(winid,release1,
       btn,mw_none,
-      pt1,shiftstate1, e.button.timestamp);
-      writeln('UP ',pt1.x,',',pt1.y,' btn=',ord(btn));
+      pt1,shiftstate1, e.button.timestamp*1000);
+    //  writeln('UP ',pt1.x,',',pt1.y,' btn=',ord(btn));
      break;
     end;
     SDL_MOUSEWHEEL: begin
@@ -1419,7 +1422,7 @@ begin
       inc(mousewheelpos,e.wheel.y);
       while mousewheelpos >= wheelstep do begin
        result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,
-              mb_none,mw_up,pt1,shiftstate,e.wheel.timestamp);
+              mb_none,mw_up,pt1,shiftstate,e.wheel.timestamp*1000);
        dec(mousewheelpos,wheelstep);
       end;
       while mousewheelpos <= -wheelstep do begin
@@ -1518,14 +1521,14 @@ begin
    windowstyleex:= windowstyleex or SDL_WINDOW_MAXIMIZED;
   end else if (pos = wp_fullscreen) or (pos = wp_fullscreenvirt) then begin
    windowstyleex:= windowstyleex or SDL_WINDOW_FULLSCREEN;
-  end; 
+  end;
   if wo_taskbar in options then begin
    SDL_HideWindow(applicationwindow);
    ownerwindow:= 0;
   end;
   result:= gue_createwindow;
   rect1:= rect;
-  classname:= widgetclassname; 
+  classname:= widgetclassname;
 
   if not ((transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> [])) then begin
    if parent <> 0 then begin
@@ -1541,7 +1544,7 @@ begin
                       (string(SDL_GetCurrentVideoDriver) = 'x11') then begin
    windowstyleex:= windowstyleex or $00040000;      // SDL_WINDOW_TOOLTIP
   end;
-  
+
   // Spawns the clean top-level window with correct maximize and resize decorations
   if (pos=wp_screencentered) then begin
    id:= SDL_CreateWindow(classname,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,rect1.cx,rect1.cy,windowstyleex);
@@ -1549,7 +1552,7 @@ begin
    id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,windowstyleex);
   end;
 
-  // FIX: Drop the temporary utility window created by createapphandle 
+  // FIX: Drop the temporary utility window created by createapphandle
   // to instantly clean up the duplicate taskbar icon issue!
   if (not testkeepappwindow) and
                  (applicationwindow <> 0) and (applicationwindow <> id) then begin
@@ -1566,7 +1569,7 @@ begin
    if transientfor <> 0 then begin
     ownerwindow:= transientfor;
    end;
-   if (transientfor = 0) and (parent = 0) then begin 
+   if (transientfor = 0) and (parent = 0) then begin
     SDL_SetWindowPosition(id,0,0);
    end;
   end else begin
@@ -1574,7 +1577,7 @@ begin
     groupleaderwindow:= id;
    end;
   end;
-  if (icon <> 0) and (parent = 0) then begin 
+  if (icon <> 0) and (parent = 0) then begin
    gui_setwindowicon(id,icon,iconmask);
    if (groupleaderwindow = id) then begin
     gui_setwindowicon(applicationwindow,icon,iconmask);
@@ -1688,7 +1691,7 @@ begin
 end;
 
 
-{function traycommand(var child: windowty; 
+{function traycommand(var child: windowty;
                        const command: integer; const flags: integer = 0;
                              const CallbackMessage: UINT = 0;
                              const Icon: HICON = 0;
@@ -1713,7 +1716,7 @@ end;
   end;
   move(source[1],dest,int1*sizeof(widechar));
  end;
- 
+
 var
 // dataa: notifyicondataa;
 // dataw: notifyicondataw_2;
@@ -1889,7 +1892,7 @@ begin
  end;
  //unregisterclass(widgetclassname,hinstance);
  //widgetclass:= 0;
- 
+
  SDL_Quit;
  //msegdi32gdi.deinit;
 

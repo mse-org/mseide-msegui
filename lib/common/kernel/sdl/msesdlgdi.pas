@@ -20,10 +20,10 @@ uses
 
 const
  radtodeg = 360/(2*pi);
- 
+
 
 procedure init;
-procedure deinit; 
+procedure deinit;
 
 function sdlgetgdifuncs: pgdifunctionaty;
 //function sdlgetgdinum: integer;
@@ -34,10 +34,11 @@ function sdlgetdefaultfontnames: defaultfontnamesty;
 implementation
 uses
  mseguiintf,msegraphutils,msesysintf1,sysutils,msegenericgdi;
- 
+
 var
- fgrgb,bgrgb: rgbtriplety;
- 
+fgrgb,bgrgb: rgbtriplety;
+ fgraw: longword;
+
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
 
@@ -49,12 +50,12 @@ type
              gcf_ispatternpen,gcf_isopaquedashpen,
                           gcf_last = 31);
             //-> longword
- gcflagsty = set of gcflagty; 
+ gcflagsty = set of gcflagty;
 
  tsimplebitmap1 = class(tsimplebitmap);
  tcanvas1 = class(tcanvas);
  tfont1 = class(tfont);
-         
+
 const
  defaultfontname = 'Tahoma';
 // defaultfontname = 'MS Sans Serif';
@@ -129,7 +130,7 @@ begin
    rect1.y:= pos.y - height;      // pos.y is the bottom edge of the glyph
    rect1.w:= width;
    rect1.h:= height;
-     
+
    SDL_RenderCopy(drawinfo.gc.handle,tex,nil,@rect1);
    SDL_DestroyTexture(tex);
   end;
@@ -193,7 +194,7 @@ var
  dummysurface: PSDL_Surface;     // unit level, created on first use
 var
  windowrenderer: ptruint;
- 
+
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
  int3: integer;
@@ -221,11 +222,11 @@ begin
      arenderer:= SDL_CreateRenderer(paintdevice,int3,SDL_RENDERER_SOFTWARE);
     end;
     gcpo^.handle:= arenderer;
- 
+
         if arenderer <> 0 then begin
      windowrenderer:= arenderer;
     end;
- 
+
     if arenderer <> 0 then begin
      error:= gde_ok;
     end;
@@ -271,6 +272,8 @@ begin
    fgrgb.green:= rgbcolor.green;
    fgrgb.blue:= rgbcolor.red;
    fgrgb.res:= rgbcolor.res;
+   fgraw:= longword(colorforeground);
+
   end;
   if gvm_colorbackground in mask then begin
    rgbcolor:= colortorgb(colorbackground);
@@ -317,6 +320,8 @@ begin
    end
    else begin
     SDL_RenderSetClipRect(handle,nil);                     // no clipping
+     if rect1.w >= 200 then begin
+       end;
    end;
    SDL_CheckError('SDL_RenderSetClipRect');
   end;
@@ -369,7 +374,7 @@ end;
 procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.moverect do begin
-  gui_movewindowrect(drawinfo.paintdevice,dist^,rect^);  
+  gui_movewindowrect(drawinfo.paintdevice,dist^,rect^);
  end;
 end;
 
@@ -451,7 +456,7 @@ begin
  end;
 end;
 
-procedure getarcinfo(const info: drawinfoty; 
+procedure getarcinfo(const info: drawinfoty;
                     out xstart,ystart,xend,yend: integer);
 var
  stopang: real;
@@ -480,10 +485,19 @@ with drawinfo do begin
   rect1.y:= rect.rect^.y + origin.y;
   rect1.w:= rect.rect^.cx;
   rect1.h:= rect.rect^.cy;
-  
+
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
-  
+
+    if (fgrgb.red = 255) and (fgrgb.green = 255) and (fgrgb.blue = 255) and
+         (rect1.w >= 30) and (rect1.w <= 80) then begin
+  // writeln('WHITEFILL ',rect1.x,',',rect1.y,' ',rect1.w,'x',rect1.h);
+  end;
   SDL_RenderFillRect(gc.handle,@rect1);
+
+  if rect1.w >= 200 then begin
+ //  writeln('BIGFILL ',rect1.x,',',rect1.y,' ',rect1.w,'x',rect1.h,
+//           ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
+  end;
   SDL_CheckError('SDL_RenderFillRect');
  end;
 end;
@@ -605,7 +619,7 @@ var
 begin
  with drawinfo, rect.rect^ do begin
   rgb:= colortorgb(acolorforeground);
-  filledEllipseRGBA(gc.handle, pos.x + origin.x, pos.y + origin.y, round(cx/2), round(cy/2), 
+  filledEllipseRGBA(gc.handle, pos.x + origin.x, pos.y + origin.y, round(cx/2), round(cy/2),
   rgb.red, rgb.green, rgb.blue, 255-rgb.res);
  end;
 end;
@@ -635,7 +649,8 @@ var
  p,pm,pd: PLongword;
  x,y: integer;
  mono: boolean;
- fgpix: longword;
+ fgpix,bgpix: longword;
+ rgbcolor1,rgbcolor2: rgbtriplety;
 begin
  with drawinfo,copyarea,gcvalues^ do begin
   rect1.x:= sourcerect^.x;
@@ -674,13 +689,24 @@ begin
   sp:= CSDL_Surface(ptruint(asurface));
 
   if mono then begin
-   fgpix:= $FF000000 or (longword(fgrgb.red) shl 16) or
-                        (longword(fgrgb.green) shl 8) or fgrgb.blue;
+   // colors requested by MSEgui for this copy (may be symbolic colors)
+   rgbcolor1:= colortorgb(drawinfo.acolorforeground);
+   rgbcolor2:= colortorgb(drawinfo.acolorbackground);
+   fgpix:= $FF000000 or (longword(rgbcolor1.red) shl 16) or
+                        (longword(rgbcolor1.green) shl 8) or rgbcolor1.blue;
+   bgpix:= $FF000000 or (longword(rgbcolor2.red) shl 16) or
+                        (longword(rgbcolor2.green) shl 8) or rgbcolor2.blue;
+   if (rect2.w <= 24) and (rect2.h <= 24) then begin
+
+   end;
    for y:= 0 to sp^.h-1 do begin
     p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
     for x:= 0 to sp^.w-1 do begin
      if (p^ and $00FFFFFF) <> 0 then begin
       p^:= fgpix;
+     end
+     else if df_opaque in drawinfo.gc.drawingflags then begin
+      p^:= bgpix;
      end
      else begin
       p^:= 0;
@@ -797,7 +823,7 @@ const
   (name: 'RUSSIAN'; code: 204),
   (name: 'MAC'; code: 77),
   (name: 'BALTIC'; code: 186));}
-  
+
 type
  pboolean = ^boolean;
 

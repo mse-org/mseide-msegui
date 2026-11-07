@@ -28,7 +28,7 @@ interface
 
 {$if defined(BGRABITMAP_USE_MSEGUI)}
  {$define class_bridge}
-{$endif} 
+{$endif}
 
 uses
  classes,mclasses,sysutils,msegraphics,msetypes,mseact,
@@ -10718,7 +10718,7 @@ begin
   end;
 
  canvas.restore(saveindex);
-  
+
   if bo1 then begin
    face1:= getactface;
    if (face1 <> nil) and (fao_alphafadenochildren in face1.fi.options) then begin
@@ -14596,7 +14596,7 @@ function twidget.getcanvas(aorigin: originty = org_client): tcanvas;
 begin
  with tcanvas1(window.fcanvas) do begin
   fstate:= fstate - changedmask; //state invalid
- end; 
+ end;
  {$if not defined(use_singlecanvas) and not defined(usesdl)}
  result:= fwindow.fasynccanvas;
  {$else}
@@ -15267,7 +15267,7 @@ begin
  until widget1 = nil;
 {$warnings off}
  {$push}
-    {$objectChecks off}          
+    {$objectChecks off}
  result:= twidgetfontempty(stockobjects.fonts[stf_empty]);
  {$pop}
 {$warnings on}
@@ -16537,6 +16537,7 @@ var
  mini1: boolean;
  mydesktop: integer;
 begin
+
  releasemouse;
  fstate:= fstate - [tws_posvalid,tws_sizevalid,tws_windowshowpending];
 {$ifdef mse_debugconfigure}
@@ -16555,7 +16556,7 @@ begin
   if fwindow.id <> 0 then begin
    if tws_windowvisible in fstate then begin
     exclude(fstate,tws_transientforminimized);
-  
+
    {$ifdef usesdl}
     if not windowevent then begin
   {$else}
@@ -16563,7 +16564,7 @@ begin
   {$endif}
      endmodal;
      end;
-   
+
     if (fsyscontainer <> sywi_none) or (fcontainer <> 0) then begin
      exclude(fstate,tws_windowvisible);
      if not windowevent then begin
@@ -17019,6 +17020,12 @@ begin
   checkwindow(false); //ev. reposition window
   fcanvas.reset;
   fcanvas.clipregion:= fupdateregion.region; //canvas owns the region
+
+{$ifdef usesdl}
+  // SDL2 has only one clip rectangle: paint the bounding box of the update region
+  rect1:= fcanvas.clipbox;
+  fcanvas.clipregion:= fcanvas.createregion(rect1);
+{$endif}
   {
   bo1:= appinst.caret.islinkedto(fcanvas) and
    testintersectrect(fcanvas.clipbox,appinst.caret.rootcliprect);
@@ -18460,11 +18467,11 @@ end;
 procedure twindow.processsysdnd(const event: twindowevent);
 var
  wi1: twidget;
- 
+
  {$ifndef usesdl}
 obj1: tsysmimedragobject;
 {$endif}
- 
+
  info: draginfoty;
  bo1: boolean;
 begin
@@ -18509,18 +18516,18 @@ begin
       if fdndkind = dek_drop then begin
 {$ifndef usesdl}
     gui_sysdnd(sdnda_finished,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
-{$endif}    
+{$endif}
       end
       else begin
        if info.accept then begin
 {$ifndef usesdl}
    gui_sysdnd(sdnda_accept,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
-{$endif} 
+{$endif}
        end
        else begin
 {$ifndef usesdl}
        gui_sysdnd(sdnda_reject,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
-{$endif}  
+{$endif}
        end;
       end;
 {$ifndef usesdl}
@@ -19379,7 +19386,7 @@ begin
  {$ifdef mse_debugwindowfocus}
       debugwriteln('trycancelmodal true '+window.fownerwidget.name+' '+hextostr(winid,8));
  {$endif}
- 
+
       include(appinst.fstate,aps_cancelloop);
       appinst.ffocuslockwindow:= nil;
       appinst.ffocuslocktransientfor:= nil;
@@ -19402,7 +19409,7 @@ begin
          {$else}
          gui_raisewindow(fmodalwindow.fwindow.id);
         {$endif}
-      
+
      end;
     end;
    end;

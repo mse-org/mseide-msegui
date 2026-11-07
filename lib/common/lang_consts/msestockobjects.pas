@@ -539,6 +539,8 @@ procedure tstockobjects.paintglyph(const canvas: tcanvas;
 var
  colorbefore: colorty;
 begin
+// writeln('PAINTGLYPH color=',inttohex(longword(color),8),
+//         ' canvascolor=',inttohex(longword(canvas.color),8));
  colorbefore:= canvas.color;
  canvas.color:= color;
  if grayed then begin
@@ -547,6 +549,7 @@ begin
  glyphs.paint(canvas,integer(glyph),rect,aalignment,color);
  canvas.color:= colorbefore;
 end;
+
 
 {$ifndef mse_dynpo}
 function tstockobjects.getmodalresulttext(index: modalresultty): msestring;

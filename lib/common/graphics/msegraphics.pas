@@ -4930,6 +4930,14 @@ begin
    opacity:= colortorgb(aopacity);
   end;
 
+{$ifdef usesdl}
+  // SDL: the glyph source can be a color-kind canvas with a mono mask, so
+  // always hand the canvas colors to the backend
+  acolorforeground:= fvaluepo^.color;
+  acolorbackground:= fvaluepo^.colorbackground;
+  checkgcstate([cs_acolorforeground,cs_acolorbackground]);
+{$endif}
+  if gc.kind <> source.fdrawinfo.gc.kind then begin //different colorformat
   if gc.kind <> source.fdrawinfo.gc.kind then begin //different colorformat
    include(gc.drawingflags,df_colorconvert);
    with fdrawinfo,gc do begin
@@ -5042,6 +5050,7 @@ begin
  if amask <> nil then begin
   exclude(fstate,cs_clipregion);
  end;
+end;
 end;
 
 procedure tcanvas.copyarea(const asource: tcanvas; const asourcerect: rectty;
