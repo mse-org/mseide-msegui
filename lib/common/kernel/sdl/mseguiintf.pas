@@ -24,8 +24,7 @@ type
 
 const
  wheelstep = 120;
-
- pixel0 = $ffffff;   //select colorbackground
+  pixel0 = $ffffff;   //select colorbackground
  pixel1 = $000000;   //select colorforeground
 
 {$ifdef FPC}
@@ -1564,6 +1563,18 @@ begin
   end;
   windowstyleex:= windowstyleex or popupflags;
 
+ if sdldebug then begin
+  writeln('BEFORE CreateWindow popup=',wo_popup in options,
+          ' flags=',inttohex(windowstyleex,8),
+          ' size=',rect1.cx,'x',rect1.cy);
+  flush(output);
+  end;
+  if sdldebug then begin
+   writeln('BEFORE CreateWindow popup=',wo_popup in options,
+           ' flags=',inttohex(windowstyleex,8),
+           ' size=',rect1.cx,'x',rect1.cy);
+   flush(output);
+  end;
   if (pos=wp_screencentered) then begin
    id:= SDL_CreateWindow(classname,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
                                          rect1.cx,rect1.cy,windowstyleex);
@@ -1574,7 +1585,9 @@ begin
 
   if (id = 0) and (popupflags <> 0) then begin
    // SDL refused the popup (for example no parent window): plain window
-  // writeln('POPUP create failed: ',string(SDL_GetError));
+  if sdldebug then begin
+   writeln('POPUP create failed: ',string(SDL_GetError));
+  end;
    SDL_ClearError;
    windowstyleex:= windowstyleex and (not popupflags);
    id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,
@@ -1590,7 +1603,17 @@ begin
 
   result:= SDL_CheckError('createwindow');
 
-    px:= 0;
+  if (id = 0) and (popupflags <> 0) then begin
+   if sdldebug then begin
+    writeln('POPUP create failed: ',string(SDL_GetError));
+   end;
+   SDL_ClearError;
+   windowstyleex:= windowstyleex and (not popupflags);
+   id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,
+                                                              windowstyleex);
+  end;
+
+  px:= 0;
   py:= 0;
   mx1:= 0;
   my1:= 0;
@@ -1898,6 +1921,7 @@ function gui_init: guierrorty;
 begin
   // Wayland/Mesa libraries expect masked FPU exceptions
  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
+ // Set8087CW($1372);
  // Tells SDL2 your ideal preference hierarchy depending on which OS it runs on
  SDL_SetHint('SDL_VIDEODRIVER', 'wayland,cocoa,windows,x11');
  SDL_Init(SDL_INIT_EVERYTHING);

@@ -382,20 +382,31 @@ end;
 
 procedure drawsingleline(renderer: SDL_Renderer; const origin: pointty;
                  x1,y1,x2,y2,awidth: integer; acolor: rgbtriplety);
+var
+ i,half,dx,dy: integer;
 begin
  inc(x1,origin.x); inc(y1,origin.y);
  inc(x2,origin.x); inc(y2,origin.y);
- //choose the best performance method
- if awidth = 0 then begin
-  if (x1 = x2) or (y1 = y2) then
-   lineRGBA(renderer,x1,y1,x2,y2,acolor.red,acolor.green,acolor.blue,255-acolor.res)
-  else
-   aalineRGBA(renderer,x1,y1,x2,y2,acolor.red,acolor.green,acolor.blue,255-acolor.res);
+ SDL_SetRenderDrawColor(renderer,acolor.red,acolor.green,acolor.blue,
+                                                         255-acolor.res);
+ if awidth <= 1 then begin
+  SDL_RenderDrawLine(renderer,x1,y1,x2,y2);
  end
  else begin
-  thickLineRGBA(renderer,x1,y1,x2,y2,awidth,
-                      acolor.red,acolor.green,acolor.blue,255-acolor.res);
+  // thick line: parallel lines, shifted across the narrower direction
+  dx:= abs(x2-x1);
+  dy:= abs(y2-y1);
+  half:= awidth div 2;
+  for i:= -half to awidth-1-half do begin
+   if dx >= dy then begin
+    SDL_RenderDrawLine(renderer,x1,y1+i,x2,y2+i);
+   end
+   else begin
+    SDL_RenderDrawLine(renderer,x1+i,y1,x2+i,y2);
+   end;
+  end;
  end;
+ SDL_CheckError('drawsingleline');
 end;
 
 procedure gdi_drawlines(var drawinfo: drawinfoty);
@@ -446,15 +457,48 @@ procedure gdi_drawellipse(var drawinfo: drawinfoty);
 var
  rgb: rgbtriplety;
 begin
-//writeln('gdi_drawellipse');
  with drawinfo, rect.rect^ do begin
   rgb:= colortorgb(acolorforeground);
-  // aaellipseRGBA wants center + radii, rect is the bounding box
+  // MSEgui: x,y is the CENTER of the ellipse, cx,cy the full size
   aaellipseRGBA(gc.handle,
-                origin.x + pos.x + cx div 2,
-                origin.y + pos.y + cy div 2,
+                origin.x + x,
+                origin.y + y,
                 cx div 2, cy div 2,
                 rgb.red,rgb.green,rgb.blue,255-rgb.res);
+ end;
+end;
+
+procedure gdi_fillelipse(var drawinfo: drawinfoty);
+var
+ yy,rx,ry,hw: integer;
+ cx0,cy0: integer;
+ d: real;
+ rect1: SDL_Rect;
+begin
+ with drawinfo, rect.rect^ do begin
+  // MSEgui: x,y is the CENTER of the ellipse, cx,cy the full size
+  rx:= cx div 2;
+  ry:= cy div 2;
+  if (rx <= 0) or (ry <= 0) then begin
+   exit;
+  end;
+  cx0:= origin.x + x;
+  cy0:= origin.y + y;
+  SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,
+                                                           255-fgrgb.res);
+  for yy:= -ry to ry do begin
+   d:= 1.0 - (yy*yy)/(ry*ry);
+   if d < 0 then begin
+    d:= 0;
+   end;
+   hw:= round(rx*sqrt(d));
+   rect1.x:= cx0 - hw;
+   rect1.y:= cy0 + yy;
+   rect1.w:= 2*hw + 1;
+   rect1.h:= 1;
+   SDL_RenderFillRect(gc.handle,@rect1);
+  end;
+  SDL_CheckError('fillellipse');
  end;
 end;
 
@@ -472,10 +516,6 @@ begin
  end;
 end;
 
-procedure gdi_drawarc(var drawinfo: drawinfoty);
-begin
- SDL_CheckError('drawarc');
-end;
 
 
 procedure gdi_fillrect(var drawinfo: drawinfoty);
@@ -615,26 +655,169 @@ begin
  SDL_CheckError('drawstring16');
 end;
 
-procedure gdi_fillelipse(var drawinfo: drawinfoty);
+
+procedure gdi_drawarc(var drawinfo: drawinfoty);
 var
+ i,n,rx,ry,rr,lwidth: integer;
+ ang,step: real;
  rgb: rgbtriplety;
+ xa,ya,xb,yb: integer;
 begin
- with drawinfo, rect.rect^ do begin
+ with drawinfo,arc,rect^ do begin
+  rx:= cx div 2;
+  ry:= cy div 2;
+  if (rx <= 0) or (ry <= 0) then begin
+   exit;
+  end;
+  if rx > ry then begin
+   rr:= rx;
+  end
+  else begin
+   rr:= ry;
+  end;
   rgb:= colortorgb(acolorforeground);
-  filledEllipseRGBA(gc.handle, pos.x + origin.x, pos.y + origin.y, round(cx/2), round(cy/2),
-  rgb.red, rgb.green, rgb.blue, 255-rgb.res);
+  lwidth:= (gcvalues^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
+  n:= round(abs(extentang)*rr/2) + 4;     // about 2 pixels per segment
+  if n > 720 then begin
+   n:= 720;
+  end;
+  step:= extentang/n;
+  xa:= x + round(cos(startang)*rx);
+  ya:= y - round(sin(startang)*ry);
+  for i:= 1 to n do begin
+   ang:= startang + i*step;
+   xb:= x + round(cos(ang)*rx);
+   yb:= y - round(sin(ang)*ry);
+   drawsingleline(gc.handle,origin,xa,ya,xb,yb,lwidth,rgb);
+   xa:= xb;
+   ya:= yb;
+  end;
+  SDL_CheckError('drawarc');
  end;
 end;
 
-procedure gdi_fillarc(var drawinfo: drawinfoty);
+procedure fillpointsarray(renderer: SDL_Renderer; const origin: pointty;
+                          const pts: array of pointty; n: integer);
+var
+ i,j,yy,miny,maxy,cnt,tmp,k: integer;
+ y1,y2,x1,x2: integer;
+ xs: array of integer;
+ rect1: SDL_Rect;
 begin
- SDL_CheckError('fillarc');
+ if n < 3 then begin
+  exit;
+ end;
+ miny:= pts[0].y;
+ maxy:= miny;
+ for i:= 1 to n-1 do begin
+  if pts[i].y < miny then begin
+   miny:= pts[i].y;
+  end;
+  if pts[i].y > maxy then begin
+   maxy:= pts[i].y;
+  end;
+ end;
+ SDL_SetRenderDrawColor(renderer,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
+ setlength(xs,n);
+ for yy:= miny to maxy do begin
+  cnt:= 0;
+  j:= n-1;
+  for i:= 0 to n-1 do begin
+   y1:= pts[j].y;
+   y2:= pts[i].y;
+   x1:= pts[j].x;
+   x2:= pts[i].x;
+   if ((y1 <= yy) and (y2 > yy)) or ((y2 <= yy) and (y1 > yy)) then begin
+    xs[cnt]:= x1 + ((yy - y1) * (x2 - x1)) div (y2 - y1);
+    inc(cnt);
+   end;
+   j:= i;
+  end;
+  for i:= 1 to cnt-1 do begin       // insertion sort of the crossings
+   tmp:= xs[i];
+   k:= i-1;
+   while (k >= 0) and (xs[k] > tmp) do begin
+    xs[k+1]:= xs[k];
+    dec(k);
+   end;
+   xs[k+1]:= tmp;
+  end;
+  i:= 0;
+  while i+1 < cnt do begin
+   rect1.x:= xs[i] + origin.x;
+   rect1.y:= yy + origin.y;
+   rect1.w:= xs[i+1] - xs[i] + 1;
+   rect1.h:= 1;
+   SDL_RenderFillRect(renderer,@rect1);
+   inc(i,2);
+  end;
+ end;
+ SDL_CheckError('fillpoints');
+end;
+
+
+
+procedure gdi_fillarc(var drawinfo: drawinfoty);
+var
+ i,n,rx,ry,rr,first,total: integer;
+ ang,step: real;
+ pts: array of pointty;
+begin
+ with drawinfo,arc,rect^ do begin
+  rx:= cx div 2;
+  ry:= cy div 2;
+  if (rx <= 0) or (ry <= 0) then begin
+   exit;
+  end;
+  if rx > ry then begin
+   rr:= rx;
+  end
+  else begin
+   rr:= ry;
+  end;
+  n:= round(abs(extentang)*rr/2) + 4;     // about 2 pixels per segment
+  if n > 720 then begin
+   n:= 720;
+  end;
+  step:= extentang/n;
+  if pieslice then begin
+   first:= 1;                             // pts[0] is the center
+   total:= n+2;
+   setlength(pts,total);
+   pts[0].x:= x;
+   pts[0].y:= y;
+  end
+  else begin
+   first:= 0;                             // chord: arc points only
+   total:= n+1;
+   setlength(pts,total);
+  end;
+  for i:= 0 to n do begin
+   ang:= startang + i*step;
+   pts[first+i].x:= x + round(cos(ang)*rx);
+   pts[first+i].y:= y - round(sin(ang)*ry);
+  end;
+  fillpointsarray(gc.handle,origin,pts,total);
+  SDL_CheckError('fillarc');
+ end;
 end;
 
 procedure gdi_fillpolygon(var drawinfo: drawinfoty);
+var
+ pts: array of pointty;
+ i: integer;
+ pp: ppointaty;
 begin
- with drawinfo.points do begin
-  //handlepoly(drawinfo,points,count-1,true);
+ with drawinfo do begin
+  if points.count < 3 then begin
+   exit;
+  end;
+  pp:= ppointaty(points.points);
+  setlength(pts,points.count);
+  for i:= 0 to points.count-1 do begin
+   pts[i]:= pp^[i];
+  end;
+  fillpointsarray(gc.handle,origin,pts,points.count);
  end;
 end;
 
