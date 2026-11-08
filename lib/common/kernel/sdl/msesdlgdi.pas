@@ -38,6 +38,7 @@ uses
 var
 fgrgb,bgrgb: rgbtriplety;
  fgraw: longword;
+  currentrop: rasteropty;
 
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
@@ -286,7 +287,11 @@ begin
   end;
   if mask * [gvm_linewidth,gvm_dashes,gvm_capstyle,gvm_joinstyle] <> [] then begin
   end;
-  if gvm_rasterop in mask then begin
+ if gvm_rasterop in mask then begin
+   currentrop:= rasterop;
+   if sdldebug then begin
+    writeln('ROP ',ord(rasterop));
+   end;
   end;
   if gvm_brush in mask then begin
   end;
@@ -393,7 +398,6 @@ begin
   SDL_RenderDrawLine(renderer,x1,y1,x2,y2);
  end
  else begin
-  // thick line: parallel lines, shifted across the narrower direction
   dx:= abs(x2-x1);
   dy:= abs(y2-y1);
   half:= awidth div 2;
@@ -409,26 +413,79 @@ begin
  SDL_CheckError('drawsingleline');
 end;
 
+procedure drawdottedline(renderer: SDL_Renderer; const origin: pointty;
+                 x1,y1,x2,y2: integer; acolor: rgbtriplety);
+var
+ i,n,dx,dy: integer;
+ xx,yy: real;
+begin
+ inc(x1,origin.x); inc(y1,origin.y);
+ inc(x2,origin.x); inc(y2,origin.y);
+ SDL_SetRenderDrawColor(renderer,acolor.red,acolor.green,acolor.blue,
+                                                         255-acolor.res);
+ dx:= x2-x1;
+ dy:= y2-y1;
+ if abs(dx) > abs(dy) then begin
+  n:= abs(dx);
+ end
+ else begin
+  n:= abs(dy);
+ end;
+ if n = 0 then begin
+  SDL_RenderDrawPoint(renderer,x1,y1);
+ end
+ else begin
+  for i:= 0 to n do begin
+   if (i and 1) = 0 then begin
+    xx:= x1 + dx*i/n;
+    yy:= y1 + dy*i/n;
+    SDL_RenderDrawPoint(renderer,round(xx),round(yy));
+   end;
+  end;
+ end;
+ SDL_CheckError('drawdottedline');
+end;
+
 procedure gdi_drawlines(var drawinfo: drawinfoty);
 var
  int1,lwidth: integer;
  rgb: rgbtriplety;
  pp: ppointaty;
  org: pointty;
+ dotted: boolean;
 begin
+ 
+  if sdldebug then begin
+  writeln('DRAWLINES brush=',df_brush in drawinfo.gc.drawingflags,
+          ' rop=',ord(currentrop));
+ end;
+ 
  with drawinfo do begin
   if points.count < 2 then exit;
   pp:= ppointaty(points.points);
   org:= origin;
   rgb:= colortorgb(acolorforeground);
+  dotted:= df_brush in gc.drawingflags;
   lwidth:= (gcvalues^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
   for int1:= 1 to points.count-1 do begin
-   drawsingleline(gc.handle,org,pp^[int1-1].x,pp^[int1-1].y,
-                                pp^[int1].x,pp^[int1].y,lwidth,rgb);
+   if dotted then begin
+    drawdottedline(gc.handle,org,pp^[int1-1].x,pp^[int1-1].y,
+                                 pp^[int1].x,pp^[int1].y,rgb);
+   end
+   else begin
+    drawsingleline(gc.handle,org,pp^[int1-1].x,pp^[int1-1].y,
+                                 pp^[int1].x,pp^[int1].y,lwidth,rgb);
+   end;
   end;
   if points.closed then begin
-   drawsingleline(gc.handle,org,pp^[points.count-1].x,pp^[points.count-1].y,
-                                pp^[0].x,pp^[0].y,lwidth,rgb);
+   if dotted then begin
+    drawdottedline(gc.handle,org,pp^[points.count-1].x,pp^[points.count-1].y,
+                                 pp^[0].x,pp^[0].y,rgb);
+   end
+   else begin
+    drawsingleline(gc.handle,org,pp^[points.count-1].x,pp^[points.count-1].y,
+                                 pp^[0].x,pp^[0].y,lwidth,rgb);
+   end;
   end;
  end;
 end;
@@ -439,16 +496,28 @@ var
  rgb: rgbtriplety;
  pp: ppointaty;
  org: pointty;
+ dotted: boolean;
 begin
-
+ 
+  if sdldebug then begin
+  writeln('DRAWSEGMENTS brush=',df_brush in drawinfo.gc.drawingflags,
+          ' rop=',ord(currentrop));
+ end;
  with drawinfo do begin
   pp:= ppointaty(points.points);
   org:= origin;
   rgb:= colortorgb(acolorforeground);
+  dotted:= df_brush in gc.drawingflags;
   lwidth:= (gcvalues^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
   for int1:= 0 to points.count div 2 - 1 do begin
-   drawsingleline(gc.handle,org,pp^[2*int1].x,pp^[2*int1].y,
-                                pp^[2*int1+1].x,pp^[2*int1+1].y,lwidth,rgb);
+   if dotted then begin
+    drawdottedline(gc.handle,org,pp^[2*int1].x,pp^[2*int1].y,
+                                 pp^[2*int1+1].x,pp^[2*int1+1].y,rgb);
+   end
+   else begin
+    drawsingleline(gc.handle,org,pp^[2*int1].x,pp^[2*int1].y,
+                                 pp^[2*int1+1].x,pp^[2*int1+1].y,lwidth,rgb);
+   end;
   end;
  end;
 end;
@@ -521,25 +590,63 @@ end;
 procedure gdi_fillrect(var drawinfo: drawinfoty);
 var
  rect1: SDL_Rect;
+ buf: array of longword;
+ xx,yy,x0,y0,x1,y1,w,h,outw,outh: integer;
+ p: longword;
 begin
-with drawinfo do begin
+ with drawinfo do begin
   rect1.x:= rect.rect^.x + origin.x;
   rect1.y:= rect.rect^.y + origin.y;
   rect1.w:= rect.rect^.cx;
   rect1.h:= rect.rect^.cy;
 
+  if (currentrop = rop_xor) and (df_brush in gc.drawingflags) then begin
+   // dotted xor frame (focus rectangle): invert every second pixel
+   outw:= 0;
+   outh:= 0;
+   SDL_GetRendererOutputSize(gc.handle,@outw,@outh);
+   x0:= rect1.x;
+   y0:= rect1.y;
+   x1:= rect1.x + rect1.w;
+   y1:= rect1.y + rect1.h;
+   if x0 < 0 then begin
+    x0:= 0;
+   end;
+   if y0 < 0 then begin
+    y0:= 0;
+   end;
+   if x1 > outw then begin
+    x1:= outw;
+   end;
+   if y1 > outh then begin
+    y1:= outh;
+   end;
+   w:= x1 - x0;
+   h:= y1 - y0;
+   if (w > 0) and (h > 0) then begin
+    rect1.x:= x0;
+    rect1.y:= y0;
+    rect1.w:= w;
+    rect1.h:= h;
+    setlength(buf,w*h);
+    SDL_RenderReadPixels(gc.handle,@rect1,$16362004,@buf[0],w*4);
+    for yy:= 0 to h-1 do begin
+     for xx:= 0 to w-1 do begin
+      if ((x0+xx+y0+yy) and 1) = 0 then begin
+       p:= buf[yy*w+xx] xor $00FFFFFF;
+       SDL_SetRenderDrawColor(gc.handle,(p shr 16) and $FF,(p shr 8) and $FF,
+                                                           p and $FF,255);
+       SDL_RenderDrawPoint(gc.handle,x0+xx,y0+yy);
+      end;
+     end;
+    end;
+   end;
+   SDL_CheckError('fillrect xor');
+   exit;
+  end;
+
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
-
-    if (fgrgb.red = 255) and (fgrgb.green = 255) and (fgrgb.blue = 255) and
-         (rect1.w >= 30) and (rect1.w <= 80) then begin
-  // writeln('WHITEFILL ',rect1.x,',',rect1.y,' ',rect1.w,'x',rect1.h);
-  end;
   SDL_RenderFillRect(gc.handle,@rect1);
-
-  if rect1.w >= 200 then begin
- //  writeln('BIGFILL ',rect1.x,',',rect1.y,' ',rect1.w,'x',rect1.h,
-//           ' fg=',fgrgb.red,',',fgrgb.green,',',fgrgb.blue);
-  end;
   SDL_CheckError('SDL_RenderFillRect');
  end;
 end;
