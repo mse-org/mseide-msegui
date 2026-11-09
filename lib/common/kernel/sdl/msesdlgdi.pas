@@ -197,15 +197,37 @@ var
  windowrenderer: ptruint;
 
 
+type
+ backbufty = record
+  renderer: ptruint;
+  window: winidty;
+  surf: PSDL_Surface;
+ end;
+
+var
+ backbufs: array of backbufty;
+
+function findbackbuf(arenderer: ptruint): integer;
+var
+ i: integer;
+begin
+ result:= -1;
+ for i:= 0 to high(backbufs) do begin
+  if backbufs[i].renderer = arenderer then begin
+   result:= i;
+   break;
+  end;
+ end;
+end;
+
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
- int3: integer;
+ int3,bw,bh,ww,wh: integer;
  arenderer: ptruint;
+ bsurf: PSDL_Surface;
+ disp: SDL_Rect;
 begin
  with drawinfo.creategc do begin
-//  writeln('CREATEGC kind=',ord(kind),
-  //        ' paintdevice=',inttohex(ptruint(paintdevice),16));
-
   gcpo^.gdifuncs:= gui_getgdifuncs;
   error:= gde_creategc;
   case kind of
@@ -223,10 +245,49 @@ begin
      arenderer:= SDL_CreateSoftwareRenderer(dummysurface);
     end
     else begin
-
-     int3:= -1;
-     arenderer:= SDL_CreateRenderer(paintdevice,int3,SDL_RENDERER_SOFTWARE);
-
+     // window: draw into a back surface of our own
+     ww:= 0;
+     wh:= 0;
+     SDL_GetWindowSize(paintdevice,ww,wh);
+     fillchar(disp,sizeof(disp),0);
+     SDL_GetDisplayBounds(0,@disp);
+     if disp.w <= 0 then begin
+      disp.w:= 1024;
+     end;
+     if disp.h <= 0 then begin
+      disp.h:= 768;
+     end;
+     bw:= disp.w;
+     if ww > bw then begin
+      bw:= ww;
+     end;
+     bh:= disp.h;
+     if wh > bh then begin
+      bh:= wh;
+     end;
+     bsurf:= SDL_CreateRGBSurface(0,bw,bh,32,
+                       $00FF0000,$0000FF00,$000000FF,$FF000000);
+     arenderer:= 0;
+     if bsurf <> 0 then begin
+      SDL_SetSurfaceBlendMode(bsurf,SDL_BLENDMODE_NONE);
+      arenderer:= SDL_CreateSoftwareRenderer(bsurf);
+      if arenderer <> 0 then begin
+       setlength(backbufs,length(backbufs)+1);
+       with backbufs[high(backbufs)] do begin
+        renderer:= arenderer;
+        window:= paintdevice;
+        surf:= bsurf;
+       end;
+      end
+      else begin
+       SDL_FreeSurface(bsurf);
+      end;
+     end;
+     if arenderer = 0 then begin
+      // fallback: renderer on the window itself
+      int3:= -1;
+      arenderer:= SDL_CreateRenderer(paintdevice,int3,SDL_RENDERER_SOFTWARE);
+     end;
     end;
     gcpo^.handle:= arenderer;
     if arenderer <> 0 then begin
@@ -250,12 +311,20 @@ begin
 end;
 
 procedure gdi_destroygc(var drawinfo: drawinfoty);
+var
+ i: integer;
 begin
  if drawinfo.gc.handle = windowrenderer then begin
   windowrenderer:= 0;
  end;
  if drawinfo.gc.handle <> 0 then begin
   SDL_DestroyRenderer(drawinfo.gc.handle);
+  i:= findbackbuf(drawinfo.gc.handle);
+  if i >= 0 then begin
+   SDL_FreeSurface(backbufs[i].surf);
+   backbufs[i]:= backbufs[high(backbufs)];
+   setlength(backbufs,high(backbufs));
+  end;
   SDL_CheckError('destroygc');
  end;
 end;
@@ -360,24 +429,82 @@ end;
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
 var
- rw,rh,ww,wh: integer;
+ i,ww,wh,idx: integer;
+ wsurf,tsurf: PSDL_Surface;
+ sp,wp: CSDL_Surface;
+ r: SDL_Rect;
+ pr: SDL_Renderer;
+ tex: SDL_Texture;
 begin
- rw:= 0;
- rh:= 0;
- ww:= 0;
- wh:= 0;
- SDL_GetRendererOutputSize(drawinfo.gc.handle,@rw,@rh);
- SDL_GetWindowSize(winidty(drawinfo.paintdevice),ww,wh);
- SDL_RenderPresent(drawinfo.gc.handle);
-end;
-
-procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
-begin
- if windowrenderer <> 0 then begin
-  SDL_RenderPresent(windowrenderer);
+ i:= findbackbuf(drawinfo.gc.handle);
+ if i >= 0 then begin
+  with backbufs[i] do begin
+   ww:= 0;
+   wh:= 0;
+   SDL_GetWindowSize(window,ww,wh);
+   sp:= CSDL_Surface(ptruint(surf));
+   if ww > sp^.w then begin
+    ww:= sp^.w;
+   end;
+   if wh > sp^.h then begin
+    wh:= sp^.h;
+   end;
+   r.x:= 0;
+   r.y:= 0;
+   r.w:= ww;
+   r.h:= wh;
+   if (string(SDL_GetCurrentVideoDriver) = 'wayland') and
+                                       (ww > 0) and (wh > 0) then begin
+    // Wayland: show the back surface through a renderer on the window
+    pr:= SDL_GetRenderer(window);
+    if pr = 0 then begin
+     idx:= -1;
+     pr:= SDL_CreateRenderer(window,idx,0);
+    end;
+    if pr <> 0 then begin
+     tsurf:= SDL_CreateRGBSurface(0,ww,wh,32,
+                    $00FF0000,$0000FF00,$000000FF,$FF000000);
+     if tsurf <> 0 then begin
+      SDL_SetSurfaceBlendMode(tsurf,SDL_BLENDMODE_NONE);
+      SDL_UpperBlit(surf,@r,tsurf,nil);
+      SDL_SetSurfaceBlendMode(tsurf,SDL_BLENDMODE_NONE);
+      tex:= SDL_CreateTextureFromSurface(pr,tsurf);
+      if tex <> 0 then begin
+       SDL_RenderCopy(pr,tex,nil,nil);
+       SDL_DestroyTexture(tex);
+      end;
+      SDL_FreeSurface(tsurf);
+     end;
+     SDL_RenderPresent(pr);
+    end
+    else begin
+     if sdldebug then begin
+      writeln('ENDPAINT present renderer failed: ',string(SDL_GetError));
+      flush(output);
+     end;
+    end;
+   end
+   else begin
+    wsurf:= SDL_GetWindowSurface(window);
+    if wsurf <> 0 then begin
+     wp:= CSDL_Surface(ptruint(wsurf));
+     if ww > wp^.w then begin
+      r.w:= wp^.w;
+     end;
+     if wh > wp^.h then begin
+      r.h:= wp^.h;
+     end;
+     SDL_UpperBlit(surf,@r,wsurf,@r);
+     SDL_UpdateWindowSurface(window);
+    end;
+   end;
+  end;
+ end
+ else begin
+  SDL_RenderPresent(drawinfo.gc.handle);
  end;
+ SDL_CheckError('endpaint');
 end;
-
 procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.moverect do begin
@@ -411,6 +538,11 @@ begin
   end;
  end;
  SDL_CheckError('drawsingleline');
+end;
+
+procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
+begin
+ // nothing to do, the back buffer is presented in gdi_endpaint
 end;
 
 procedure drawdottedline(renderer: SDL_Renderer; const origin: pointty;
@@ -524,16 +656,42 @@ end;
 
 procedure gdi_drawellipse(var drawinfo: drawinfoty);
 var
+ i,n,rx,ry,rr,lwidth: integer;
+ ang,step: real;
  rgb: rgbtriplety;
+ xa,ya,xb,yb: integer;
 begin
- with drawinfo, rect.rect^ do begin
-  rgb:= colortorgb(acolorforeground);
+ with drawinfo,rect.rect^ do begin
   // MSEgui: x,y is the CENTER of the ellipse, cx,cy the full size
-  aaellipseRGBA(gc.handle,
-                origin.x + x,
-                origin.y + y,
-                cx div 2, cy div 2,
-                rgb.red,rgb.green,rgb.blue,255-rgb.res);
+  rx:= cx div 2;
+  ry:= cy div 2;
+  if (rx <= 0) or (ry <= 0) then begin
+   exit;
+  end;
+  if rx > ry then begin
+   rr:= rx;
+  end
+  else begin
+   rr:= ry;
+  end;
+  rgb:= colortorgb(acolorforeground);
+  lwidth:= (gcvalues^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
+  n:= round(pi*rr) + 8;
+  if n > 720 then begin
+   n:= 720;
+  end;
+  step:= 2*pi/n;
+  xa:= x + rx;
+  ya:= y;
+  for i:= 1 to n do begin
+   ang:= i*step;
+   xb:= x + round(cos(ang)*rx);
+   yb:= y - round(sin(ang)*ry);
+   drawsingleline(gc.handle,origin,xa,ya,xb,yb,lwidth,rgb);
+   xa:= xb;
+   ya:= yb;
+  end;
+  SDL_CheckError('drawellipse');
  end;
 end;
 

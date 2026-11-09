@@ -1099,7 +1099,13 @@ begin
  result:= iswindowvisible(handle);
 end;
 
+function gui_movewindowrect(id: winidty; const dist: pointty;
+                                             const rect: rectty): guierrorty;
+begin
+ result:= gue_scroll;      // test: let MSEgui repaint instead of scrolling pixels
+end;
 
+{
 function gui_movewindowrect(id: winidty; const dist: pointty;
                                              const rect: rectty): guierrorty;
 var
@@ -1127,6 +1133,8 @@ begin
  end;
  gdi_unlock;
 end;
+
+}
 
 
 function getclientrect(winid: winidty; windowrect: prectty = nil): rectty;
@@ -1988,7 +1996,6 @@ function gui_init: guierrorty;
 begin
   // Wayland/Mesa libraries expect masked FPU exceptions
  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
- // Set8087CW($1372);
  // Tells SDL2 your ideal preference hierarchy depending on which OS it runs on
  SDL_SetHint('SDL_VIDEODRIVER', 'wayland,cocoa,windows,x11');
  SDL_Init(SDL_INIT_EVERYTHING);
