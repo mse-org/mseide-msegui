@@ -1500,7 +1500,7 @@ begin
       end;
       while mousewheelpos <= -wheelstep do begin
        result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,
-              mb_none,mw_down,pt1,shiftstate,e.wheel.timestamp);
+              mb_none,mw_down,pt1,shiftstate,e.wheel.timestamp*1000);
        inc(mousewheelpos,wheelstep);
       end;
      end;
