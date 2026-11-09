@@ -27,6 +27,7 @@ function gui_settimer(us: longword): guierrorty;
 {$ifndef usesdl}
 procedure gui_disconnectmaineventqueue(); //called by application.lock()
 procedure gui_connectmaineventqueue();    //called by application.unlock()
+{$endif}
 function gui_addpollfd(var id: int32; const afd: int32;
                            const aflags: pollflagsty;
                                 const acallback: pollcallbackty = nil;
@@ -35,7 +36,7 @@ function gui_removepollfd(const id: int32): guierrorty;
 function gui_setpollfdactive(const id: int32;
                        const aactive: boolean): guierrorty;
 
-{$endif}
+
 function gui_hasevent: boolean;         //false if no event pending
 function gui_getevent: tmseevent;          //can be nil
 function gui_escapepressed: boolean;
