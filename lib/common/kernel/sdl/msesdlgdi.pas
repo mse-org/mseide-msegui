@@ -202,6 +202,7 @@ type
   renderer: ptruint;
   window: winidty;
   surf: PSDL_Surface;
+  pres: ptruint;       // Wayland: renderer used to present the back surface
  end;
 
 var
@@ -318,6 +319,11 @@ begin
   windowrenderer:= 0;
  end;
  if drawinfo.gc.handle <> 0 then begin
+  i:= findbackbuf(drawinfo.gc.handle);
+  if (i >= 0) and (backbufs[i].pres <> 0) then begin
+   SDL_DestroyRenderer(backbufs[i].pres);   // before the window goes away
+   backbufs[i].pres:= 0;
+  end;
   SDL_DestroyRenderer(drawinfo.gc.handle);
   i:= findbackbuf(drawinfo.gc.handle);
   if i >= 0 then begin
@@ -426,16 +432,21 @@ begin
   end;
  end;
 end;
+var
+ lastpaintw,lastpainth: integer;
+ endpaintreported: boolean;
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
 var
  i,ww,wh,idx: integer;
  wsurf,tsurf: PSDL_Surface;
  sp,wp: CSDL_Surface;
- r: SDL_Rect;
+ r,dr: SDL_Rect;
  pr: SDL_Renderer;
  tex: SDL_Texture;
+ wayland: boolean;
 begin
+ wayland:= string(SDL_GetCurrentVideoDriver) = 'wayland';
  i:= findbackbuf(drawinfo.gc.handle);
  if i >= 0 then begin
   with backbufs[i] do begin
@@ -453,13 +464,13 @@ begin
    r.y:= 0;
    r.w:= ww;
    r.h:= wh;
-   if (string(SDL_GetCurrentVideoDriver) = 'wayland') and
-                                       (ww > 0) and (wh > 0) then begin
+   if wayland and (ww > 0) and (wh > 0) then begin
     // Wayland: show the back surface through a renderer on the window
-    pr:= SDL_GetRenderer(window);
+    pr:= pres;
     if pr = 0 then begin
      idx:= -1;
      pr:= SDL_CreateRenderer(window,idx,0);
+     pres:= pr;
     end;
     if pr <> 0 then begin
      tsurf:= SDL_CreateRGBSurface(0,ww,wh,32,
@@ -467,10 +478,15 @@ begin
      if tsurf <> 0 then begin
       SDL_SetSurfaceBlendMode(tsurf,SDL_BLENDMODE_NONE);
       SDL_UpperBlit(surf,@r,tsurf,nil);
-      SDL_SetSurfaceBlendMode(tsurf,SDL_BLENDMODE_NONE);
       tex:= SDL_CreateTextureFromSurface(pr,tsurf);
       if tex <> 0 then begin
-       SDL_RenderCopy(pr,tex,nil,nil);
+       SDL_SetRenderDrawColor(pr,208,208,208,255);
+       SDL_RenderClear(pr);
+       dr.x:= 0;
+       dr.y:= 0;
+       dr.w:= ww;
+       dr.h:= wh;
+       SDL_RenderCopy(pr,tex,nil,@dr);
        SDL_DestroyTexture(tex);
       end;
       SDL_FreeSurface(tsurf);
@@ -505,6 +521,8 @@ begin
  end;
  SDL_CheckError('endpaint');
 end;
+
+
 procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.moverect do begin
