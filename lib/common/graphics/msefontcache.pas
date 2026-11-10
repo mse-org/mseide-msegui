@@ -191,20 +191,27 @@ end;
 procedure tfontcache.freefontdata(var drawinfo: drawinfoty);
 var
  po1: pfontcachehashdataty;
+ dummy: fontcachehashdataty;
+ shift: ptrint;
 begin
  with drawinfo.getfont.fontdata^ do begin
   if font <> 0 then begin
-   po1:= getdatapo(getdataoffsfont(font));
-   dec(po1^.data.refcount);
-   if po1^.data.refcount = 0 then begin
-    internalfreefont(font);
+   // the stored offset points to the data field, not to the item start
+   shift:= pchar(@dummy.data) - pchar(@dummy);
+   po1:= pfontcachehashdataty(pchar(getdatapo(getdataoffsfont(font))) - shift);
+   if po1^.data.font = font then begin
+    dec(po1^.data.refcount);
+    if po1^.data.refcount <= 0 then begin
+     internalfreefont(font);
+     internaldeleteitem(phashdataty(po1));
+    end;
    end;
-   internaldeleteitem(phashdataty(po1));
   end;
  end;
  if count = 0 then begin
   freeandnil(finstancepo^);
  end;
 end;
+
 
 end.

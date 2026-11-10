@@ -11,7 +11,7 @@
 unit msesdlgdi;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
-//{$define sdl8x8font}
+{.$define sdl8x8font}
 
 interface
 uses
@@ -850,7 +850,9 @@ end;
 procedure gdi_freefontdata(var drawinfo: drawinfoty);
 begin
 {$ifndef sdl8x8font}
- // left empty on purpose (freeing here crashed at exit)
+ if ffontcache <> nil then begin
+  fontcache.freefontdata(drawinfo);
+ end;
 {$endif}
 end;
 

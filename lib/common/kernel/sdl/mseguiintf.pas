@@ -1039,12 +1039,53 @@ begin
 end;
 
 function composeicon(const icon,mask: pixmapty): PSDL_Surface;
+var
+ si,sm,sr: CSDL_Surface;
+ res: PSDL_Surface;
+ x,y,w,h: integer;
+ p,pm: PLongword;
 begin
- if mask<>0 then begin
-  SDL_SetSurfaceBlendMode(mask,SDL_BLENDMODE_ADD);
-  SDL_UpperBlit(mask,nil,icon,nil);
+ result:= 0;
+ if icon = 0 then begin
+  exit;
  end;
- result:= icon;
+ si:= CSDL_Surface(ptruint(icon));
+ res:= SDL_CreateRGBSurface(0,si^.w,si^.h,32,
+                    $00FF0000,$0000FF00,$000000FF,$FF000000);
+ if res = 0 then begin
+  exit;
+ end;
+ // copy the icon into an ARGB surface, the blit converts the pixel format
+ SDL_SetSurfaceBlendMode(icon,SDL_BLENDMODE_NONE);
+ SDL_SetSurfaceBlendMode(res,SDL_BLENDMODE_NONE);
+ SDL_UpperBlit(icon,nil,res,nil);
+ sr:= CSDL_Surface(ptruint(res));
+ if mask <> 0 then begin
+  sm:= CSDL_Surface(ptruint(mask));
+  w:= sr^.w;
+  if sm^.w < w then begin
+   w:= sm^.w;
+  end;
+  h:= sr^.h;
+  if sm^.h < h then begin
+   h:= sm^.h;
+  end;
+  for y:= 0 to h-1 do begin
+   p:= PLongword(ptruint(sr^.pixels) + ptruint(y*sr^.pitch));
+   pm:= PLongword(ptruint(sm^.pixels) + ptruint(y*sm^.pitch));
+   for x:= 0 to w-1 do begin
+    if (pm^ and $00FFFFFF) <> 0 then begin
+     p^:= p^ or $FF000000;          // mask set: opaque
+    end
+    else begin
+     p^:= p^ and $00FFFFFF;         // mask clear: transparent
+    end;
+    inc(p);
+    inc(pm);
+   end;
+  end;
+ end;
+ result:= res;
 end;
 
 function gui_setwindowicon(id: winidty; const icon,mask: pixmapty): guierrorty;
@@ -1052,13 +1093,16 @@ var
  ico: PSDL_Surface;
 begin
  result:= gue_error;
- if icon <> 0 then begin
-  ico:= composeicon(icon,mask);
-  if ico = 0 then begin
-   exit;
-  end;
+ if icon = 0 then begin
+  result:= gue_ok;          // nothing to set, do not pass an unset surface
+  exit;
+ end;
+ ico:= composeicon(icon,mask);
+ if ico = 0 then begin
+  exit;
  end;
  SDL_SetWindowIcon(id,ico);
+ SDL_FreeSurface(ico);      // composeicon returns a new surface
  result:= SDL_CheckError('setwindowicon');
 end;
 
@@ -1956,35 +2000,26 @@ begin
   int1:= bigint;
  end;
  //result:= traycommand(awindow,nim_modify,nif_info,0,0,'',0,0,
- //                                                    message,int1,0,'',0);
+ //         message,int1,0,'',0);
 end;
 
 function gui_canceltraymessage(var awindow: windowty;
                           const messageid: longword): guierrorty;
 begin
- //result:= traycommand(awindow,nim_modify,nif_info,0,0,'',0,0,
- //                                                    '',0,0,'',0);
+ result:= gue_notraywindow;
 end;
+
 
 function gui_settrayicon(var awindow: windowty;
                                      const icon,mask: pixmapty): guierrorty;
-//var
-// ico{,ico1}: hicon;
 begin
-{ ico:= 0;
- if icon <> 0 then begin
-  ico:= composeicon(icon,mask);
-  if ico = 0 then begin
-   exit;
-  end;
- end;
- result:= traycommand(awindow,nim_modify,nif_icon,0,ico);}
+ result:= gue_notraywindow;   // tray icons are not implemented in the SDL backend
 end;
 
 function gui_settrayhint(var awindow: windowty;
                                      const hint: msestring): guierrorty;
 begin
-// result:= traycommand(awindow,nim_modify,nif_tip,0,0,hint);
+ result:= gue_notraywindow;
 end;
 
 function gui_initcolormap: guierrorty;

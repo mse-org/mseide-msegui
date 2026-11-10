@@ -7,7 +7,7 @@ uses
 
 const
  sdldebug = false;   // true: print diagnostics of the SDL backend
- 
+
 const
   SDL_INIT_TIMER = $00000001;
   SDL_INIT_AUDIO = $00000010;
@@ -516,7 +516,7 @@ type
 // error
  function SDL_GetError: pchar; cdecl; external SDLLibName;
  procedure SDL_ClearError; cdecl; external SDLLibName;
- 
+
  function SDL_CheckError(ref: string): guierrorty;
  function SDL_CheckErrorGDI(ref: string): gdierrorty;
 
