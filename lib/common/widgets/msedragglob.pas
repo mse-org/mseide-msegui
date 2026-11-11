@@ -9,6 +9,7 @@
 }
 unit msedragglob;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$include ../kernel/sdl/msesdl.inc}
 interface
 uses
  mseglob,msegraphutils,mseguiglob,mseevent;

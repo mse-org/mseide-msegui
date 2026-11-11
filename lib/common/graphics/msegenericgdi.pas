@@ -12,6 +12,8 @@ unit msegenericgdi;
 // under construction
 // 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$include ../kernel/sdl/msesdl.inc}
+
 interface
 //{$checkpointer on}
 uses

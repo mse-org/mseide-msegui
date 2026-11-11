@@ -9,6 +9,7 @@
 }
 unit mseprocutils;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$include ../kernel/sdl/msesdl.inc}
 {$ifndef FPC}{$ifdef linux} {$define UNIX} {$endif}{$endif}
 {$if fpc_fullversion >= 30000}
  {$define mse_fpc_3}

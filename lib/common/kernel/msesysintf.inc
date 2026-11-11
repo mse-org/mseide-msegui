@@ -8,6 +8,8 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
 
+{$include ../kernel/sdl/msesdl.inc}
+
 function sys_gettimeus: longword;
                //systemtime in microseconds, origin undefined
 function sys_getpid: procidty;

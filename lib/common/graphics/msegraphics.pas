@@ -9,6 +9,7 @@
 }
 unit msegraphics;
 {$ifdef FPC}{$mode objfpc}{$h+}{$GOTO ON}{$interfaces corba}{$endif}
+{$include ../kernel/sdl/msesdl.inc}
 
 interface
 {$ifndef mse_allwarnings}

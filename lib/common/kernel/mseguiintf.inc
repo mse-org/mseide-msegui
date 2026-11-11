@@ -7,6 +7,10 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
+
+{$include ../kernel/sdl/msesdl.inc}
+
+
 function gui_init: guierrorty;
 function gui_deinit: guierrorty;
 procedure gui_cancelshutdown;

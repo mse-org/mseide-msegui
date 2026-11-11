@@ -9,6 +9,7 @@
 }
 unit msesysintf1;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$include msesdl.inc}
 interface
 uses
  msesystypes,sdl4msegui;

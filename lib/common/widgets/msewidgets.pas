@@ -10,7 +10,7 @@
 unit msewidgets;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$goto on}{$endif}
-
+{$include ../kernel/sdl/msesdl.inc}
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

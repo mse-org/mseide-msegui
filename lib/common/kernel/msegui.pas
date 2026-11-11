@@ -16,6 +16,8 @@ unit msegui;
  {$define mse_with_ifi}
 {$endif}
 
+{$include ../kernel/sdl/msesdl.inc}
+
 interface
 {$ifndef mse_allwarnings}
  {$if fpc_fullversion >= 030100}

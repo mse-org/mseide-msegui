@@ -10,6 +10,7 @@
 unit msemenuwidgets;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$goto on}{$endif}
+{$include ../kernel/sdl/msesdl.inc}
 {$R-}{$Q-}
 interface
 {$ifndef mse_allwarnings}
