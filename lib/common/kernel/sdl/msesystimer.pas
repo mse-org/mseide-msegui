@@ -11,8 +11,8 @@ unit msesystimer;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 interface
 uses
- mseguiglob,mselist,msetypes,dateutils,sysutils,sdl4msegui;
- 
+ mseguiglob,mselist,msetypes,dateutils,sysutils,{$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif};
+
 function setsystimer(us: longword): guierrorty;
                //send et_timer event after delay or us (micro seconds)
 procedure systimerinit(const aeventlist: tobjectqueue; const apphandle: winidty);

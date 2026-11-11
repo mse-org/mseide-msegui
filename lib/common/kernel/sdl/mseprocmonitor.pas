@@ -11,13 +11,13 @@ unit mseprocmonitor;
 {$ifdef FPC}{$mode objfpc}{$h+}{$interfaces corba}{$endif}
 interface
 uses
- msesystypes,mseglob,sdl4msegui;
- 
+ msesystypes,mseglob,{$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif};
+
  {$include ../mseprocmonitor.inc}
 implementation
 uses
  mseapplication,msedatalist,{mselibc,}msearrayutils;
- 
+
 type
  procinfoty = record
   prochandle: prochandlety;
@@ -27,7 +27,7 @@ type
  procinfoarty = array of procinfoty;
 var
  infos: procinfoarty;
-  
+
 function pro_listentoprocess(const aprochandle: prochandlety;
                              const adest: iprocmonitor; const adata: pointer): boolean;
 begin
@@ -69,7 +69,7 @@ begin
   SDL_WaitThread(@infos[int1].prochandle,@execresult);
   for int2:= int1 downto 0 do begin
    with infos[int2] do begin
-    if prochandle = infos[int1].prochandle then begin     
+    if prochandle = infos[int1].prochandle then begin
      if dest <> nil then begin
       dest.processdied(prochandle,execresult,data);
 //       application.postevent(tchildprocevent.create(dest,prochandle,execresult,

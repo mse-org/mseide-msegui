@@ -12,7 +12,7 @@ unit msesysintf1;
 {$include msesdl.inc}
 interface
 uses
- msesystypes,sdl4msegui;
+ msesystypes,{$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif};
 var
  iswin95: boolean;
  iswin98: boolean;
@@ -23,10 +23,10 @@ var
 implementation
 uses
  sysutils,dateutils,msedynload;
- 
+
 type
  condeventsty = (ce_signal,ce_broadcast);
-   
+
 function sys_getlasterror: Integer;
 begin
  //result:= windows.GetLastError;
@@ -84,9 +84,9 @@ begin
 {$if defined(usesdl) and defined(windows)}
 if SDL_mutexV(mutex)=0 then begin
  {$else}
-if SDL_UnlockMutex(mutex)=0 then begin 
+if SDL_UnlockMutex(mutex)=0 then begin
 {$endif}
-  
+
   result:= sye_ok;
  end else begin
   result:= sye_busy;
@@ -280,12 +280,12 @@ function localtimeshift(value: tdatetime; const tolocal: boolean) : integer;
    result:= encodedate(ayear,wmonth,wo3) + encodetime(whour,wminute,0,0);
   end;
  end;}
- 
-var                                  
+
+var
  //tinfo: time_zone_information;
  year: word;
  stddate,dldate: tdatetime;
- bo1: boolean; 
+ bo1: boolean;
 begin
  {$ifdef FPC}
  //if gettimezoneinformation(@tinfo) = time_zone_id_invalid then begin
@@ -327,7 +327,7 @@ begin
  end;}
 end;
 
-function sys_utctolocaltime(const value: tdatetime): tdatetime;  
+function sys_utctolocaltime(const value: tdatetime): tdatetime;
 begin
  result:= incminute(value,localtimeshift(value,true));
 // result:= value + sys_localtimeoffset; //todo

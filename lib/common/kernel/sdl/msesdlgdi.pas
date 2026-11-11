@@ -15,8 +15,8 @@ unit msesdlgdi;
 
 interface
 uses
- msegraphics,msetypes,msestrings,mseguiglob,sdl4msegui,msebitmap,mseftfontcache,
- msefontcache, msesysutils,sdl2_gfxprimitives;
+ msegraphics,msetypes,msestrings,mseguiglob,{$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif},msebitmap,mseftfontcache,
+ msefontcache, msesysutils{$ifdef usesdl2},sdl2_gfxprimitives{$endif};
 
 const
  radtodeg = 360/(2*pi);
@@ -604,12 +604,12 @@ var
  org: pointty;
  dotted: boolean;
 begin
- 
+
   if sdldebug then begin
   writeln('DRAWLINES brush=',df_brush in drawinfo.gc.drawingflags,
           ' rop=',ord(currentrop));
  end;
- 
+
  with drawinfo do begin
   if points.count < 2 then exit;
   pp:= ppointaty(points.points);
@@ -648,7 +648,7 @@ var
  org: pointty;
  dotted: boolean;
 begin
- 
+
   if sdldebug then begin
   writeln('DRAWSEGMENTS brush=',df_brush in drawinfo.gc.drawingflags,
           ' rop=',ord(currentrop));

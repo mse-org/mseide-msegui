@@ -10,15 +10,15 @@
 unit msegenericgdi;
 //
 // under construction
-// 
+//
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$include ../kernel/sdl/msesdl.inc}
 
 interface
 //{$checkpointer on}
 uses
- mseguiglob,msegraphics,msetypes,msegraphutils 
-{$ifdef usesdl},sdl4msegui{$endif};
+ mseguiglob,msegraphics,msetypes,msegraphutils
+{$ifdef usesdl},{$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif}{$endif};
 type
  rectextentty = integer;
  prectextentty = ^rectextentty;
@@ -32,22 +32,22 @@ type
  prectdataty = ^rectdataty;
  rectdataaty = array[0..0] of rectdataty;
  prectdataaty = ^rectdataaty;
-  
+
  stripedataty = record //aray[n] of rectdataty
  end;
 
  stripeheaderty = record
-  height: rectextentty; 
+  height: rectextentty;
   rectcount: rectextentty;
  end;
 
  stripety = record
   header: stripeheaderty;
-  data: stripedataty;    
- end;                  
+  data: stripedataty;
+ end;
  pstripety = ^stripety;
 
- regiondataty = record 
+ regiondataty = record
  end;
 
  regioninfoty = record
@@ -65,7 +65,7 @@ type
 
  pointsfprocty = procedure(const gc: gcty; const points: pfpointty;
                                  const count: integer; const close: boolean);
- 
+
 procedure gdinotimplemented;
 function gdi_regiontorects(const aregion: regionty): rectarty;
 
@@ -86,7 +86,7 @@ procedure gdi_regintersectregion(var drawinfo: drawinfoty);
 
 procedure segmentellipsef(var drawinfo: drawinfoty;
                       const segmentsproc: pointsfprocty);
-                      
+
 {$ifdef mse_debugregion}
 procedure dumpregion(const atext: string; const aregion: regionty;
                         const nocheck: boolean = false);
@@ -97,10 +97,10 @@ implementation
 uses
  msesysutils,sysutils,math{$ifdef mse_debugregion},typinfo,mseformatstr{$endif}
 ;
- 
+
 type
  regopty = (reop_add,reop_sub,reop_intersect);
- 
+
  regionrectstripety = record
   header: stripeheaderty;
   data: rectdataty;
@@ -112,10 +112,10 @@ type
 const
  rowheadersize = 2*sizeof(rectextentty);      //height, colstart
  celldatasize = 2*sizeof(rectextentty);       //width, gap or 0
- 
+
 {$ifdef mse_debugregion}
 
-procedure dodumpstripes(po1: pstripety; const stripecount: rectextentty; 
+procedure dodumpstripes(po1: pstripety; const stripecount: rectextentty;
                        s1: rectextentty; out stripeheight: integer);
 var
  int1,int2,int3: integer;
@@ -239,7 +239,7 @@ begin
                 astripe^.header.rectcount*sizeof(rectdataty));
 end;
 
-function nextstripe(const astripe: pstripety):pstripety; 
+function nextstripe(const astripe: pstripety):pstripety;
                                             {$ifdef FPC} inline;{$endif}
 begin
  result:= pstripety(pchar(astripe)+sizeof(stripeheaderty)+
@@ -270,7 +270,7 @@ procedure checkbuffersize(var reg: regioninfoty; const sizedelta: ptruint;
 var
  po1: pointer;
 begin
- with reg do begin  
+ with reg do begin
   datasize:= datasize + sizedelta;
   if datasize > buffersize then begin
    buffersize:= 2*buffersize + sizedelta;
@@ -300,7 +300,7 @@ begin
 end;
 
 procedure insertemptystripe(var reg: regioninfoty;
-               const stripe: pstripety; const astart,aheight: rectextentty; 
+               const stripe: pstripety; const astart,aheight: rectextentty;
                                         out start: pstripety);
 var
 // po1: pointer;
@@ -337,7 +337,7 @@ begin
 //  po1:= datapo;
   start:= stripe;
   int1:= stripe^.header.rectcount;
-  pui1:= sizeof(stripeheaderty) + sizeof(rectdataty)*int1;  
+  pui1:= sizeof(stripeheaderty) + sizeof(rectdataty)*int1;
   insertmem(reg,pui1,start);
   stop:= pstripety(pchar(start) + pui1);
   move(stop^,start^,pui1);
@@ -370,7 +370,7 @@ begin
      below:= po1;
      inc(pchar(po1),sizeof(stripeheaderty)+
                       po1^.header.rectcount*sizeof(rectdataty));
-    end; 
+    end;
     astripestart:= ext1;
     result:= po1;
    end;
@@ -378,7 +378,7 @@ begin
  end;
 end;
 
-procedure splitstripes(var reg: regioninfoty; 
+procedure splitstripes(var reg: regioninfoty;
              const astripestart: rectextentty; const astripe: pstripety;
         out start: pstripety; out belowref: ptrint;
         out splitstripecount,splitrectcount: integer);
@@ -487,8 +487,8 @@ begin
     po1^.header.height:= ext3;
     po2:= datapo;
     copystripe(reg,po1,po3,po3);
-    start:= pstripety(pchar(start)+(pchar(datapo)-pchar(po2)));    
-    po3^.header.height:= ext2; 
+    start:= pstripety(pchar(start)+(pchar(datapo)-pchar(po2)));
+    po3^.header.height:= ext2;
    end;
   end;
  end;
@@ -540,12 +540,12 @@ end;
 
 type
  regopprocty = function (var data: regopdataty): boolean;
- 
+
 const
  regops: array[regopty] of regopprocty = (@addop,@subop,@intersectop);
- 
+
 procedure stripeop(var reg: regioninfoty;
-                             const astripestart: rectextentty; 
+                             const astripestart: rectextentty;
                              const stripe: pstripety; const op: regopty);
 var
  d: regopdataty;
@@ -568,7 +568,7 @@ var
  pendingmovecount: integer;
  moves,moved: pointer;
 const
- endmark = maxint-1; 
+ endmark = maxint-1;
 begin
 {$ifdef mse_debugregion}
  debugwriteln('');
@@ -665,7 +665,7 @@ begin
      posa:= posa + prectextentty(psa1)^;
     end;
    end;
-   pd2^.header.rectcount:= ((pchar(pd1)-pchar(pd2))-sizeof(stripeheaderty)) 
+   pd2^.header.rectcount:= ((pchar(pd1)-pchar(pd2))-sizeof(stripeheaderty))
                                                        div sizeof(rectdataty);
    drectco:= drectco + pd2^.header.rectcount;
    if startd <> endmark then begin  //has result rects
@@ -699,9 +699,9 @@ begin
   dumpstripes('dest after operation ',pd,stripeco,astripestart);
 //  dumpregion('region after operation ',ptruint(@reg));
  {$endif}
-         
+
          //merge stripes in block
-         
+
   psb1:= pd;           //dest
   psbb1:= pd;          //dest buffer
   psa1:= pd;           //init last stripe
@@ -715,7 +715,7 @@ begin
   while int1 <> 0 do begin             //pack similar stripes
 //   psa1:= po1; //backup last stripe
    psa1:= psb1; //backup last stripe
-   while (int1 <> 0) and 
+   while (int1 <> 0) and
                   (po1^.header.rectcount = psbb1^.header.rectcount) do begin
     po2:= @po1^.data;
     po3:= @psbb1^.data;
@@ -766,12 +766,12 @@ begin
 //  dumpregion('region after pack',ptruint(@reg));
  {$endif}
 
-  if op <> reop_intersect then begin 
+  if op <> reop_intersect then begin
          //merge stripe above
-         
+
    pui1:= calcdatasize(stripeco,rectco);  //old size
    po1:= pstripety(pchar(psb) + pui1);    //first stripe after touched block
-   if (pchar(po1) < (pchar(datapo) + datasize)) and 
+   if (pchar(po1) < (pchar(datapo) + datasize)) and
             (po1^.header.rectcount = psa1^.header.rectcount) then begin
     po3:= @psa1^.data;                     //last stripe in new block
     po2:= @po1^.data;
@@ -796,9 +796,9 @@ begin
      incstripe(po1);
     end;
    end;
- 
+
          //merge stripe below
- 
+
    if (psbbelowref >= 0) then begin
     po6:= pstripety(pchar(datapo)+psbbelowref); //stripe below touched block
     if po6^.header.rectcount = pd^.header.rectcount then begin
@@ -835,7 +835,7 @@ begin
    po6:= pd;
    while (po6^.header.rectcount = 0) and (int1 < dstripeco) do begin
     stripestart:= stripestart + po6^.header.height;
-    inc(int1);          
+    inc(int1);
     inc(po6);
    end;
    inc(pd,int1);      //remove leading empty stripes
@@ -856,19 +856,19 @@ begin
    rectcount:= rectcount - rectco + drectco;
    stripecount:= stripecount - stripeco + dstripeco;
    datasize:= calcdatasize(stripecount,rectcount);
- 
+
   {$ifdef mse_debugregion}
    dumpregion('region after move',ptruint(@reg));
   {$endif}
-   
+
   end;
-  if (lastdeststripe^.header.rectcount = 0) and 
+  if (lastdeststripe^.header.rectcount = 0) and
                      ((pchar(psb)-pchar(datapo))+pui2 = datasize) then begin
                    //changed last stripe
    po1:= pd;
    ext1:= 0;
    ext2:= 0;
-   ext3:= 0; 
+   ext3:= 0;
    for int1:= dstripeco-1 downto 0 do begin
     ext1:= ext1+po1^.header.height;
     inc(ext3); //empty stripes
@@ -1018,7 +1018,7 @@ begin
     inc(po2);
    end;
    s1:= s1 + h1;     //next row
-   inc(po1);     
+   inc(po1);
   end;
  end;
 end;
@@ -1026,7 +1026,7 @@ end;
 procedure gdi_createemptyregion(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.regionoperation do begin
-  pointer(dest):= getregmem(0,0);  
+  pointer(dest):= getregmem(0,0);
  end;
 end;
 
@@ -1178,7 +1178,7 @@ begin
   rect1.w:= rect.cx;
   rect1.h:= rect.cy;
   //SDL_RenderSetViewport(drawinfo.gc.handle,@rect1);
-{$endif} 
+{$endif}
 end;
 end;
 
@@ -1222,7 +1222,7 @@ var
 begin
  with drawinfo.regionoperation do begin
   regionop(pregioninfoty(source)^,pregioninfoty(dest)^,reop_add);
-{$ifdef usesdl} 
+{$ifdef usesdl}
  rect1.x:= rect.x;
   rect1.y:= rect.y;
   rect1.w:= rect.cx;
@@ -1250,7 +1250,7 @@ begin
   rect1.w:= rect.cx;
   rect1.h:= rect.cy;
   //SDL_RenderSetViewport(drawinfo.gc.handle,@rect1);
-{$endif} 
+{$endif}
 end;
 end;
 
@@ -1331,12 +1331,12 @@ begin
      x1:= do1;
      inc(po1);
      po1^.x:= x1+ox;
-     po1^.y:= y1*a+oy;   
+     po1^.y:= y1*a+oy;
     end;
    end;
   end;
   segmentsproc(gc,buffer.buffer,count,true);
  end;
-end;                      
+end;
 
 end.

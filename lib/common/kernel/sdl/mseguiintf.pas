@@ -11,13 +11,13 @@ unit mseguiintf;
 {$warn 5033 on}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-
+{$include ../kernel/sdl/msesdl.inc}
 interface
 uses
  math,mseapplication,msetypes,msegraphutils, msesys,
   mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,msestrings,msesystypes,
- sdl4msegui,msesdlgdi,dateutils,msegenericgdi;
+ {$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif},msesdlgdi,dateutils,msegenericgdi;
 
 type
  syseventty = SDL_Event;
@@ -1544,16 +1544,31 @@ begin
      if mousewindow <> 0 then begin
       pt1:= gui_getpointerpos;
       subpoint1(pt1,getclientrect(mousewindow).pos);
-      inc(mousewheelpos,e.wheel.y);
-      while mousewheelpos >= wheelstep do begin
-       result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,
-              mb_none,mw_up,pt1,shiftstate,e.wheel.timestamp*1000);
-       dec(mousewheelpos,wheelstep);
+      winid:= SDL_GetWindowFromID(e.wheel.window);
+      buttons:= e.wheel.y;               // notches, positive = away from user
+      if e.wheel.direction = 1 then begin
+       buttons:= -buttons;               // SDL_MOUSEWHEEL_FLIPPED
       end;
-      while mousewheelpos <= -wheelstep do begin
-       result:= tmouseevent.create(SDL_GetWindowFromID(e.wheel.window),false,
-              mb_none,mw_down,pt1,shiftstate,e.wheel.timestamp*1000);
-       inc(mousewheelpos,wheelstep);
+      if sdldebug then begin
+       writeln('WHEEL y=',e.wheel.y,' direction=',e.wheel.direction,
+               ' notches=',buttons);
+       flush(output);
+      end;
+      if buttons <> 0 then begin
+       if buttons > 0 then begin
+        mousewheel1:= mw_up;
+       end
+       else begin
+        mousewheel1:= mw_down;
+        buttons:= -buttons;
+       end;
+       while buttons > 1 do begin
+        application.postevent(tmouseevent.create(winid,false,
+              mb_none,mousewheel1,pt1,shiftstate,e.wheel.timestamp*1000));
+        dec(buttons);
+       end;
+       result:= tmouseevent.create(winid,false,
+              mb_none,mousewheel1,pt1,shiftstate,e.wheel.timestamp*1000);
       end;
      end;
      break;
