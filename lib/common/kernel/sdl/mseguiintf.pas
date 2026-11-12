@@ -1217,6 +1217,18 @@ begin
  result:= SDL_CheckError('getwindowpos');
 end;
 
+function gui_getrootwindow(id: winidty = 0): winidty;
+begin
+ result:= 0;  //SDL has no root window
+end;
+
+function gui_getpixel(const id: winidty; const pos: pointty;
+                                             out pixel: pixelty): guierrorty;
+begin
+ pixel:= 0;
+ result:= gue_error;  //SDL can not read pixels from the screen
+end;
+
 var
  configuredwindow: winidty;
 
