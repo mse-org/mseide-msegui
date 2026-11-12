@@ -221,6 +221,7 @@ begin
  end;
 end;
 
+//
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
  int3,bw,bh,ww,wh: integer;
@@ -229,6 +230,10 @@ var
  disp: SDL_Rect;
 begin
  with drawinfo.creategc do begin
+  if sdldebug then begin
+   writeln('CREATEGC kind=',ord(kind),' paintdevice=',ptruint(paintdevice));
+   flush(output);
+  end;
   gcpo^.gdifuncs:= gui_getgdifuncs;
   error:= gde_creategc;
   case kind of
@@ -288,12 +293,20 @@ begin
       // fallback: renderer on the window itself
       int3:= -1;
       arenderer:= SDL_CreateRenderer(paintdevice,int3,SDL_RENDERER_SOFTWARE);
+      if sdldebug then begin
+       writeln('CREATEGC fallback renderer=',arenderer);
+       flush(output);
+      end;
      end;
     end;
     gcpo^.handle:= arenderer;
     if arenderer <> 0 then begin
      windowrenderer:= arenderer;
      error:= gde_ok;
+    end;
+    if sdldebug then begin
+     writeln('CREATEGC screen handle=',arenderer,' error=',ord(error));
+     flush(output);
     end;
    end;
    else begin
@@ -310,6 +323,7 @@ begin
   end;
  end;
 end;
+//
 
 procedure gdi_destroygc(var drawinfo: drawinfoty);
 var
@@ -436,24 +450,52 @@ var
  lastpaintw,lastpainth: integer;
  endpaintreported: boolean;
 
+var
+ endpaintcount: integer;
+
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
 var
- i,ww,wh,idx: integer;
- wsurf,tsurf: PSDL_Surface;
+ i,ww,wh: integer;
+{$ifdef usesdl3}
+ winw,winh,res: integer;
+{$endif}
+ wsurf: PSDL_Surface;
  sp,wp: CSDL_Surface;
- r,dr: SDL_Rect;
+ r: SDL_Rect;
+ idx: integer;
+ tsurf: PSDL_Surface;
  pr: SDL_Renderer;
  tex: SDL_Texture;
- wayland: boolean;
+ dr: SDL_Rect;
+ userenderer,done: boolean;
 begin
- wayland:= string(SDL_GetCurrentVideoDriver) = 'wayland';
+ userenderer:= false;
+{$ifdef usesdl2}
+ userenderer:= string(SDL_GetCurrentVideoDriver) = 'wayland';
+{$endif}
  i:= findbackbuf(drawinfo.gc.handle);
  if i >= 0 then begin
   with backbufs[i] do begin
    ww:= 0;
    wh:= 0;
    SDL_GetWindowSize(window,ww,wh);
+{$ifdef usesdl3}
+   winw:= ww;
+   winh:= wh;
+   //SDL3: only Wayland popups use the renderer, the software window
+   //surface of a popup is not shown by the compositor until the pointer
+   //enters it
+   userenderer:= (string(SDL_GetCurrentVideoDriver) = 'wayland') and
+        ((SDL_GetWindowFlags(window) and $00080000) <> 0);
+{$endif}
    sp:= CSDL_Surface(ptruint(surf));
+   
+      if sdldebug and (endpaintcount < 80) then begin
+    writeln('ENDPAINT gc=',ptruint(drawinfo.gc.handle),' backbuf=',i,
+            ' win=',ptruint(window),' surf=',ptruint(surf));
+    flush(output);
+   end;
+   
    if ww > sp^.w then begin
     ww:= sp^.w;
    end;
@@ -464,8 +506,9 @@ begin
    r.y:= 0;
    r.w:= ww;
    r.h:= wh;
-   if wayland and (ww > 0) and (wh > 0) then begin
-    // Wayland: show the back surface through a renderer on the window
+   done:= false;
+   if userenderer and (ww > 0) and (wh > 0) then begin
+    // show the back surface through a renderer on the window
     pr:= pres;
     if pr = 0 then begin
      idx:= -1;
@@ -492,26 +535,67 @@ begin
       SDL_FreeSurface(tsurf);
      end;
      SDL_RenderPresent(pr);
+     done:= true;
+         if sdldebug and (endpaintcount < 80) then begin
+      inc(endpaintcount);
+      writeln('ENDPAINT renderer window=',ww,'x',wh,
+       ' px10,10=',inttohex(pdword(pbyte(sp^.pixels)+10*sp^.pitch+40)^,8),
+       ' px50,50=',inttohex(pdword(pbyte(sp^.pixels)+50*sp^.pitch+200)^,8));
+      flush(output);
+     end;
     end
     else begin
      if sdldebug then begin
-      writeln('ENDPAINT present renderer failed: ',string(SDL_GetError));
+      writeln('ENDPAINT popup renderer failed: ',string(SDL_GetError));
       flush(output);
      end;
     end;
-   end
-   else begin
+   end;
+   if not done then begin
     wsurf:= SDL_GetWindowSurface(window);
+{$ifdef usesdl3}
     if wsurf <> 0 then begin
      wp:= CSDL_Surface(ptruint(wsurf));
+     if (wp^.w <> winw) or (wp^.h <> winh) then begin
+      // SDL3 keeps the old window surface after a programmatic resize
+      SDL_DestroyWindowSurface(window);
+      wsurf:= SDL_GetWindowSurface(window);
+     end;
+    end;
+{$endif}
+    if wsurf <> 0 then begin
+     wp:= CSDL_Surface(ptruint(wsurf));
+     if sdldebug and (endpaintcount < 80) then begin
+      inc(endpaintcount);
+      writeln('ENDPAINT window=',ww,'x',wh,' winsurface=',wp^.w,'x',wp^.h,
+              ' pitch=',wp^.pitch,' back=',sp^.w,'x',sp^.h);
+      flush(output);
+     end;
      if ww > wp^.w then begin
       r.w:= wp^.w;
      end;
      if wh > wp^.h then begin
       r.h:= wp^.h;
      end;
+     // plain copy, no alpha blending over the (zeroed) window surface
+     SDL_SetSurfaceBlendMode(surf,SDL_BLENDMODE_NONE);
      SDL_UpperBlit(surf,@r,wsurf,@r);
+{$ifdef usesdl3}
+     res:= SDL_UpdateWindowSurface(window);
+     if sdldebug and (endpaintcount < 80) then begin
+      writeln('ENDPAINT update res=',res,' err=',string(SDL_GetError));
+      flush(output);
+     end;
+{$else}
      SDL_UpdateWindowSurface(window);
+{$endif}
+    end
+    else begin
+     if sdldebug and (endpaintcount < 80) then begin
+      inc(endpaintcount);
+      writeln('ENDPAINT no window surface: ',string(SDL_GetError));
+      flush(output);
+     end;
     end;
    end;
   end;
@@ -521,7 +605,6 @@ begin
  end;
  SDL_CheckError('endpaint');
 end;
-
 
 procedure gdi_movewindowrect(var drawinfo: drawinfoty); //gdifunc
 begin

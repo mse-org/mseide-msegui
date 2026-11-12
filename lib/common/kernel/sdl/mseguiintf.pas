@@ -1239,8 +1239,7 @@ end;
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  rect1: rectty;
- ww,wh,px,py: integer;
- flags: SDL_WindowFlags;
+ ww,wh: integer;
 begin
  if (rect.cx <= 0) or (rect.cy <= 0) then begin
   result:= gue_ok;
@@ -1250,19 +1249,7 @@ begin
  rect1:= getclientrect(id);
  if not ((rect.x=rect1.x) and (rect.y=rect1.y) and
          (rect.cx=rect1.cx) and (rect.cy=rect1.cy)) then begin
-  flags:= SDL_GetWindowFlags(id);
-  if (flags and $00080000) <> 0 then begin
-   // wayland popup: position is relative to the parent window
-   px:= 0;
-   py:= 0;
-   if groupleaderwindow <> 0 then begin
-    SDL_GetWindowPosition(groupleaderwindow,px,py);
-   end;
-   SDL_SetWindowPosition(id,rect.x-px,rect.y-py);
-  end
-  else begin
-   SDL_SetWindowPosition(id,rect.x,rect.y);
-  end;
+  SDL_SetWindowPosition(id,rect.x,rect.y);
   ww:= 0;
   wh:= 0;
   SDL_GetWindowSize(id,ww,wh);
@@ -1332,7 +1319,27 @@ begin
  result:= SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT);
 end;
 
+var
+ getevcount: integer;
+
+function gui_getevent_raw: tmseevent; forward;
+
 function gui_getevent: tmseevent;
+begin
+ result:= gui_getevent_raw;
+ if sdldebug and (getevcount < 80) then begin
+  inc(getevcount);
+  if result <> nil then begin
+   writeln('GETEVENT ',result.classname,' kind=',ord(result.kind));
+  end
+  else begin
+   writeln('GETEVENT nil');
+  end;
+  flush(output);
+ end;
+end;
+
+function gui_getevent_raw: tmseevent;
 var
  e: SDL_Event;
  rect1: rectty;
@@ -1397,15 +1404,19 @@ begin
       end else begin
        result:= twindowevent.create(ek_close,winid);
       end;
-          end else if (e.window.event = SDL_WINDOWEVENT_RESIZED)
+              end else if (e.window.event = SDL_WINDOWEVENT_RESIZED)
       or (e.window.event = SDL_WINDOWEVENT_SIZE_CHANGED) then begin
       postconfigureevent(winid);
-      // new: after a size change the whole window must be repainted
+      // after a size change the whole window must be repainted
       gui_getwindowrect(winid,rect1);
+      rect1.x:= 0;      // expose rectangles are in window coordinates
+      rect1.y:= 0;
       application.postevent(twindowrectevent.create(ek_expose,winid,rect1,nullpoint));
       SDL_CheckError('resized');
      end else if (e.window.event = SDL_WINDOWEVENT_EXPOSED) then begin
       gui_getwindowrect(winid,rect1);
+      rect1.x:= 0;      // expose rectangles are in window coordinates
+      rect1.y:= 0;
       result:= twindowrectevent.create(ek_expose,winid,rect1,nullpoint);
           end else if (e.window.event = SDL_WINDOWEVENT_MOVED) then begin
       postconfigureevent(winid);
@@ -1646,8 +1657,8 @@ var
  classname: pchar;
  ownerwindow: winidty;
  drv: string;
- px,py,mx1,my1: integer;
-
+ parentwin: winidty;
+ realpopup: boolean;
 begin
  fillchar(awindow,sizeof(awindow),0);
  with awindow,options do begin
@@ -1683,49 +1694,52 @@ begin
    end;
   end;
 
-  // popups: X11 small hints must not take the focus (tooltip flag),
-  // Wayland menus must be real popups, otherwise the compositor places them
-    drv:= string(SDL_GetCurrentVideoDriver);
+  drv:= string(SDL_GetCurrentVideoDriver);
   popupflags:= 0;
-  if wo_popup in options then begin
-   if (drv = 'wayland') and waylandpopups then begin
-    popupflags:= $00080000;         // SDL_WINDOW_POPUP_MENU, test only
-   end
-   else if (drv = 'x11') and (rect1.cx <= 100) and (rect1.cy <= 100) then begin
-    popupflags:= $00040000;         // SDL_WINDOW_TOOLTIP
+  realpopup:= false;
+  id:= 0;
+
+{$ifdef usesdl3}
+  if (wo_popup in options) and (drv = 'wayland') then begin
+   // native Wayland: a real popup window, placed by the compositor relative
+   // to its parent window
+   parentwin:= transientfor;
+   if parentwin = 0 then begin
+    parentwin:= lastfocuswindow;
+   end;
+   if parentwin <> 0 then begin
+    id:= SDL_CreatePopupWindow(parentwin,rect1.x,rect1.y,rect1.cx,rect1.cy,
+                                              windowstyleex or $00080000);
+    realpopup:= id <> 0;
+   end;
+   if sdldebug then begin
+    writeln('POPUP parent=',ptruint(parentwin),' id=',ptruint(id));
+    flush(output);
    end;
   end;
-  windowstyleex:= windowstyleex or popupflags;
+{$endif}
 
- if sdldebug then begin
-  writeln('BEFORE CreateWindow popup=',wo_popup in options,
-          ' flags=',inttohex(windowstyleex,8),
-          ' size=',rect1.cx,'x',rect1.cy);
-  flush(output);
-  end;
-  if sdldebug then begin
-   writeln('BEFORE CreateWindow popup=',wo_popup in options,
-           ' flags=',inttohex(windowstyleex,8),
-           ' size=',rect1.cx,'x',rect1.cy);
-   flush(output);
-  end;
-  if (pos=wp_screencentered) then begin
-   id:= SDL_CreateWindow(classname,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,
-                                         rect1.cx,rect1.cy,windowstyleex);
-  end else begin
-   id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,
+  if id = 0 then begin
+   // small hint windows must not take the focus (X11 only)
+   if (wo_popup in options) and (drv = 'x11') and
+                         (rect1.cx <= 100) and (rect1.cy <= 100) then begin
+    popupflags:= $00040000;         // SDL_WINDOW_TOOLTIP
+    windowstyleex:= windowstyleex or popupflags;
+   end;
+   if sdldebug then begin
+    writeln('BEFORE CreateWindow popup=',wo_popup in options,
+            ' flags=',inttohex(windowstyleex,8),
+            ' size=',rect1.cx,'x',rect1.cy);
+    flush(output);
+   end;
+   if (pos=wp_screencentered) then begin
+    id:= SDL_CreateWindow(classname,SDL_WINDOWPOS_CENTERED,
+                     SDL_WINDOWPOS_CENTERED,rect1.cx,rect1.cy,windowstyleex);
+   end
+   else begin
+    id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,
                                                               windowstyleex);
-  end;
-
-  if (id = 0) and (popupflags <> 0) then begin
-   // SDL refused the popup (for example no parent window): plain window
-  if sdldebug then begin
-   writeln('POPUP create failed: ',string(SDL_GetError));
-  end;
-   SDL_ClearError;
-   windowstyleex:= windowstyleex and (not popupflags);
-   id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,
-                                                              windowstyleex);
+   end;
   end;
 
   // Drop the temporary utility window created by createapphandle
@@ -1737,37 +1751,16 @@ begin
 
   result:= SDL_CheckError('createwindow');
 
-  if (id = 0) and (popupflags <> 0) then begin
-   if sdldebug then begin
-    writeln('POPUP create failed: ',string(SDL_GetError));
-   end;
-   SDL_ClearError;
-   windowstyleex:= windowstyleex and (not popupflags);
-   id:= SDL_CreateWindow(classname,rect1.x,rect1.y,rect1.cx,rect1.cy,
-                                                              windowstyleex);
-  end;
-
-  px:= 0;
-  py:= 0;
-  mx1:= 0;
-  my1:= 0;
-  if id <> 0 then begin
-   SDL_GetWindowPosition(id,px,py);
-  end;
-  if lastfocuswindow <> 0 then begin
-   SDL_GetWindowPosition(lastfocuswindow,mx1,my1);
-  end;
-
-
   if (transientfor <> 0) or
                  (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
    if transientfor <> 0 then begin
     ownerwindow:= transientfor;
    end;
-   if (transientfor = 0) and (parent = 0) then begin
+   if (transientfor = 0) and (parent = 0) and not realpopup then begin
     SDL_SetWindowPosition(id,0,0);
    end;
-  end else begin
+  end
+  else begin
    if setgroup and (groupleader = 0) or (wo_groupleader in options) then begin
     groupleaderwindow:= id;
    end;
