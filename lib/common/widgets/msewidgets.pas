@@ -6174,6 +6174,9 @@ procedure tpopupwidget.updatewindowinfo(var info: windowinfoty);
 begin
  with info do begin
   options:= [wo_popup];
+  if self is tcustomhintwidget then begin
+   include(options,wo_tooltip);  //hints must not take the focus, menus do
+  end;
   transientfor:= ftransientfor;
  end;
 end;

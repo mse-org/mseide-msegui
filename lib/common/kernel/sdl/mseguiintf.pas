@@ -1740,7 +1740,7 @@ begin
   id:= 0;
 
 {$ifdef usesdl3}
-  if (wo_popup in options) and (drv = 'wayland') then begin
+    if (wo_popup in options) and (drv = 'wayland') then begin
    // native Wayland: a real popup window, placed by the compositor relative
    // to its parent window
    parentwin:= transientfor;
@@ -1748,12 +1748,21 @@ begin
     parentwin:= lastfocuswindow;
    end;
    if parentwin <> 0 then begin
-    id:= SDL_CreatePopupWindow(parentwin,rect1.x,rect1.y,rect1.cx,rect1.cy,
+    if wo_tooltip in options then begin
+     //hint: tooltip type, no input grab, no focus
+     id:= SDL_CreatePopupWindow(parentwin,rect1.x,rect1.y,rect1.cx,rect1.cy,
+                                              windowstyleex or $00040000);
+    end
+    else begin
+     //menu: popup type with grab
+     id:= SDL_CreatePopupWindow(parentwin,rect1.x,rect1.y,rect1.cx,rect1.cy,
                                               windowstyleex or $00080000);
+    end;
     realpopup:= id <> 0;
    end;
    if sdldebug then begin
-    writeln('POPUP parent=',ptruint(parentwin),' id=',ptruint(id));
+    writeln('POPUP parent=',ptruint(parentwin),' id=',ptruint(id),
+            ' tooltip=',wo_tooltip in options);
     flush(output);
    end;
   end;
@@ -1761,10 +1770,16 @@ begin
 
   if id = 0 then begin
    // small hint windows must not take the focus (X11 only)
-   if (wo_popup in options) and (drv = 'x11') and
+      if (wo_popup in options) and (drv = 'x11') and
                          (rect1.cx <= 100) and (rect1.cy <= 100) then begin
+{$ifdef usesdl3}
+    // SDL3: the shim strips SDL_WINDOW_TOOLTIP, so ask for a window that
+    // never takes the focus: NOT_FOCUSABLE $80000000 + ALWAYS_ON_TOP $00010000
+    windowstyleex:= windowstyleex or $80000000 or $00010000;
+{$else}
     popupflags:= $00040000;         // SDL_WINDOW_TOOLTIP
     windowstyleex:= windowstyleex or popupflags;
+{$endif}
    end;
    if sdldebug then begin
     writeln('BEFORE CreateWindow popup=',wo_popup in options,

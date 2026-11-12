@@ -283,8 +283,8 @@ begin
   end
   else begin
    time1:= unigettimestamp(timeoutusec);
-   
-  {$ifndef darwin} 
+
+  {$ifndef darwin}
    while sem_timedwait(d.sema,@time1) <> 0 do begin
     case sys_getlasterror of
      eintr: begin
@@ -301,7 +301,7 @@ begin
    {$else}
    // darwin to check
    {$endif}
-    
+
   end;
  end;
  result:= sye_ok;
