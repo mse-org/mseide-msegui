@@ -5,7 +5,7 @@ unit sdl3msegui;
 interface
 uses
  msetypes,msesystypes,mseguiglob,sysutils,ctypes,msekeyboard,msesysutils,msegraphutils,
-  sdl3api;
+ sdl3api;
 {$i sdl2_types.inc}
 
 const

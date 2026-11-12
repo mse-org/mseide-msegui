@@ -300,7 +300,7 @@ begin
      end;
     end;
     gcpo^.handle:= arenderer;
-    if arenderer <> 0 then begin
+       if arenderer <> 0 then begin
      windowrenderer:= arenderer;
      error:= gde_ok;
     end;
@@ -474,6 +474,10 @@ begin
  userenderer:= string(SDL_GetCurrentVideoDriver) = 'wayland';
 {$endif}
  i:= findbackbuf(drawinfo.gc.handle);
+ if sdldebug and (endpaintcount < 80) then begin
+  writeln('ENDPAINT call gc=',ptruint(drawinfo.gc.handle),' backbuf index=',i);
+  flush(output);
+ end;
  if i >= 0 then begin
   with backbufs[i] do begin
    ww:= 0;
@@ -489,13 +493,13 @@ begin
         ((SDL_GetWindowFlags(window) and $00080000) <> 0);
 {$endif}
    sp:= CSDL_Surface(ptruint(surf));
-   
-      if sdldebug and (endpaintcount < 80) then begin
+
+   if sdldebug and (endpaintcount < 80) then begin
     writeln('ENDPAINT gc=',ptruint(drawinfo.gc.handle),' backbuf=',i,
             ' win=',ptruint(window),' surf=',ptruint(surf));
     flush(output);
    end;
-   
+
    if ww > sp^.w then begin
     ww:= sp^.w;
    end;
@@ -536,7 +540,7 @@ begin
      end;
      SDL_RenderPresent(pr);
      done:= true;
-         if sdldebug and (endpaintcount < 80) then begin
+     if sdldebug and (endpaintcount < 80) then begin
       inc(endpaintcount);
       writeln('ENDPAINT renderer window=',ww,'x',wh,
        ' px10,10=',inttohex(pdword(pbyte(sp^.pixels)+10*sp^.pitch+40)^,8),
@@ -601,6 +605,10 @@ begin
   end;
  end
  else begin
+  if sdldebug and (endpaintcount < 80) then begin
+   writeln('ENDPAINT no backbuf, SDL_RenderPresent only');
+   flush(output);
+  end;
   SDL_RenderPresent(drawinfo.gc.handle);
  end;
  SDL_CheckError('endpaint');

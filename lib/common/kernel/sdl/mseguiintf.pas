@@ -1638,8 +1638,13 @@ var
  str1: string;
 begin
  str1:= application.applicationname;
+ {$ifdef usesdl3}
  //$00000008 = SDL_WINDOW_HIDDEN, the application window must never be visible
  id:= SDL_CreateWindow(pchar(str1),0,0,0,0,$00000008);
+ {$else}
+ //SDL2: original call (the value is really SDL_WINDOW_OPENGL), test only
+ id:= SDL_CreateWindow(pchar(str1),0,0,0,0,SDL_WINDOWEVENT_HIDDEN);
+ {$endif}
  if id = 0 then begin
   result:= gue_createwindow;
   SDL_CheckError('createapphandle');
@@ -1694,8 +1699,11 @@ begin
  fillchar(awindow,sizeof(awindow),0);
  with awindow,options do begin
   ownerwindow:= applicationwindow;
-//  windowstyleex:= SDL_WINDOW_SHOWN;
-  windowstyleex:= $00000008;
+{$ifdef usesdl3}
+  windowstyleex:= $00000008;     //hidden, the SDL3 shim shows it when ready
+{$else}
+  windowstyleex:= SDL_WINDOW_SHOWN;
+{$endif}
   if (options * noframewindowtypes <> []) or
     (wo_message in options) then begin
    windowstyleex:= windowstyleex or SDL_WINDOW_BORDERLESS;
@@ -2075,11 +2083,13 @@ begin
  SDL_SetHint('SDL_VIDEODRIVER', 'wayland,cocoa,windows,x11');
  SDL_Init(SDL_INIT_EVERYTHING);
  SDL_CheckError('Init video');
+ {$ifdef usesdl3}
  if string(SDL_GetCurrentVideoDriver) = 'x11' then begin
-  //without this SDL builds a hidden OpenGL renderer at the first
+  //without this SDL3 builds a hidden OpenGL renderer at the first
   //SDL_GetWindowSurface and recreates the window = visible flash
   SDL_SetHint('SDL_FRAMEBUFFER_ACCELERATION','0');
  end;
+ {$endif}
  if sdldebug then begin
   writeln('GUI_INIT driver=',string(SDL_GetCurrentVideoDriver));
   flush(output);
