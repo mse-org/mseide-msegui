@@ -11,7 +11,7 @@ uses
 {$i sdl2_types.inc}
 
 const
- sdldebug = true;   // true: print diagnostics of the SDL backend
+ sdldebug = false;   // true: print diagnostics of the SDL backend
 
 const
  SDL_INIT_TIMER = $00000001;
