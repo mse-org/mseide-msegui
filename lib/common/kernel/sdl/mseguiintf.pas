@@ -11,9 +11,11 @@ unit mseguiintf;
 {$warn 5033 on}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-{$include ../kernel/sdl/msesdl.inc}
+{$include msesdl.inc}
 interface
+
 uses
+
  math,mseapplication,msetypes,msegraphutils, msesys,
   mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,msestrings,msesystypes,
@@ -36,6 +38,12 @@ const
 function getapplicationwindow: winidty;
 function ismonopixmap(pixmap: pixmapty): boolean;
 procedure removemonopixmap(pixmap: pixmapty);
+function msedefaultscreenno: integer;
+function gui_getrootwindow(id: winidty = 0): winidty;
+function msedisplay: pointer;
+function gui_getpixel(const id: winidty; const pos: pointty;
+                                             out pixel: pixelty): guierrorty;
+
 
 implementation
 
@@ -1227,6 +1235,16 @@ function gui_getpixel(const id: winidty; const pos: pointty;
 begin
  pixel:= 0;
  result:= gue_error;  //SDL can not read pixels from the screen
+end;
+
+function msedisplay: pointer;
+begin
+ result:= nil;   //SDL has no X display
+end;
+
+function msedefaultscreenno: integer;
+begin
+ result:= 0;
 end;
 
 var

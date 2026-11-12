@@ -12,7 +12,8 @@ unit msesysintf1;
 {$include msesdl.inc}
 interface
 uses
- msesystypes,{$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif};
+ msesystypes
+ {$ifdef usesdl3},sdl3msegui{$else}{$ifdef usesdl2},sdl2msegui{$endif}{$endif};
 var
  iswin95: boolean;
  iswin98: boolean;
