@@ -12,10 +12,14 @@ unit msesysintf;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 
 interface
-uses
- msesys,msetypes,msesystypes, msestrings{$ifdef windows},windows{$endif},{$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif}, mseguiglob,
- {$ifdef unix}cthreads,cwstring,mselibc, msectypes, baseunix,{$endif}msestream, classes;
 
+uses
+ msesys,msetypes,msesystypes,msestrings{$ifdef windows},windows{$endif},
+ {$ifdef usesdl3}sdl3msegui,{$else}{$ifdef usesdl2}sdl2msegui,{$endif}{$endif}
+ mseguiglob,
+ {$ifdef unix}cthreads,cwstring,mselibc,msectypes,baseunix,{$endif}msestream,
+ classes;
+ 
 {$include ..\msesysintf.inc}
 {$ifdef windows}
  {$include msesysintfhwin32.inc}

@@ -11,7 +11,7 @@ uses
 {$i sdl2_types.inc}
 
 const
- sdldebug = false;   // true: print diagnostics of the SDL backend
+ sdldebug = true;   // true: print diagnostics of the SDL backend
 
 const
  SDL_INIT_TIMER = $00000001;
@@ -798,6 +798,18 @@ end;
 
 procedure SDL_ShowWindow(window: winidty);
 begin
+ if (SDL_GetWindowFlags(window) and $00000008) = 0 then begin
+  //not hidden: showing it again would re-map the window and make it flash
+  if sdldebug then begin
+   writeln('SHOWWINDOW skipped id=',ptruint(window));
+   flush(output);
+  end;
+  exit;
+ end;
+ if sdldebug then begin
+  writeln('SHOWWINDOW id=',ptruint(window));
+  flush(output);
+ end;
  x3_showwindow(w3(window));
 end;
 
