@@ -151,7 +151,7 @@ procedure x3_waitthread(thread: pointer; status: plongint);
 
 implementation
 uses
- SDL3;
+ sdl3min;
 
 type
  ptimerrec = ^timerrec;
