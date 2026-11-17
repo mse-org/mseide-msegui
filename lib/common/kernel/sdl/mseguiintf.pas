@@ -1353,19 +1353,27 @@ var
  getevcount: integer;
 
 function gui_getevent_raw: tmseevent; forward;
-
-function gui_getevent: tmseevent;
+procedure sdlwaitforevents;
+         //MSEgui expects gui_getevent to block until an event arrives. Without
+         //a wait the loop in gui_getevent_raw runs at full speed and uses a
+         //whole cpu core. The application lock is released while sleeping,
+         //like the X11 backend does around its poll().
+var
+ locked: boolean;
 begin
- result:= gui_getevent_raw;
- if sdldebug and (getevcount < 80) then begin
-  inc(getevcount);
-  if result <> nil then begin
-   writeln('GETEVENT ',result.classname,' kind=',ord(result.kind));
-  end
-  else begin
-   writeln('GETEVENT nil');
+ locked:= application.unlock();
+ try
+  while true do begin
+   SDL_PumpEvents;                  //fetch the events from the system
+   if gui_hasevent then begin       //also posted ones (timer, other threads)
+    break;
+   end;
+   sleep(4);                        //at most 4 ms input latency
   end;
-  flush(output);
+ finally
+  if locked then begin
+   application.lock;
+  end;
  end;
 end;
 
@@ -1619,7 +1627,25 @@ begin
      break;
     end;
    end;
+  end
+  else begin
+   sdlwaitforevents;      //nothing pending: sleep instead of spinning
   end;
+ end;
+end;
+
+function gui_getevent: tmseevent;
+begin
+ result:= gui_getevent_raw;
+ if sdldebug and (getevcount < 80) then begin
+  inc(getevcount);
+  if result <> nil then begin
+   writeln('GETEVENT ',result.classname,' kind=',ord(result.kind));
+  end
+  else begin
+   writeln('GETEVENT nil');
+  end;
+  flush(output);
  end;
 end;
 

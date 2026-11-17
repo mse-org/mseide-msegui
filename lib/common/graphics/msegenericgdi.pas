@@ -18,8 +18,13 @@ interface
 //{$checkpointer on}
 uses
  mseguiglob,msegraphics,msetypes,msegraphutils
-{$ifdef usesdl},{$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif}{$endif};
+{$if defined(usesdl2) or defined(usesdl3)}
+ ,{$ifdef usesdl3}sdl3msegui{$else}sdl2msegui{$endif}
+{$endif};
 type
+{$ifdef usewayland}
+ SDL_Rect = record x,y,w,h: integer; end;
+{$endif}
  rectextentty = integer;
  prectextentty = ^rectextentty;
  rectextentaty = array[0..0] of rectextentty;

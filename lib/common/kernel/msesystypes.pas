@@ -38,7 +38,7 @@ type
  prochandlety = type ptrint;
  pprochandlety = ^prochandlety;
 
- {$ifdef usesdl}
+ {$if defined(usesdl) and not defined(usewayland)}
  mutexty = pointer;
  {$else}
  mutexty = array[0..9] of pointer;

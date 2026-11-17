@@ -31,10 +31,9 @@ function sys_getcommandlinearguments: stringarty;
 function sys_getcommandlinearguments: msestringarty;
 {$endif}
 
-{$if not defined(usesdl) and not defined(windows)}
+{$if (not defined(usesdl) or defined(usewayland)) and not defined(windows)}
 procedure sys_getenvvars(out names: msestringarty; out values: msestringarty);
 {$endif}
-
 
 function sys_getenv(const aname: msestring; out avalue: msestring): boolean;
                           //true if found

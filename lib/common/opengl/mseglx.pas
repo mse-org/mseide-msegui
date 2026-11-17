@@ -39,7 +39,8 @@ interface
 {$ifdef linux}{$define unix}{$endif}
 {$IFDEF Unix}
   uses
-    mxlib, mseglextglob;
+    mxlib,
+     mseglextglob;
   {$DEFINE HasGLX}  // Activate GLX stuff
 {$ELSE}
   {$MESSAGE Unsupported platform.}
@@ -111,9 +112,9 @@ const
   GLX_TRANSPARENT_INDEX_EXT             = $8009;
 
 type
-{$ifndef FPC}
-  txid = xid;
-{$endif}
+//{$ifndef FPC}
+  txid = integer;
+//{$endif}
   // From XLib:
   XPixmap = TXID;
   XFont = TXID;

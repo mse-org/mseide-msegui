@@ -10,11 +10,13 @@
 unit mseglextglob;
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+//{$include msesdl.inc}
+
 
 interface
 uses
  msedynload,{msegl,}msesys,{$ifdef FPC}dynlibs,{$else}classes_del,{$endif}
- msegraphics,msetypes;
+ msegraphics,msetypes, mseguiintf ;
 
 type
  glextensionty = (
@@ -262,7 +264,7 @@ procedure init(); //do not use, automatically called by msegl
 implementation
 uses
  msegl,mseglext,msestrings{$ifdef mswindows}{$else},
-                                          mseglx,mseguiintf{$endif},
+                                          mseglx{$endif},
  mseglu;
 
 type
@@ -290,6 +292,7 @@ begin
  if {$ifndef FPC}@{$endif}glxqueryextensionsstring <> nil then begin
   result:= mseglparseextensions(
        glxqueryextensionsstring(msedisplay,msedefaultscreenno));
+  
  end;
 {$endif}
 end;

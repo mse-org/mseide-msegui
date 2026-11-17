@@ -726,7 +726,7 @@ begin
     end
    end
    else begin
-{$ifndef usesdl}
+{$if not defined(usesdl) or defined(usewayland)}
     i1:= timedwaitpid(prochandle,@dwo1,timeoutus);
 {$endif}
    i1 := 0;
