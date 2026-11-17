@@ -161,6 +161,8 @@ implementation
 var
  display,registry,compositor,shm,wmbase,seat,output: pointer;
  wlpointer,wlkeyboard: pointer;
+ grabserial: cuint32;      //serial of the last button or key press: popup
+                           //grabs, move and resize are checked against it
  xkbctx: pxkb_context;
  xkbmap: pxkb_keymap;
  xkbstate: pxkb_state;
@@ -742,6 +744,10 @@ end;
 
 procedure onpopupdone(data: pointer; po: pointer); cdecl;
 begin
+ if wlc_debug then begin
+  writeln('popup_done');
+  flush(system.output);
+ end;
  pushevent(newevent(wle_popupdone,twlwindow(data)));
 end;
 
@@ -800,7 +806,12 @@ begin
    xdg_positioner_destroy(pos);
    xdg_popup_add_listener(popup,@pul,win);
    if grab and (seat <> nil) then begin
-    xdg_popup_grab(popup,seat,wlc_lastserial);
+    xdg_popup_grab(popup,seat,grabserial);
+    if wlc_debug then begin
+     writeln('popup grab serial ',grabserial,' last input serial ',
+                                                          wlc_lastserial);
+     flush(system.output);
+    end;
    end;
   end;
   visible:= true;
@@ -944,14 +955,14 @@ end;
 procedure wlc_move(const win: twlwindow);
 begin
  if (win <> nil) and (win.toplevel <> nil) and (seat <> nil) then begin
-  xdg_toplevel_move(win.toplevel,seat,wlc_lastserial);
+  xdg_toplevel_move(win.toplevel,seat,grabserial);
  end;
 end;
 
 procedure wlc_resize(const win: twlwindow; const edges: cuint32);
 begin
  if (win <> nil) and (win.toplevel <> nil) and (seat <> nil) then begin
-  xdg_toplevel_resize(win.toplevel,seat,wlc_lastserial,edges);
+  xdg_toplevel_resize(win.toplevel,seat,grabserial,edges);
  end;
 end;
 
@@ -964,6 +975,8 @@ var
  cursurface: pointer;
  curname: string;
  curserial,enterserial: cuint32;
+ outscale: integer = 1;             //integer scale of the output
+ curthemescale: integer;
 
 procedure setcursorimage(const aname: string);
 var
@@ -983,8 +996,13 @@ begin
   wl_pointer_set_cursor(wlpointer,enterserial,nil,0,0);
   exit;
  end;
+ if (curtheme <> nil) and (curthemescale <> outscale) then begin
+  wl_cursor_theme_destroy(curtheme);     //output scale changed
+  curtheme:= nil;
+ end;
  if curtheme = nil then begin
-  curtheme:= wl_cursor_theme_load(nil,24,shm);
+  curtheme:= wl_cursor_theme_load(nil,24 * outscale,shm);
+  curthemescale:= outscale;
  end;
  if curtheme = nil then begin
   exit;
@@ -1004,11 +1022,13 @@ begin
  if cursurface = nil then begin
   cursurface:= wl_compositor_create_surface(compositor);
  end;
+ wl_surface_set_buffer_scale(cursurface,outscale);
  wl_surface_attach(cursurface,buf,0,0);
  wl_surface_damage_buffer(cursurface,0,0,img^.width,img^.height);
  wl_surface_commit(cursurface);
- wl_pointer_set_cursor(wlpointer,enterserial,cursurface,img^.hotspot_x,
-                                                           img^.hotspot_y);
+ wl_pointer_set_cursor(wlpointer,enterserial,cursurface,
+                       img^.hotspot_x div cuint32(outscale),
+                       img^.hotspot_y div cuint32(outscale));
 end;
 
 procedure applycursor(const win: twlwindow);
@@ -1144,6 +1164,9 @@ var
  win: twlwindow;
 begin
  wlc_lastserial:= serial;
+ if state = 1 then begin
+  grabserial:= serial;
+ end;
  win:= pointerwin;
  if win = nil then begin
   exit;
@@ -1335,6 +1358,9 @@ procedure onkkey(data: pointer; kb: pointer; serial,time,key,
                                               state: cuint32); cdecl;
 begin
  wlc_lastserial:= serial;
+ if state = 1 then begin
+  grabserial:= serial;
+ end;
  pushkey(key,state = 1,false,time);
  if state = 1 then begin
   if (xkbmap <> nil) and (repeatrate > 0) and
@@ -1696,10 +1722,25 @@ begin
  end;
 end;
 
+procedure onoutputscale(data: pointer; op: pointer; factor: cint32); cdecl;
+begin
+ if factor < 1 then begin
+  factor:= 1;
+ end;
+ if factor <> outscale then begin
+  outscale:= factor;
+  curname:= '';                     //load the cursor again with the new scale
+  if wlc_debug then begin
+   writeln('output scale ',outscale);
+   flush(system.output);
+  end;
+ end;
+end;
+
 procedure wlc_screensize(out w,h: integer);
 begin
- w:= screenw;
- h:= screenh;
+ w:= screenw div outscale;           //logical size, like the windows
+ h:= screenh div outscale;
  if (w <= 0) or (h <= 0) then begin
   w:= 1024;                         //MSEgui must never see an empty screen
   h:= 768;
@@ -1796,6 +1837,7 @@ begin
  if output <> nil then begin
   wl_output_noop_listener(ol);
   ol.mode:= @onoutputmode;
+  ol.scale:= @onoutputscale;
   wl_output_add_listener(output,@ol,nil);
  end;
  if seat <> nil then begin
