@@ -64,7 +64,7 @@ implementation
 
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesysintf1,BaseUnix,ctypes,xkbcommon,msebitmap;
+ msesysintf1,BaseUnix,ctypes,xkbcommon,msebitmap,mseprocmonitor;
 
 type
  tapplication1 = class(tguiapplication);
@@ -81,6 +81,10 @@ var
  timerdue: qword;                 //ms, 0 = no timer
  escapepressed: boolean;
  clipboardtext: msestring;
+ terminated: boolean;             //set by the SIGTERM handler
+ sigtermbefore: SignalHandler;
+ childevent: boolean;             //set by the SIGCHLD handler
+ sigchldbefore: SignalHandler;
 
  //focus and pointer state
  focuswin: twlwindow;             //toplevel with the keyboard focus (posted)
@@ -229,6 +233,19 @@ var
 begin
  while fpread(wakepipe[0],buf,sizeof(buf)) > 0 do begin
  end;
+end;
+
+procedure sigterminate(signum: cint); cdecl;
+begin
+ terminated:= true;
+ wakeup;                          //leave the poll, async signal safe
+end;
+
+procedure sigchild(signum: cint); cdecl;
+begin
+ childevent:= true;
+ mseprocmonitor.sigchildcallback();
+ wakeup;
 end;
 
 function usrcount: integer;
@@ -604,111 +621,7 @@ begin
  end;
 end;
 
-//waits for Wayland events or the wake up pipe, application is not locked
-procedure waitwayland(const timeoutms: integer);
-var
- fds: array[0..1] of tpollfd;
- fd,res: cint;
- readable: boolean;
-begin
- fd:= wlc_pollprepare;
- if wlc_hasevents then begin
-  wlc_pollfinish(false);
-  exit;
- end;
- fds[0].fd:= fd;
- fds[0].events:= POLLIN;
- fds[0].revents:= 0;
- fds[1].fd:= wakepipe[0];
- fds[1].events:= POLLIN;
- fds[1].revents:= 0;
- res:= fpPoll(@fds[0],2,wlc_timeout(timeoutms));
- readable:= (res > 0) and (fds[0].revents and POLLIN <> 0);
- wlc_pollfinish(readable);
- wlc_timers;
- if (res > 0) and (fds[1].revents and POLLIN <> 0) then begin
-  drainwakepipe;
- end;
-end;
-
-function gui_hasevent: boolean;
-begin
- result:= (evhead < length(evlist)) or (usrcount > 0) or timerisdue;
- if not result then begin
-  waitwayland(0);
-  processwayland;
-  result:= (evhead < length(evlist)) or (usrcount > 0) or timerisdue;
- end;
-end;
-
-function gui_getevent: tmseevent;
-var
- locked: boolean;
- timeout: integer;
- now: qword;
-begin
- result:= nil;
- while true do begin
-  result:= getlistevent;
-  if result <> nil then begin
-   break;
-  end;
-  result:= getusrevent;
-  if result <> nil then begin
-   break;
-  end;
-  if timerisdue then begin
-   timerdue:= 0;
-   result:= tmseevent.create(ek_timer);
-   break;
-  end;
-  timeout:= 10000;
-  if timerdue <> 0 then begin
-   now:= GetTickCount64;
-   if timerdue > now then begin
-    if timerdue - now < qword(timeout) then begin
-     timeout:= integer(timerdue - now);
-    end;
-   end
-   else begin
-    timeout:= 0;
-   end;
-  end;
-  locked:= application.unlock();
-  try
-   waitwayland(timeout);
-  finally
-   if locked then begin
-    application.lock();
-   end;
-  end;
-  processwayland;
-  if (evhead >= length(evlist)) and (usrcount = 0) and not timerisdue then begin
-   break;                  //wake up or timeout, MSEgui rechecks its state
-  end;
- end;
- if sdldebug then begin
-  if result <> nil then begin
-   writeln('GETEVENT ',result.classname,' kind=',ord(result.kind));
-  end
-  else begin
-   writeln('GETEVENT nil');
-  end;
-  flush(output);
- end;
-end;
-
-function gui_escapepressed: boolean;
-begin
- result:= escapepressed;
-end;
-
-procedure gui_resetescapepressed;
-begin
- escapepressed:= false;
-end;
-
-//poll fds, stored like in the SDL backend (not polled yet)
+//registered poll fds, polled together with the Wayland connection
 
 type
  wlpollinfoty = record
@@ -720,6 +633,16 @@ type
 
 var
  wlpoll: array of wlpollinfoty;
+
+type
+ wlpendingpollty = record
+  flags: pollflagsty;
+  callback: pollcallbackty;
+  data: pointer;
+ end;
+
+var
+ wlpending: array of wlpendingpollty;   //polled, callbacks not yet called
 
 function gui_addpollfd(var id: int32; const afd: int32;
                            const aflags: pollflagsty;
@@ -777,6 +700,190 @@ begin
   end;
   result:= gue_ok;
  end;
+end;
+
+procedure dispatchpolls;       //calls the callbacks, application is locked
+var
+ list: array of wlpendingpollty;
+ i: integer;
+begin
+ if length(wlpending) > 0 then begin
+  list:= wlpending;
+  wlpending:= nil;
+  for i:= 0 to high(list) do begin
+   if assigned(list[i].callback) then begin
+    list[i].callback(list[i].flags,list[i].data);
+   end;
+  end;
+ end;
+end;
+
+function pollrevents(const revents: integer): pollflagsty;
+begin
+ result:= [];
+ if revents and POLLIN <> 0 then begin
+  include(result,pf_in);
+ end;
+ if revents and POLLPRI <> 0 then begin
+  include(result,pf_pri);
+ end;
+ if revents and POLLOUT <> 0 then begin
+  include(result,pf_out);
+ end;
+ if revents and POLLERR <> 0 then begin
+  include(result,pf_err);
+ end;
+ if revents and POLLHUP <> 0 then begin
+  include(result,pf_hup);
+ end;
+ if revents and POLLNVAL <> 0 then begin
+  include(result,pf_nval);
+ end;
+end;
+
+//waits for Wayland events, the wake up pipe and the registered poll fds,
+//application is not locked. The poll fd callbacks are called later by
+//dispatchpolls
+procedure waitwayland(const timeoutms: integer);
+var
+ fds: array of tpollfd;
+ snap: array of wlpollinfoty;
+ fd,res: cint;
+ readable: boolean;
+ i,n: integer;
+begin
+ fd:= wlc_pollprepare;
+ if wlc_hasevents then begin
+  wlc_pollfinish(false);
+  exit;
+ end;
+ snap:= copy(wlpoll,0,length(wlpoll));
+ setlength(fds,2 + length(snap));
+ fds[0].fd:= fd;
+ fds[0].events:= POLLIN;
+ fds[0].revents:= 0;
+ fds[1].fd:= wakepipe[0];
+ fds[1].events:= POLLIN;
+ fds[1].revents:= 0;
+ for i:= 0 to high(snap) do begin
+  fds[2+i].fd:= snap[i].fd;          //negative fd = inactive, ignored
+  fds[2+i].events:= snap[i].events;
+  fds[2+i].revents:= 0;
+ end;
+ res:= fpPoll(@fds[0],length(fds),wlc_timeout(timeoutms));
+ readable:= (res > 0) and (fds[0].revents and POLLIN <> 0);
+ wlc_pollfinish(readable);
+ wlc_timers;
+ if res > 0 then begin
+  if fds[1].revents and POLLIN <> 0 then begin
+   drainwakepipe;
+  end;
+  for i:= 0 to high(snap) do begin
+   if (snap[i].fd >= 0) and (fds[2+i].revents <> 0) then begin
+    n:= length(wlpending);
+    setlength(wlpending,n + 1);
+    wlpending[n].flags:= pollrevents(fds[2+i].revents);
+    wlpending[n].callback:= snap[i].callback;
+    wlpending[n].data:= snap[i].data;
+   end;
+  end;
+ end;
+end;
+
+function gui_hasevent: boolean;
+begin
+ if childevent then begin
+  childevent:= false;
+  handlesigchld;                  //child process state changed
+ end;
+ result:= (evhead < length(evlist)) or (usrcount > 0) or timerisdue or
+                                                                terminated;
+ if not result then begin
+  waitwayland(0);
+  dispatchpolls;
+  processwayland;
+  result:= (evhead < length(evlist)) or (usrcount > 0) or timerisdue or
+                                                                terminated;
+ end;
+end;
+
+function gui_getevent: tmseevent;
+var
+ locked: boolean;
+ timeout: integer;
+ now: qword;
+begin
+ result:= nil;
+ while true do begin
+  result:= getlistevent;
+  if result <> nil then begin
+   break;
+  end;
+  result:= getusrevent;
+  if result <> nil then begin
+   break;
+  end;
+  if timerisdue then begin
+   timerdue:= 0;
+   result:= tmseevent.create(ek_timer);
+   break;
+  end;
+  if terminated then begin
+   terminated:= false;
+   result:= tmseevent.create(ek_terminate);
+   break;
+  end;
+  if childevent then begin
+   childevent:= false;
+   handlesigchld;
+   continue;
+  end;
+  timeout:= 10000;
+  if timerdue <> 0 then begin
+   now:= GetTickCount64;
+   if timerdue > now then begin
+    if timerdue - now < qword(timeout) then begin
+     timeout:= integer(timerdue - now);
+    end;
+   end
+   else begin
+    timeout:= 0;
+   end;
+  end;
+  locked:= application.unlock();
+  try
+   waitwayland(timeout);
+  finally
+   if locked then begin
+    application.lock();
+   end;
+  end;
+  dispatchpolls;
+  processwayland;
+  if (evhead >= length(evlist)) and (usrcount = 0) and not timerisdue and
+                                    not terminated and not childevent then begin
+   break;                  //wake up or timeout, MSEgui rechecks its state
+  end;
+ end;
+ if sdldebug then begin
+  if result <> nil then begin
+   writeln('GETEVENT ',result.classname,' kind=',ord(result.kind));
+  end
+  else begin
+   writeln('GETEVENT nil');
+  end;
+  flush(output);
+ end;
+end;
+
+function gui_escapepressed: boolean;
+begin
+ result:= escapepressed;
+end;
+
+procedure gui_resetescapepressed;
+begin
+ escapepressed:= false;
 end;
 
 //title text of the client side decoration
@@ -1121,22 +1228,30 @@ procedure GUI_DEBUGEND;
 begin
 end;
 
-//clipboard, local to the application until wl_data_device is implemented
+//clipboard, text through wl_data_device
 
 function gui_copytoclipboard(const value: msestring): guierrorty;
 begin
  clipboardtext:= value;
+ wlc_clipboardset(stringtoutf8ansi(value));
  result:= gue_ok;
 end;
 
 function gui_canpastefromclipboard(): boolean;
 begin
- result:= clipboardtext <> '';
+ result:= wlc_clipboardcanpaste or (clipboardtext <> '');
 end;
 
 function gui_pastefromclipboard(out value: msestring): guierrorty;
+var
+ s: string;
 begin
- value:= clipboardtext;
+ if wlc_clipboardget(s) then begin
+  value:= utf8tomsestring(s);
+ end
+ else begin
+  value:= clipboardtext;
+ end;
  result:= gue_ok;
 end;
 
@@ -1821,6 +1936,10 @@ begin
   exit;
  end;
  gui_setmainthread;
+ terminated:= false;
+ sigtermbefore:= fpsignal(SIGTERM,@sigterminate);
+ childevent:= false;
+ sigchldbefore:= fpsignal(SIGCHLD,@sigchild);
  wlc_titlerenderer:= @rendertitle;
  wlc_debug:= sdldebug;
  result:= gue_ok;
@@ -1829,6 +1948,8 @@ end;
 function gui_deinit: guierrorty;
 begin
  timerdue:= 0;
+ fpsignal(SIGTERM,sigtermbefore);
+ fpsignal(SIGCHLD,sigchldbefore);
  wlc_disconnect;
  setlength(wins,0);
  fpclose(wakepipe[0]);

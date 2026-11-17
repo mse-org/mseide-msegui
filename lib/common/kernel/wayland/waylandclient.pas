@@ -148,6 +148,11 @@ procedure wlc_resize(const win: twlwindow; const edges: cuint32);
 procedure wlc_present(const win: twlwindow);
 function wlc_windowfromsurface(const asurface: pointer): twlwindow;
 
+//clipboard, text only
+function wlc_clipboardset(const utf8: string): boolean;
+function wlc_clipboardcanpaste: boolean;
+function wlc_clipboardget(out utf8: string): boolean;
+
 var
  wlc_lastserial: cuint32;             //serial of the last input event
 
@@ -1392,6 +1397,269 @@ end;
 
 //seat, output
 
+//clipboard
+
+type
+ twloffer = class
+  proxy: pointer;
+  mimes: array of string;
+  procedure addmime(const amime: string);
+  function textmime: string;
+ end;
+
+var
+ ddm,ddev: pointer;                 //data device manager, data device
+ ddl: twl_data_device_listener;
+ dol: twl_data_offer_listener;
+ dsl: twl_data_source_listener;
+ offers: array of twloffer;         //all live offers
+ seloffer: twloffer;                //current selection offer
+ srcobj: pointer;                   //our data source, nil if not owner
+ srctext: string;                   //utf8 text of our data source
+
+procedure twloffer.addmime(const amime: string);
+begin
+ setlength(mimes,length(mimes) + 1);
+ mimes[high(mimes)]:= amime;
+end;
+
+function twloffer.textmime: string;
+const
+ names: array[0..3] of string = ('text/plain;charset=utf-8','UTF8_STRING',
+                                                       'text/plain','TEXT');
+var
+ i,j: integer;
+begin
+ result:= '';
+ for j:= 0 to high(names) do begin
+  for i:= 0 to high(mimes) do begin
+   if mimes[i] = names[j] then begin
+    result:= names[j];
+    exit;
+   end;
+  end;
+ end;
+end;
+
+function findoffer(const aproxy: pointer): twloffer;
+var
+ i: integer;
+begin
+ result:= nil;
+ for i:= 0 to high(offers) do begin
+  if offers[i].proxy = aproxy then begin
+   result:= offers[i];
+   exit;
+  end;
+ end;
+end;
+
+procedure freeoffer(const aoffer: twloffer);
+var
+ i: integer;
+begin
+ if aoffer = nil then begin
+  exit;
+ end;
+ for i:= 0 to high(offers) do begin
+  if offers[i] = aoffer then begin
+   offers[i]:= offers[high(offers)];
+   setlength(offers,high(offers));
+   break;
+  end;
+ end;
+ if seloffer = aoffer then begin
+  seloffer:= nil;
+ end;
+ if aoffer.proxy <> nil then begin
+  wl_data_offer_destroy(aoffer.proxy);
+ end;
+ aoffer.free;
+end;
+
+procedure onofferoffer(data: pointer; ofr: pointer; mime_type: pchar); cdecl;
+var
+ o: twloffer;
+begin
+ o:= findoffer(ofr);
+ if o <> nil then begin
+  o.addmime(mime_type);
+ end;
+end;
+
+procedure onddataoffer(data: pointer; dev: pointer; id: pointer); cdecl;
+var
+ o: twloffer;
+begin
+ o:= twloffer.create;
+ o.proxy:= id;
+ setlength(offers,length(offers) + 1);
+ offers[high(offers)]:= o;
+ wl_data_offer_add_listener(id,@dol,nil);
+end;
+
+procedure onddselection(data: pointer; dev: pointer; id: pointer); cdecl;
+var
+ i: integer;
+begin
+ if id = nil then begin
+  seloffer:= nil;
+ end
+ else begin
+  seloffer:= findoffer(id);
+ end;
+ for i:= high(offers) downto 0 do begin   //only the selection is of interest
+  if offers[i] <> seloffer then begin
+   freeoffer(offers[i]);
+  end;
+ end;
+end;
+
+procedure onsrcsend(data: pointer; src: pointer; mime_type: pchar;
+                                                  fd: cint32); cdecl;
+var
+ p: pchar;
+ n,done,res: ptrint;
+ pfd: tpollfd;
+ t0: qword;
+begin
+ p:= pchar(srctext);
+ n:= length(srctext);
+ done:= 0;
+ t0:= gettickcount64;
+ fpfcntl(fd,F_SETFL,O_NONBLOCK);
+ while done < n do begin
+  res:= fpwrite(fd,(p + done)^,n - done);
+  if res > 0 then begin
+   done:= done + res;
+  end
+  else begin
+   if (res < 0) and (fpgeterrno = ESysEAGAIN) then begin
+    pfd.fd:= fd;
+    pfd.events:= POLLOUT;
+    pfd.revents:= 0;
+    fppoll(@pfd,1,500);
+   end
+   else begin
+    if (res = 0) or (fpgeterrno <> ESysEINTR) then begin
+     break;
+    end;
+   end;
+  end;
+  if gettickcount64 - t0 > 3000 then begin
+   break;                           //reader too slow
+  end;
+ end;
+ fpclose(fd);
+end;
+
+procedure onsrccancelled(data: pointer; src: pointer); cdecl;
+begin
+ if src = srcobj then begin
+  srcobj:= nil;
+  srctext:= '';
+ end;
+ wl_data_source_destroy(src);
+end;
+
+function wlc_clipboardset(const utf8: string): boolean;
+var
+ src: pointer;
+begin
+ result:= false;
+ if (ddm = nil) or (ddev = nil) then begin
+  exit;
+ end;
+ src:= wl_data_device_manager_create_data_source(ddm);
+ if src = nil then begin
+  exit;
+ end;
+ wl_data_source_noop_listener(dsl);
+ dsl.send:= @onsrcsend;
+ dsl.cancelled:= @onsrccancelled;
+ wl_data_source_add_listener(src,@dsl,nil);
+ wl_data_source_offer(src,'text/plain;charset=utf-8');
+ wl_data_source_offer(src,'UTF8_STRING');
+ wl_data_source_offer(src,'text/plain');
+ wl_data_source_offer(src,'TEXT');
+ srctext:= utf8;
+ srcobj:= src;       //the old source gets cancelled by the compositor
+ wl_data_device_set_selection(ddev,src,wlc_lastserial);
+ wl_display_flush(display);
+ result:= true;
+end;
+
+function wlc_clipboardcanpaste: boolean;
+begin
+ result:= (srcobj <> nil) or ((seloffer <> nil) and (seloffer.textmime <> ''));
+end;
+
+function wlc_clipboardget(out utf8: string): boolean;
+var
+ mime: string;
+ fds: tfildes;
+ buf: array[0..4095] of char;
+ n: ptrint;
+ l: integer;
+ pfd: tpollfd;
+ t0: qword;
+begin
+ utf8:= '';
+ result:= false;
+ if srcobj <> nil then begin           //we are the owner
+  utf8:= srctext;
+  result:= true;
+  exit;
+ end;
+ if seloffer = nil then begin
+  exit;
+ end;
+ mime:= seloffer.textmime;
+ if mime = '' then begin
+  exit;
+ end;
+ if fppipe(fds) <> 0 then begin
+  exit;
+ end;
+ wl_data_offer_receive(seloffer.proxy,pchar(mime),fds[1]);
+ wl_display_flush(display);
+ fpclose(fds[1]);
+ t0:= gettickcount64;
+ while gettickcount64 - t0 < 3000 do begin
+  pfd.fd:= fds[0];
+  pfd.events:= POLLIN;
+  pfd.revents:= 0;
+  n:= fppoll(@pfd,1,500);
+  if n < 0 then begin
+   if fpgeterrno <> ESysEINTR then begin
+    break;
+   end;
+  end
+  else begin
+   if n > 0 then begin
+    n:= fpread(fds[0],buf,sizeof(buf));
+    if n > 0 then begin
+     l:= length(utf8);
+     setlength(utf8,l + n);
+     move(buf,utf8[l + 1],n);
+    end
+    else begin
+     if n = 0 then begin             //end of data
+      result:= true;
+      break;
+     end
+     else begin
+      if fpgeterrno <> ESysEINTR then begin
+       break;
+      end;
+     end;
+    end;
+   end;
+  end;
+ end;
+ fpclose(fds[0]);
+end;
+
 procedure onseatcapabilities(data: pointer; st: pointer;
                                           caps: cuint32); cdecl;
 begin
@@ -1446,6 +1714,12 @@ var
  s: string;
 begin
  s:= iface;
+ if s = 'wl_data_device_manager' then begin
+  if version > 3 then begin
+   version:= 3;
+  end;
+  ddm:= wl_registry_bind(reg,name,@wl_data_device_manager_interface,version);
+ end;
  if s = 'wl_compositor' then begin
   if version > 4 then begin
    version:= 4;                     //damage_buffer needs 4
@@ -1529,6 +1803,16 @@ begin
   sl.capabilities:= @onseatcapabilities;
   wl_seat_add_listener(seat,@sl,nil);
  end;
+ if (ddm <> nil) and (seat <> nil) then begin
+  wl_data_device_noop_listener(ddl);
+  ddl.data_offer:= @onddataoffer;
+  ddl.selection:= @onddselection;
+  wl_data_offer_noop_listener(dol);
+  dol.offer:= @onofferoffer;
+  ddev:= wl_data_device_manager_get_data_device(ddm,seat);
+  wl_data_device_add_listener(ddev,@ddl,nil);
+ end;
+ fpsignal(SIGPIPE,signalhandler(SIG_IGN));   //clipboard readers can go away
  wl_display_roundtrip(display);      //seat capabilities, output mode
  wl_display_roundtrip(display);      //keymap, repeat info
  result:= true;
@@ -1565,6 +1849,11 @@ begin
   wl_display_disconnect(display);
   display:= nil;
  end;
+ ddm:= nil;
+ ddev:= nil;
+ seloffer:= nil;
+ srcobj:= nil;
+ setlength(offers,0);
  compositor:= nil;
  shm:= nil;
  wmbase:= nil;
