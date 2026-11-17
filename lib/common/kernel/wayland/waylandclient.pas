@@ -144,6 +144,10 @@ procedure wlc_setmaximized(const win: twlwindow; const value: boolean);
 procedure wlc_setfullscreen(const win: twlwindow; const value: boolean);
 procedure wlc_setminimized(const win: twlwindow);
 procedure wlc_move(const win: twlwindow);          //interactive, from a button press
+function wlc_buttonsdown: integer;      //mouse buttons held in the client area
+procedure wlc_startmove(const win: twlwindow);
+                //frameless window dragged by the application: the compositor
+                //does the move, the held button is released for the application
 procedure wlc_resize(const win: twlwindow; const edges: cuint32);
 procedure wlc_present(const win: twlwindow);
 function wlc_windowfromsurface(const asurface: pointer): twlwindow;
@@ -174,6 +178,8 @@ var
  pointerwin,keyboardwin: twlwindow;
  pointerx,pointery: integer;
  clientbuttons: integer;     //buttons pressed in the client area
+ heldbutton: cuint32;        //last button pressed in the client area
+ movewin: twlwindow;         //window moved by the compositor
  repeatrate,repeatdelay: integer;
  repeatkey: cuint32;
  repeatdue: qword;
@@ -959,6 +965,36 @@ begin
  end;
 end;
 
+function wlc_buttonsdown: integer;
+begin
+ result:= clientbuttons;
+end;
+
+procedure wlc_startmove(const win: twlwindow);
+var
+ ev: twlevent;
+begin
+ if (win = nil) or (win.toplevel = nil) or (seat = nil) or (win <> pointerwin) or
+        (win = movewin) or (clientbuttons <= 0) then begin
+  exit;
+ end;
+ if wlc_debug then begin
+  writeln('application move, compositor takes over');
+  flush(system.output);
+ end;
+ movewin:= win;
+ xdg_toplevel_move(win.toplevel,seat,grabserial);
+ ev:= newevent(wle_button,win);      //the compositor eats the real release
+ ev.time:= cuint32(GetTickCount64);
+ ev.x:= pointerx;
+ ev.y:= pointery;
+ ev.button:= heldbutton;
+ ev.pressed:= false;
+ ev.mods:= curmods;
+ pushevent(ev);
+ clientbuttons:= 0;
+end;
+
 procedure wlc_resize(const win: twlwindow; const edges: cuint32);
 begin
  if (win <> nil) and (win.toplevel <> nil) and (seat <> nil) then begin
@@ -1127,6 +1163,7 @@ procedure onpenter(data: pointer; ptr: pointer; serial: cuint32;
 begin
  wlc_lastserial:= serial;
  enterserial:= serial;
+ movewin:= nil;                      //a compositor move has ended
  pointerwin:= wlc_windowfromsurface(surf);
  if pointerwin <> nil then begin
   pointerwin.inclient:= false;
@@ -1181,6 +1218,7 @@ begin
   ev.mods:= curmods;
   pushevent(ev);
   if state = 1 then begin
+   heldbutton:= button;
    inc(clientbuttons);
   end
   else begin

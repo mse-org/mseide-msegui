@@ -1868,6 +1868,11 @@ begin
  if (win = nil) or (rect.cx <= 0) or (rect.cy <= 0) then begin
   exit;
  end;
+ if (win.kind = wlk_toplevel) and (win.width = rect.cx) and
+        (win.height = rect.cy) and ((win.posx <> rect.x) or
+                  (win.posy <> rect.y)) and (wlc_buttonsdown > 0) then begin
+  wlc_startmove(win);       //application drags its frameless window
+ end;
  changed:= false;
  if (win.posx <> rect.x) or (win.posy <> rect.y) then begin
   win.posx:= rect.x;
@@ -1897,6 +1902,10 @@ var
 begin
  win:= findwin(id);
  if win <> nil then begin
+  if (win.kind = wlk_toplevel) and ((win.posx <> rect.x) or
+                  (win.posy <> rect.y)) and (wlc_buttonsdown > 0) then begin
+   wlc_startmove(win);
+  end;
   win.posx:= rect.x;
   win.posy:= rect.y;
  end;
