@@ -64,7 +64,8 @@ implementation
 
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesysintf1,BaseUnix,ctypes,xkbcommon,msebitmap,mseprocmonitor;
+ msesysintf1,BaseUnix,ctypes,xkbcommon,msebitmap,mseprocmonitor,
+ msedragglob,msesysdnd;
 
 type
  tapplication1 = class(tguiapplication);
@@ -468,6 +469,62 @@ begin
  end;
 end;
 
+//drag and drop, receiving: the events become tsysdndevent like with xdnd
+
+procedure translatednd(const ev: twlevent);
+var
+ kind: drageventkindty;
+ mimes: twlstrings;
+ fmts: msestringarty;
+ ist: booleanarty;
+ acts: dndactionsty;
+ pt: pointty;
+ i: integer;
+ win: twlwindow;
+begin
+ win:= ev.window;
+ case ev.kind of
+  wle_dndmotion: begin
+   kind:= dek_check;
+  end;
+  wle_dnddrop: begin
+   kind:= dek_drop;
+  end;
+  else begin
+   kind:= dek_leavesysdnd;
+  end;
+ end;
+ fmts:= nil;
+ ist:= nil;
+ acts:= [dnda_copy];
+ if kind <> dek_leavesysdnd then begin
+  mimes:= wlc_dndmimes;
+  setlength(fmts,length(mimes));
+  setlength(ist,length(mimes));
+  for i:= 0 to high(mimes) do begin
+   fmts[i]:= utf8tomsestring(mimes[i]);
+   ist[i]:= false;                    //like xdnd
+  end;
+  case wlc_dndaction of
+   WLDND_MOVE: begin
+    acts:= [dnda_move];
+   end;
+   WLDND_ASK: begin
+    acts:= [dnda_ask];
+   end;
+  end;
+ end;
+ pt.x:= ev.x + win.posx;               //like xdnd: screen position
+ pt.y:= ev.y + win.posy;
+ if sdldebug then begin
+  writeln('dnd event kind=',ord(kind),' pos=',pt.x,',',pt.y,
+                       ' formats=',length(fmts));
+  flush(system.output);
+ end;
+ putevent(tsysdndevent.create(kind,winid(win),pt,modstoshiftstate(ev.mods),
+                                                  false,fmts,ist,acts));
+end;
+
 procedure translateevent(const ev: twlevent);
 var
  win,root: twlwindow;
@@ -602,6 +659,9 @@ begin
     end;
     postwheel(win,steps,ev);
    end;
+  end;
+  wle_dndmotion,wle_dnddrop,wle_dndleave: begin
+   translatednd(ev);
   end;
   wle_key: begin
    shiftstate1:= modstoshiftstate(ev.mods);
@@ -1279,6 +1339,141 @@ begin
  result:= gue_ok;
 end;
 
+//drag and drop
+
+var
+ dndintf: isysdnd;               //source object of the drag in progress
+ dndstarted: boolean;            //the compositor does the drag
+
+function dndactionmask(const aactions: dndactionsty): cuint32;
+begin
+ result:= 0;
+ if dnda_copy in aactions then begin
+  result:= result or WLDND_COPY;
+ end;
+ if dnda_move in aactions then begin
+  result:= result or WLDND_MOVE;
+ end;
+ if dnda_ask in aactions then begin
+  result:= result or WLDND_ASK;
+ end;
+ if result = 0 then begin
+  result:= WLDND_COPY;
+ end;
+end;
+
+function startdnd: boolean;
+var
+ fmts: msestringarty;
+ mimes,data: twlstrings;
+ i: integer;
+begin
+ result:= false;
+ if dndintf <> nil then begin
+  fmts:= dndintf.getformats;
+  mimes:= nil;
+  data:= nil;
+  setlength(mimes,length(fmts));
+  setlength(data,length(fmts));
+  for i:= 0 to high(fmts) do begin      //data is converted now, the drag
+   mimes[i]:= stringtoutf8ansi(fmts[i]);  //object can be gone when it is read
+   data[i]:= dndintf.convertmimedata(i);
+  end;
+  result:= wlc_dndstart(mimes,data,dndactionmask(dndintf.getactions));
+ end;
+end;
+
+function gui_sysdnd(const action: sysdndactionty;
+                         const aintf: isysdnd; const arect: rectty;
+                                         out aresult: boolean): guierrorty;
+begin
+ aresult:= false;
+ result:= gue_ok;
+ case action of
+  sdnda_begin: begin                 //source
+   dndintf:= aintf;
+   dndstarted:= false;
+  end;
+  sdnda_check: begin                 //pointer is outside of our windows
+   if dndstarted then begin
+    aresult:= true;
+   end
+   else begin
+    if startdnd then begin
+     dndstarted:= true;
+     aresult:= true;
+    end;
+   end;
+  end;
+  sdnda_drop: begin
+   aresult:= dndstarted;
+  end;
+  sdnda_destroyed: begin             //the compositor keeps the started drag
+   if (aintf <> nil) and (dndintf = aintf) then begin
+    dndintf:= nil;
+   end;
+  end;
+  sdnda_accept: begin                //target
+   if wlc_dndactive then begin
+    wlc_dndaccept(true);
+   end
+   else begin
+    result:= gue_nodragpending;
+   end;
+  end;
+  sdnda_reject: begin
+   if wlc_dndactive then begin
+    wlc_dndaccept(false);
+   end
+   else begin
+    result:= gue_nodragpending;
+   end;
+  end;
+  sdnda_finished: begin
+   if wlc_dndactive then begin
+    wlc_dndfinish;
+   end
+   else begin
+    result:= gue_nodragpending;
+   end;
+  end;
+  else begin
+   result:= gue_error;
+  end;
+ end;
+end;
+
+function gui_sysdndreaddata(var adata: string;
+                              const typeindex: integer): guierrorty;
+begin
+ result:= gue_nodragpending;
+ if wlc_dndactive then begin
+  if wlc_dndread(typeindex,adata) then begin
+   result:= gue_ok;
+  end
+  else begin
+   result:= gue_error;
+  end;
+ end;
+end;
+
+function gui_sysdndreadtext(var atext: msestring;
+                              const typeindex: integer): guierrorty;
+var
+ s: string;
+begin
+ result:= gue_nodragpending;
+ if wlc_dndactive then begin
+  if wlc_dndread(typeindex,s) then begin
+   atext:= utf8tomsestring(s);
+   result:= gue_ok;
+  end
+  else begin
+   result:= gue_error;
+  end;
+ end;
+end;
+
 //pointer
 
 function gui_getpointerpos: pointty;
@@ -1674,6 +1869,7 @@ begin
   end;
   win.posx:= rect.x;
   win.posy:= rect.y;
+  win.sysdnd:= wo_sysdnd in options;
   wlc_setdecorated(win,(akind = wlk_toplevel) and
               (options * noframewindowtypes = []) and
                                            not (wo_message in options));

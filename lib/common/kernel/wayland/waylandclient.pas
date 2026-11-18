@@ -33,7 +33,8 @@ type
  twleventkind = (wle_none,wle_configure,wle_expose,wle_close,wle_popupdone,
                  wle_keyboardenter,wle_keyboardleave,wle_pointerenter,
                  wle_pointerleave,wle_pointermotion,wle_button,wle_axis,
-                 wle_axisdiscrete,wle_key);
+                 wle_axisdiscrete,wle_key,wle_dndmotion,wle_dnddrop,
+                 wle_dndleave);
  twlmod = (wlm_shift,wlm_ctrl,wlm_alt,wlm_logo,wlm_caps,wlm_num,wlm_altgr);
  twlmods = set of twlmod;
 
@@ -76,6 +77,7 @@ type
    titleact: boolean;
    decorstate: integer;
    minimized: boolean;          //set by the caller
+   sysdnd: boolean;             //accepts drag and drop (wo_sysdnd)
    destructor destroy; override;
  end;
 
@@ -157,6 +159,29 @@ function wlc_clipboardset(const utf8: string): boolean;
 function wlc_clipboardcanpaste: boolean;
 function wlc_clipboardget(out utf8: string): boolean;
 
+//drag and drop
+type
+ twlstrings = array of string;
+const
+ WLDND_COPY = 1;
+ WLDND_MOVE = 2;
+ WLDND_ASK = 4;
+
+//receiving, the offer is valid from the first wle_dndmotion to
+//wlc_dndfinish or wle_dndleave
+function wlc_dndactive: boolean;
+function wlc_dndmimes: twlstrings;
+function wlc_dndaction: cuint32;      //action chosen by the compositor, 0 = none
+procedure wlc_dndaccept(const aaccept: boolean);
+procedure wlc_dndfinish;
+function wlc_dndread(const aindex: integer; out data: string): boolean;
+
+//sending, data = the data of all mimes, the button is released for the
+//application, the compositor does the drag
+function wlc_dndstart(const mimes,data: twlstrings;
+                                     const actions: cuint32): boolean;
+function wlc_dndsending: boolean;
+
 var
  wlc_lastserial: cuint32;             //serial of the last input event
 
@@ -176,6 +201,7 @@ var
  evhead: integer;
  windows: array of twlwindow;
  pointerwin,keyboardwin: twlwindow;
+ dndwin: twlwindow;             //window of the current drag and drop offer
  pointerx,pointery: integer;
  clientbuttons: integer;     //buttons pressed in the client area
  heldbutton: cuint32;        //last button pressed in the client area
@@ -843,6 +869,9 @@ begin
   if pointerwin = win then begin
    pointerwin:= nil;
   end;
+  if dndwin = win then begin
+   dndwin:= nil;
+  end;
   if keyboardwin = win then begin
    keyboardwin:= nil;
    repeatkey:= 0;
@@ -1467,6 +1496,7 @@ type
  twloffer = class
   proxy: pointer;
   mimes: array of string;
+  srcactions,action: cuint32;   //drag and drop
   procedure addmime(const amime: string);
   function textmime: string;
  end;
@@ -1479,6 +1509,13 @@ var
  offers: array of twloffer;         //all live offers
  seloffer: twloffer;                //current selection offer
  srcobj: pointer;                   //our data source, nil if not owner
+ dndoffer: twloffer;                //offer of the current drag and drop
+ dndserial: cuint32;                //serial of the enter event
+ dndx,dndy: integer;                //last position, client coordinates
+ dnddropped: boolean;
+ ddmver: cuint32;                   //bound version of wl_data_device_manager
+ dndsrc: pointer;                   //our drag source
+ dndsrcmimes,dndsrcdata: twlstrings;
  srctext: string;                   //utf8 text of our data source
 
 procedure twloffer.addmime(const amime: string);
@@ -1535,6 +1572,9 @@ begin
  if seloffer = aoffer then begin
   seloffer:= nil;
  end;
+ if dndoffer = aoffer then begin
+  dndoffer:= nil;
+ end;
  if aoffer.proxy <> nil then begin
   wl_data_offer_destroy(aoffer.proxy);
  end;
@@ -1573,22 +1613,21 @@ begin
   seloffer:= findoffer(id);
  end;
  for i:= high(offers) downto 0 do begin   //only the selection is of interest
-  if offers[i] <> seloffer then begin
+  if (offers[i] <> seloffer) and (offers[i] <> dndoffer) then begin
    freeoffer(offers[i]);
   end;
  end;
 end;
 
-procedure onsrcsend(data: pointer; src: pointer; mime_type: pchar;
-                                                  fd: cint32); cdecl;
+procedure writepipe(const fd: cint32; const s: string);
 var
  p: pchar;
  n,done,res: ptrint;
  pfd: tpollfd;
  t0: qword;
 begin
- p:= pchar(srctext);
- n:= length(srctext);
+ p:= pchar(s);
+ n:= length(s);
  done:= 0;
  t0:= gettickcount64;
  fpfcntl(fd,F_SETFL,O_NONBLOCK);
@@ -1617,13 +1656,57 @@ begin
  fpclose(fd);
 end;
 
+procedure onsrcsend(data: pointer; src: pointer; mime_type: pchar;
+                                                  fd: cint32); cdecl;
+var
+ s,m: string;
+ i: integer;
+begin
+ s:= '';
+ if (src = dndsrc) and (src <> nil) then begin
+  m:= mime_type;
+  for i:= 0 to high(dndsrcmimes) do begin
+   if dndsrcmimes[i] = m then begin
+    s:= dndsrcdata[i];
+    break;
+   end;
+  end;
+ end
+ else begin
+  s:= srctext;
+ end;
+ writepipe(fd,s);
+end;
+
 procedure onsrccancelled(data: pointer; src: pointer); cdecl;
 begin
  if src = srcobj then begin
   srcobj:= nil;
   srctext:= '';
  end;
+ if src = dndsrc then begin
+  dndsrc:= nil;
+  dndsrcmimes:= nil;
+  dndsrcdata:= nil;
+ end;
  wl_data_source_destroy(src);
+end;
+
+procedure onsrcfinished(data: pointer; src: pointer); cdecl;
+begin
+ if wlc_debug then begin
+  writeln('dnd source finished');
+  flush(system.output);
+ end;
+ onsrccancelled(data,src);        //the drag is complete, free the source
+end;
+
+procedure setsrclistener;
+begin
+ wl_data_source_noop_listener(dsl);
+ dsl.send:= @onsrcsend;
+ dsl.cancelled:= @onsrccancelled;
+ dsl.dnd_finished:= @onsrcfinished;
 end;
 
 function wlc_clipboardset(const utf8: string): boolean;
@@ -1638,9 +1721,7 @@ begin
  if src = nil then begin
   exit;
  end;
- wl_data_source_noop_listener(dsl);
- dsl.send:= @onsrcsend;
- dsl.cancelled:= @onsrccancelled;
+ setsrclistener;
  wl_data_source_add_listener(src,@dsl,nil);
  wl_data_source_offer(src,'text/plain;charset=utf-8');
  wl_data_source_offer(src,'UTF8_STRING');
@@ -1724,6 +1805,311 @@ begin
  fpclose(fds[0]);
 end;
 
+//drag and drop, receiving
+
+procedure onoffersrcactions(data: pointer; ofr: pointer;
+                                         actions: cuint32); cdecl;
+var
+ o: twloffer;
+begin
+ o:= findoffer(ofr);
+ if o <> nil then begin
+  o.srcactions:= actions;
+ end;
+end;
+
+procedure onofferaction(data: pointer; ofr: pointer;
+                                         action: cuint32); cdecl;
+var
+ o: twloffer;
+begin
+ o:= findoffer(ofr);
+ if o <> nil then begin
+  o.action:= action;
+ end;
+end;
+
+procedure dndreset;                //destroys the offer of the drag
+begin
+ if dndoffer <> nil then begin
+  freeoffer(dndoffer);
+ end;
+ dndoffer:= nil;
+ dndwin:= nil;
+ dnddropped:= false;
+end;
+
+procedure dndmotion(const x,y: cint32);
+var
+ ev: twlevent;
+begin
+ if dndwin = nil then begin
+  exit;
+ end;
+ dndx:= wl_fixed_to_int(x) - offx(dndwin);
+ dndy:= wl_fixed_to_int(y) - offy(dndwin);
+ ev:= newevent(wle_dndmotion,dndwin);
+ ev.x:= dndx;
+ ev.y:= dndy;
+ ev.mods:= curmods;
+ pushevent(ev);
+end;
+
+procedure onddenter(data: pointer; dev: pointer; serial: cuint32;
+                      surf: pointer; x,y: cint32; id: pointer); cdecl;
+var
+ win: twlwindow;
+begin
+ dndreset;
+ if id = nil then begin
+  exit;
+ end;
+ dndoffer:= findoffer(id);
+ if dndoffer = nil then begin
+  exit;
+ end;
+ dndserial:= serial;
+ win:= wlc_windowfromsurface(surf);
+ if wlc_debug then begin
+  writeln('dnd enter, mimes ',length(dndoffer.mimes),
+                  ' window accepts ',(win <> nil) and win.sysdnd);
+  flush(system.output);
+ end;
+ if (win <> nil) and win.sysdnd then begin
+  dndwin:= win;
+  dndmotion(x,y);
+ end
+ else begin                           //nobody is interested
+  wl_data_offer_accept(dndoffer.proxy,serial,nil);
+  if ddmver >= 3 then begin
+   wl_data_offer_set_actions(dndoffer.proxy,0,0);
+  end;
+  wl_display_flush(display);
+ end;
+end;
+
+procedure onddmotion(data: pointer; dev: pointer; time: cuint32;
+                                                   x,y: cint32); cdecl;
+begin
+ dndmotion(x,y);
+end;
+
+procedure onddleave(data: pointer; dev: pointer); cdecl;
+begin
+ if dnddropped then begin             //the offer lives until wlc_dndfinish
+  exit;
+ end;
+ if dndwin <> nil then begin
+  pushevent(newevent(wle_dndleave,dndwin));
+ end;
+ dndreset;
+end;
+
+procedure onddrop(data: pointer; dev: pointer); cdecl;
+var
+ ev: twlevent;
+begin
+ if (dndwin = nil) or (dndoffer = nil) then begin
+  exit;
+ end;
+ dnddropped:= true;
+ ev:= newevent(wle_dnddrop,dndwin);
+ ev.x:= dndx;
+ ev.y:= dndy;
+ ev.mods:= curmods;
+ pushevent(ev);
+end;
+
+function wlc_dndactive: boolean;
+begin
+ result:= (dndoffer <> nil) and (dndwin <> nil);
+end;
+
+function wlc_dndmimes: twlstrings;
+begin
+ result:= nil;
+ if dndoffer <> nil then begin
+  result:= dndoffer.mimes;
+ end;
+end;
+
+function wlc_dndaction: cuint32;
+begin
+ result:= 0;
+ if dndoffer <> nil then begin
+  result:= dndoffer.action;
+ end;
+end;
+
+procedure wlc_dndaccept(const aaccept: boolean);
+begin
+ if (dndoffer = nil) or (dndwin = nil) then begin
+  exit;
+ end;
+ if aaccept and (length(dndoffer.mimes) > 0) then begin
+  wl_data_offer_accept(dndoffer.proxy,dndserial,pchar(dndoffer.mimes[0]));
+  if ddmver >= 3 then begin
+   wl_data_offer_set_actions(dndoffer.proxy,WLDND_COPY or WLDND_MOVE,
+                                                               WLDND_COPY);
+  end;
+ end
+ else begin
+  wl_data_offer_accept(dndoffer.proxy,dndserial,nil);
+  if ddmver >= 3 then begin
+   wl_data_offer_set_actions(dndoffer.proxy,0,0);
+  end;
+ end;
+ wl_display_flush(display);
+end;
+
+procedure wlc_dndfinish;
+begin
+ if dndoffer = nil then begin
+  exit;
+ end;
+ if dnddropped and (ddmver >= 3) and (dndoffer.action <> 0) then begin
+  wl_data_offer_finish(dndoffer.proxy);
+ end;
+ dndreset;
+ wl_display_flush(display);
+end;
+
+//reads the data of an offer, the connection is dispatched while waiting
+//because the data source can be in this process
+function readoffer(const proxy: pointer; const mime: string;
+                                              out data: string): boolean;
+var
+ fds: tfildes;
+ pfds: array[0..1] of tpollfd;
+ buf: array[0..4095] of char;
+ n: ptrint;
+ l: integer;
+ t0: qword;
+ dispatched: boolean;
+begin
+ data:= '';
+ result:= false;
+ if (proxy = nil) or (fppipe(fds) <> 0) then begin
+  exit;
+ end;
+ wl_data_offer_receive(proxy,pchar(mime),fds[1]);
+ wl_display_flush(display);
+ fpclose(fds[1]);
+ t0:= gettickcount64;
+ while gettickcount64 - t0 < 5000 do begin
+  while wl_display_prepare_read(display) <> 0 do begin
+   wl_display_dispatch_pending(display);
+  end;
+  wl_display_flush(display);
+  pfds[0].fd:= fds[0];
+  pfds[0].events:= POLLIN;
+  pfds[0].revents:= 0;
+  pfds[1].fd:= wl_display_get_fd(display);
+  pfds[1].events:= POLLIN;
+  pfds[1].revents:= 0;
+  n:= fppoll(@pfds[0],2,200);
+  dispatched:= (n > 0) and (pfds[1].revents and POLLIN <> 0);
+  if dispatched then begin
+   wl_display_read_events(display);
+  end
+  else begin
+   wl_display_cancel_read(display);
+  end;
+  wl_display_dispatch_pending(display);
+  if (n > 0) and (pfds[0].revents <> 0) then begin
+   n:= fpread(fds[0],buf,sizeof(buf));
+   if n > 0 then begin
+    l:= length(data);
+    setlength(data,l + n);
+    move(buf,data[l + 1],n);
+   end
+   else begin
+    if n = 0 then begin             //end of data
+     result:= true;
+     break;
+    end
+    else begin
+     if fpgeterrno <> ESysEINTR then begin
+      break;
+     end;
+    end;
+   end;
+  end
+  else begin
+   if (n < 0) and (fpgeterrno <> ESysEINTR) then begin
+    break;
+   end;
+  end;
+ end;
+ fpclose(fds[0]);
+end;
+
+function wlc_dndread(const aindex: integer; out data: string): boolean;
+begin
+ data:= '';
+ result:= false;
+ if (dndoffer <> nil) and (aindex >= 0) and
+                             (aindex <= high(dndoffer.mimes)) then begin
+  result:= readoffer(dndoffer.proxy,dndoffer.mimes[aindex],data);
+ end;
+end;
+
+//drag and drop, sending
+
+function wlc_dndsending: boolean;
+begin
+ result:= dndsrc <> nil;
+end;
+
+function wlc_dndstart(const mimes,data: twlstrings;
+                                     const actions: cuint32): boolean;
+var
+ src: pointer;
+ win: twlwindow;
+ ev: twlevent;
+ i: integer;
+begin
+ result:= false;
+ win:= pointerwin;
+ if (ddm = nil) or (ddev = nil) or (seat = nil) or (dndsrc <> nil) or
+        (win = nil) or (win.surface = nil) or (clientbuttons <= 0) or
+        (length(mimes) = 0) or (length(mimes) <> length(data)) then begin
+  exit;
+ end;
+ src:= wl_data_device_manager_create_data_source(ddm);
+ if src = nil then begin
+  exit;
+ end;
+ setsrclistener;
+ wl_data_source_add_listener(src,@dsl,nil);
+ for i:= 0 to high(mimes) do begin
+  wl_data_source_offer(src,pchar(mimes[i]));
+ end;
+ if ddmver >= 3 then begin
+  wl_data_source_set_actions(src,actions);
+ end;
+ dndsrc:= src;
+ dndsrcmimes:= mimes;
+ dndsrcdata:= data;
+ if wlc_debug then begin
+  writeln('dnd start, formats ',length(mimes),' actions ',actions,
+                                           ' serial ',grabserial);
+  flush(system.output);
+ end;
+ wl_data_device_start_drag(ddev,src,win.surface,nil,grabserial);
+ wl_display_flush(display);
+ ev:= newevent(wle_button,win);      //the compositor eats the real release
+ ev.time:= cuint32(GetTickCount64);
+ ev.x:= pointerx;
+ ev.y:= pointery;
+ ev.button:= heldbutton;
+ ev.pressed:= false;
+ ev.mods:= curmods;
+ pushevent(ev);
+ clientbuttons:= 0;
+ result:= true;
+end;
+
 procedure onseatcapabilities(data: pointer; st: pointer;
                                           caps: cuint32); cdecl;
 begin
@@ -1797,6 +2183,7 @@ begin
   if version > 3 then begin
    version:= 3;
   end;
+  ddmver:= version;
   ddm:= wl_registry_bind(reg,name,@wl_data_device_manager_interface,version);
  end;
  if s = 'wl_compositor' then begin
@@ -1887,8 +2274,14 @@ begin
   wl_data_device_noop_listener(ddl);
   ddl.data_offer:= @onddataoffer;
   ddl.selection:= @onddselection;
+  ddl.enter:= @onddenter;
+  ddl.leave:= @onddleave;
+  ddl.motion:= @onddmotion;
+  ddl.drop:= @onddrop;
   wl_data_offer_noop_listener(dol);
   dol.offer:= @onofferoffer;
+  dol.source_actions:= @onoffersrcactions;
+  dol.action:= @onofferaction;
   ddev:= wl_data_device_manager_get_data_device(ddm,seat);
   wl_data_device_add_listener(ddev,@ddl,nil);
  end;
@@ -1933,6 +2326,12 @@ begin
  ddev:= nil;
  seloffer:= nil;
  srcobj:= nil;
+ dndoffer:= nil;
+ dndwin:= nil;
+ dndsrc:= nil;
+ dndsrcmimes:= nil;
+ dndsrcdata:= nil;
+ dnddropped:= false;
  setlength(offers,0);
  compositor:= nil;
  shm:= nil;

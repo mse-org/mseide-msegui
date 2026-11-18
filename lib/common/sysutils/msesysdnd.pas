@@ -127,10 +127,9 @@ begin
  end
  else begin
   result:= '';
-{$ifndef usesdl}
+{$if not defined(usesdl) or defined(usewayland)}
   gui_sysdndreaddata(result,formatindex);
 {$endif}
-//  guierror(gui_sysdndreaddata(result,typeindex),'Can not read sysdnd data.');
  end;
 end;
 
@@ -141,10 +140,9 @@ begin
  end
  else begin
   result:= '';
-{$ifndef usesdl}
- gui_sysdndreadtext(result,formatindex);
+{$if not defined(usesdl) or defined(usewayland)}
+  gui_sysdndreadtext(result,formatindex);
 {$endif}
-//  guierror(gui_sysdndreadtext(result,typeindex),'Can not read sysdnd text.');
  end;
 end;
 

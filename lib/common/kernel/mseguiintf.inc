@@ -223,7 +223,7 @@ function gui_pastefromclipboard(out value: msestring): guierrorty;
 function gui_canpastefromclipboard(): boolean;
  {$endif}
 
-{$ifndef usesdl}
+{$if not defined(usesdl) or defined(usewayland)}
 function gui_sysdnd(const action: sysdndactionty;
                      const aintf: isysdnd; const arect: rectty;
                                out aresult: boolean): guierrorty;

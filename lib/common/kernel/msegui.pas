@@ -18469,11 +18469,6 @@ end;
 procedure twindow.processsysdnd(const event: twindowevent);
 var
  wi1: twidget;
-
- {$ifndef usesdl}
-obj1: tsysmimedragobject;
-{$endif}
-
  info: draginfoty;
  bo1: boolean;
 begin
@@ -18515,25 +18510,21 @@ begin
      try
       wi1.dragevent(info);
      finally
+{$if not defined(usesdl) or defined(usewayland)}
       if fdndkind = dek_drop then begin
-{$ifndef usesdl}
-    gui_sysdnd(sdnda_finished,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
-{$endif}
+       gui_sysdnd(sdnda_finished,isysdnd(tsysmimedragobject(fsysdragobject)),
+                                                                   nullrect,bo1);
       end
       else begin
        if info.accept then begin
-{$ifndef usesdl}
-   gui_sysdnd(sdnda_accept,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
-{$endif}
+        gui_sysdnd(sdnda_accept,isysdnd(tsysmimedragobject(fsysdragobject)),
+                                                                 nullrect,bo1);
        end
        else begin
-{$ifndef usesdl}
-       gui_sysdnd(sdnda_reject,isysdnd(tsysmimedragobject(fsysdragobject)),nullrect,bo1);
-{$endif}
+        gui_sysdnd(sdnda_reject,isysdnd(tsysmimedragobject(fsysdragobject)),
+                                                                   nullrect,bo1);
        end;
       end;
-{$ifndef usesdl}
-     obj1.free;
 {$endif}
      end;
     end;

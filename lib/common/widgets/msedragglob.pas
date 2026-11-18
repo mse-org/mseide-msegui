@@ -120,7 +120,7 @@ function tdragobject.checksysdnd(const aaction: sysdndactionty;
 begin
  result:= false;
  if dos_sysdnd in fstate then begin
-{$ifndef usesdl}
+{$if not defined(usesdl) or defined(usewayland)}
   gui_sysdnd(aaction,fsysdndintf,arect,result);
 {$endif}
  end;
