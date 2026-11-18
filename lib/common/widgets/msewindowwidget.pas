@@ -60,6 +60,8 @@ type
    procedure setoptionsclient(const avalue: clientwindowoptionsty);
   protected
    procedure resetrenderstep;
+   procedure updaterenderstep;
+   procedure restarttimer;
    procedure dotimer(const sender: tobject);
    procedure checktimer;
    procedure checkwindowrect;
@@ -301,6 +303,24 @@ begin
  ftimer.enabled:= false;
 end;
 
+procedure tcustomwindowwidget.updaterenderstep;
+var
+ lwo1: longword;
+begin
+ lwo1:= timestamp;
+ if frendered then begin
+  frenderstep:= (lwo1-frendertimestampus)/1000000;
+ end;
+ frendertimestampus:= lwo1;
+ frendered:= true;
+ inc(frendercount);
+end;
+
+procedure tcustomwindowwidget.restarttimer;
+begin
+ ftimer.interval:= ftimer.interval;
+end;
+
 procedure tcustomwindowwidget.visiblechanged;
 begin
  resetrenderstep;
@@ -373,21 +393,15 @@ begin
  end;
 end;
 
+//
 procedure tcustomwindowwidget.doonpaint(const acanvas: tcanvas);
 var
- lwo1: longword;
  rect1: rectty;
 begin
  if not (csdesigning in componentstate) and canclientpaint then begin
   checkclientwinid;
   checkwindowrect;
-  lwo1:= timestamp;
-  if frendered then begin
-   frenderstep:= (lwo1-frendertimestampus)/1000000;
-  end;
-  frendertimestampus:= lwo1;
-  frendered:= true;
-  inc(frendercount);
+  updaterenderstep;
   if acanvas <> nil then begin
    rect1:= acanvas.clipbox;
    rect1.y:= rect1.y+rect1.cy;
@@ -399,7 +413,7 @@ begin
   end;
  end;
  if acanvas <> nil then begin
-  ftimer.interval:= ftimer.interval;
+  restarttimer;
   inherited;
  end;
 end;
