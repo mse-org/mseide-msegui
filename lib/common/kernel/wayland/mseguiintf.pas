@@ -2175,11 +2175,20 @@ begin
 end;
 
 function gui_deinit: guierrorty;
+var
+ i: integer;
 begin
  timerdue:= 0;
  fpsignal(SIGTERM,sigtermbefore);
  fpsignal(SIGCHLD,sigchldbefore);
  wlc_disconnect;
+ softfreeall;                              //pixmaps not freed by the gui
+ for i:= evhead to high(evlist) do begin   //events never processed
+  evlist[i].free;                          //(e.g. ek_hide posted at shutdown)
+  evlist[i]:= nil;
+ end;
+ setlength(evlist,0);
+ evhead:= 0;
  setlength(wins,0);
  fpclose(wakepipe[0]);
  fpclose(wakepipe[1]);
@@ -2200,12 +2209,37 @@ begin
  result:= gue_ok;
 end;
 
+procedure freependingevents;
+var
+ i: integer;
+begin
+ for i:= evhead to high(evlist) do begin   //events never processed
+  evlist[i].free;                          //(e.g. ek_hide posted at shutdown)
+  evlist[i]:= nil;
+ end;
+ setlength(evlist,0);
+ evhead:= 0;
+ if lockvalid then begin
+  entercriticalsection(usrlock);
+  try
+   for i:= 0 to high(usrq) do begin        //posted from other threads or
+    usrq[i].free;                          //by settimer, never taken
+    pointer(usrq[i]):= nil;
+   end;
+   setlength(usrq,0);
+  finally
+   leavecriticalsection(usrlock);
+  end;
+ end;
+end;
+
 initialization
  wakepipe[0]:= -1;
  wakepipe[1]:= -1;
  initcriticalsection(usrlock);
  lockvalid:= true;
 finalization
+ freependingevents;
  lockvalid:= false;
  donecriticalsection(usrlock);
 end.

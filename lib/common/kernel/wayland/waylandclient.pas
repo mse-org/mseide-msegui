@@ -2296,7 +2296,10 @@ begin
  result:= display <> nil;
 end;
 
+
 procedure wlc_disconnect;
+var
+ i: integer;
 begin
  while length(windows) > 0 do begin
   wlc_destroywindow(windows[high(windows)]);
@@ -2332,6 +2335,9 @@ begin
  dndsrcmimes:= nil;
  dndsrcdata:= nil;
  dnddropped:= false;
+ for i:= 0 to high(offers) do begin   //proxies are gone with the display
+  offers[i].free;
+ end;
  setlength(offers,0);
  compositor:= nil;
  shm:= nil;
@@ -2343,7 +2349,6 @@ begin
  setlength(evq,0);
  evhead:= 0;
 end;
-
 //event loop support
 
 function wlc_pollprepare: cint;
@@ -2373,4 +2378,8 @@ begin
  end;
 end;
 
+finalization
+ while length(offers) > 0 do begin       //before the managed globals go
+  freeoffer(offers[high(offers)]);
+ end;
 end.

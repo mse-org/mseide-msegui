@@ -84,6 +84,8 @@ function softvalid(const surf: psoftsurfacety): boolean;
                    //true if surf is a live surface, all functions above
                    //ignore invalid (nil, freed) surfaces
 
+procedure softfreeall;
+                   //frees all surfaces still alive, call at shutdown
 implementation
 
 const
@@ -97,6 +99,9 @@ function findlive(const surf: psoftsurfacety; out index: integer): boolean;
 var
  lo,hi,mid: integer;
 begin
+ if livecount > length(live) then begin
+  livecount:= length(live);            //registry released (unit finalized)
+ end;
  lo:= 0;
  hi:= livecount - 1;
  while lo <= hi do begin
@@ -116,6 +121,7 @@ begin
  index:= lo;                           //insert position
  result:= false;
 end;
+
 
 procedure addlive(const surf: psoftsurfacety);
 var
@@ -146,6 +152,19 @@ var
  i: integer;
 begin
  result:= (surf <> nil) and findlive(surf,i);
+end;
+
+procedure softfreeall;
+var
+ surf: psoftsurfacety;
+begin
+ while livecount > 0 do begin
+  surf:= live[livecount - 1];
+  freesoftsurface(surf);               //removes it from the registry
+  if (livecount > 0) and (live[livecount - 1] = surf) then begin
+   dec(livecount);                     //safety, never loop forever
+  end;
+ end;
 end;
 
 function softrect(const x,y,cx,cy: integer): softrectty;
@@ -625,4 +644,6 @@ begin
  end;
 end;
 
+finalization
+ softfreeall;                            //pixmaps not freed by the gui
 end.
