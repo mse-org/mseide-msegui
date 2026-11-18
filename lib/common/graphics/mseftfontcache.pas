@@ -358,12 +358,12 @@ procedure tftface.renderglyph(var ainfo: pglyphinfoty);
 var
  po1: pchar;
  so,de: pbyteaty;
- int1,int2,int3: integer;
+ int1,int2,int3,mode: integer;
  bm1: pbitmapdataty;
 begin
  if ft_render_glyph(fface^.glyph,ft_render_mode_normal) = 0 then begin
   with fface^.glyph^,bitmap do begin
-//todo: check bitmap format
+   mode:= ord(pixel_mode);       //1 = mono, 2 = gray, 7 = BGRA color
    po1:= fbuffer;
    int3:= getbuffer(sizeof(bitmapdataty) + width * rows,false);
    ainfo:= pointer(pchar(ainfo) +
@@ -382,8 +382,27 @@ begin
     so:= pointer(pchar(buffer)+(rows-1)*pitch);
    end;
    for int1:= rows - 1 downto 0 do begin
-    for int2:= width-1 downto 0 do begin
-     de[int2]:= so[int2];
+    case mode of
+     1: begin                    //1 bit per pixel, most significant bit first
+      for int2:= 0 to width-1 do begin
+       if ((so^[int2 shr 3] shr (7 - (int2 and 7))) and 1) <> 0 then begin
+        de^[int2]:= 255;
+       end
+       else begin
+        de^[int2]:= 0;
+       end;
+      end;
+     end;
+     7: begin                    //32 bit BGRA (color fonts), use the alpha
+      for int2:= 0 to width-1 do begin
+       de^[int2]:= so^[int2*4+3];
+      end;
+     end;
+     else begin                  //8 bit gray
+      for int2:= width-1 downto 0 do begin
+       de^[int2]:= so^[int2];
+      end;
+     end;
     end;
     de:= pointer(pchar(de)+width);
     so:= pointer(pchar(so)-pitch);

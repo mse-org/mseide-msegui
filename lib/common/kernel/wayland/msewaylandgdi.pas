@@ -723,7 +723,7 @@ var
  sp,mp,dp: plongword;
  x,y: integer;
  mono: boolean;
- fgpix,bgpix,p: longword;
+ fgpix,bgpix,p,alpha: longword;
  rgbcolor1,rgbcolor2: rgbtriplety;
 begin
  with drawinfo,copyarea do begin
@@ -787,11 +787,12 @@ begin
      sp:= plongword(pbyte(tmp^.pixels) + y*tmp^.pitch);
      mp:= plongword(pbyte(msurface^.pixels) + y*msurface^.pitch);
      for x:= 0 to tmp^.width-1 do begin
-      if (mp^ and $00FFFFFF) <> 0 then begin
+      alpha:= mp^ and $FF;               //gray mask = alpha, mono mask = 0/255
+      if alpha = 255 then begin
        sp^:= sp^ or $FF000000;
       end
       else begin
-       sp^:= sp^ and $00FFFFFF;
+       sp^:= (sp^ and $00FFFFFF) or (alpha shl 24);
       end;
       inc(sp);
       inc(mp);

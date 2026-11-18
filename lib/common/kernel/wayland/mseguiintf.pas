@@ -77,6 +77,7 @@ var
  evhead: integer;
  usrq: array of tmseevent;        //posted events, any thread
  usrlock: trtlcriticalsection;
+ lockvalid: boolean;              //false after the unit finalization
  wakepipe: array[0..1] of cint;
  timerdue: qword;                 //ms, 0 = no timer
  escapepressed: boolean;
@@ -223,6 +224,9 @@ procedure wakeup;
 var
  b: byte;
 begin
+ if wakepipe[1] < 0 then begin
+  exit;                           //not initialized or already closed
+ end;
  b:= 1;
  fpwrite(wakepipe[1],b,1);
 end;
@@ -250,6 +254,10 @@ end;
 
 function usrcount: integer;
 begin
+ if not lockvalid then begin
+  result:= 0;                     //application destroyed after our finalization
+  exit;
+ end;
  entercriticalsection(usrlock);
  result:= length(usrq);
  leavecriticalsection(usrlock);
@@ -258,6 +266,9 @@ end;
 function getusrevent: tmseevent;
 begin
  result:= nil;
+ if not lockvalid then begin
+  exit;
+ end;
  entercriticalsection(usrlock);
  try
   if length(usrq) > 0 then begin
@@ -278,6 +289,11 @@ end;
 
 function gui_postevent(event: tmseevent): guierrorty;
 begin
+ if not lockvalid then begin
+  event.free;
+  result:= gue_ok;
+  exit;
+ end;
  entercriticalsection(usrlock);
  try
   setlength(usrq,length(usrq)+1);
@@ -792,6 +808,10 @@ end;
 
 function gui_hasevent: boolean;
 begin
+ if not wlc_connected then begin   //called while the application is destroyed
+  result:= evhead < length(evlist);
+  exit;
+ end;
  if childevent then begin
   childevent:= false;
   handlesigchld;                  //child process state changed
@@ -814,6 +834,10 @@ var
  now: qword;
 begin
  result:= nil;
+ if not wlc_connected then begin
+  result:= getlistevent;
+  exit;
+ end;
  while true do begin
   result:= getlistevent;
   if result <> nil then begin
@@ -1376,7 +1400,7 @@ var
  surf: psoftsurfacety;
 begin
  with info do begin
-  if handle = 0 then begin
+  if (handle = 0) or not softvalid(psoftsurfacety(ptruint(handle))) then begin
    result:= gde_pixmap;
   end
   else begin
@@ -1411,8 +1435,8 @@ var
  y: integer;
 begin
  sp:= psoftsurfacety(ptruint(pixmap));
- if (pixmap = 0) or (sp^.pixels = nil) or (sp^.width <= 0) or
-                                          (sp^.height <= 0) then begin
+ if (pixmap = 0) or not softvalid(sp) or (sp^.pixels = nil) or
+                       (sp^.width <= 0) or (sp^.height <= 0) then begin
   result:= gde_pixmap;
   exit;
  end;
@@ -1963,6 +1987,8 @@ begin
  setlength(wins,0);
  fpclose(wakepipe[0]);
  fpclose(wakepipe[1]);
+ wakepipe[0]:= -1;
+ wakepipe[1]:= -1;
  mainthread:= 0;
  result:= gue_ok;
 end;
@@ -1979,7 +2005,11 @@ begin
 end;
 
 initialization
+ wakepipe[0]:= -1;
+ wakepipe[1]:= -1;
  initcriticalsection(usrlock);
+ lockvalid:= true;
 finalization
+ lockvalid:= false;
  donecriticalsection(usrlock);
 end.

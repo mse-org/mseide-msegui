@@ -80,7 +80,73 @@ procedure softreadpixels(const surf: psoftsurfacety; const rect: softrectty;
 function softgetpixel(const surf: psoftsurfacety; const x,y: integer): longword;
                    //0 if outside of the surface
 
+function softvalid(const surf: psoftsurfacety): boolean;
+                   //true if surf is a live surface, all functions above
+                   //ignore invalid (nil, freed) surfaces
+
 implementation
+
+const
+ maxsurfacebytes = 1024*1024*1024;      //1 GB
+
+var
+ live: array of psoftsurfacety;         //all live surfaces, sorted by address
+ livecount: integer;
+
+function findlive(const surf: psoftsurfacety; out index: integer): boolean;
+var
+ lo,hi,mid: integer;
+begin
+ lo:= 0;
+ hi:= livecount - 1;
+ while lo <= hi do begin
+  mid:= (lo + hi) div 2;
+  if ptruint(live[mid]) = ptruint(surf) then begin
+   index:= mid;
+   result:= true;
+   exit;
+  end;
+  if ptruint(live[mid]) < ptruint(surf) then begin
+   lo:= mid + 1;
+  end
+  else begin
+   hi:= mid - 1;
+  end;
+ end;
+ index:= lo;                           //insert position
+ result:= false;
+end;
+
+procedure addlive(const surf: psoftsurfacety);
+var
+ i: integer;
+begin
+ if not findlive(surf,i) then begin
+  if livecount >= length(live) then begin
+   setlength(live,livecount * 2 + 64);
+  end;
+  move(live[i],live[i + 1],(livecount - i) * sizeof(live[0]));
+  live[i]:= surf;
+  inc(livecount);
+ end;
+end;
+
+procedure removelive(const surf: psoftsurfacety);
+var
+ i: integer;
+begin
+ if findlive(surf,i) then begin
+  move(live[i + 1],live[i],(livecount - i - 1) * sizeof(live[0]));
+  dec(livecount);
+ end;
+end;
+
+function softvalid(const surf: psoftsurfacety): boolean;
+var
+ i: integer;
+begin
+ result:= (surf <> nil) and findlive(surf,i);
+end;
 
 function softrect(const x,y,cx,cy: integer): softrectty;
 begin
@@ -160,10 +226,11 @@ end;
 function createsoftsurface(const w,h: integer): psoftsurfacety;
 begin
  result:= nil;
- if (w <= 0) or (h <= 0) then begin
-  exit;
+ if (w <= 0) or (h <= 0) or (int64(w) * h * 4 > maxsurfacebytes) then begin
+  exit;                      //empty or absurdly large, 32 bit overflow
  end;
  new(result);
+ addlive(result);
  result^.width:= w;
  result^.height:= h;
  result^.pitch:= w * 4;
@@ -181,6 +248,7 @@ begin
   exit;
  end;
  new(result);
+ addlive(result);
  result^.pixels:= pixels;
  result^.width:= w;
  result^.height:= h;
@@ -191,7 +259,8 @@ end;
 
 procedure freesoftsurface(var surf: psoftsurfacety);
 begin
- if surf <> nil then begin
+ if softvalid(surf) then begin
+  removelive(surf);
   if surf^.owned and (surf^.pixels <> nil) then begin
    freemem(surf^.pixels);
   end;
@@ -202,11 +271,17 @@ end;
 
 procedure softsetclip(const surf: psoftsurfacety; const rect: softrectty);
 begin
+ if not softvalid(surf) then begin
+  exit;
+ end;
  surf^.clip:= intersectrect(rect,softrect(0,0,surf^.width,surf^.height));
 end;
 
 procedure softresetclip(const surf: psoftsurfacety);
 begin
+ if not softvalid(surf) then begin
+  exit;
+ end;
  surf^.clip:= softrect(0,0,surf^.width,surf^.height);
 end;
 
@@ -215,8 +290,9 @@ var
  newpix: pointer;
  newpitch,y,cw,ch: integer;
 begin
- if (surf = nil) or not surf^.owned or (w <= 0) or (h <= 0) or
-            ((w = surf^.width) and (h = surf^.height)) then begin
+ if not softvalid(surf) or not surf^.owned or (w <= 0) or (h <= 0) or
+            ((w = surf^.width) and (h = surf^.height)) or
+                          (int64(w) * h * 4 > maxsurfacebytes) then begin
   exit;
  end;
  newpitch:= w * 4;
@@ -246,6 +322,9 @@ var
  y: integer;
  value: longword;
 begin
+ if not softvalid(surf) then begin
+  exit;
+ end;
  value:= $FF000000 or (color and $00FFFFFF);
  for y:= 0 to surf^.height - 1 do begin
   filldword(pixelpo(surf,0,y)^,surf^.width,value);
@@ -260,7 +339,7 @@ var
  po: plongword;
  value: longword;
 begin
- if alpha = 0 then begin
+ if (alpha = 0) or not softvalid(surf) then begin
   exit;
  end;
  r:= intersectrect(rect,surf^.clip);
@@ -289,7 +368,7 @@ procedure softdrawpoint(const surf: psoftsurfacety; const x,y: integer;
 var
  po: plongword;
 begin
- if (alpha = 0) or (x < surf^.clip.x) or (y < surf^.clip.y) or
+ if (alpha = 0) or not softvalid(surf) or (x < surf^.clip.x) or (y < surf^.clip.y) or
           (x >= surf^.clip.x + surf^.clip.cx) or
           (y >= surf^.clip.y + surf^.clip.cy) then begin
   exit;
@@ -367,6 +446,9 @@ var
  sp,dp: plongword;
  s: longword;
 begin
+ if not softvalid(dest) or not softvalid(src) then begin
+  exit;
+ end;
  //source rectangle inside of the source surface
  sr:= intersectrect(srcrect,softrect(0,0,src^.width,src^.height));
  if (sr.cx <= 0) or (sr.cy <= 0) then begin
@@ -435,7 +517,7 @@ var
  s: longword;
 begin
  if (drect.cx <= 0) or (drect.cy <= 0) or (srect.cx <= 0) or
-                                              (srect.cy <= 0) then begin
+          (srect.cy <= 0) or not softvalid(dest) or not softvalid(src) then begin
   exit;
  end;
  vis:= intersectrect(drect,dest^.clip);
@@ -482,7 +564,7 @@ var
  dp: plongword;
  a: cardinal;
 begin
- if (mask = nil) or (w <= 0) or (h <= 0) then begin
+ if (mask = nil) or (w <= 0) or (h <= 0) or not softvalid(dest) then begin
   exit;
  end;
  r:= intersectrect(softrect(dx,dy,w,h),dest^.clip);
@@ -519,7 +601,7 @@ var
  y: integer;
  row: pbyte;
 begin
- if (rect.cx <= 0) or (rect.cy <= 0) then begin
+ if (rect.cx <= 0) or (rect.cy <= 0) or not softvalid(surf) then begin
   exit;
  end;
  r:= intersectrect(rect,softrect(0,0,surf^.width,surf^.height));
@@ -534,7 +616,8 @@ end;
 
 function softgetpixel(const surf: psoftsurfacety; const x,y: integer): longword;
 begin
- if (x < 0) or (y < 0) or (x >= surf^.width) or (y >= surf^.height) then begin
+ if not softvalid(surf) or (x < 0) or (y < 0) or (x >= surf^.width) or
+                                                (y >= surf^.height) then begin
   result:= 0;
  end
  else begin
