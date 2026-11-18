@@ -549,6 +549,7 @@ type
 const
  regops: array[regopty] of regopprocty = (@addop,@subop,@intersectop);
 
+//
 procedure stripeop(var reg: regioninfoty;
                              const astripestart: rectextentty;
                              const stripe: pstripety; const op: regopty);
@@ -762,8 +763,13 @@ begin
    else begin
     if pendingmovecount <> 0 then begin
      move(moves^,moved^,pendingmovecount);
+     pendingmovecount:= 0;
     end;
    end;
+  end;
+  if pendingmovecount <> 0 then begin  //last group not yet moved
+   move(moves^,moved^,pendingmovecount);
+   pendingmovecount:= 0;
   end;
   lastdeststripe:= psb1;
  {$ifdef mse_debugregion}
@@ -1206,17 +1212,182 @@ begin
  end;
 end;
 
+//
+{$ifdef mse_regioncheck}
+var
+ regdebug: boolean = true;
+
+function checkregion(const reg: regioninfoty; out msg: string): boolean;
+var
+ po1: pstripety;
+ int1,int2,rc: integer;
+ sumrects: integer;
+ sumheight: int64;
+ bytes: int64;
+ po2: prectextentty;
+begin
+ result:= true;
+ msg:= '';
+ with reg do begin
+  if buffersize < datasize then begin
+   msg:= 'buffersize < datasize';
+   result:= false;
+   exit;
+  end;
+  if (stripecount < 0) or (rectcount < 0) then begin
+   msg:= 'negative counts';
+   result:= false;
+   exit;
+  end;
+  if stripecount = 0 then begin
+   exit;
+  end;
+  po1:= datapo;
+  bytes:= 0;
+  sumrects:= 0;
+  sumheight:= 0;
+  for int1:= 0 to stripecount-1 do begin
+   if bytes + sizeof(stripeheaderty) > datasize then begin
+    msg:= 'stripe '+inttostr(int1)+' header beyond datasize';
+    result:= false;
+    exit;
+   end;
+   rc:= po1^.header.rectcount;
+   if (rc < 0) or (rc > 1000000) then begin
+    msg:= 'stripe '+inttostr(int1)+' bad rectcount '+inttostr(rc);
+    result:= false;
+    exit;
+   end;
+   if po1^.header.height <= 0 then begin
+    msg:= 'stripe '+inttostr(int1)+' bad height '+
+                                     inttostr(po1^.header.height);
+    result:= false;
+    exit;
+   end;
+   sumheight:= sumheight + po1^.header.height;
+   sumrects:= sumrects + rc;
+   po2:= prectextentty(pchar(po1)+sizeof(stripeheaderty));
+   for int2:= 0 to rc*2-1 do begin
+    if po2^ < 0 then begin
+     msg:= 'stripe '+inttostr(int1)+' negative extent';
+     result:= false;
+     exit;
+    end;
+    inc(po2);
+   end;
+   bytes:= bytes + sizeof(stripeheaderty) + rc*sizeof(rectdataty);
+   po1:= nextstripe(po1);
+  end;
+  if bytes <> datasize then begin
+   msg:= 'walked bytes '+inttostr(bytes)+' <> datasize '+inttostr(datasize);
+   result:= false;
+  end
+  else begin
+   if sumrects <> rectcount then begin
+    msg:= 'walked rects '+inttostr(sumrects)+' <> rectcount '+
+                                                      inttostr(rectcount);
+    result:= false;
+   end
+   else begin
+    if sumheight <> stripeend - stripestart then begin
+     msg:= 'sum height '+inttostr(sumheight)+' <> stripeend-stripestart '+
+                         inttostr(stripeend-stripestart);
+     result:= false;
+    end;
+   end;
+  end;
+ end;
+end;
+
+function regiondumpstr(const reg: regioninfoty): string;
+var
+ po1: pstripety;
+ po2: prectextentty;
+ int1,int2: integer;
+ pos1: integer;
+begin
+ result:= 'start='+inttostr(reg.stripestart)+' end='+inttostr(reg.stripeend)+
+          ' stripes='+inttostr(reg.stripecount)+
+          ' rects='+inttostr(reg.rectcount)+
+          ' datasize='+inttostr(reg.datasize)+
+          ' buffersize='+inttostr(reg.buffersize)+' |';
+ if (reg.stripecount <= 0) or (reg.stripecount > 100000) then begin
+  exit;
+ end;
+ po1:= reg.datapo;
+ for int1:= 0 to reg.stripecount-1 do begin
+  result:= result+' ['+inttostr(int1)+' h='+inttostr(po1^.header.height)+
+                      ' n='+inttostr(po1^.header.rectcount);
+  if (po1^.header.rectcount < 0) or (po1^.header.rectcount > 1000) then begin
+   result:= result+' BAD]';
+   exit;
+  end;
+  po2:= prectextentty(pchar(po1)+sizeof(stripeheaderty));
+  pos1:= 0;
+  for int2:= 0 to po1^.header.rectcount-1 do begin
+   pos1:= pos1 + po2^;     //gap
+   inc(po2);
+   result:= result+' x'+inttostr(pos1)+'..'+inttostr(pos1+po2^);
+   pos1:= pos1 + po2^;     //width
+   inc(po2);
+  end;
+  result:= result+']';
+  po1:= nextstripe(po1);
+ end;
+end;
+
+procedure regioncheck(const reg: regioninfoty; const where: string;
+                                                     const arect: rectty);
+var
+ msg: string;
+begin
+ if regdebug then begin
+  if not checkregion(reg,msg) then begin
+   writeln(stderr,'REGION CORRUPT ',where,': ',msg,
+     ' rect=(',arect.x,',',arect.y,',',arect.cx,',',arect.cy,')');
+   writeln(stderr,' STATE: ',regiondumpstr(reg));
+   flush(stderr);
+   halt(99);
+  end;
+ end;
+end;
+{$endif}
+
 procedure gdi_regaddrect(var drawinfo: drawinfoty); //gdifunc
 var
  stri1: regionrectstripety;
  ext1: rectextentty;
+{$ifdef mse_regioncheck}
+ before: string;
+ msg: string;
+{$endif}
 begin
  with drawinfo.regionoperation do begin
+ {$ifdef mse_regioncheck}
+  regioncheck(pregioninfoty(dest)^,'before regaddrect',rect);
+  before:= regiondumpstr(pregioninfoty(dest)^);
+ {$endif}
   if recttostripe(rect,ext1,stri1) then begin
    stripeop(pregioninfoty(dest)^,ext1,@stri1,reop_add);
   end;
+ {$ifdef mse_regioncheck}
+  if regdebug then begin
+   if not checkregion(pregioninfoty(dest)^,msg) then begin
+    writeln(stderr,'REGION CORRUPT after regaddrect: ',msg);
+    writeln(stderr,' rect=(',rect.x,',',rect.y,',',rect.cx,',',rect.cy,')',
+                   ' ext1(astripestart)=',ext1);
+    writeln(stderr,' BEFORE: ',before);
+    writeln(stderr,' AFTER:  ',regiondumpstr(pregioninfoty(dest)^));
+    flush(stderr);
+    halt(99);
+   end;
+  end;
+ {$endif}
  end;
 end;
+//
+
+
 
 procedure gdi_regaddregion(var drawinfo: drawinfoty); //gdifunc
 {$ifdef usesdl}
