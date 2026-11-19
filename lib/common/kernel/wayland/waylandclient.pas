@@ -78,6 +78,8 @@ type
    decorstate: integer;
    minimized: boolean;          //set by the caller
    sysdnd: boolean;             //accepts drag and drop (wo_sysdnd)
+   shape: array of byte;        //window shape, 1 = visible, shapew x shapeh
+   shapew,shapeh: integer;      //client area coordinates, 0 = no shape
    destructor destroy; override;
  end;
 
@@ -116,7 +118,10 @@ var
 procedure wlc_setdecorated(const win: twlwindow; const value: boolean);
 procedure wlc_setcursor(const win: twlwindow; const aname: string);
                               //xcursor name, 'none' hides it, '' default
-
+procedure wlc_setshape(const win: twlwindow; const w,h: integer;
+                                              const mask: pbyte);
+                //mask = w*h bytes, 0 = transparent and click through,
+                //nil = no shape
 //connection
 function wlc_connect: boolean;
 procedure wlc_disconnect;
@@ -639,6 +644,62 @@ begin
  result:= true;
 end;
 
+procedure applyshapealpha(const win: twlwindow; const dst: psoftsurfacety);
+var
+ x,y,ox,oy,sx,sy: integer;
+ po: plongword;
+begin
+ ox:= offx(win);
+ oy:= offy(win);
+ for y:= 0 to dst^.height-1 do begin
+  po:= plongword(ptruint(dst^.pixels) + ptruint(y*dst^.pitch));
+  sy:= y - oy;
+  for x:= 0 to dst^.width-1 do begin
+   sx:= x - ox;
+   if (sx >= 0) and (sy >= 0) and (sx < win.shapew) and
+        (sy < win.shapeh) and (win.shape[sy*win.shapew + sx] <> 0) then begin
+    po^:= po^ or $ff000000;       //visible
+   end
+   else begin
+    po^:= 0;                      //transparent
+   end;
+   inc(po);
+  end;
+ end;
+end;
+
+procedure applyinputregion(const win: twlwindow);
+var
+ reg: pointer;
+ x,x0,y: integer;
+begin
+ if (win.surface = nil) or (compositor = nil) then begin
+  exit;
+ end;
+ if length(win.shape) = 0 then begin
+  wl_surface_set_input_region(win.surface,nil);     //whole surface
+  exit;
+ end;
+ reg:= wl_compositor_create_region(compositor);
+ for y:= 0 to win.shapeh-1 do begin
+  x:= 0;
+  while x < win.shapew do begin
+   if win.shape[y*win.shapew + x] <> 0 then begin
+    x0:= x;
+    while (x < win.shapew) and (win.shape[y*win.shapew + x] <> 0) do begin
+     inc(x);
+    end;
+    wl_region_add(reg,offx(win) + x0,offy(win) + y,x - x0,1);
+   end
+   else begin
+    inc(x);
+   end;
+  end;
+ end;
+ wl_surface_set_input_region(win.surface,reg);
+ wl_region_destroy(reg);
+end;
+
 procedure wlc_present(const win: twlwindow);
 var
  i,idx: integer;
@@ -676,6 +737,9 @@ begin
    drawdecoration(win,dst);
   end;
   softcopy(dst,offx(win),offy(win),back,softrect(0,0,width,height),false);
+  if length(shape) > 0 then begin
+   applyshapealpha(win,dst);
+  end;
   freesoftsurface(dst);
   wl_surface_attach(surface,bufs[idx].buffer,0,0);
   wl_surface_damage_buffer(surface,0,0,bufw,bufh);
@@ -683,6 +747,43 @@ begin
   bufs[idx].busy:= true;
  end;
 end;
+
+procedure wlc_setshape(const win: twlwindow; const w,h: integer;
+                                              const mask: pbyte);
+var
+ i,n: integer;
+begin
+ if win = nil then begin
+  exit;
+ end;
+ if (mask = nil) or (w <= 0) or (h <= 0) then begin
+  win.shape:= nil;
+  win.shapew:= 0;
+  win.shapeh:= 0;
+ end
+ else begin
+  setlength(win.shape,w*h);
+  move(mask^,win.shape[0],w*h);
+  win.shapew:= w;
+  win.shapeh:= h;
+ end;
+ if wlc_debug then begin
+  n:= 0;
+  for i:= 0 to length(win.shape)-1 do begin
+   if win.shape[i] <> 0 then begin
+    inc(n);
+   end;
+  end;
+  writeln('setshape ',w,'x',h,' visible pixels ',n,' of ',length(win.shape),
+                                              ' window visible ',win.visible);
+  flush(system.output);
+ end;
+ if win.visible then begin
+  applyinputregion(win);
+  wlc_present(win);
+ end;
+end;
+
 
 //windows
 
@@ -867,6 +968,7 @@ begin
   end;
   visible:= true;
   configured:= false;
+  applyinputregion(win);            //click through area of a shaped window
   wl_surface_commit(surface);       //initial commit without a buffer
  end;
 end;

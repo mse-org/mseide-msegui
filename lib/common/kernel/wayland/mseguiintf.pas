@@ -24,7 +24,7 @@ interface
 
 uses
  math,mseapplication,msetypes,msegraphutils,msesys,
- mseevent,msepointer,mseguiglob,msegraphics,
+ mseevent,msepointer,mseguiglob,msegraphics,msebitmap,
  msethread,mseformatstr,msestrings,msesystypes,
  msesoftsurface,waylandclient,msewaylandgdi,msegenericgdi;
 
@@ -59,12 +59,13 @@ procedure waylandpresent(surf: psoftsurfacety);
 
 var
  sdldebug: boolean;      //set by the environment variable MSEWLDEBUG
-
+ mse_shapebmp: tmaskedbitmap;   //image of wo_customshape, dark = window
+ 
 implementation
 
 uses
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
- msesysintf1,BaseUnix,ctypes,xkbcommon,msebitmap,mseprocmonitor,
+ msesysintf1,BaseUnix,ctypes,xkbcommon,mseprocmonitor,
  msedragglob,msesysdnd;
 
 type
@@ -1627,12 +1628,30 @@ function gui_pixmaptoimage(pixmap: pixmapty; out image: imagety;
                                        gchandle: longword): gdierrorty;
 var
  sp: psoftsurfacety;
- y: integer;
+ x,y: integer;
+ src: plongword;
+ dst: plongwordaty;
 begin
  sp:= psoftsurfacety(ptruint(pixmap));
  if (pixmap = 0) or not softvalid(sp) or (sp^.pixels = nil) or
                        (sp^.width <= 0) or (sp^.height <= 0) then begin
   result:= gde_pixmap;
+  exit;
+ end;
+ if ismonopixmap(pixmap) then begin     //packed bits like the X11 backend
+  allocimage(image,makesize(sp^.width,sp^.height),bmk_mono);
+  fillchar(image.pixels^,image.length*sizeof(longword),0);
+  for y:= 0 to sp^.height-1 do begin
+   src:= plongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+   dst:= plongwordaty(ptruint(image.pixels) + ptruint(y*image.linebytes));
+   for x:= 0 to sp^.width-1 do begin
+    if (src^ and $00ffffff) <> 0 then begin
+     dst^[x shr 5]:= dst^[x shr 5] or (longword(1) shl (x and 31));
+    end;
+    inc(src);
+   end;
+  end;
+  result:= gde_ok;
   exit;
  end;
  image.kind:= bmk_rgb;
@@ -1796,6 +1815,199 @@ begin
  end;
 end;
 
+type
+ shapemaskty = array of byte;
+
+const
+ shapewindowoptions = [wo_rounded,wo_ellipse,wo_customshape,
+                       wo_transparentbackground,wo_transparentbackgroundround];
+ shapevisibledark = true;  //dark pixels of mse_shapebmp are the window, like
+                           //on Windows. false = light pixels.
+
+procedure fillshape(var mask: shapemaskty; const w,h: integer;
+                         const r: rectty; const kind: integer);
+                         //kind 0 = rectangle, 1 = rounded, 2 = ellipse
+var
+ x,y,x1,y1,x2,y2: integer;
+ rad,dx,dy,px,py,hx,hy: double;
+ inside: boolean;
+begin
+ x1:= r.x;
+ if x1 < 0 then begin
+  x1:= 0;
+ end;
+ y1:= r.y;
+ if y1 < 0 then begin
+  y1:= 0;
+ end;
+ x2:= r.x + r.cx;
+ if x2 > w then begin
+  x2:= w;
+ end;
+ y2:= r.y + r.cy;
+ if y2 > h then begin
+  y2:= h;
+ end;
+ rad:= mse_radiuscorner / 2;        //mse_radiuscorner = diameter of the corner
+ if rad > r.cx / 2 then begin
+  rad:= r.cx / 2;
+ end;
+ if rad > r.cy / 2 then begin
+  rad:= r.cy / 2;
+ end;
+ for y:= y1 to y2-1 do begin
+  py:= y - r.y + 0.5;
+  for x:= x1 to x2-1 do begin
+   px:= x - r.x + 0.5;
+   inside:= true;
+   case kind of
+    1: begin
+     dx:= 0;
+     dy:= 0;
+     if px < rad then begin
+      dx:= rad - px;
+     end
+     else begin
+      if px > r.cx - rad then begin
+       dx:= px - (r.cx - rad);
+      end;
+     end;
+     if py < rad then begin
+      dy:= rad - py;
+     end
+     else begin
+      if py > r.cy - rad then begin
+       dy:= py - (r.cy - rad);
+      end;
+     end;
+     if (dx > 0) and (dy > 0) then begin
+      inside:= dx*dx + dy*dy <= rad*rad;
+     end;
+    end;
+    2: begin
+     hx:= r.cx / 2;
+     hy:= r.cy / 2;
+     dx:= (px - hx) / hx;
+     dy:= (py - hy) / hy;
+     inside:= dx*dx + dy*dy <= 1;
+    end;
+   end;
+   if inside then begin
+    mask[y*w + x]:= 1;
+   end;
+  end;
+ end;
+end;
+
+
+procedure shapefromsurface(var shp: shapemaskty; const w,h: integer;
+                      const apixmap: pixmapty; const ismask: boolean);
+                      //reads the soft surface of the pixmap directly, like
+                      //X11 which uses the mask pixmap as shape
+var
+ sp: psoftsurfacety;
+ x,y,cx,cy: integer;
+ po: plongword;
+ c: longword;
+ mono,vis: boolean;
+begin
+ sp:= psoftsurfacety(ptruint(apixmap));
+ if (apixmap = 0) or not softvalid(sp) or (sp^.pixels = nil) then begin
+  exit;
+ end;
+ mono:= ismonopixmap(apixmap);
+ cx:= sp^.width;
+ if cx > w then begin
+  cx:= w;
+ end;
+ cy:= sp^.height;
+ if cy > h then begin
+  cy:= h;
+ end;
+ for y:= 0 to cy-1 do begin
+  po:= plongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+  for x:= 0 to cx-1 do begin
+   c:= po^ and $00ffffff;
+   if ismask then begin
+    if mono then begin
+     vis:= c <> 0;                  //set bit = opaque
+    end
+    else begin
+     vis:= (c and $ff) >= $80;      //gray mask
+    end;
+   end
+   else begin
+    vis:= (c <= $7f7f7f) = shapevisibledark;     //like Windows
+   end;
+   if vis then begin
+    shp[y*w + x]:= 1;
+   end;
+   inc(po);
+  end;
+ end;
+end;
+
+procedure setwindowshape(const win: twlwindow; const aoptions: windowoptionsty;
+                                                        const w,h: integer);
+var
+ shp: shapemaskty;
+ i: integer;
+begin
+ shp:= nil;
+ setlength(shp,w*h);
+ fillchar(shp[0],w*h,0);
+ if wo_ellipse in aoptions then begin
+  fillshape(shp,w,h,makerect(0,0,w,h),2);
+ end
+ else begin
+  if wo_transparentbackground in aoptions then begin
+   if length(mse_formchild) = 0 then begin
+    fillshape(shp,w,h,makerect(0,0,w,h),0);
+   end
+   else begin
+    for i:= 0 to high(mse_formchild) do begin
+     with mse_formchild[i] do begin
+      fillshape(shp,w,h,makerect(left,top,width,height),0);
+     end;
+    end;
+   end;
+  end
+  else begin
+   if wo_customshape in aoptions then begin
+    if mse_shapebmp = nil then begin
+     fillshape(shp,w,h,makerect(0,0,w,h),0);
+    end
+    else begin
+     if mse_shapebmp.masked then begin      //like X11: the mask is the shape
+      shapefromsurface(shp,w,h,mse_shapebmp.mask.handle,true);
+     end
+     else begin                             //like Windows: dark pixels
+      shapefromsurface(shp,w,h,mse_shapebmp.handle,false);
+     end;
+    end;
+   end
+   else begin
+    if wo_transparentbackgroundround in aoptions then begin
+     if length(mse_formchild) = 0 then begin
+      fillshape(shp,w,h,makerect(0,0,w,h),1);
+     end
+     else begin
+      for i:= 0 to high(mse_formchild) do begin
+       with mse_formchild[i] do begin
+        fillshape(shp,w,h,makerect(left,top,width,height),1);
+       end;
+      end;
+     end;
+    end
+    else begin
+     fillshape(shp,w,h,makerect(0,0,w,h),1);       //wo_rounded
+    end;
+   end;
+  end;
+ end;
+ wlc_setshape(win,w,h,@shp[0]);
+end;
+
 function gui_createwindow(const rect: rectty;
                              var options: internalwindowoptionsty;
                              var awindow: windowty): guierrorty;
@@ -1803,6 +2015,7 @@ var
  win,parentwin: twlwindow;
  akind: twlwindowkind;
  w,h,i: integer;
+ shaped: boolean;
 begin
  fillchar(awindow,sizeof(awindow),0);
  result:= gue_createwindow;
@@ -1870,9 +2083,12 @@ begin
   win.posx:= rect.x;
   win.posy:= rect.y;
   win.sysdnd:= wo_sysdnd in options;
+  shaped:= options * shapewindowoptions <> [];
   wlc_setdecorated(win,(akind = wlk_toplevel) and
-              (options * noframewindowtypes = []) and
-                                           not (wo_message in options));
+              (options * noframewindowtypes = []) and not shaped);
+  if shaped then begin               //window shape, like the X11 and Windows
+   setwindowshape(win,options,w,h);  //backends: set once with the creation size
+  end;
   if pos = wp_maximized then begin
    win.maximized:= true;
   end

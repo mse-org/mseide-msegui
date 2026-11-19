@@ -16,7 +16,7 @@ interface
 
 uses
 
- math,mseapplication,msetypes,msegraphutils, msesys,
+ math,mseapplication,msetypes,msegraphutils, msesys,msebitmap,
   mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,msestrings,msesystypes,
  {$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif},msesdlgdi,dateutils,msegenericgdi;

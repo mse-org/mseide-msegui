@@ -33,8 +33,8 @@ procedure init;
 procedure deinit;
 
 function waylandgetgdifuncs: pgdifunctionaty;
-procedure waylandpushgcstate;   //saves the global drawing state
-procedure waylandpopgcstate;    //restores it (nested drawing)
+procedure waylandpushgcstate;   //dummy, the state is kept per canvas
+procedure waylandpopgcstate;    //dummy
 procedure waylandinitdefaultfont;
 function waylandgetdefaultfontnames: defaultfontnamesty;
 
@@ -42,11 +42,22 @@ implementation
 uses
  mseguiintf,msegraphutils,msesysintf1,msegenericgdi;
 
-var
- fgrgb,bgrgb: rgbtriplety;
- currentrop: rasteropty;
-
 type
+ //drawing state of a canvas, kept in gcty.platformdata like the Windows gdi.
+ //A global state is wrong: MSEgui sends only the changed values per canvas,
+ //so canvases drawing alternately would use the values of each other.
+ waylandgcdty = record
+  fgrgb,bgrgb: rgbtriplety;
+  currentrop: rasteropty;
+  currentfont: fontty;
+ end;
+ waylandgcty = record
+  case integer of
+   0: (d: waylandgcdty;);
+   1: (_bufferspace: gcpty;);
+ end;
+ pwaylandgcty = ^waylandgcty;
+
  tsimplebitmap1 = class(tsimplebitmap);
  tcanvas1 = class(tcanvas);
  tfont1 = class(tfont);
@@ -73,7 +84,6 @@ type
 
 var
  ffontcache: twaylandftfontcache;
- currentfont: fontty;      //set in gdi_changegc
  dummysurf: psoftsurfacety;
 
 function fontcache: twaylandftfontcache;
@@ -95,6 +105,11 @@ end;
 function gcsurf(const drawinfo: drawinfoty): psoftsurfacety;
 begin
  result:= psoftsurfacety(ptruint(drawinfo.gc.handle));
+end;
+
+function gcdata(const drawinfo: drawinfoty): pwaylandgcty;
+begin
+ result:= pwaylandgcty(@drawinfo.gc.platformdata);
 end;
 
 function rgbvalue(const acolor: rgbtriplety): longword;
@@ -120,7 +135,7 @@ begin
   //rows are stored bottom up, pos.x already includes origin and left bearing,
   //pos.y is the bottom edge of the glyph
   softblendmask(gcsurf(drawinfo),pos.x,pos.y - height,pbyte(@data),
-                                       width,height,true,rgbvalue(fgrgb));
+                                       width,height,true,rgbvalue(gcdata(drawinfo)^.d.fgrgb));
  end;
 end;
 
@@ -134,7 +149,8 @@ begin
    softfillrect(gcsurf(drawinfo),
         softrect(rect1.x + drawinfo.origin.x,rect1.y + drawinfo.origin.y,
                                                       rect1.cx,rect1.cy),
-        rgbvalue(bgrgb),rgbalpha(bgrgb));
+        rgbvalue(gcdata(drawinfo)^.d.bgrgb),
+                                    rgbalpha(gcdata(drawinfo)^.d.bgrgb));
   end;
  end;
  inherited;
@@ -154,7 +170,7 @@ end;
 procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.createpixmap do begin
-  pixmap:= gui_createpixmap(size,0,false,copyfrom);
+  pixmap:= gui_createpixmap(size,0,kind = bmk_mono,copyfrom);
  end;
 end;
 
@@ -178,6 +194,13 @@ var
 begin
  with drawinfo.creategc do begin
   gcpo^.gdifuncs:= gui_getgdifuncs;
+  fillchar(gcpo^.platformdata,sizeof(gcpo^.platformdata),0);
+  with pwaylandgcty(@gcpo^.platformdata)^.d do begin
+   fgrgb.red:= 0;   fgrgb.green:= 0;   fgrgb.blue:= 0;   fgrgb.res:= 0;
+   bgrgb.red:= 255; bgrgb.green:= 255; bgrgb.blue:= 255; bgrgb.res:= 0;
+   currentrop:= rop_copy;
+   currentfont:= 0;
+  end;
   error:= gde_creategc;
   case kind of
    gck_pixmap: begin
@@ -219,25 +242,27 @@ var
  x1,y1,x2,y2: integer;
  rgbcolor: rgbtriplety;
  surf: psoftsurfacety;
+ gcd: ^waylandgcdty;
 begin
  with drawinfo.gcvalues^,drawinfo.gc do begin
   surf:= psoftsurfacety(ptruint(handle));
+  gcd:= @pwaylandgcty(@platformdata)^.d;
   if gvm_colorforeground in mask then begin
    rgbcolor:= colortorgb(colorforeground);
-   fgrgb.red:= rgbcolor.blue;       //same swap as in the SDL gdi
-   fgrgb.green:= rgbcolor.green;
-   fgrgb.blue:= rgbcolor.red;
-   fgrgb.res:= rgbcolor.res;
+   gcd^.fgrgb.red:= rgbcolor.blue;       //same swap as in the SDL gdi
+   gcd^.fgrgb.green:= rgbcolor.green;
+   gcd^.fgrgb.blue:= rgbcolor.red;
+   gcd^.fgrgb.res:= rgbcolor.res;
   end;
   if gvm_colorbackground in mask then begin
    rgbcolor:= colortorgb(colorbackground);
-   bgrgb.red:= rgbcolor.blue;
-   bgrgb.green:= rgbcolor.green;
-   bgrgb.blue:= rgbcolor.red;
-   bgrgb.res:= rgbcolor.res;
+   gcd^.bgrgb.red:= rgbcolor.blue;
+   gcd^.bgrgb.green:= rgbcolor.green;
+   gcd^.bgrgb.blue:= rgbcolor.red;
+   gcd^.bgrgb.res:= rgbcolor.res;
   end;
   if gvm_rasterop in mask then begin
-   currentrop:= rasterop;
+   gcd^.currentrop:= rasterop;
   end;
   if (gvm_clipregion in mask) and (surf <> nil) then begin
    if clipregion <> 0 then begin
@@ -274,7 +299,7 @@ begin
    end;
   end;
   if gvm_font in mask then begin
-   currentfont:= font;
+   gcd^.currentfont:= font;
   end;
  end;
 end;
@@ -506,7 +531,8 @@ begin
    end;
    hw:= round(rx*sqrt(d));
    softfillrect(surf,softrect(cx0 - hw,cy0 + yy,2*hw + 1,1),
-                                          rgbvalue(fgrgb),rgbalpha(fgrgb));
+                    rgbvalue(gcdata(drawinfo)^.d.fgrgb),
+                                    rgbalpha(gcdata(drawinfo)^.d.fgrgb));
   end;
  end;
 end;
@@ -553,7 +579,8 @@ begin
 end;
 
 procedure fillpointsarray(const surf: psoftsurfacety; const origin: pointty;
-                          const pts: array of pointty; n: integer);
+                          const pts: array of pointty; n: integer;
+                          const acolor: rgbtriplety);
 var
  i,j,yy,miny,maxy,cnt,tmp,k: integer;
  y1,y2,x1,x2: integer;
@@ -564,8 +591,8 @@ begin
  if n < 3 then begin
   exit;
  end;
- col:= rgbvalue(fgrgb);
- alpha:= rgbalpha(fgrgb);
+ col:= rgbvalue(acolor);
+ alpha:= rgbalpha(acolor);
  miny:= pts[0].y;
  maxy:= miny;
  for i:= 1 to n-1 do begin
@@ -649,7 +676,8 @@ begin
    pts[first+i].x:= x + round(cos(ang)*rx);
    pts[first+i].y:= y - round(sin(ang)*ry);
   end;
-  fillpointsarray(gcsurf(drawinfo),origin,pts,total);
+  fillpointsarray(gcsurf(drawinfo),origin,pts,total,
+                                             gcdata(drawinfo)^.d.fgrgb);
  end;
 end;
 
@@ -668,7 +696,8 @@ begin
   for i:= 0 to points.count-1 do begin
    pts[i]:= pp^[i];
   end;
-  fillpointsarray(gcsurf(drawinfo),origin,pts,points.count);
+  fillpointsarray(gcsurf(drawinfo),origin,pts,points.count,
+                                             gcdata(drawinfo)^.d.fgrgb);
  end;
 end;
 
@@ -685,7 +714,7 @@ begin
   surf:= gcsurf(drawinfo);
   r:= softrect(rect.rect^.x + origin.x,rect.rect^.y + origin.y,
                                          rect.rect^.cx,rect.rect^.cy);
-  if (currentrop = rop_xor) and (df_brush in gc.drawingflags) then begin
+  if (gcdata(drawinfo)^.d.currentrop = rop_xor) and (df_brush in gc.drawingflags) then begin
    //dotted xor frame (focus rectangle): invert every second pixel
    x0:= r.x;
    y0:= r.y;
@@ -713,7 +742,8 @@ begin
    end;
    exit;
   end;
-  softfillrect(surf,r,rgbvalue(fgrgb),rgbalpha(fgrgb));
+  softfillrect(surf,r,rgbvalue(gcdata(drawinfo)^.d.fgrgb),
+                                  rgbalpha(gcdata(drawinfo)^.d.fgrgb));
  end;
 end;
 
@@ -915,8 +945,8 @@ end;
 
 procedure gdi_drawstring16(var drawinfo: drawinfoty);
 begin
- if currentfont <> 0 then begin
-  fontcache.drawstring16(drawinfo,currentfont);
+ if gcdata(drawinfo)^.d.currentfont <> 0 then begin
+  fontcache.drawstring16(drawinfo,gcdata(drawinfo)^.d.currentfont);
  end;
 end;
 
@@ -924,25 +954,13 @@ procedure gdi_getfonthighres(var drawinfo: drawinfoty);
 begin
 end;
 
-var
- savedfg,savedbg: rgbtriplety;
- savedrop: rasteropty;
- savedfont: fontty;
-
 procedure waylandpushgcstate;
 begin
- savedfg:= fgrgb;
- savedbg:= bgrgb;
- savedrop:= currentrop;
- savedfont:= currentfont;
+ //nothing to do, the state is kept per canvas
 end;
 
 procedure waylandpopgcstate;
 begin
- fgrgb:= savedfg;
- bgrgb:= savedbg;
- currentrop:= savedrop;
- currentfont:= savedfont;
 end;
 
 procedure waylandinitdefaultfont;
@@ -1011,7 +1029,5 @@ end;
 
 initialization
  sdldebug:= getenvironmentvariable('MSEWLDEBUG') <> '';
- fgrgb.red:= 0;   fgrgb.green:= 0;   fgrgb.blue:= 0;   fgrgb.res:= 0;
- bgrgb.red:= 255; bgrgb.green:= 255; bgrgb.blue:= 255; bgrgb.res:= 0;
 
 end.
