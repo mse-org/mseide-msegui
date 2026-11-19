@@ -20,9 +20,12 @@ unit msewaylandgdi;
 
 interface
 uses
- msegraphics,msetypes,msestrings,mseguiglob,msebitmap,mseftfontcache,
+ sysutils,msegraphics,msetypes,msestrings,mseguiglob,msebitmap,mseftfontcache,
  msefontcache,msesysutils,msesoftsurface;
 
+var
+ sdldebug: boolean;      //set by the environment variable MSEWLDEBUG
+ 
 const
  radtodeg = 360/(2*pi);
 
@@ -37,7 +40,7 @@ function waylandgetdefaultfontnames: defaultfontnamesty;
 
 implementation
 uses
- mseguiintf,msegraphutils,msesysintf1,sysutils,msegenericgdi;
+ mseguiintf,msegraphutils,msesysintf1,msegenericgdi;
 
 var
  fgrgb,bgrgb: rgbtriplety;
@@ -720,13 +723,32 @@ procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  r1,r2: softrectty;
  dst,srcsurf,tmp,msurface: psoftsurfacety;
- sp,mp,dp: plongword;
+ sp,mp: plongword;
  x,y: integer;
  mono: boolean;
- fgpix,bgpix,p,alpha: longword;
+ fgpix,bgpix,p,alpha,keycolor: longword;
+ usekey: boolean;
  rgbcolor1,rgbcolor2: rgbtriplety;
 begin
  with drawinfo,copyarea do begin
+  if sdldebug then begin
+   write('copyarea src ',sourcerect^.x,',',sourcerect^.y,' ',sourcerect^.cx,'x',
+          sourcerect^.cy,' dest ',destrect^.x,',',destrect^.y,' ',destrect^.cx,
+          'x',destrect^.cy,' srcpixmap=',
+          df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags,
+          ' dstpixmap=',df_canvasispixmap in drawinfo.gc.drawingflags,
+          ' srcmono=',ismonopixmap(tcanvas1(source).fdrawinfo.paintdevice),
+          ' mask=',mask <> nil);
+   if mask <> nil then begin
+    write(' maskkind=',ord(mask.kind));
+   end;
+   writeln(' copymode=',ord(copymode),' transp=$',
+           inttohex(transparentcolor,8),' opacity=',opacity.red,',',
+           opacity.green,',',opacity.blue,' tiled=',al_tiled in alignment,
+           ' opaque=',df_opaque in drawinfo.gc.drawingflags,' fg=$',
+           inttohex(acolorforeground,8),' bg=$',inttohex(acolorbackground,8));
+   flush(system.output);
+  end;
   r1:= softrect(sourcerect^.x,sourcerect^.y,sourcerect^.cx,sourcerect^.cy);
   r2:= softrect(destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
   dst:= gcsurf(drawinfo);
@@ -779,6 +801,9 @@ begin
    end;
   end
   else begin
+   //color key: pixels of this color are transparent (0 = not used)
+   keycolor:= longword(drawinfo.copyarea.transparentcolor) and $00FFFFFF;
+   usekey:= keycolor <> 0;
    if drawinfo.copyarea.mask <> nil then begin
     msurface:= createsoftsurface(r1.cx,r1.cy);
     softcopy(msurface,0,0,
@@ -788,11 +813,16 @@ begin
      mp:= plongword(pbyte(msurface^.pixels) + y*msurface^.pitch);
      for x:= 0 to tmp^.width-1 do begin
       alpha:= mp^ and $FF;               //gray mask = alpha, mono mask = 0/255
-      if alpha = 255 then begin
-       sp^:= sp^ or $FF000000;
+      if usekey and ((sp^ and $00FFFFFF) = keycolor) then begin
+       sp^:= 0;
       end
       else begin
-       sp^:= (sp^ and $00FFFFFF) or (alpha shl 24);
+       if alpha = 255 then begin
+        sp^:= sp^ or $FF000000;
+       end
+       else begin
+        sp^:= (sp^ and $00FFFFFF) or (alpha shl 24);
+       end;
       end;
       inc(sp);
       inc(mp);
@@ -804,7 +834,12 @@ begin
     for y:= 0 to tmp^.height-1 do begin
      sp:= plongword(pbyte(tmp^.pixels) + y*tmp^.pitch);
      for x:= 0 to tmp^.width-1 do begin
-      sp^:= sp^ or $FF000000;
+      if usekey and ((sp^ and $00FFFFFF) = keycolor) then begin
+       sp^:= 0;
+      end
+      else begin
+       sp^:= sp^ or $FF000000;
+      end;
       inc(sp);
      end;
     end;
@@ -975,6 +1010,8 @@ begin
 end;
 
 initialization
+ sdldebug:= getenvironmentvariable('MSEWLDEBUG') <> '';
  fgrgb.red:= 0;   fgrgb.green:= 0;   fgrgb.blue:= 0;   fgrgb.res:= 0;
  bgrgb.red:= 255; bgrgb.green:= 255; bgrgb.blue:= 255; bgrgb.res:= 0;
+
 end.
