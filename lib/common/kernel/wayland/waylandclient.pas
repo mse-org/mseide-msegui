@@ -524,21 +524,40 @@ end;
 procedure applyconstraints(const win: twlwindow);
 var
  ex,ey: integer;
+ mnw,mnh,mxw,mxh: integer;
 begin
  if win.toplevel <> nil then begin
   ex:= 2 * offx(win);
   ey:= offy(win) + offx(win);
+  mnw:= 0;
+  mnh:= 0;
+  mxw:= 0;
+  mxh:= 0;
+  if win.minw > 0 then begin
+   mnw:= win.minw + ex;
+  end;
+  if win.minh > 0 then begin
+   mnh:= win.minh + ey;
+  end;
+  if win.maxw > 0 then begin           //0 = no limit in this direction
+   mxw:= win.maxw + ex;
+   if mxw < mnw then begin
+    mxw:= mnw;                         //max < min is a protocol error
+   end;
+  end;
+  if win.maxh > 0 then begin
+   mxh:= win.maxh + ey;
+   if mxh < mnh then begin
+    mxh:= mnh;
+   end;
+  end;
   if wlc_debug then begin
    writeln('constraints min ',win.minw,'x',win.minh,' max ',win.maxw,'x',
-                                                       win.maxh);
+                          win.maxh,' sent min ',mnw,'x',mnh,' max ',mxw,'x',mxh);
    flush(system.output);
   end;
-  if (win.minw > 0) or (win.minh > 0) then begin
-   xdg_toplevel_set_min_size(win.toplevel,win.minw + ex,win.minh + ey);
-  end;
-  if (win.maxw > 0) or (win.maxh > 0) then begin
-   xdg_toplevel_set_max_size(win.toplevel,win.maxw + ex,win.maxh + ey);
-  end;
+  xdg_toplevel_set_min_size(win.toplevel,mnw,mnh);
+  xdg_toplevel_set_max_size(win.toplevel,mxw,mxh);
  end;
 end;
 
