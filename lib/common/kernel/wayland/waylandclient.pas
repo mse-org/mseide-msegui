@@ -649,29 +649,39 @@ begin
  result:= true;
 end;
 
+
 procedure applyshapealpha(const win: twlwindow; const dst: psoftsurfacety);
 var
  x,y,ox,oy,sx,sy: integer;
  po: plongword;
+ deco: boolean;
 begin
  ox:= offx(win);
  oy:= offy(win);
+ deco:= csd(win);
  for y:= 0 to dst^.height-1 do begin
   po:= plongword(ptruint(dst^.pixels) + ptruint(y*dst^.pitch));
   sy:= y - oy;
   for x:= 0 to dst^.width-1 do begin
    sx:= x - ox;
-   if (sx >= 0) and (sy >= 0) and (sx < win.shapew) and
-        (sy < win.shapeh) and (win.shape[sy*win.shapew + sx] <> 0) then begin
-    po^:= po^ or $ff000000;       //visible
+   if deco and ((sx < 0) or (sy < 0) or (sx >= win.width) or
+                                           (sy >= win.height)) then begin
+    po^:= po^ or $ff000000;       //title bar and borders stay visible
    end
    else begin
-    po^:= 0;                      //transparent
+    if (sx >= 0) and (sy >= 0) and (sx < win.shapew) and
+         (sy < win.shapeh) and (win.shape[sy*win.shapew + sx] <> 0) then begin
+     po^:= po^ or $ff000000;      //visible
+    end
+    else begin
+     po^:= 0;                     //transparent
+    end;
    end;
    inc(po);
   end;
  end;
 end;
+
 
 procedure applyinputregion(const win: twlwindow);
 var
@@ -686,6 +696,12 @@ begin
   exit;
  end;
  reg:= wl_compositor_create_region(compositor);
+ if csd(win) then begin                 //title bar and borders get input
+  wl_region_add(reg,0,0,outw(win),offy(win));
+  wl_region_add(reg,0,offy(win),offx(win),win.height);
+  wl_region_add(reg,offx(win) + win.width,offy(win),offx(win),win.height);
+  wl_region_add(reg,0,offy(win) + win.height,outw(win),offx(win));
+ end;
  for y:= 0 to win.shapeh-1 do begin
   x:= 0;
   while x < win.shapew do begin

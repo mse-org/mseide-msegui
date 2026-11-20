@@ -2048,6 +2048,8 @@ begin
  wlc_setshape(win,w,h,@shp[0]);
 end;
 
+
+
 function gui_createwindow(const rect: rectty;
                              var options: internalwindowoptionsty;
                              var awindow: windowty): guierrorty;
@@ -2124,8 +2126,10 @@ begin
   win.posy:= rect.y;
   win.sysdnd:= wo_sysdnd in options;
   shaped:= options * shapewindowoptions <> [];
+  //like X11: only the no-frame window types remove the frame. A shape applies
+  //to the client area, the title bar stays.
   wlc_setdecorated(win,(akind = wlk_toplevel) and
-              (options * noframewindowtypes = []) and not shaped);
+              (options * noframewindowtypes = []));
   if shaped then begin               //window shape, like the X11 and Windows
    setwindowshape(win,options,w,h);  //backends: set once with the creation size
   end;
@@ -2143,6 +2147,7 @@ begin
   result:= gue_ok;
  end;
 end;
+
 
 function gui_destroywindow(var awindow: windowty): guierrorty;
 var
