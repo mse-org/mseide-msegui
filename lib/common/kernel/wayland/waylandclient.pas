@@ -440,6 +440,7 @@ begin
  end;
 end;
 
+
 procedure drawdecoration(const win: twlwindow; const dst: psoftsurfacety);
 var
  ow,oh,b,i,x0,cx,cy,tw,bar: integer;
@@ -520,11 +521,15 @@ begin
    win.titleact:= win.activated;
   end;
   if win.titlecache <> nil then begin
-   softcopy(dst,3 * wl_btnw,0,win.titlecache,
-            softrect(0,0,win.titlecache^.width,win.titlecache^.height),false);
+   //the first and the last row of the bar are the outline and the separator
+   //line, they must stay visible
+   softcopy(dst,3 * wl_btnw,1,win.titlecache,
+            softrect(0,1,win.titlecache^.width,win.titlecache^.height - 2),
+                                                                    false);
   end;
  end;
 end;
+
 
 procedure applyconstraints(const win: twlwindow);
 var

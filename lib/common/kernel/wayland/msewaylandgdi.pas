@@ -747,7 +747,55 @@ begin
  end;
 end;
 
-//copyarea
+var
+ dumpcount: integer;
+
+procedure debugdumpmask(const msurf,isurf: psoftsurfacety);
+                                   //light icons only, MSEWLDEBUG output
+const
+ shades = '.:-=+*%#';
+var
+ x,y: integer;
+ mp,ip: plongword;
+ a,l: longword;
+ s1,s2: string;
+begin
+ if dumpcount >= 6 then begin
+  exit;
+ end;
+ inc(dumpcount);
+ writeln('  dump mask | image (brightness) size=',msurf^.width,'x',
+                                                           msurf^.height);
+ for y:= 0 to msurf^.height-1 do begin
+  mp:= plongword(pbyte(msurf^.pixels) + y*msurf^.pitch);
+  ip:= plongword(pbyte(isurf^.pixels) + y*isurf^.pitch);
+  s1:= '';
+  s2:= '';
+  for x:= 0 to msurf^.width-1 do begin
+   a:= mp^ and $ff;
+   if a = 0 then begin
+    s1:= s1 + '.';
+   end
+   else begin
+    if a = 255 then begin
+     s1:= s1 + '#';
+    end
+    else begin
+     s1:= s1 + '+';
+    end;
+   end;
+   l:= (((ip^ shr 16) and $ff) + ((ip^ shr 8) and $ff) + (ip^ and $ff)) div 3;
+   s2:= s2 + shades[1 + l div 32];
+   inc(mp);
+   inc(ip);
+  end;
+  writeln('  ',s1,' | ',s2);
+ end;
+ flush(system.output);
+end;
+
+
+
 
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
@@ -834,7 +882,25 @@ begin
    //color key: pixels of this color are transparent (0 = not used)
    keycolor:= longword(drawinfo.copyarea.transparentcolor) and $00FFFFFF;
    usekey:= keycolor <> 0;
-   if drawinfo.copyarea.mask <> nil then begin
+   if (drawinfo.copyarea.mask = nil) and
+                    ismonopixmap(pixmapty(ptruint(dst))) then begin
+    //color -> monochrome like X11 (tmaskedbitmap.checkmask): the pixels of
+    //the transparent color (black if none) become 0, all others 1. The
+    //colors must not be copied.
+    for y:= 0 to tmp^.height-1 do begin
+     sp:= plongword(pbyte(tmp^.pixels) + y*tmp^.pitch);
+     for x:= 0 to tmp^.width-1 do begin
+      if (sp^ and $00FFFFFF) = keycolor then begin
+       sp^:= $FF000000;
+      end
+      else begin
+       sp^:= $FFFFFFFF;
+      end;
+      inc(sp);
+     end;
+    end;
+   end
+   else if drawinfo.copyarea.mask <> nil then begin
     msurface:= createsoftsurface(r1.cx,r1.cy);
     softcopy(msurface,0,0,
        psoftsurfacety(ptruint(drawinfo.copyarea.mask.handle)),r1,false);

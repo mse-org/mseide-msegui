@@ -16,7 +16,7 @@ interface
 
 uses
 
- math,mseapplication,msetypes,msegraphutils, msesys,msebitmap,
+ math,mseapplication,msetypes,msegraphutils, msesys,
   mseevent,msepointer,mseguiglob,msegraphics,
  msethread,mseformatstr,msestrings,msesystypes,
  {$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif},msesdlgdi,dateutils,msegenericgdi;
@@ -26,9 +26,9 @@ type
 
 const
  wheelstep = 120;
-  pixel0 = $ffffff;   //select colorbackground
- pixel1 = $000000;   //select colorforeground
-
+ pixel0 = $000000;   //select colorbackground
+ pixel1 = $ffffff;   //select colorforeground
+ 
 {$ifdef FPC}
 {$include ../mseguiintf.inc}
 {$else}

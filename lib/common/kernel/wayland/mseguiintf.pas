@@ -35,8 +35,8 @@ type
 
 const
  wheelstep = 120;
- pixel0 = $ffffff;   //select colorbackground
- pixel1 = $000000;   //select colorforeground
+ pixel0 = $000000;   //select colorbackground
+ pixel1 = $ffffff;   //select colorforeground
 
 {$ifdef FPC}
 {$include ../mseguiintf.inc}
@@ -978,7 +978,7 @@ function rendertitle(const atitle: string; const w,h: integer;
 var
  bmp: tbitmap1;
  src,src1: psoftsurfacety;
- x,y,minx,maxx: integer;
+ x,y,minx,maxx,miny,yb,dx,dy,inkw: integer;
  po: plongword;
  bgpix: longword;
 begin
@@ -989,11 +989,12 @@ begin
   try
    bmp.size:= makesize(w,h);
    bmp.init(rgbtocolor((bg shr 16) and $ff,(bg shr 8) and $ff,bg and $ff));
+   yb:= 0;
    with bmp.canvas do begin
     font.height:= 14;
     color:= rgbtocolor((fg shr 16) and $ff,(fg shr 8) and $ff,fg and $ff);
-    drawstring(utf8tomsestring(atitle),
-                     makepoint(0,(h + font.ascent - font.descent) div 2));
+    yb:= (h + font.ascent - font.descent) div 2;   //first guess of the baseline
+    drawstring(utf8tomsestring(atitle),makepoint(0,yb));
    end;
    src:= psoftsurfacety(ptruint(bmp.handle));
    if src <> nil then begin
@@ -1006,11 +1007,12 @@ begin
       inc(po);
      end;
     end;
-    //center the text horizontally: find its extent, the background is the
-    //color of the first pixel
+    //find the extent of the text, the background is the color of the first
+    //pixel
     bgpix:= plongword(result^.pixels)^;
     minx:= w;
     maxx:= -1;
+    miny:= h;
     for y:= 0 to h-1 do begin
      po:= plongword(ptruint(result^.pixels) + ptruint(y*result^.pitch));
      for x:= 0 to w-1 do begin
@@ -1021,15 +1023,24 @@ begin
        if x > maxx then begin
         maxx:= x;
        end;
+       if y < miny then begin
+        miny:= y;
+       end;
       end;
       inc(po);
      end;
     end;
-    if (maxx >= minx) and (maxx - minx + 1 < w) then begin
+    if maxx >= minx then begin
+     inkw:= maxx - minx + 1;
+     dx:= (w - inkw) div 2;                 //centered horizontally
+     //vertical: center the box from the top of the letters to the baseline
+     dy:= (h - (yb - miny)) div 2 - miny;
+     if miny + dy < 1 then begin
+      dy:= 1 - miny;                        //keep the outline row free
+     end;
      src1:= createsoftsurface(w,h);
      softfillrect(src1,softrect(0,0,w,h),bgpix and $ffffff,255);
-     softcopy(src1,(w - (maxx - minx + 1)) div 2,0,result,
-                    softrect(minx,0,maxx - minx + 1,h),false);
+     softcopy(src1,dx,dy,result,softrect(minx,0,inkw,h),false);
      freesoftsurface(result);
      result:= src1;
     end;
@@ -1209,11 +1220,40 @@ begin
  result:= gue_ok;
 end;
 
+
 function gui_movewindowrect(id: winidty; const dist: pointty;
                                              const rect: rectty): guierrorty;
+var
+ win: twlwindow;
+ surf: psoftsurfacety;
+ saveclip: softrectty;
+ r: rectty;
 begin
- result:= gue_scroll;      //MSEgui repaints
+ result:= gue_ok;
+ win:= findwin(id);
+ if win <> nil then begin
+  surf:= win.back;
+  if surf <> nil then begin
+   if sdldebug then begin
+    writeln('movewindowrect ',rect.x,',',rect.y,' ',rect.cx,'x',rect.cy,
+                                  ' dist ',dist.x,',',dist.y);
+    flush(system.output);
+   end;
+   //rect is the SOURCE area, it lands at rect + dist (like XCopyArea on
+   //X11). The destination is only limited by the surface, not by rect.
+   //softcopy handles overlapping rows and columns of the same surface.
+   r:= intersectrect(rect,makerect(0,0,surf^.width,surf^.height));
+   if (r.cx > 0) and (r.cy > 0) then begin
+    saveclip:= surf^.clip;
+    softresetclip(surf);
+    softcopy(surf,r.x + dist.x,r.y + dist.y,surf,
+                           softrect(r.x,r.y,r.cx,r.cy),false);
+    surf^.clip:= saveclip;
+   end;
+  end;
+ end;
 end;
+
 
 function gui_stackunderwindow(id: winidty; predecessor: winidty): guierrorty;
 begin
