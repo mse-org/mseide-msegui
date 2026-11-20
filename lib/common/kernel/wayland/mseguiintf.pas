@@ -157,14 +157,62 @@ begin
  end;
 end;
 
-procedure waylandpresent(surf: psoftsurfacety);
+
+
 var
- i: integer;
+ dirtywins: array of twlwindow;       //windows with painted, unpresented content
+ dirtytick: qword;                    //time of the first unpresented paint
+
+procedure waylandpresent(surf: psoftsurfacety);
+//called by gdi_endpaint, possibly several times in one repaint pass: only
+//mark the window, flushpresents shows the finished frame
+var
+ i,j: integer;
+ w: twlwindow;
+ found: boolean;
 begin
  if surf <> nil then begin
   for i:= 0 to high(wins) do begin
    if wins[i].back = surf then begin
-    wlc_present(wins[i]);
+    w:= wins[i];
+    found:= false;
+    for j:= 0 to high(dirtywins) do begin
+     if dirtywins[j] = w then begin
+      found:= true;
+      break;
+     end;
+    end;
+    if not found then begin
+     if length(dirtywins) = 0 then begin
+      dirtytick:= GetTickCount64;
+     end;
+     setlength(dirtywins,length(dirtywins) + 1);
+     dirtywins[high(dirtywins)]:= w;
+    end;
+    break;
+   end;
+  end;
+ end;
+end;
+
+procedure flushpresents;
+var
+ i,j: integer;
+ list: array of twlwindow;
+begin
+ if length(dirtywins) = 0 then begin
+  exit;
+ end;
+ list:= dirtywins;
+ dirtywins:= nil;
+ for i:= 0 to high(list) do begin
+  for j:= 0 to high(wins) do begin
+   if wins[j] = list[i] then begin   //still exists
+    if sdldebug then begin
+     writeln('PRESENT win ',j,' ',list[i].width,'x',list[i].height);
+     flush(system.output);
+    end;
+    wlc_present(list[i]);
     break;
    end;
   end;
@@ -867,6 +915,7 @@ begin
  end;
 end;
 
+
 function gui_hasevent: boolean;
 begin
  if not wlc_connected then begin   //called while the application is destroyed
@@ -880,6 +929,7 @@ begin
  result:= (evhead < length(evlist)) or (usrcount > 0) or timerisdue or
                                                                 terminated;
  if not result then begin
+  flushpresents;                  //idle: show the finished frame
   waitwayland(0);
   dispatchpolls;
   processwayland;
@@ -887,6 +937,7 @@ begin
                                                                 terminated;
  end;
 end;
+
 
 function gui_getevent: tmseevent;
 var
@@ -898,6 +949,9 @@ begin
  if not wlc_connected then begin
   result:= getlistevent;
   exit;
+ end;
+ if (length(dirtywins) > 0) and (GetTickCount64 - dirtytick >= 16) then begin
+  flushpresents;       //events keep coming: show the frame at most 16 ms late
  end;
  while true do begin
   result:= getlistevent;
@@ -935,6 +989,7 @@ begin
     timeout:= 0;
    end;
   end;
+  flushpresents;                   //idle: show the finished frame
   locked:= application.unlock();
   try
    waitwayland(timeout);
@@ -960,6 +1015,7 @@ begin
   flush(output);
  end;
 end;
+
 
 function gui_escapepressed: boolean;
 begin
@@ -2339,6 +2395,68 @@ begin
  end;
 end;
 
+procedure resizewindowshape(const win: twlwindow; const w,h: integer);
+//keeps the shape corners, repeats the middle (like a nine-patch)
+var
+ shp: shapemaskty;
+ ow,oh,hx,hy,x,y,sx,sy: integer;
+begin
+ ow:= win.shapew;
+ oh:= win.shapeh;
+ if (ow <= 0) or (oh <= 0) or (w <= 0) or (h <= 0) or
+                                       ((ow = w) and (oh = h)) then begin
+  exit;
+ end;
+ shp:= nil;
+ setlength(shp,w*h);
+ hx:= ow div 2;
+ hy:= oh div 2;
+ for y:= 0 to h-1 do begin
+  if y < hy then begin
+   sy:= y;
+  end
+  else begin
+   if y >= h - (oh - hy) then begin
+    sy:= y - (h - oh);
+   end
+   else begin
+    sy:= hy;
+   end;
+  end;
+  if sy < 0 then begin
+   sy:= 0;
+  end;
+  if sy >= oh then begin
+   sy:= oh - 1;
+  end;
+  for x:= 0 to w-1 do begin
+   if x < hx then begin
+    sx:= x;
+   end
+   else begin
+    if x >= w - (ow - hx) then begin
+     sx:= x - (w - ow);
+    end
+    else begin
+     sx:= hx;
+    end;
+   end;
+   if sx < 0 then begin
+    sx:= 0;
+   end;
+   if sx >= ow then begin
+    sx:= ow - 1;
+   end;
+   shp[y*w + x]:= win.shape[sy*ow + sx];
+  end;
+ end;
+ if sdldebug then begin
+  writeln('resizewindowshape ',ow,'x',oh,' -> ',w,'x',h);
+  flush(system.output);
+ end;
+ wlc_setshape(win,w,h,@shp[0]);
+end;
+
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  win: twlwindow;
@@ -2362,6 +2480,9 @@ begin
  end;
  if (win.width <> rect.cx) or (win.height <> rect.cy) then begin
   wlc_setsize(win,rect.cx,rect.cy);
+  if win.shapew > 0 then begin          //shaped window: the shape follows
+   resizewindowshape(win,rect.cx,rect.cy);  //the new client size
+  end;
   changed:= true;
  end;
  if changed then begin
