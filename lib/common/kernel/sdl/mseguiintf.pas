@@ -17,10 +17,10 @@ interface
 uses
 
  math,mseapplication,msetypes,msegraphutils, msesys,
-  mseevent,msepointer,mseguiglob,msegraphics,
+  mseevent,msepointer,mseguiglob,msegraphics,msebitmap,
  msethread,mseformatstr,msestrings,msesystypes,
  {$ifdef usesdl3}sdl3msegui{$else}{$ifdef usesdl2}sdl2msegui{$endif}{$endif},msesdlgdi,dateutils,msegenericgdi;
-
+ 
 type
  syseventty = SDL_Event;
 
@@ -42,8 +42,15 @@ function msedefaultscreenno: integer;
 function gui_getrootwindow(id: winidty = 0): winidty;
 function msedisplay: pointer;
 function gui_getpixel(const id: winidty; const pos: pointty;
-                                             out pixel: pixelty): guierrorty;
+                                           out pixel: pixelty): guierrorty;
+procedure addmonopixmap(pixmap: pixmapty);
 
+function sdlwindowshape(const awindow: winidty; out w,h: integer): pbyte;
+                          //nil if the window has no shape, else w*h bytes,
+                          //0 = outside of the shape
+
+var
+ mse_shapebmp: tmaskedbitmap;     //image of wo_customshape, set by splash.pas
 
 implementation
 
@@ -948,20 +955,308 @@ type
  end;
  psetwindowownerinfoty = ^setwindowownerinfoty;
 
-{function setwindowowner(id: winidty; param: lparam): winbool; stdcall;
+type
+ shapemaskty = array of byte;
+ sdlshapeinfoty = record
+  window: winidty;
+  w,h: integer;
+  mask: shapemaskty;
+ end;
 
+const
+ shapewindowoptions = [wo_rounded,wo_ellipse,wo_customshape,
+                       wo_transparentbackground,wo_transparentbackgroundround];
+ shapevisibledark = true;  //dark pixels of mse_shapebmp are the window, like
+                           //on Windows. false = light pixels.
+
+var
+ sdlshapes: array of sdlshapeinfoty;
+
+function sdlwindowshape(const awindow: winidty; out w,h: integer): pbyte;
+var
+ i: integer;
 begin
- with psetwindowownerinfoty(ptruint(param))^ do begin
-  if getwindowlong(id,gwl_winidtyparent) = oldowner then begin
-   setwindowlong(id,gwl_winidtyparent,newowner);
+ result:= nil;
+ w:= 0;
+ h:= 0;
+ for i:= 0 to high(sdlshapes) do begin
+  if sdlshapes[i].window = awindow then begin
+   w:= sdlshapes[i].w;
+   h:= sdlshapes[i].h;
+   result:= @sdlshapes[i].mask[0];
+   break;
   end;
  end;
- result:= true;
-end;}
+end;
+
+procedure removesdlshape(const awindow: winidty);
+var
+ i: integer;
+begin
+ for i:= 0 to high(sdlshapes) do begin
+  if sdlshapes[i].window = awindow then begin
+   sdlshapes[i]:= sdlshapes[high(sdlshapes)];
+   setlength(sdlshapes,high(sdlshapes));
+   break;
+  end;
+ end;
+end;
+
+procedure fillshape(var mask: shapemaskty; const w,h: integer;
+                         const r: rectty; const kind: integer);
+                         //kind 0 = rectangle, 1 = rounded, 2 = ellipse
+var
+ x,y,x1,y1,x2,y2: integer;
+ rad,dx,dy,px,py,hx,hy: double;
+ inside: boolean;
+begin
+ x1:= r.x;
+ if x1 < 0 then begin
+  x1:= 0;
+ end;
+ y1:= r.y;
+ if y1 < 0 then begin
+  y1:= 0;
+ end;
+ x2:= r.x + r.cx;
+ if x2 > w then begin
+  x2:= w;
+ end;
+ y2:= r.y + r.cy;
+ if y2 > h then begin
+  y2:= h;
+ end;
+ rad:= mse_radiuscorner / 2;        //mse_radiuscorner = diameter of the corner
+ if rad > r.cx / 2 then begin
+  rad:= r.cx / 2;
+ end;
+ if rad > r.cy / 2 then begin
+  rad:= r.cy / 2;
+ end;
+ for y:= y1 to y2-1 do begin
+  py:= y - r.y + 0.5;
+  for x:= x1 to x2-1 do begin
+   px:= x - r.x + 0.5;
+   inside:= true;
+   case kind of
+    1: begin
+     dx:= 0;
+     dy:= 0;
+     if px < rad then begin
+      dx:= rad - px;
+     end
+     else begin
+      if px > r.cx - rad then begin
+       dx:= px - (r.cx - rad);
+      end;
+     end;
+     if py < rad then begin
+      dy:= rad - py;
+     end
+     else begin
+      if py > r.cy - rad then begin
+       dy:= py - (r.cy - rad);
+      end;
+     end;
+     if (dx > 0) and (dy > 0) then begin
+      inside:= dx*dx + dy*dy <= rad*rad;
+     end;
+    end;
+    2: begin
+     hx:= r.cx / 2;
+     hy:= r.cy / 2;
+     dx:= (px - hx) / hx;
+     dy:= (py - hy) / hy;
+     inside:= dx*dx + dy*dy <= 1;
+    end;
+   end;
+   if inside then begin
+    mask[y*w + x]:= 1;
+   end;
+  end;
+ end;
+end;
+
+procedure shapefromsurface(var shp: shapemaskty; const w,h: integer;
+                      const apixmap: pixmapty; const ismask: boolean);
+                      //reads the surface of the pixmap directly, like
+                      //X11 which uses the mask pixmap as shape
+var
+ sp: CSDL_Surface;
+ x,y,cx,cy: integer;
+ po: plongword;
+ c: longword;
+ mono,vis: boolean;
+begin
+ if apixmap = 0 then begin
+  exit;
+ end;
+ sp:= CSDL_Surface(ptruint(apixmap));
+ if sp^.pixels = nil then begin
+  exit;
+ end;
+ mono:= ismonopixmap(apixmap);
+ cx:= sp^.w;
+ if cx > w then begin
+  cx:= w;
+ end;
+ cy:= sp^.h;
+ if cy > h then begin
+  cy:= h;
+ end;
+ for y:= 0 to cy-1 do begin
+  po:= plongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+  for x:= 0 to cx-1 do begin
+   c:= po^ and $00ffffff;
+   if ismask then begin
+    if mono then begin
+     vis:= c <> 0;                  //set bit = opaque
+    end
+    else begin
+     vis:= (c and $ff) >= $80;      //gray mask
+    end;
+   end
+   else begin
+    vis:= (c <= $7f7f7f) = shapevisibledark;     //like Windows
+   end;
+   if vis then begin
+    shp[y*w + x]:= 1;
+   end;
+   inc(po);
+  end;
+ end;
+end;
+
+{$ifdef usesdl3}
+function sdl3_setwindowshape(window: pointer; shape: pointer): bytebool; cdecl;
+                           external 'SDL3' name 'SDL_SetWindowShape';
+{$endif}
+
+procedure addsdlshape(const awindow: winidty; const aoptions: windowoptionsty;
+                                                        const w,h: integer);
+var
+ shp: shapemaskty;
+ i,n: integer;
+{$ifdef usesdl3}
+ x,y: integer;
+ ssurf: PSDL_Surface;
+ ssp: CSDL_Surface;
+ po: plongword;
+ ok: bytebool;
+{$endif}
+begin
+ if (w <= 0) or (h <= 0) then begin
+  exit;
+ end;
+ shp:= nil;
+ setlength(shp,w*h);
+ fillchar(shp[0],w*h,0);
+ if wo_ellipse in aoptions then begin
+  fillshape(shp,w,h,makerect(0,0,w,h),2);
+ end
+ else begin
+  if wo_transparentbackground in aoptions then begin
+   if length(mse_formchild) = 0 then begin
+    fillshape(shp,w,h,makerect(0,0,w,h),0);
+   end
+   else begin
+    for i:= 0 to high(mse_formchild) do begin
+     with mse_formchild[i] do begin
+      fillshape(shp,w,h,makerect(left,top,width,height),0);
+     end;
+    end;
+   end;
+  end
+  else begin
+   if wo_customshape in aoptions then begin
+    if mse_shapebmp = nil then begin
+     fillshape(shp,w,h,makerect(0,0,w,h),0);
+    end
+    else begin
+     if mse_shapebmp.masked then begin      //like X11: the mask is the shape
+      shapefromsurface(shp,w,h,mse_shapebmp.mask.handle,true);
+     end
+     else begin                             //like Windows: dark pixels
+      shapefromsurface(shp,w,h,mse_shapebmp.handle,false);
+     end;
+    end;
+   end
+   else begin
+    if wo_transparentbackgroundround in aoptions then begin
+     if length(mse_formchild) = 0 then begin
+      fillshape(shp,w,h,makerect(0,0,w,h),1);
+     end
+     else begin
+      for i:= 0 to high(mse_formchild) do begin
+       with mse_formchild[i] do begin
+        fillshape(shp,w,h,makerect(left,top,width,height),1);
+       end;
+      end;
+     end;
+    end
+    else begin
+     fillshape(shp,w,h,makerect(0,0,w,h),1);       //wo_rounded
+    end;
+   end;
+  end;
+ end;
+ removesdlshape(awindow);
+ i:= length(sdlshapes);
+ setlength(sdlshapes,i+1);
+ sdlshapes[i].window:= awindow;
+ sdlshapes[i].w:= w;
+ sdlshapes[i].h:= h;
+ sdlshapes[i].mask:= shp;
+ if sdldebug then begin
+  n:= 0;
+  for i:= 0 to w*h-1 do begin
+   if shp[i] <> 0 then begin
+    inc(n);
+   end;
+  end;
+  write('SHAPEMASK visible=',n,' of ',w*h,' customshape=',
+                                              wo_customshape in aoptions);
+  write(' shapebmp=',mse_shapebmp <> nil);
+  if mse_shapebmp <> nil then begin
+   write(' masked=',mse_shapebmp.masked);
+  end;
+  writeln;
+  flush(output);
+ end;
+{$ifdef usesdl3}
+ //SDL 3.2 and later: the alpha channel of the shape surface sets the shape and
+ //the clickable area of a window created with SDL_WINDOW_TRANSPARENT.
+ //The shape surface is not freed here, SDL may keep using it.
+ ssurf:= SDL_CreateRGBSurface(0,w,h,32,
+                       $00FF0000,$0000FF00,$000000FF,$FF000000);
+ if ssurf <> 0 then begin
+  ssp:= CSDL_Surface(ptruint(ssurf));
+  for y:= 0 to h-1 do begin
+   po:= plongword(ptruint(ssp^.pixels) + ptruint(y*ssp^.pitch));
+   for x:= 0 to w-1 do begin
+    if shp[y*w + x] <> 0 then begin
+     po^:= $FF000000;
+    end
+    else begin
+     po^:= 0;
+    end;
+    inc(po);
+   end;
+  end;
+  ok:= sdl3_setwindowshape(pointer(ptruint(awindow)),pointer(ptruint(ssurf)));
+  if sdldebug then begin
+   writeln('SETWINDOWSHAPE ok=',ok,' err=',string(SDL_GetError));
+   flush(output);
+  end;
+ end;
+{$endif}
+end;
+
 
 function gui_destroywindow(var awindow: windowty): guierrorty;
 begin
  result:= gue_destroywindow;
+ removesdlshape(awindow.id);
  SDL_DestroyWindow(awindow.id);
  result:= SDL_CheckError('destroywindow');
  windowdestroyed(awindow.id);
@@ -1709,6 +2004,7 @@ end;
 const
  waylandpopups = false;   // true: real Wayland popups, currently hides the main window
 
+
 function gui_createwindow(const rect: rectty;
                              var options: internalwindowoptionsty;
                              var awindow: windowty): guierrorty;
@@ -1736,6 +2032,11 @@ begin
   end else begin
    windowstyleex:= windowstyleex or SDL_WINDOW_RESIZABLE;
   end;
+{$ifdef usesdl3}
+  if options * shapewindowoptions <> [] then begin
+   windowstyleex:= windowstyleex or $40000000;   //SDL_WINDOW_TRANSPARENT
+  end;
+{$endif}
   if pos = wp_minimized then begin
    windowstyleex:= windowstyleex or SDL_WINDOW_MINIMIZED;
   end else if pos = wp_maximized then begin
@@ -1766,7 +2067,7 @@ begin
   id:= 0;
 
 {$ifdef usesdl3}
-    if (wo_popup in options) and (drv = 'wayland') then begin
+  if (wo_popup in options) and (drv = 'wayland') then begin
    // native Wayland: a real popup window, placed by the compositor relative
    // to its parent window
    parentwin:= transientfor;
@@ -1796,7 +2097,7 @@ begin
 
   if id = 0 then begin
    // small hint windows must not take the focus (X11 only)
-      if (wo_popup in options) and (drv = 'x11') and
+   if (wo_popup in options) and (drv = 'x11') and
                          (rect1.cx <= 100) and (rect1.cy <= 100) then begin
 {$ifdef usesdl3}
     // SDL3: the shim strips SDL_WINDOW_TOOLTIP, so ask for a window that
@@ -1832,6 +2133,14 @@ begin
 
   result:= SDL_CheckError('createwindow');
 
+  if (id <> 0) and (options * shapewindowoptions <> []) then begin
+   addsdlshape(id,options,rect1.cx,rect1.cy);   //alpha mask, see gdi_endpaint
+   if sdldebug then begin
+    writeln('SHAPE window=',ptruint(id),' size=',rect1.cx,'x',rect1.cy);
+    flush(output);
+   end;
+  end;
+
   if (transientfor <> 0) or
                  (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
    if transientfor <> 0 then begin
@@ -1854,6 +2163,7 @@ begin
   end;
  end;
 end;
+
 
 function gui_getparentwindow(const awindow: winidty): winidty;
 begin
