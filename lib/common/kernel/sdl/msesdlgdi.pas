@@ -1209,8 +1209,8 @@ var
  sp,mp,dp,dsp: CSDL_Surface;
  p,pm,pd: PLongword;
  x,y: integer;
- mono: boolean;
- fgpix,bgpix: longword;
+ mono,destmono,usekey: boolean;
+ fgpix,bgpix,keycolor,alpha: longword;
  rgbcolor1,rgbcolor2: rgbtriplety;
 begin
  with drawinfo,copyarea,gcvalues^ do begin
@@ -1222,6 +1222,25 @@ begin
   rect2.y:= destrect^.y;
   rect2.w:= destrect^.cx;
   rect2.h:= destrect^.cy;
+
+  if sdldebug then begin
+   write('copyarea src ',rect1.x,',',rect1.y,' ',rect1.w,'x',rect1.h,
+          ' dest ',rect2.x,',',rect2.y,' ',rect2.w,'x',rect2.h,
+          ' srcpixmap=',
+          df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags,
+          ' dstpixmap=',df_canvasispixmap in drawinfo.gc.drawingflags,
+          ' srcmono=',ismonopixmap(tcanvas1(source).fdrawinfo.paintdevice),
+          ' mask=',drawinfo.copyarea.mask <> nil);
+   if drawinfo.copyarea.mask <> nil then begin
+    write(' maskkind=',ord(drawinfo.copyarea.mask.kind));
+   end;
+   writeln(' copymode=',ord(drawinfo.copyarea.copymode),' transp=$',
+           inttohex(longword(drawinfo.copyarea.transparentcolor),8),
+           ' opaque=',df_opaque in drawinfo.gc.drawingflags,' fg=$',
+           inttohex(longword(drawinfo.acolorforeground),8),' bg=$',
+           inttohex(longword(drawinfo.acolorbackground),8));
+   flush(system.output);
+  end;
 
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
    if df_canvasispixmap in drawinfo.gc.drawingflags then begin
@@ -1238,6 +1257,11 @@ begin
   end;
 
   mono:= ismonopixmap(tcanvas1(source).fdrawinfo.paintdevice);
+  destmono:= (df_canvasispixmap in drawinfo.gc.drawingflags) and
+                                         ismonopixmap(drawinfo.paintdevice);
+  //color key: pixels of this color are transparent (0 = not used)
+  keycolor:= longword(drawinfo.copyarea.transparentcolor) and $00FFFFFF;
+  usekey:= keycolor <> 0;
 
   // surface at the SOURCE size: SDL_RenderCopy scales it to rect2
   asurface:= SDL_CreateRGBSurface(0,rect1.w,rect1.h,32,
@@ -1257,9 +1281,6 @@ begin
                         (longword(rgbcolor1.green) shl 8) or rgbcolor1.blue;
    bgpix:= $FF000000 or (longword(rgbcolor2.red) shl 16) or
                         (longword(rgbcolor2.green) shl 8) or rgbcolor2.blue;
-   if (rect2.w <= 24) and (rect2.h <= 24) then begin
-
-   end;
    for y:= 0 to sp^.h-1 do begin
     p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
     for x:= 0 to sp^.w-1 do begin
@@ -1271,6 +1292,23 @@ begin
      end
      else begin
       p^:= 0;
+     end;
+     inc(p);
+    end;
+   end;
+  end
+  else if (drawinfo.copyarea.mask = nil) and destmono then begin
+   //color -> monochrome like X11 (tmaskedbitmap.checkmask): the pixels of
+   //the transparent color (black if none) become 0, all others 1. The
+   //colors must not be copied.
+   for y:= 0 to sp^.h-1 do begin
+    p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
+    for x:= 0 to sp^.w-1 do begin
+     if (p^ and $00FFFFFF) = keycolor then begin
+      p^:= $FF000000;
+     end
+     else begin
+      p^:= $FFFFFFFF;
      end;
      inc(p);
     end;
@@ -1288,11 +1326,17 @@ begin
     p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
     pm:= PLongword(ptruint(mp^.pixels) + ptruint(y*mp^.pitch));
     for x:= 0 to sp^.w-1 do begin
-     if (pm^ and $00FFFFFF) <> 0 then begin
-      p^:= p^ or $FF000000;
+     alpha:= pm^ and $FF;               //gray mask = alpha, mono mask = 0/255
+     if usekey and ((p^ and $00FFFFFF) = keycolor) then begin
+      p^:= 0;
      end
      else begin
-      p^:= p^ and $00FFFFFF;
+      if alpha = 255 then begin
+       p^:= p^ or $FF000000;
+      end
+      else begin
+       p^:= (p^ and $00FFFFFF) or (alpha shl 24);
+      end;
      end;
      inc(p);
      inc(pm);
@@ -1304,7 +1348,12 @@ begin
    for y:= 0 to sp^.h-1 do begin
     p:= PLongword(ptruint(sp^.pixels) + ptruint(y*sp^.pitch));
     for x:= 0 to sp^.w-1 do begin
-     p^:= p^ or $FF000000;
+     if usekey and ((p^ and $00FFFFFF) = keycolor) then begin
+      p^:= 0;
+     end
+     else begin
+      p^:= p^ or $FF000000;
+     end;
      inc(p);
     end;
    end;
@@ -1341,6 +1390,7 @@ begin
   SDL_FreeSurface(asurface);
  end;
 end;
+
 
 procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
 begin
