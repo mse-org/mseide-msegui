@@ -48,9 +48,11 @@ type
  //so canvases drawing alternately would use the values of each other.
  waylandgcdty = record
   fgrgb,bgrgb: rgbtriplety;
+  fgcolor,bgcolor: colorty;     //unmapped canvas colors, for mono copyarea
   currentrop: rasteropty;
   currentfont: fontty;
  end;
+ 
  waylandgcty = record
   case integer of
    0: (d: waylandgcdty;);
@@ -198,6 +200,8 @@ begin
   with pwaylandgcty(@gcpo^.platformdata)^.d do begin
    fgrgb.red:= 0;   fgrgb.green:= 0;   fgrgb.blue:= 0;   fgrgb.res:= 0;
    bgrgb.red:= 255; bgrgb.green:= 255; bgrgb.blue:= 255; bgrgb.res:= 0;
+   fgcolor:= cl_black;
+   bgcolor:= cl_white;
    currentrop:= rop_copy;
    currentfont:= 0;
   end;
@@ -235,6 +239,7 @@ begin
  drawinfo.gc.handle:= 0;
 end;
 
+
 procedure gdi_changegc(var drawinfo: drawinfoty);
 var
  ar1: rectarty;
@@ -248,6 +253,7 @@ begin
   surf:= psoftsurfacety(ptruint(handle));
   gcd:= @pwaylandgcty(@platformdata)^.d;
   if gvm_colorforeground in mask then begin
+   gcd^.fgcolor:= colorforeground;
    rgbcolor:= colortorgb(colorforeground);
    gcd^.fgrgb.red:= rgbcolor.blue;       //same swap as in the SDL gdi
    gcd^.fgrgb.green:= rgbcolor.green;
@@ -255,6 +261,7 @@ begin
    gcd^.fgrgb.res:= rgbcolor.res;
   end;
   if gvm_colorbackground in mask then begin
+   gcd^.bgcolor:= colorbackground;
    rgbcolor:= colortorgb(colorbackground);
    gcd^.bgrgb.red:= rgbcolor.blue;
    gcd^.bgrgb.green:= rgbcolor.green;
@@ -303,6 +310,7 @@ begin
   end;
  end;
 end;
+
 
 procedure gdi_getcanvasclass(var drawinfo: drawinfoty); //gdifunc
 begin
@@ -795,8 +803,20 @@ begin
 end;
 
 
+function monoglyphcolor(const acolor: colorty): colorty;
+//X11 shows the mono glyphs (expander boxes, button glyphs) dark: the
+//foreground cl_transparent (normal rows) and cl_active (focused row, it has
+//the same light grey as the row background) must not be drawn light.
+begin
+ if (acolor = cl_transparent) or (acolor = cl_active) then begin
+  result:= cl_black;
+ end
+ else begin
+  result:= acolor;
+ end;
+end;
 
-
+// copyarea
 procedure gdi_copyarea(var drawinfo: drawinfoty);
 var
  r1,r2: softrectty;
@@ -807,6 +827,7 @@ var
  fgpix,bgpix,p,alpha,keycolor: longword;
  usekey: boolean;
  rgbcolor1,rgbcolor2: rgbtriplety;
+ col1,col2: colorty;
 begin
  with drawinfo,copyarea do begin
   if sdldebug then begin
@@ -824,9 +845,13 @@ begin
            inttohex(transparentcolor,8),' opacity=',opacity.red,',',
            opacity.green,',',opacity.blue,' tiled=',al_tiled in alignment,
            ' opaque=',df_opaque in drawinfo.gc.drawingflags,' fg=$',
-           inttohex(acolorforeground,8),' bg=$',inttohex(acolorbackground,8));
+           inttohex(acolorforeground,8),' bg=$',inttohex(acolorbackground,8),
+           ' gcfg=$',inttohex(gcdata(drawinfo)^.d.fgcolor,8),
+           ' gcfgrgb=$',inttohex(rgbvalue(gcdata(drawinfo)^.d.fgrgb),6),
+           ' gcbg=$',inttohex(gcdata(drawinfo)^.d.bgcolor,8));
    flush(system.output);
   end;
+
   r1:= softrect(sourcerect^.x,sourcerect^.y,sourcerect^.cx,sourcerect^.cy);
   r2:= softrect(destrect^.x,destrect^.y,destrect^.cx,destrect^.cy);
   dst:= gcsurf(drawinfo);
@@ -856,8 +881,13 @@ begin
 
   if mono then begin
    //colors requested by MSEgui for this copy (may be symbolic colors)
-   rgbcolor1:= colortorgb(drawinfo.acolorforeground);
-   rgbcolor2:= colortorgb(drawinfo.acolorbackground);
+   col1:= monoglyphcolor(drawinfo.acolorforeground);
+   col2:= drawinfo.acolorbackground;
+   if col2 = cl_transparent then begin
+    col2:= gcdata(drawinfo)^.d.bgcolor;
+   end;
+   rgbcolor1:= colortorgb(col1);
+   rgbcolor2:= colortorgb(col2);
    fgpix:= $FF000000 or rgbvalue(rgbcolor1);
    bgpix:= $FF000000 or rgbvalue(rgbcolor2);
    for y:= 0 to tmp^.height-1 do begin
@@ -967,6 +997,7 @@ begin
   end;
  end;
 end;
+
 
 procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
 begin
