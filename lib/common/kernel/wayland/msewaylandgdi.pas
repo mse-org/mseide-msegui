@@ -841,15 +841,20 @@ begin
    if mask <> nil then begin
     write(' maskkind=',ord(mask.kind));
    end;
-   writeln(' copymode=',ord(copymode),' transp=$',
+   
+     writeln(' copymode=',ord(copymode),' transp=$',
            inttohex(transparentcolor,8),' opacity=',opacity.red,',',
            opacity.green,',',opacity.blue,' tiled=',al_tiled in alignment,
            ' opaque=',df_opaque in drawinfo.gc.drawingflags,' fg=$',
            inttohex(acolorforeground,8),' bg=$',inttohex(acolorbackground,8),
            ' gcfg=$',inttohex(gcdata(drawinfo)^.d.fgcolor,8),
            ' gcfgrgb=$',inttohex(rgbvalue(gcdata(drawinfo)^.d.fgrgb),6),
-           ' gcbg=$',inttohex(gcdata(drawinfo)^.d.bgcolor,8));
+           ' gcbg=$',inttohex(gcdata(drawinfo)^.d.bgcolor,8),
+           ' dkind=',ord(drawinfo.gc.kind),
+           ' skind=',ord(tcanvas1(source).fdrawinfo.gc.kind),
+           ' colorconvert=',df_colorconvert in drawinfo.gc.drawingflags);
    flush(system.output);
+   
   end;
 
   r1:= softrect(sourcerect^.x,sourcerect^.y,sourcerect^.cx,sourcerect^.cy);
@@ -890,24 +895,52 @@ begin
    rgbcolor2:= colortorgb(col2);
    fgpix:= $FF000000 or rgbvalue(rgbcolor1);
    bgpix:= $FF000000 or rgbvalue(rgbcolor2);
-   for y:= 0 to tmp^.height-1 do begin
-    sp:= plongword(pbyte(tmp^.pixels) + y*tmp^.pitch);
-    for x:= 0 to tmp^.width-1 do begin
-     if (sp^ and $00FFFFFF) <> 0 then begin
-      sp^:= fgpix;
-     end
-     else begin
-      if df_opaque in drawinfo.gc.drawingflags then begin
-       sp^:= bgpix;
+   if drawinfo.copyarea.mask <> nil then begin
+    //like X11: with a mask the mono source is a stipple, only the set bits
+    //inside the mask are painted with the foreground, the background is
+    //never painted
+    msurface:= createsoftsurface(r1.cx,r1.cy);
+    softcopy(msurface,0,0,
+       psoftsurfacety(ptruint(drawinfo.copyarea.mask.handle)),r1,false);
+    for y:= 0 to tmp^.height-1 do begin
+     sp:= plongword(pbyte(tmp^.pixels) + y*tmp^.pitch);
+     mp:= plongword(pbyte(msurface^.pixels) + y*msurface^.pitch);
+     for x:= 0 to tmp^.width-1 do begin
+      alpha:= mp^ and $FF;               //mono mask = 0/255
+      if ((sp^ and $00FFFFFF) <> 0) and (alpha <> 0) then begin
+       sp^:= fgpix;
       end
       else begin
        sp^:= 0;
       end;
+      inc(sp);
+      inc(mp);
      end;
-     inc(sp);
+    end;
+    freesoftsurface(msurface);
+   end
+   else begin
+    for y:= 0 to tmp^.height-1 do begin
+     sp:= plongword(pbyte(tmp^.pixels) + y*tmp^.pitch);
+     for x:= 0 to tmp^.width-1 do begin
+      if (sp^ and $00FFFFFF) <> 0 then begin
+       sp^:= fgpix;
+      end
+      else begin
+       if df_opaque in drawinfo.gc.drawingflags then begin
+        sp^:= bgpix;
+       end
+       else begin
+        sp^:= 0;
+       end;
+      end;
+      inc(sp);
+     end;
     end;
    end;
   end
+  
+  
   else begin
    //color key: pixels of this color are transparent (0 = not used)
    keycolor:= longword(drawinfo.copyarea.transparentcolor) and $00FFFFFF;

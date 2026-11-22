@@ -1700,7 +1700,12 @@ begin
    result:= gde_ok;
    size.cx:= surf^.width;
    size.cy:= surf^.height;
-   depth:= 32;
+   if ismonopixmap(handle) then begin
+    depth:= 1;        //like X11, so tsimplebitmap.sethandle keeps bmk_mono
+   end
+   else begin
+    depth:= 32;
+   end;
   end;
  end;
 end;
