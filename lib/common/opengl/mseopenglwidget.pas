@@ -10,14 +10,20 @@
 unit mseopenglwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifdef linux} {$define unix}{$endif}
+{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland)}
+ {$define offscreengl}   //no GLX window: EGL pbuffer rendering, the picture
+{$else}                  //is copied into the widget (SDL2, SDL3, Wayland)
+ {$ifdef unix} {$define useglx}{$endif}
+{$endif}
 interface
 uses
  classes,mclasses,msewindowwidget,msegl,
- {$ifdef unix}mseglx,mxlib,{$else}windows,{$endif}
+ {$ifdef offscreengl}mseegl,msebitmap,{$else}
+ {$ifdef useglx}mseglx,mxlib,{$else}windows,{$endif}{$endif}
  mseguiintf,msetypes,mseguiglob,mseclasses,msemenus,mseevent,msegui,msegraphics,
  msegraphutils;
 
-{$ifdef unix}
+{$ifdef useglx}
 {$ifdef FPC}
  {$macro on}
  {$define xchar2b:=txchar2b}
@@ -56,7 +62,17 @@ type
 
  tcustomopenglwidget = class(tcustomwindowwidget)
   private
-   {$ifdef unix}
+   {$ifdef offscreengl}
+   fegl: teglcontext;
+   fbitmap: tbitmap;
+   fpixels: array of longword;
+   frowbuffer: array of longword;
+   foffscreensize: sizety;
+   ffresh: boolean;              //rendered by the timer, not yet painted
+   ffailed: boolean;
+   fglused: boolean;
+  {$else}
+   {$ifdef useglx}
    fcontext: glxcontext;
    fdpy: pdisplay;
    fcolormap: tcolormap;
@@ -66,8 +82,9 @@ type
    fcontext: hglrc;
    {$endif}
    fwin: winidty;
+   {$endif}
    fonrender: openglrendereventty;
-  {$ifdef unix}
+  {$ifdef useglx}
    fvisualattributes: integerarty;
   {$endif}
    fattrib_buffersize: integer;
@@ -87,18 +104,29 @@ type
    fattrib_accumgreensize: integer;
    fattrib_accumbluesize: integer;
    fattrib_accumalphasize: integer;
+  {$ifdef offscreengl}
+   procedure renderoffscreen;
+  {$else}
    function setcurrent: boolean;
-  protected
+  {$endif}
+   protected
+  {$ifdef offscreengl}
+   procedure doonpaint(const acanvas: tcanvas); override;
+  {$else}
    procedure doclientrectchanged; override;
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
                   var aid: winidty); override;
    procedure dodestroywinid; override;
-   function canclientpaint: boolean; override;
    procedure doclientpaint(const aupdaterect: rectty); override;
    procedure updateviewport(const arect: rectty); override;
+  {$endif}
+   function canclientpaint: boolean; override;
   public
    constructor create(aowner: tcomponent); override;
-   {$ifdef unix}
+  {$ifdef offscreengl}
+   destructor destroy; override;
+  {$endif}
+   {$ifdef useglx}
    property visualattributes: integerarty read fvisualattributes
                                                    write fvisualattributes;
    {$endif}
@@ -177,7 +205,7 @@ type
 
 implementation
 uses
- sysutils,mseglextglob;
+ sysutils,mseglextglob{$ifdef offscreengl},mseglext{$endif};
 
 { tcustomopenglwidget }
 
@@ -202,6 +230,111 @@ begin
  fattrib_accumalphasize:= -1;
  inherited;
 end;
+
+{$ifdef offscreengl}
+
+destructor tcustomopenglwidget.destroy;
+begin
+ if fegl <> nil then begin
+  fegl.release;
+  freeandnil(fegl);
+ end;
+ fbitmap.free;
+ if fglused then begin
+  releaseopengl;
+ end;
+ inherited;
+end;
+
+procedure tcustomopenglwidget.renderoffscreen;
+var
+ size1: sizety;
+ rect1: rectty;
+ int1,int2: integer;
+ po1,po2: plongword;
+ img: imagety;
+begin
+ if ffailed then begin
+  exit;
+ end;
+ size1:= innerclientrect.size;
+ if (size1.cx <= 0) or (size1.cy <= 0) then begin
+  exit;
+ end;
+ try
+  if fegl = nil then begin
+   initializeopengl([]);
+   fglused:= true;
+   fegl:= teglcontext.create(fattrib_depthsize,fattrib_stencilsize,
+                                                         fattrib_alphasize);
+  end;
+  fegl.resize(size1.cx,size1.cy);
+  fegl.makecurrent;
+  updaterenderstep;
+  if not sizeisequal(size1,foffscreensize) then begin
+   foffscreensize:= size1;
+   glviewport(0,0,size1.cx,size1.cy);
+   doclientrectchanged;
+  end;
+  glviewport(0,0,size1.cx,size1.cy);
+  rect1:= makerect(nullpoint,size1);
+  if canevent(tmethod(fonrender)) then begin
+   fonrender(self,rect1);
+  end;
+  glfinish;
+  setlength(fpixels,size1.cx*size1.cy);
+  glpixelstorei(gl_pack_alignment,1);
+  glreadpixels(0,0,size1.cx,size1.cy,gl_bgra,gl_unsigned_byte,@fpixels[0]);
+  setlength(frowbuffer,size1.cx);         //OpenGL is bottom up
+  for int1:= 0 to size1.cy div 2 - 1 do begin
+   po1:= @fpixels[int1*size1.cx];
+   po2:= @fpixels[(size1.cy-1-int1)*size1.cx];
+   move(po1^,frowbuffer[0],size1.cx*sizeof(longword));
+   move(po2^,po1^,size1.cx*sizeof(longword));
+   move(frowbuffer[0],po2^,size1.cx*sizeof(longword));
+  end;
+  fillchar(img,sizeof(img),0);
+  img.kind:= bmk_rgb;
+  img.bgr:= false;
+  img.size:= size1;
+  img.length:= size1.cx*size1.cy;
+  img.linelength:= size1.cx;
+  img.linebytes:= size1.cx*sizeof(longword);
+  img.pixels:= plongwordaty(@fpixels[0]);
+  if fbitmap = nil then begin
+   fbitmap:= tbitmap.create(bmk_rgb);
+  end;
+  fbitmap.loadfromimage(img);
+ except
+  on e: exception do begin
+   ffailed:= true;
+   writeln(stderr,'topenglwidget: ',e.message);
+  end;
+ end;
+end;
+
+procedure tcustomopenglwidget.doonpaint(const acanvas: tcanvas);
+begin
+ if not (csdesigning in componentstate) and canclientpaint then begin
+  if acanvas = nil then begin               //timer
+   renderoffscreen;
+   ffresh:= true;
+   invalidatewidget;
+  end
+  else begin
+   if not ffresh then begin
+    renderoffscreen;
+   end;
+   ffresh:= false;
+   if fbitmap <> nil then begin
+    fbitmap.paint(acanvas,innerclientrect.pos);
+   end;
+   restarttimer;
+  end;
+ end;
+end;
+
+{$else}
 
 procedure tcustomopenglwidget.dodestroywinid;
 begin
@@ -397,6 +530,8 @@ begin
  setcurrent;
  inherited;
 end;
+
+{$endif}
 
 function tcustomopenglwidget.canclientpaint: boolean;
 begin

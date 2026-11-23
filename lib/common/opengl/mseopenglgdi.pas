@@ -15,11 +15,15 @@ unit mseopenglgdi;
 //todo: optimize pixmap and brush handling, use server side buffers
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland)}
+ {$define offscreengl}   //no GLX: EGL pbuffer contexts
+{$endif}
 
 interface
 uses
- msegl,mseglext,mseglu,{$ifdef unix}mseglx,mx,mxlib,mxutil,msectypes,
- {$else}windows,{$endif}
+ msegl,mseglext,mseglu,{$ifdef offscreengl}mseegl,msectypes,
+ {$else}{$ifdef unix}mseglx,mx,mxlib,mxutil,msectypes,
+ {$else}windows,{$endif}{$endif}
  msegraphics,msetypes,msegraphutils,mseguiglob,mseglextglob;
 {
 const
@@ -62,6 +66,9 @@ type
  oglgcstatesty = set of oglgcstatety;
  oglgcdty = record
   fkind: gckindty;
+  {$ifdef offscreengl}
+  fegl: teglcontext;
+  {$else}
   {$ifdef unix}
   fcontext: glxcontext;
   fdpy: pdisplay;
@@ -72,6 +79,7 @@ type
   fdc: hdc;
   fcontext: hglrc;
   doublebuf: boolean;
+  {$endif}
   {$endif}
   pd: paintdevicety;
   extensions: glextensionsty;
@@ -210,10 +218,16 @@ end;
 procedure makecurrent(const gc: gcty);
 begin
  with oglgcty(gc.platformdata).d do begin
+{$ifdef offscreengl}
+  if fegl <> nil then begin
+   fegl.makecurrent;
+  end;
+{$else}
 {$ifdef unix}
   glxmakecurrent(fdpy,pd,fcontext);
 {$else}
   wglmakecurrent(fdc,fcontext);
+{$endif}
 {$endif}
  end;
 end;
@@ -264,6 +278,14 @@ var
 
 function gdi_choosevisual(var gc: gcty;
                                  const contextinfo: contextinfoty): gdierrorty;
+{$ifdef offscreengl}
+begin
+ result:= gde_ok;
+ if not eglavailable then begin
+  result:= gde_novisual;
+ end;
+end;
+{$else}
 {$ifdef unix}
 var
  index: integer;
@@ -321,6 +343,7 @@ begin
 {$endif}
  end;
 end;
+{$endif}
 (*
 {$ifdef unix}
 
@@ -473,18 +496,27 @@ end;
 procedure gdi_makecurrent(var drawinfo: drawinfoty);
 begin
  with oglgcty(drawinfo.gc.platformdata).d do begin
+{$ifdef offscreengl}
+  if fegl <> nil then begin
+   fegl.makecurrent;
+  end;
+{$else}
 {$ifdef unix}
 //  glxmakecurrent(fdpy,drawinfo.paintdevice,fcontext);
   glxmakecurrent(fdpy,pd,fcontext);
 {$else}
   wglmakecurrent(fdc,fcontext);
 {$endif}
+{$endif}
  end;
 end;
 
+{$ifdef offscreengl}
+{$else}
 {$ifdef unix}
 var
  linkgc: glxcontext;
+{$endif}
 {$endif}
 var
  screenextensions: glextensionsty;
@@ -529,6 +561,9 @@ end;
 procedure gdi_creategc(var drawinfo: drawinfoty); //gdifunc
 var
  device1: ptruint; //used for extension query
+{$ifdef offscreengl}
+ sz: sizety;
+{$else}
 {$ifdef unix}
  attributes: txsetwindowattributes;
 {$else}
@@ -536,6 +571,7 @@ var
  int1: integer;
  options1: internalwindowoptionsty;
  wi1: windowty;
+{$endif}
 {$endif}
 begin
  if gccount = 0 then begin
@@ -546,6 +582,37 @@ begin
   if error <> gde_ok then begin
    exit;
   end;
+ {$ifdef offscreengl}
+  device1:= 0; //not used
+  sz:= gcpo^.paintdevicesize;
+  if (kind <> gck_pixmap) and (windowrect <> nil) then begin
+   sz:= windowrect^.size;
+  end;
+  if sz.cx < 1 then begin
+   sz.cx:= 1;
+  end;
+  if sz.cy < 1 then begin
+   sz.cy:= 1;
+  end;
+  try
+   with pcontextinfoty(contextinfopo)^.attrib do begin
+    fegl:= teglcontext.create(depthsize,stencilsize,alphasize);
+   end;
+   fegl.resize(sz.cx,sz.cy);
+  except
+   freeandnil(fegl);
+   error:= gde_rendercontext;
+   exit;
+  end;
+  inc(gccount);
+  gcpo^.handle:= ptruint(fegl);
+  fkind:= kind;
+  if paintdevice = 0 then begin  //no window, marker for "valid"
+   paintdevice:= ptruint(fegl);
+   gcpo^.paintdevicesize:= sz;
+  end;
+  pd:= paintdevice;
+ {$else}
  {$ifdef unix}
   if fvisinfo = nil then begin
    error:= gde_novisual;
@@ -660,13 +727,14 @@ begin
   inc(gccount);
   gcpo^.handle:= ptruint(fcontext);
  {$endif}
+ {$endif}
   if error = gde_ok then begin
    initcontext(paintdevice,gcpo^,mr(nullpoint,gcpo^.paintdevicesize));
    if paintdevice <> 0 then begin
     if (kind = gck_pixmap) then begin
      if not pixmapextensionschecked then begin
       makecurrent(gcpo^);
-      pixmapextensions:= gldeviceextensions(device1) +
+      pixmapextensions:= {$ifndef offscreengl}gldeviceextensions(device1) +{$endif}
                             mseglparseextensions(glgetstring(gl_extensions));
       pixmapextensionschecked:= true;
      end;
@@ -675,7 +743,7 @@ begin
     else begin
      if not screenextensionschecked then begin
       makecurrent(gcpo^);
-      screenextensions:= gldeviceextensions(device1) +
+      screenextensions:= {$ifndef offscreengl}gldeviceextensions(device1) +{$endif}
                         mseglparseextensions(glgetstring(gl_extensions));
       screenextensionschecked:= true;
      end;
@@ -692,6 +760,15 @@ begin
   if tess <> nil then begin
    gludeletetess(tess);
   end;
+{$ifdef offscreengl}
+  if fegl <> nil then begin
+   fegl.makecurrent;
+   gldeletetextures(1,@texture);
+   fegl.release;
+   freeandnil(fegl);
+  end;
+  dec(gccount);
+{$else}
 {$ifdef unix}
   glxmakecurrent(fdpy,0,nil);
   gldeletetextures(1,@texture);
@@ -722,6 +799,7 @@ begin
   end;
   dec(gccount);
 {$endif}
+{$endif}
   if gccount = 0 then begin
    releaseopengl();
    screenextensionschecked:= false;
@@ -739,10 +817,14 @@ end;
 procedure gdi_swapbuffers(var drawinfo: drawinfoty);
 begin
  with oglgcty(drawinfo.gc.platformdata).d do begin
+ {$ifdef offscreengl}
+  glflush;       //pbuffer, nothing to swap
+ {$else}
  {$ifdef unix}
   glxswapbuffers(fdpy,drawinfo.paintdevice);
  {$else}
   swapbuffers(fdc);
+ {$endif}
  {$endif}
  end;
 end;

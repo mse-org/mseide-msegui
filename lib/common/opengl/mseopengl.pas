@@ -12,10 +12,13 @@ unit mseopengl;
 // under construction
 //
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
+{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland)}
+ {$define offscreengl}   //no GLX: EGL pbuffer contexts
+{$endif}
 
 interface
 uses
- msegl,{$ifdef unix}mseglx,mx,mxlib,mxutil,{$else}windows,{$endif}
+ msegl,{$ifdef offscreengl}{$else}{$ifdef unix}mseglx,mx,mxlib,mxutil,{$else}windows,{$endif}{$endif}
  msegraphics,msetypes,mseguiglob,msegraphutils,mseopenglgdi;
 
 type
@@ -93,7 +96,7 @@ const
    accumbluesize: -1;
    accumalphasize: -1
   );
-{$ifdef unix}
+{$if defined(unix) and not defined(offscreengl)}
   defaultvisualattributes: array[0..8] of integer =
   (GLX_RGBA,GLX_RED_SIZE,8,GLX_GREEN_SIZE,8,GLX_BLUE_SIZE,8,
    GLX_DOUBLEBUFFER,none);
@@ -111,7 +114,7 @@ begin
  initializeopengl([]);
 // fgdinum:= openglgetgdinum;
  fcontextinfo.attrib:= defaultcontextattributes;
-{$ifdef unix}
+{$if defined(unix) and not defined(offscreengl)}
  fcontextinfo.visualattributes:= defaultvisualattributes;
 {$endif}
  inherited;
@@ -197,10 +200,15 @@ begin
 end;
 
 procedure topenglcanvas.updatewindowoptions(var aoptions: internalwindowoptionsty);
+{$ifndef offscreengl}
 var
  gc1: gcty;
+{$endif}
 begin
  inherited;
+{$ifdef offscreengl}
+ //no native window, nothing to do
+{$else}
  fillchar(gc1,sizeof(gc1),0);
  gdi_choosevisual(gc1,fcontextinfo);
 {$ifdef unix}
@@ -220,6 +228,7 @@ begin
   end;
  end;
 {$endif}
+{$endif}
 end;
 
 procedure topenglcanvas.updatesize(const asize: sizety);
@@ -229,6 +238,15 @@ begin
  with fdrawinfo.gc do begin
   oglgcty(platformdata).d.top:= asize.cy+gltopshift;
   if (handle <> 0) and not sizeisequal(asize,paintdevicesize) then begin
+  {$ifdef offscreengl}
+   with oglgcty(platformdata).d do begin
+    if (fkind <> gck_pixmap) and (fegl <> nil) then begin
+     fegl.release;
+     fegl.resize(asize.cx,asize.cy);   //new pbuffer, context is kept
+     fegl.makecurrent;
+    end;
+   end;
+  {$endif}
    viewport:= mr(fviewport.pos,asize);
    {
    fillchar(gc1,sizeof(gc1),0);

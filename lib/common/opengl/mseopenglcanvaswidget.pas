@@ -12,11 +12,14 @@ unit mseopenglcanvaswidget;
 // under construction
 //
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland)}
+ {$define offscreengl}   //no native child window: EGL pbuffer, the picture
+{$endif}                 //is copied into the widget
 
 interface
 uses
  msewindowwidget,msegraphics,mseopengl,classes,mclasses,mseclasses,
- msegraphutils,
+ msegraphutils,{$ifdef offscreengl}msebitmap,{$endif}
  msegui,msemenus,mseguiglob,msetypes;
 
 type
@@ -59,8 +62,21 @@ type
   private
    fcanvas: topenglwidgetcanvas;
    fonrender: openglcanvasrendereventty;
+   {$ifdef offscreengl}
+   fbitmap: tbitmap;
+   fpixels: array of longword;
+   frowbuffer: array of longword;
+   flinked: boolean;
+   fglused: boolean;
+   ffailed: boolean;
+   ffresh: boolean;
+   procedure renderoffscreen;
+   {$endif}
    procedure setcanvas(const avalue: topenglwidgetcanvas);
   protected
+   {$ifdef offscreengl}
+   procedure doonpaint(const acanvas: tcanvas); override;
+   {$endif}
    procedure readstate(reader: treader); override;
    procedure doclientrectchanged; override;
    procedure docreatewinid(const aparent: winidty; const awidgetrect: rectty;
@@ -114,7 +130,7 @@ type
 
 implementation
 uses
- mseopenglgdi,msegl;
+ mseopenglgdi,msegl,sysutils{$ifdef offscreengl},mseglext{$endif};
 
 type
  topenglcanvas1 = class(topenglcanvas);
@@ -129,6 +145,16 @@ end;
 
 destructor topenglcanvaswidget.destroy;
 begin
+{$ifdef offscreengl}
+ if flinked then begin
+  fcanvas.unlink;
+  flinked:= false;
+ end;
+ fbitmap.free;
+ if fglused then begin
+  releaseopengl;
+ end;
+{$endif}
  inherited;
  fcanvas.free;
 end;
@@ -140,7 +166,11 @@ end;
 
 procedure topenglcanvaswidget.gcneeded(const sender: tcanvas);
 begin
+{$ifdef offscreengl}
+ //the context is created in renderoffscreen
+{$else}
  checkclientwinid;
+{$endif}
 end;
 {
 function topenglcanvaswidget.getmonochrome: boolean;
@@ -174,7 +204,13 @@ end;
 
 procedure topenglcanvaswidget.doclientrectchanged;
 begin
+{$ifdef offscreengl}
+ if flinked then begin
+  fcanvas.updatesize(innerpaintrect.size);
+ end;
+{$else}
  fcanvas.updatesize(innerpaintrect.size);
+{$endif}
  inherited;
 end;
 
@@ -204,6 +240,100 @@ procedure topenglcanvaswidget.getcanvasimage(const bgr: boolean;
 begin
  //dummy
 end;
+
+{$ifdef offscreengl}
+
+procedure topenglcanvaswidget.renderoffscreen;
+var
+ size1: sizety;
+ rect1: rectty;
+ id1: winidty;
+ int1: integer;
+ po1,po2: plongword;
+ img: imagety;
+begin
+ if ffailed then begin
+  exit;
+ end;
+ size1:= innerpaintrect.size;
+ if (size1.cx <= 0) or (size1.cy <= 0) then begin
+  exit;
+ end;
+ rect1:= makerect(nullpoint,size1);
+ try
+  if not flinked then begin
+   initializeopengl([]);
+   fglused:= true;
+   id1:= 0;
+   fcanvas.linktopaintdevice(0,rect1,id1);
+   if id1 = 0 then begin
+    raise exception.create('could not create the EGL context');
+   end;
+   flinked:= true;
+   fcanvas.updatesize(size1);
+  end;
+  updaterenderstep;
+  fcanvas.updatesize(size1);         //new pbuffer if the size has changed
+  if canevent(tmethod(fonrender)) then begin
+   fcanvas.reset;
+   fonrender(self,rect1);
+   fcanvas.endpaint;
+  end;
+  gdi_makecurrent(topenglcanvas1(fcanvas).fdrawinfo);
+  glfinish;
+  setlength(fpixels,size1.cx*size1.cy);
+  glpixelstorei(gl_pack_alignment,1);
+  glreadpixels(0,0,size1.cx,size1.cy,gl_bgra,gl_unsigned_byte,@fpixels[0]);
+  setlength(frowbuffer,size1.cx);          //OpenGL is bottom up
+  for int1:= 0 to size1.cy div 2 - 1 do begin
+   po1:= @fpixels[int1*size1.cx];
+   po2:= @fpixels[(size1.cy-1-int1)*size1.cx];
+   move(po1^,frowbuffer[0],size1.cx*sizeof(longword));
+   move(po2^,po1^,size1.cx*sizeof(longword));
+   move(frowbuffer[0],po2^,size1.cx*sizeof(longword));
+  end;
+  fillchar(img,sizeof(img),0);
+  img.kind:= bmk_rgb;
+  img.bgr:= false;
+  img.size:= size1;
+  img.length:= size1.cx*size1.cy;
+  img.linelength:= size1.cx;
+  img.linebytes:= size1.cx*sizeof(longword);
+  img.pixels:= plongwordaty(@fpixels[0]);
+  if fbitmap = nil then begin
+   fbitmap:= tbitmap.create(bmk_rgb);
+  end;
+  fbitmap.loadfromimage(img);
+ except
+  on e: exception do begin
+   ffailed:= true;
+   writeln(stderr,'topenglcanvaswidget: ',e.message);
+  end;
+ end;
+end;
+
+procedure topenglcanvaswidget.doonpaint(const acanvas: tcanvas);
+begin
+ if not (csdesigning in componentstate) and canclientpaint then begin
+  if acanvas = nil then begin               //timer
+   renderoffscreen;
+   ffresh:= true;
+   invalidatewidget;
+  end
+  else begin
+   if not ffresh then begin
+    renderoffscreen;
+   end;
+   ffresh:= false;
+   if fbitmap <> nil then begin
+    fbitmap.paint(acanvas,innerpaintrect.pos);
+   end;
+   restarttimer;
+  end;
+ end;
+end;
+
+{$endif}
 
 procedure topenglcanvaswidget.readstate(reader: treader);
 begin
