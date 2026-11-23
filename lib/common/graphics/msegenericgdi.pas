@@ -22,7 +22,7 @@ uses
  ,{$ifdef usesdl3}sdl3msegui{$else}sdl2msegui{$endif}
 {$endif};
 type
-{$ifdef usewayland}
+{$if defined(usewayland) or defined(usehybrid)}
  SDL_Rect = record x,y,w,h: integer; end;
 {$endif}
  rectextentty = integer;

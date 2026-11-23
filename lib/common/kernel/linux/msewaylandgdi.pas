@@ -16,7 +16,9 @@ unit msewaylandgdi;
    pixmap canvas:  the pixmap itself (pixmapty = psoftsurfacety).
   A window is shown by gdi_endpaint -> waylandpresent(), which copies the
   backing store into a wl_shm buffer and commits. }
+
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
+{$include ../sdl/msesdl.inc}  //derives usesdl from usewayland, like mseguiintf.pas
 
 interface
 uses
@@ -25,7 +27,7 @@ uses
 
 var
  sdldebug: boolean;      //set by the environment variable MSEWLDEBUG
- 
+
 const
  radtodeg = 360/(2*pi);
 
@@ -40,7 +42,8 @@ function waylandgetdefaultfontnames: defaultfontnamesty;
 
 implementation
 uses
- mseguiintf,msegraphutils,msesysintf1,msegenericgdi;
+ {$ifdef usehybrid}mseguiintfwl{$else}mseguiintf{$endif},
+ msegraphutils,msesysintf1,msegenericgdi;
 
 type
  //drawing state of a canvas, kept in gcty.platformdata like the Windows gdi.
@@ -52,7 +55,7 @@ type
   currentrop: rasteropty;
   currentfont: fontty;
  end;
- 
+
  waylandgcty = record
   case integer of
    0: (d: waylandgcdty;);
@@ -172,7 +175,7 @@ end;
 procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.createpixmap do begin
-  pixmap:= gui_createpixmap(size,0,kind = bmk_mono,copyfrom);
+  pixmap:= waylandcreatepixmap(size,kind = bmk_mono,copyfrom);
  end;
 end;
 
@@ -841,7 +844,7 @@ begin
    if mask <> nil then begin
     write(' maskkind=',ord(mask.kind));
    end;
-   
+
      writeln(' copymode=',ord(copymode),' transp=$',
            inttohex(transparentcolor,8),' opacity=',opacity.red,',',
            opacity.green,',',opacity.blue,' tiled=',al_tiled in alignment,
@@ -854,7 +857,7 @@ begin
            ' skind=',ord(tcanvas1(source).fdrawinfo.gc.kind),
            ' colorconvert=',df_colorconvert in drawinfo.gc.drawingflags);
    flush(system.output);
-   
+
   end;
 
   r1:= softrect(sourcerect^.x,sourcerect^.y,sourcerect^.cx,sourcerect^.cy);
@@ -939,8 +942,8 @@ begin
     end;
    end;
   end
-  
-  
+
+
   else begin
    //color key: pixels of this color are transparent (0 = not used)
    keycolor:= longword(drawinfo.copyarea.transparentcolor) and $00FFFFFF;

@@ -1443,6 +1443,9 @@ procedure setchildbounds(const sender: TObject);
 
 var
  flushgdi: boolean;
+ guisoftbackend: boolean = {$ifdef usesdl}true{$else}false{$endif};
+          //true: SDL or Wayland software backend (no async canvas, one clip
+          //rectangle); set by gui_init of the Wayland backend
 {$ifdef mse_debuggdisync}
 procedure checkgdilock;
 procedure checkgdiunlocked;
@@ -2354,7 +2357,6 @@ begin
   end;
  end;
 end;
-
 
 procedure tsimplebitmap.switchtomonochrome;
 begin
@@ -4937,7 +4939,17 @@ begin
   acolorforeground:= fvaluepo^.color;
   acolorbackground:= fvaluepo^.colorbackground;
   checkgcstate([cs_acolorforeground,cs_acolorbackground]);
+{$else}
+  // other backends (Wayland): a color-kind source canvas with a mono mask is
+  // a glyph, the canvas colors must reach the backend as well
+  if guisoftbackend and (amask <> nil) and (amask.kind = bmk_mono) and
+                  (gc.kind = source.fdrawinfo.gc.kind) then begin
+   acolorforeground:= fvaluepo^.color;
+   acolorbackground:= fvaluepo^.colorbackground;
+   checkgcstate([cs_acolorforeground,cs_acolorbackground]);
+  end;
 {$endif}
+
   if gc.kind <> source.fdrawinfo.gc.kind then begin //different colorformat
   if gc.kind <> source.fdrawinfo.gc.kind then begin //different colorformat
    include(gc.drawingflags,df_colorconvert);

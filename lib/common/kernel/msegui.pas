@@ -2607,8 +2607,8 @@ type
    fcontainer: winidty;
    fownerwidget: twidget;
    fcanvas: tcanvas;
-   {$if not defined(use_singlecanvas) and not defined(usesdl)}
-   fasynccanvas: tcanvas;
+   {$ifndef use_singlecanvas}
+   fasynccanvas: tcanvas;      //nil if guisoftbackend
    {$endif}
    fmodalresult: modalresultty;
    fupdateregion: gdiregionty;
@@ -14594,26 +14594,33 @@ begin
  end;
 end;
 
+
 function twidget.getcanvas(aorigin: originty = org_client): tcanvas;
 begin
  with tcanvas1(window.fcanvas) do begin
   fstate:= fstate - changedmask; //state invalid
  end;
- {$if not defined(use_singlecanvas) and not defined(usesdl)}
- result:= fwindow.fasynccanvas;
+ {$ifndef use_singlecanvas}
+ if guisoftbackend then begin
+  result:= fwindow.fcanvas;
+ end
+ else begin
+  result:= fwindow.fasynccanvas;
+ end;
  {$else}
  result:= fwindow.fcanvas;
  {$endif}
  with result do begin
   if active then begin
-   {$ifdef usesdl}
-   // SDL builds have no separate async canvas: result is the window canvas,
-   // which may be in the middle of a paint. Do not reset it, only push a state.
-   save;
-   {$else}
-   reset;
-   save;
-   {$endif}
+   if guisoftbackend then begin
+    // no separate async canvas: result is the window canvas, which may be
+    // in the middle of a paint. Do not reset it, only push a state.
+    save;
+   end
+   else begin
+    reset;
+    save;
+   end;
   end;
   font:= getfont;
   origin:= rootpos;
@@ -14635,7 +14642,10 @@ begin
    end;
   end;
  end;
+
 end;
+
+
 procedure twidget.updatewindowinfo(var info: windowinfoty);
 begin
  //dummy
@@ -15995,21 +16005,24 @@ begin
  fownerwidget:= aowner;
  fownerwidget.fwindow:= self;
  fcanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
-   {$if not defined(use_singlecanvas) and not defined(usesdl)}
- fasynccanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
-  {$endif}
+ {$ifndef use_singlecanvas}
+ if not guisoftbackend then begin
+  fasynccanvas:= creategdicanvas(fgdi,bmk_rgb,self,icanvas(self));
+ end;
+ {$endif}
  fscrollnotifylist:= tnotifylist.create;
  fopacity:= emptyreal;
  inherited create;
  fownerwidget.rootchanged([rcf_windowset]); //nil all references
 end;
 
+
 destructor twindow.destroy;
 begin
  include(fstate,tws_destroying);
- {$ifndef usesdl}
- freeandnil(fsysdragobject);
- {$endif}
+ if not guisoftbackend then begin
+  freeandnil(fsysdragobject);
+ end;
  container:= 0;
  appinst.twindowdestroyed(self);
  if ftransientfor <> nil then begin
@@ -16020,19 +16033,22 @@ begin
  end;
  destroywindow;
  fcanvas.free;
-   {$if not defined(use_singlecanvas) and not defined(usesdl)}
- fasynccanvas.free;
+ {$ifndef use_singlecanvas}
+ fasynccanvas.free;           //nil on soft backends
  {$endif}
  inherited;
  destroyregion(fupdateregion);
  fscrollnotifylist.free;
 end;
 
+
 procedure twindow.setasynccanvas(const acanvas: tcanvas);
 begin
  include(fstate,tws_canvasoverride);
-   {$if not defined(use_singlecanvas) and not defined(usesdl)}
- acanvas.initflags(fasynccanvas);
+ {$ifndef use_singlecanvas}
+ if fasynccanvas <> nil then begin
+  acanvas.initflags(fasynccanvas);
+ end;
  {$endif}
  fownerwidget.fontcanvaschanged;
 end;
@@ -16041,8 +16057,10 @@ procedure twindow.releaseasynccanvas;
 begin
  if tws_canvasoverride in fstate then begin
   exclude(fstate,tws_canvasoverride);
-   {$if not defined(use_singlecanvas) and not defined(usesdl)}
-  fasynccanvas.initflags(fasynccanvas);
+  {$ifndef use_singlecanvas}
+  if fasynccanvas <> nil then begin
+   fasynccanvas.initflags(fasynccanvas);
+  end;
   {$endif}
  end;
 end;
@@ -16135,9 +16153,11 @@ begin
   gdierror(fcanvas.creategc(fwindow.id,gck_screen,gc),self);
   gc.paintdevicesize:= fownerwidget.fwidgetrect.size;
   fcanvas.linktopaintdevice(fwindow.id,gc{,fowner.fwidgetrect.size},nullpoint);
-   {$if not defined(use_singlecanvas) and not defined(usesdl)}
-  gdierror(fasynccanvas.creategc(fwindow.id,gck_screen,gc),self);
-  fasynccanvas.linktopaintdevice(fwindow.id,gc,{fowner.fwidgetrect.size,}nullpoint);
+  {$ifndef use_singlecanvas}
+  if fasynccanvas <> nil then begin
+   gdierror(fasynccanvas.creategc(fwindow.id,gck_screen,gc),self);
+   fasynccanvas.linktopaintdevice(fwindow.id,gc,{fowner.fwidgetrect.size,}nullpoint);
+  end;
   {$endif}
   if appinst <> nil then begin
    tinternalapplication(application).registerwindow(self);
@@ -16167,8 +16187,10 @@ begin
   appinst.unregisterwindow(self);
  end;
  fcanvas.unlink;
-   {$if not defined(use_singlecanvas) and not defined(usesdl)}
- fasynccanvas.unlink;
+ {$ifndef use_singlecanvas}
+ if fasynccanvas <> nil then begin
+  fasynccanvas.unlink;
+ end;
  {$endif}
  if fwindow.id <> 0 then begin
   appinst.windowdestroyed(fwindow.id);
@@ -16190,6 +16212,7 @@ begin
  fillchar(fwindow,sizeof(fwindow),0);
  exclude(fstate,tws_windowvisible);
 end;
+
 
 procedure twindow.recreatewindow();
 var
@@ -16936,8 +16959,10 @@ procedure twindow.sizechanged;
 begin
  exclude(fstate,tws_sizevalid);
  tcanvas1(fcanvas).updatesize(fownerwidget.fwidgetrect.size);
- {$if not defined(use_singlecanvas) and not defined(usesdl)}
- tcanvas1(fasynccanvas).updatesize(fownerwidget.fwidgetrect.size);
+ {$ifndef use_singlecanvas}
+ if fasynccanvas <> nil then begin
+  tcanvas1(fasynccanvas).updatesize(fownerwidget.fwidgetrect.size);
+ end;
  {$endif}
  if fobjectlinker <> nil then begin
   fobjectlinker.sendevent(oe_changed);
@@ -17023,11 +17048,13 @@ begin
   fcanvas.reset;
   fcanvas.clipregion:= fupdateregion.region; //canvas owns the region
 
-{$ifdef usesdl}
-  // SDL2 has only one clip rectangle: paint the bounding box of the update region
-  rect1:= fcanvas.clipbox;
-  fcanvas.clipregion:= fcanvas.createregion(rect1);
-{$endif}
+  if guisoftbackend then begin
+   // SDL2 and the Wayland software gdi have only one clip rectangle:
+   // paint the bounding box of the update region
+   rect1:= fcanvas.clipbox;
+   fcanvas.clipregion:= fcanvas.createregion(rect1);
+  end;
+
   {
   bo1:= appinst.caret.islinkedto(fcanvas) and
    testintersectrect(fcanvas.clipbox,appinst.caret.rootcliprect);

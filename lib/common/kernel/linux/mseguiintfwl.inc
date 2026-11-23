@@ -7,7 +7,8 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 }
-unit mseguiintf;
+
+
 { Pure Wayland backend (no libx11, no SDL).
   Build with -dusewayland, unit path kernel/wayland, include path kernel/sdl
   (for msesdl.inc).
@@ -19,7 +20,7 @@ unit mseguiintf;
 {$warn 5033 on}
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-{$include msesdl.inc}
+{$include ../sdl/msesdl.inc}
 interface
 
 uses
@@ -48,19 +49,25 @@ function getapplicationwindow: winidty;
 function ismonopixmap(pixmap: pixmapty): boolean;
 procedure removemonopixmap(pixmap: pixmapty);
 function msedefaultscreenno: integer;
+{$ifdef usesdl}
 function gui_getrootwindow(id: winidty = 0): winidty;
+{$endif}
 function msedisplay: pointer;
+{$ifdef usesdl}
 function gui_getpixel(const id: winidty; const pos: pointty;
                                              out pixel: pixelty): guierrorty;
+{$endif}
 
 //used by msewaylandgdi
 function waylandbacksurface(id: winidty): psoftsurfacety;
 procedure waylandpresent(surf: psoftsurfacety);
+function waylandcreatepixmap(const size: sizety; const mono: boolean;
+                                    const copyfrom: pixmapty): pixmapty;
 
 var
  sdldebug: boolean;      //set by the environment variable MSEWLDEBUG
  mse_shapebmp: tmaskedbitmap;   //image of wo_customshape, dark = window
- 
+
 implementation
 
 uses
@@ -245,6 +252,44 @@ begin
  pixel:= 0;
  result:= gue_error;      //Wayland can not read the screen
 end;
+
+{$ifndef usesdl}
+//functions of the X11 interface that have no meaning on Wayland
+
+procedure gui_disconnectmaineventqueue();
+begin
+ //nothing to do, the event loop is not blocked in a connection
+end;
+
+procedure gui_connectmaineventqueue();
+begin
+end;
+
+function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
+begin
+ result:= gue_ok;                 //not possible with plain Wayland
+end;
+
+procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
+begin
+ appmmwidth:= 0;                  //0.0 = not supported
+ appmmheight:= 0;
+end;
+
+function gui_graytopixel(gray: byte): pixelty;
+begin
+ result:= gui_rgbtopixel(longword(gray) * $010101);
+end;
+
+function gui_pixeltogray(pixel: pixelty): byte;
+var
+ rgb: longword;
+begin
+ rgb:= gui_pixeltorgb(pixel);
+ result:= (((rgb shr 16) and $ff) + ((rgb shr 8) and $ff) +
+                                                    (rgb and $ff)) div 3;
+end;
+{$endif}
 
 //event lists
 
@@ -1321,12 +1366,20 @@ begin
  result:= gue_ok;
 end;
 
+{$ifdef usesdl}
 function gui_raisewindow(id: winidty): guierrorty;
+{$else}
+function gui_raisewindow(id: winidty; const topmost: boolean = false): guierrorty;
+{$endif}
 begin
  result:= gue_ok;                 //not possible with Wayland
 end;
 
+{$ifdef usesdl}
 function gui_lowerwindow(id: winidty): guierrorty;
+{$else}
+function gui_lowerwindow(id: winidty; const topmost: boolean = false): guierrorty;
+{$endif}
 begin
  result:= gue_ok;
 end;
@@ -1411,6 +1464,7 @@ end;
 
 //clipboard, text through wl_data_device
 
+{$ifdef usesdl}
 function gui_copytoclipboard(const value: msestring): guierrorty;
 begin
  clipboardtext:= value;
@@ -1435,6 +1489,52 @@ begin
  end;
  result:= gue_ok;
 end;
+{$else}
+var
+ localbuffertext: msestring;     //buffers other than cbb_clipboard
+
+function gui_copytoclipboard(const value: msestring;
+                             const buffer: clipboardbufferty): guierrorty;
+begin
+ if buffer = cbb_clipboard then begin
+  clipboardtext:= value;
+  wlc_clipboardset(stringtoutf8ansi(value));
+ end
+ else begin
+  localbuffertext:= value;
+ end;
+ result:= gue_ok;
+end;
+
+function gui_canpastefromclipboard(const buffer: clipboardbufferty): boolean;
+begin
+ if buffer = cbb_clipboard then begin
+  result:= wlc_clipboardcanpaste or (clipboardtext <> '');
+ end
+ else begin
+  result:= localbuffertext <> '';
+ end;
+end;
+
+function gui_pastefromclipboard(out value: msestring;
+                             const buffer: clipboardbufferty): guierrorty;
+var
+ s: string;
+begin
+ if buffer = cbb_clipboard then begin
+  if wlc_clipboardget(s) then begin
+   value:= utf8tomsestring(s);
+  end
+  else begin
+   value:= clipboardtext;
+  end;
+ end
+ else begin
+  value:= localbuffertext;
+ end;
+ result:= gue_ok;
+end;
+{$endif}
 
 //drag and drop
 
@@ -1655,9 +1755,9 @@ begin
  end;
 end;
 
-function gui_createpixmap(const size: sizety; winid: winidty = 0;
-                          monochrome: boolean = false;
-                          copyfrom: pixmapty = 0): pixmapty;
+//
+function waylandcreatepixmap(const size: sizety; const mono: boolean;
+                                    const copyfrom: pixmapty): pixmapty;
 var
  surf: psoftsurfacety;
 begin
@@ -1665,7 +1765,7 @@ begin
  surf:= createsoftsurface(size.cx,size.cy);
  if surf <> nil then begin
   result:= pixmapty(ptruint(surf));
-  if monochrome then begin
+  if mono then begin
    addmonopixmap(result);
   end;
   if copyfrom <> 0 then begin
@@ -1674,6 +1774,24 @@ begin
   end;
  end;
 end;
+
+{$ifdef usesdl}
+function gui_createpixmap(const size: sizety; winid: winidty = 0;
+                          monochrome: boolean = false;
+                          copyfrom: pixmapty = 0): pixmapty;
+begin
+ result:= waylandcreatepixmap(size,monochrome,copyfrom);
+end;
+{$else}
+function gui_createpixmap(const size: sizety; winid: winidty = 0;
+                          kind: bitmapkindty = bmk_rgb;
+                          copyfrom: pixmapty = 0): pixmapty;
+begin
+ result:= waylandcreatepixmap(size,kind = bmk_mono,copyfrom); //gray = rgb
+end;
+{$endif}
+//
+
 
 function gui_freepixmap(pixmap: pixmapty): gdierrorty;
 var
@@ -2538,6 +2656,8 @@ begin
  SetExceptionMask([exInvalidOp,exDenormalized,exZeroDivide,exOverflow,
                                                      exUnderflow,exPrecision]);
  sdldebug:= getenvironmentvariable('MSEWLDEBUG') <> '';
+ guisoftbackend:= true;     //behaviour of the soft backends
+ flushgdi:= true;
  result:= gue_error;
  if fppipe(wakepipe) <> 0 then begin
   exit;

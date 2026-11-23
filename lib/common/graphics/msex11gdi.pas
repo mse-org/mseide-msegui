@@ -14,7 +14,9 @@ interface
 uses
  mxlib,mxft,
  {$ifdef FPC}dynlibs,{$endif}
- msegraphics,mseguiglob,msestrings,msegraphutils,mseguiintf,msetypes,
+
+  msegraphics,mseguiglob,msestrings,msegraphutils,
+ {$ifdef usehybrid}mseguiintfx11{$else}mseguiintf{$endif},msetypes,
  msectypes,msefontconfig,msetriaglob;
 
 procedure init(const adisp: pdisplay; const avisual: msepvisual;
@@ -397,7 +399,7 @@ begin
   rgbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardrgb24);
   argbrenderpictformat:= xrenderfindstandardformat(appdisp,pictstandardargb32);
  end;
- 
+
   if not noxft then begin
   fhasxft:= fhasxft and xftdefaulthasrender(appdisp) and (xftgetversion() >= 20000);
    if fhasxft then begin
@@ -2239,7 +2241,7 @@ begin
             ((destrect^.cx <> sourcerect^.cx) or
             (destrect^.cy <> sourcerect^.cy)) and
             (destrect^.cx > 0) and (destrect^.cy > 0);
-  monomask:= (mask = nil) or (mask.kind = bmk_mono);
+    monomask:= (mask = nil) or (mask.kind = bmk_mono);
 //  stipplemask:= false;
   if hasxrender and (needstransform or (longword(opacity) <> maxopacity) or
                                                       not monomask) then begin
@@ -2564,7 +2566,7 @@ begin
        if pixmap = 0 then begin
         endlab := true ;
        end;
-       
+
        if endlab = false then
        begin
        pixmapgc:= xcreategc(appdisp,pixmap,gcgraphicsexposures,@xvalues);
@@ -3260,7 +3262,7 @@ const
   (n: 'XRenderSetPictureClipRegion';
                      d: {$ifndef FPC}@{$endif}@XRenderSetPictureClipRegion)
   );
-  
+
 var
  handle: tlibhandle;
 begin
