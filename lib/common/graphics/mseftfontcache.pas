@@ -51,6 +51,11 @@ type
    function getdataoffsfont(const afont: fontty): hashoffsetty; override;
    function textbackgroundrect(const drawinfo: drawinfoty;
                         const afont: fontty; out arect: rectty): boolean;
+   function drawscale(const drawinfo: drawinfoty): integer; virtual;
+                    //device pixels per logical unit of the target surface,
+                    //default 1. If > 1 the glyphs are rendered with a font
+                    //of scale * size, the layout stays the one of the
+                    //normal size.
   public
    constructor create(var ainstance: tftfontcache);
    destructor destroy; override;
@@ -100,6 +105,11 @@ type
    fbuffer: pointer;
    fsize: longword;
    fcapacity: longword;
+   ffile: string;            //for the scaled face
+   findex: integer;
+   fheight: integer;         //pixel size of this face / scale
+   fscaled: tftface;         //face with scale * fheight pixels, created on demand
+   fscaledscale: integer;
   protected
    fdataoffset: hashoffsetty;
    fascent: integer;
@@ -114,6 +124,8 @@ type
                const forceload: boolean): boolean;
                             //true if found
    procedure renderglyph(var ainfo: pglyphinfoty);
+   function scaledface(const ascale: integer): tftface;
+                            //nil if not possible
  end;
 
 { tftfontcache }
@@ -150,6 +162,11 @@ begin
    if ft_new_face(ftlib,pchar(str1),int1,ftface) = 0 then begin
     if ft_set_pixel_sizes(ftface,0,aheight) = 0 then begin
      pointer(fontdata^.font):= tftface.create(ftface);
+     with tftface(pointer(fontdata^.font)) do begin
+      ffile:= str1;
+      findex:= int1;
+      fheight:= aheight;
+     end;
      result:= true;
     end;
    end;
@@ -280,38 +297,70 @@ begin
  end;
 end;
 
+function tftfontcache.drawscale(const drawinfo: drawinfoty): integer;
+begin
+ result:= 1;
+end;
+
 procedure tftfontcache.drawstring16(var drawinfo: drawinfoty;
                                                      const afont: fontty);
 var
- face: tftface;
- po1: pglyphinfoty;
+ face,sface: tftface;
+ po1,po4: pglyphinfoty;
  po2: pmsecharaty;
  po3: pbitmapdataty;
- int1: integer;
+ int1,sc: integer;
  pt1: pointty;
- y1: integer;
+ y1,xl: integer;
 begin
  with drawinfo,text16pos do begin
   if count = 0 then begin
    exit;
   end;
-  pt1.x:= pos^.x + origin.x;
-  y1:= pos^.y + origin.y - 1;
+  sc:= drawscale(drawinfo);
   face:= tftface(pointer(afont));
   po2:= pointer(text);
-  for int1:= 0 to count-1 do begin
-   if face.getglyph(po2^[int1],po1,true) then begin
-    if po1^.bitmap = 0 then begin
-     face.renderglyph(po1);
+  sface:= nil;
+  if sc > 1 then begin
+   sface:= face.scaledface(sc);
+  end;
+  if sface = nil then begin               //normal size
+   pt1.x:= pos^.x + origin.x;
+   y1:= pos^.y + origin.y - 1;
+   for int1:= 0 to count-1 do begin
+    if face.getglyph(po2^[int1],po1,true) then begin
+     if po1^.bitmap = 0 then begin
+      face.renderglyph(po1);
+     end;
+     if po1^.bitmap <> 0 then begin //render error otherwise
+      po3:= pointer(pchar(face.fbuffer)+po1^.bitmap);
+      pt1.x:= pt1.x + po3^.left;
+      pt1.y:= y1 - po3^.top;
+      drawglyph(drawinfo,pt1,po3);
+      pt1.x:= pt1.x - po3^.left;
+     end;
+     pt1.x:= pt1.x + po1^.width;
     end;
-    if po1^.bitmap <> 0 then begin //render error otherwise
-     po3:= pointer(pchar(face.fbuffer)+po1^.bitmap);
-     pt1.x:= pt1.x + po3^.left;
-     pt1.y:= y1 - po3^.top;
-     drawglyph(drawinfo,pt1,po3);
-     pt1.x:= pt1.x - po3^.left;
+   end;
+  end
+  else begin                              //scaled: layout of the normal size,
+   xl:= pos^.x + origin.x;                //glyphs of the large face
+   y1:= (pos^.y + origin.y) * sc - 1;
+   for int1:= 0 to count-1 do begin
+    if face.getglyph(po2^[int1],po1,false) then begin  //advance, normal size
+     if sface.getglyph(po2^[int1],po4,true) then begin
+      if po4^.bitmap = 0 then begin
+       sface.renderglyph(po4);
+      end;
+      if po4^.bitmap <> 0 then begin
+       po3:= pointer(pchar(sface.fbuffer)+po4^.bitmap);
+       pt1.x:= xl * sc + po3^.left;
+       pt1.y:= y1 - po3^.top;
+       drawglyph(drawinfo,pt1,po3);
+      end;
+     end;
+     xl:= xl + po1^.width;
     end;
-    pt1.x:= pt1.x + po1^.width;
    end;
   end;
  end;
@@ -334,9 +383,35 @@ end;
 
 destructor tftface.destroy;
 begin
+ fscaled.free;
  inherited;
  freemem(fbuffer);
  ft_done_face(fface);
+end;
+
+function tftface.scaledface(const ascale: integer): tftface;
+var
+ ftface: pft_face;
+begin
+ result:= nil;
+ if (ascale < 1) or (ffile = '') then begin
+  exit;
+ end;
+ if (fscaled <> nil) and (fscaledscale = ascale) then begin
+  result:= fscaled;
+  exit;
+ end;
+ if ft_new_face(ftlib,pchar(ffile),findex,ftface) = 0 then begin
+  if ft_set_pixel_sizes(ftface,0,fheight * ascale) = 0 then begin
+   fscaled.free;                      //other scale, the old glyphs are useless
+   fscaled:= tftface.create(ftface);
+   fscaledscale:= ascale;
+   result:= fscaled;
+  end
+  else begin
+   ft_done_face(ftface);
+  end;
+ end;
 end;
 
 function tftface.getbuffer(const asize: integer;

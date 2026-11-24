@@ -9,7 +9,15 @@ unit msesoftsurface;
   is kept opaque when the destination is opaque.
 
   Clipping: every drawing function except softclear and softreadpixels is
-  restricted to surf^.clip, which is always inside the surface. }
+  restricted to surf^.clip, which is always inside the surface.
+
+  Scale (HiDPI): a surface has a scale factor, default 1. The size of a surface
+  (createsoftsurface, wrapsoftsurface, softresize, width, height, pitch) is
+  always given in device pixels. The coordinates and sizes given to the
+  drawing, clipping and copying functions are logical units, one logical unit
+  is surf^.scale device pixels. Exceptions in device pixels: softclear,
+  softblendmask, softreadpixels, softgetpixel. With scale = 1 everything
+  behaves as without a scale. }
 {$mode objfpc}{$h+}
 {$R-}{$Q-}
 
@@ -26,7 +34,8 @@ type
   width,height: integer;
   pitch: integer;          //bytes per row
   owned: boolean;          //pixels were allocated by createsoftsurface
-  clip: softrectty;
+  clip: softrectty;        //device pixels
+  scale: integer;          //device pixels per logical unit, >= 1, default 1
  end;
  psoftsurfacety = ^softsurfacety;
 
@@ -44,7 +53,10 @@ procedure softresetclip(const surf: psoftsurfacety);
 procedure softresize(const surf: psoftsurfacety; const w,h: integer);
                           //owned surfaces only, keeps the overlapping content,
                           //new area is 0, the surface record stays the same,
-                          //the clip is reset
+                          //the clip is reset, w and h are device pixels
+procedure softsetscale(const surf: psoftsurfacety; const scale: integer);
+                          //device pixels per logical unit, values < 1 are
+                          //taken as 1, the clip is reset
 
 //primitives
 procedure softclear(const surf: psoftsurfacety; const color: longword);
@@ -62,17 +74,22 @@ procedure softcopy(const dest: psoftsurfacety; const dx,dy: integer;
                    const blend: boolean);
                    //blend false: plain copy of the pixels including alpha,
                    //blend true: source over using the alpha of the source,
-                   //dest and src may be the same surface (plain copy only)
+                   //dest and src may be the same surface (plain copy only),
+                   //dx,dy are logical units of dest, srcrect is in logical
+                   //units of src, if the scales of the surfaces are different
+                   //the area is scaled with nearest neighbour (dest <> src)
 procedure softcopyscaled(const dest: psoftsurfacety; const drect: softrectty;
                    const src: psoftsurfacety; const srect: softrectty;
                    const blend: boolean);
                    //nearest neighbour scaling of srect into drect, clipped,
-                   //dest and src must be different surfaces
+                   //dest and src must be different surfaces, drect in logical
+                   //units of dest, srect in logical units of src
 procedure softblendmask(const dest: psoftsurfacety; const dx,dy: integer;
                    const mask: pbyte; const w,h: integer;
                    const bottomup: boolean; const color: longword);
                    //8 bit alpha mask, w*h bytes, (dx,dy) = top left corner on
-                   //the surface, bottomup: the first mask row is the bottom row
+                   //the surface, bottomup: the first mask row is the bottom row,
+                   //device pixels, not scaled
 procedure softreadpixels(const surf: psoftsurfacety; const rect: softrectty;
                    const dest: pointer; const destpitch: integer);
                    //pixels outside of the surface are returned as 0
@@ -254,6 +271,7 @@ begin
  result^.height:= h;
  result^.pitch:= w * 4;
  result^.owned:= true;
+ result^.scale:= 1;
  getmem(result^.pixels,result^.pitch * h);
  fillchar(result^.pixels^,result^.pitch * h,0);
  softresetclip(result);
@@ -273,6 +291,7 @@ begin
  result^.height:= h;
  result^.pitch:= pitch;
  result^.owned:= false;
+ result^.scale:= 1;
  softresetclip(result);
 end;
 
@@ -289,11 +308,16 @@ begin
 end;
 
 procedure softsetclip(const surf: psoftsurfacety; const rect: softrectty);
+var
+ s: integer;
 begin
  if not softvalid(surf) then begin
   exit;
  end;
- surf^.clip:= intersectrect(rect,softrect(0,0,surf^.width,surf^.height));
+ s:= surf^.scale;
+ surf^.clip:= intersectrect(softrect(rect.x * s,rect.y * s,rect.cx * s,
+                                                            rect.cy * s),
+                                  softrect(0,0,surf^.width,surf^.height));
 end;
 
 procedure softresetclip(const surf: psoftsurfacety);
@@ -336,6 +360,20 @@ begin
  softresetclip(surf);
 end;
 
+procedure softsetscale(const surf: psoftsurfacety; const scale: integer);
+begin
+ if not softvalid(surf) then begin
+  exit;
+ end;
+ if scale < 1 then begin
+  surf^.scale:= 1;
+ end
+ else begin
+  surf^.scale:= scale;
+ end;
+ softresetclip(surf);
+end;
+
 procedure softclear(const surf: psoftsurfacety; const color: longword);
 var
  y: integer;
@@ -350,7 +388,8 @@ begin
  end;
 end;
 
-procedure softfillrect(const surf: psoftsurfacety; const rect: softrectty;
+//device pixels, the surface must be valid
+procedure rawfillrect(const surf: psoftsurfacety; const rect: softrectty;
                        const color: longword; const alpha: byte);
 var
  r: softrectty;
@@ -358,7 +397,7 @@ var
  po: plongword;
  value: longword;
 begin
- if (alpha = 0) or not softvalid(surf) then begin
+ if alpha = 0 then begin
   exit;
  end;
  r:= intersectrect(rect,surf^.clip);
@@ -382,12 +421,39 @@ begin
  end;
 end;
 
+procedure softfillrect(const surf: psoftsurfacety; const rect: softrectty;
+                       const color: longword; const alpha: byte);
+var
+ s: integer;
+begin
+ if (alpha = 0) or not softvalid(surf) then begin
+  exit;
+ end;
+ s:= surf^.scale;
+ if s = 1 then begin
+  rawfillrect(surf,rect,color,alpha);
+ end
+ else begin
+  rawfillrect(surf,softrect(rect.x * s,rect.y * s,rect.cx * s,rect.cy * s),
+                                                                color,alpha);
+ end;
+end;
+
 procedure softdrawpoint(const surf: psoftsurfacety; const x,y: integer;
                        const color: longword; const alpha: byte);
 var
  po: plongword;
+ s: integer;
 begin
- if (alpha = 0) or not softvalid(surf) or (x < surf^.clip.x) or (y < surf^.clip.y) or
+ if (alpha = 0) or not softvalid(surf) then begin
+  exit;
+ end;
+ s:= surf^.scale;
+ if s <> 1 then begin                    //a block of scale * scale pixels
+  rawfillrect(surf,softrect(x * s,y * s,s,s),color,alpha);
+  exit;
+ end;
+ if (x < surf^.clip.x) or (y < surf^.clip.y) or
           (x >= surf^.clip.x + surf^.clip.cx) or
           (y >= surf^.clip.y + surf^.clip.cy) then begin
   exit;
@@ -456,7 +522,9 @@ begin
  end;
 end;
 
-procedure softcopy(const dest: psoftsurfacety; const dx,dy: integer;
+
+//device pixels, both surfaces must be valid
+procedure rawcopy(const dest: psoftsurfacety; const dx,dy: integer;
                    const src: psoftsurfacety; const srcrect: softrectty;
                    const blend: boolean);
 var
@@ -465,9 +533,6 @@ var
  sp,dp: plongword;
  s: longword;
 begin
- if not softvalid(dest) or not softvalid(src) then begin
-  exit;
- end;
  //source rectangle inside of the source surface
  sr:= intersectrect(srcrect,softrect(0,0,src^.width,src^.height));
  if (sr.cx <= 0) or (sr.cy <= 0) then begin
@@ -526,7 +591,8 @@ begin
  end;
 end;
 
-procedure softcopyscaled(const dest: psoftsurfacety; const drect: softrectty;
+//device pixels, both surfaces must be valid
+procedure rawcopyscaled(const dest: psoftsurfacety; const drect: softrectty;
                    const src: psoftsurfacety; const srect: softrectty;
                    const blend: boolean);
 var
@@ -536,7 +602,7 @@ var
  s: longword;
 begin
  if (drect.cx <= 0) or (drect.cy <= 0) or (srect.cx <= 0) or
-          (srect.cy <= 0) or not softvalid(dest) or not softvalid(src) then begin
+          (srect.cy <= 0) then begin
   exit;
  end;
  vis:= intersectrect(drect,dest^.clip);
@@ -570,6 +636,51 @@ begin
     inc(dp);
    end;
   end;
+ end;
+end;
+
+procedure softcopyscaled(const dest: psoftsurfacety; const drect: softrectty;
+                   const src: psoftsurfacety; const srect: softrectty;
+                   const blend: boolean);
+var
+ sd,ss: integer;
+begin
+ if not softvalid(dest) or not softvalid(src) then begin
+  exit;
+ end;
+ sd:= dest^.scale;
+ ss:= src^.scale;
+ rawcopyscaled(dest,softrect(drect.x * sd,drect.y * sd,drect.cx * sd,
+                                                         drect.cy * sd),
+               src,softrect(srect.x * ss,srect.y * ss,srect.cx * ss,
+                                                         srect.cy * ss),blend);
+end;
+
+procedure softcopy(const dest: psoftsurfacety; const dx,dy: integer;
+                   const src: psoftsurfacety; const srcrect: softrectty;
+                   const blend: boolean);
+var
+ sd,ss: integer;
+begin
+ if not softvalid(dest) or not softvalid(src) then begin
+  exit;
+ end;
+ sd:= dest^.scale;
+ ss:= src^.scale;
+ if sd = ss then begin
+  if sd = 1 then begin
+   rawcopy(dest,dx,dy,src,srcrect,blend);
+  end
+  else begin
+   rawcopy(dest,dx * sd,dy * sd,src,
+          softrect(srcrect.x * sd,srcrect.y * sd,srcrect.cx * sd,
+                                                srcrect.cy * sd),blend);
+  end;
+ end
+ else begin                       //different scales: dest <> src
+  rawcopyscaled(dest,softrect(dx * sd,dy * sd,srcrect.cx * sd,srcrect.cy * sd),
+               src,softrect(srcrect.x * ss,srcrect.y * ss,srcrect.cx * ss,
+                                                srcrect.cy * ss),blend);
  end;
 end;
 

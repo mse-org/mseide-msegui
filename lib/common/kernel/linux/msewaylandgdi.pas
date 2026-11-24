@@ -82,6 +82,7 @@ type
   protected
    procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                                       const bitmap: pbitmapdataty); override;
+   function drawscale(const drawinfo: drawinfoty): integer; override;
   public
    procedure drawstring16(var drawinfo: drawinfoty;
                                     const afont: fontty); override;
@@ -141,6 +142,17 @@ begin
   //pos.y is the bottom edge of the glyph
   softblendmask(gcsurf(drawinfo),pos.x,pos.y - height,pbyte(@data),
                                        width,height,true,rgbvalue(gcdata(drawinfo)^.d.fgrgb));
+ end;
+end;
+
+function twaylandftfontcache.drawscale(const drawinfo: drawinfoty): integer;
+var
+ surf: psoftsurfacety;
+begin
+ result:= 1;
+ surf:= gcsurf(drawinfo);
+ if softvalid(surf) then begin
+  result:= surf^.scale;          //window surfaces of a HiDPI output
  end;
 end;
 
@@ -718,7 +730,7 @@ procedure gdi_fillrect(var drawinfo: drawinfoty);
 var
  surf: psoftsurfacety;
  r: softrectty;
- xx,yy,x0,y0,x1,y1: integer;
+ xx,yy,x0,y0,x1,y1,sc: integer;
  p: longword;
 begin
  with drawinfo do begin
@@ -727,6 +739,8 @@ begin
                                          rect.rect^.cx,rect.rect^.cy);
   if (gcdata(drawinfo)^.d.currentrop = rop_xor) and (df_brush in gc.drawingflags) then begin
    //dotted xor frame (focus rectangle): invert every second pixel
+   //logical units, one unit is surf^.scale device pixels
+   sc:= surf^.scale;
    x0:= r.x;
    y0:= r.y;
    x1:= r.x + r.cx;
@@ -737,16 +751,16 @@ begin
    if y0 < 0 then begin
     y0:= 0;
    end;
-   if x1 > surf^.width then begin
-    x1:= surf^.width;
+   if x1 > surf^.width div sc then begin
+    x1:= surf^.width div sc;
    end;
-   if y1 > surf^.height then begin
-    y1:= surf^.height;
+   if y1 > surf^.height div sc then begin
+    y1:= surf^.height div sc;
    end;
    for yy:= y0 to y1-1 do begin
     for xx:= x0 to x1-1 do begin
      if ((xx + yy) and 1) = 0 then begin
-      p:= softgetpixel(surf,xx,yy) xor $00FFFFFF;
+      p:= softgetpixel(surf,xx * sc,yy * sc) xor $00FFFFFF;
       softdrawpoint(surf,xx,yy,p and $00FFFFFF,255);
      end;
     end;
