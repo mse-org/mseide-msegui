@@ -288,7 +288,6 @@ var
  po2: pmsecharaty;
  po3: pbitmapdataty;
  int1: integer;
-// rect1: rectty;
  pt1: pointty;
  y1: integer;
 begin
@@ -310,8 +309,9 @@ begin
      pt1.x:= pt1.x + po3^.left;
      pt1.y:= y1 - po3^.top;
      drawglyph(drawinfo,pt1,po3);
+     pt1.x:= pt1.x - po3^.left;
     end;
-    pt1.x:= pt1.x - po3^.left + po1^.width;
+    pt1.x:= pt1.x + po1^.width;
    end;
   end;
  end;
@@ -345,7 +345,9 @@ begin
  result:= fsize;
  fsize:= (fsize + asize + 3) and not 3; //4 byte align
  if fsize > fcapacity then begin
-  fcapacity:= fcapacity * 2 - fcapacity div 2; //* 1.5
+  while fcapacity < fsize do begin       //a big glyph may need more than
+   fcapacity:= fcapacity * 2 - fcapacity div 2;  //one step of * 1.5
+  end;
   reallocmem(fbuffer,fcapacity);
  end;
  if ainit then begin
@@ -429,6 +431,7 @@ begin
   if ft_load_glyph(fface,ft_get_char_index(fface,ord(achar)),
                                           ft_load_default) = 0 then begin
    int3:= getbuffer(sizeof(glyphinfoty),false);
+   po1:= pcharrowty(pchar(fbuffer)+fbuckets[int1]); //fbuffer may have moved
    po1^[int2]:= int3;
    ainfo:= pglyphinfoty(pchar(fbuffer)+int3);
    with fface^.glyph^ do begin
