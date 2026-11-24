@@ -550,8 +550,10 @@ function Xutf8TextPropertyToTextList(para1:PDisplay; para2:PXTextProperty;
             para3:PPPchar; para4: pinteger): integer; cdecl;
                      external sXlib name 'Xutf8TextPropertyToTextList';
 
+{$ifndef mseguibackendunit}
 var
 mse_shapebmp: tmaskedbitmap;
+{$endif}
 
 implementation
 uses

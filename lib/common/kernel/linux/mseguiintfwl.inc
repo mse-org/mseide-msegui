@@ -66,11 +66,16 @@ function waylandcreatepixmap(const size: sizety; const mono: boolean;
 
 var
  sdldebug: boolean;      //set by the environment variable MSEWLDEBUG
+{$ifndef mseguibackendunit}
  mse_shapebmp: tmaskedbitmap;   //image of wo_customshape, dark = window
+{$endif}
 
 implementation
 
 uses
+{$ifdef mseguibackendunit}
+ mseguiintf,
+{$endif}
  sysutils,mselist,msekeyboard,msebits,msearrayutils,msesysutils,msegui,
  msesysintf1,BaseUnix,ctypes,xkbcommon,mseprocmonitor,
  msedragglob,msesysdnd;
