@@ -270,10 +270,7 @@ procedure gui_connectmaineventqueue();
 begin
 end;
 
-function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
-begin
- result:= gue_ok;                 //not possible with plain Wayland
-end;
+
 
 procedure gui_getppmm(id: winidty; out appmmwidth,appmmheight: flo64);
 begin
@@ -2343,6 +2340,35 @@ begin
   wlc_destroywindow(win);
  end;
  result:= gue_ok;
+end;
+
+function gui_setwindowopacity(id: winidty; const opacity: real): guierrorty;
+var
+ win: twlwindow;
+ int1: integer;
+begin
+ result:= gue_ok;
+ win:= findwin(id);
+ if win = nil then begin
+  exit;
+ end;
+ if opacity >= 1 then begin
+  int1:= 0;                         //opaque
+ end
+ else begin
+  if opacity <= 0 then begin
+   int1:= 256;                      //invisible
+  end
+  else begin
+   int1:= round((1 - opacity) * 256);
+  end;
+ end;
+ if int1 <> win.fade then begin
+  win.fade:= int1;
+  if win.visible then begin
+   wlc_present(win);                //show the new opacity at once
+  end;
+ end;
 end;
 
 function gui_showwindow(id: winidty): guierrorty;

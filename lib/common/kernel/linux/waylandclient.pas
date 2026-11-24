@@ -80,8 +80,9 @@ type
    sysdnd: boolean;             //accepts drag and drop (wo_sysdnd)
    shape: array of byte;        //window shape, 1 = visible, shapew x shapeh
    shapew,shapeh: integer;      //client area coordinates, 0 = no shape
-   destructor destroy; override;
- end;
+   fade: integer;               //window opacity: 0 = opaque (default),
+                                //1..255 = faded, 256 = invisible
+   destructor destroy; override; end;
 
  twlevent = record
   kind: twleventkind;
@@ -682,6 +683,28 @@ begin
  end;
 end;
 
+procedure applyopacity(const win: twlwindow; const dst: psoftsurfacety);
+var
+ x,y: integer;
+ po: plongword;
+ f,c,rb,ag: longword;
+begin
+ if win.fade <= 0 then begin
+  exit;                             //opaque, nothing to do
+ end;
+ f:= longword(256 - win.fade);       //0..255
+ for y:= 0 to dst^.height-1 do begin
+  po:= plongword(ptruint(dst^.pixels) + ptruint(y*dst^.pitch));
+  for x:= 0 to dst^.width-1 do begin
+   c:= po^;                          //premultiplied ARGB: scale all channels
+   rb:= (((c and $00ff00ff) * f) shr 8) and $00ff00ff;
+   ag:= (((c shr 8) and $00ff00ff) * f) and $ff00ff00;
+   po^:= rb or ag;
+   inc(po);
+  end;
+ end;
+end;
+
 
 procedure applyinputregion(const win: twlwindow);
 var
@@ -760,6 +783,9 @@ begin
   softcopy(dst,offx(win),offy(win),back,softrect(0,0,width,height),false);
   if length(shape) > 0 then begin
    applyshapealpha(win,dst);
+  end;
+  if fade > 0 then begin            //form.opacity < 1
+   applyopacity(win,dst);
   end;
   freesoftsurface(dst);
   wl_surface_attach(surface,bufs[idx].buffer,0,0);
