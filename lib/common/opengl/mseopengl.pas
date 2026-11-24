@@ -12,7 +12,7 @@ unit mseopengl;
 // under construction
 //
 {$ifdef FPC}{$mode objfpc}{$h+}{$INTERFACES CORBA}{$endif}
-{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland)}
+{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland) or defined(usehybrid)}
  {$define offscreengl}   //no GLX: EGL pbuffer contexts
 {$endif}
 

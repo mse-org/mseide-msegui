@@ -15,7 +15,7 @@ unit mseopenglgdi;
 //todo: optimize pixmap and brush handling, use server side buffers
 
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland)}
+{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland) or defined(usehybrid)}
  {$define offscreengl}   //no GLX: EGL pbuffer contexts
 {$endif}
 

@@ -10,7 +10,7 @@
 unit mseopenglwidget;
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
 {$ifdef linux} {$define unix}{$endif}
-{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland)}
+{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland) or defined(usehybrid)}
  {$define offscreengl}   //no GLX window: EGL pbuffer rendering, the picture
 {$else}                  //is copied into the widget (SDL2, SDL3, Wayland)
  {$ifdef unix} {$define useglx}{$endif}

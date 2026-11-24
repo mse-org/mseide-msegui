@@ -12,7 +12,7 @@ unit mseopenglcanvaswidget;
 // under construction
 //
 {$ifdef FPC}{$mode objfpc}{$h+}{$endif}
-{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland)}
+{$if defined(usesdl2) or defined(usesdl3) or defined(usewayland) or defined(usehybrid)}
  {$define offscreengl}   //no native child window: EGL pbuffer, the picture
 {$endif}                 //is copied into the widget
 
