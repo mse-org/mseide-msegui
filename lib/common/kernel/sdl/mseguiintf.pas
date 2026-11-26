@@ -1652,6 +1652,11 @@ begin
  configuredwindow:= id;
  if gui_getwindowsize(id) <> wsi_minimized then begin
   gui_getwindowrect(id,rect1);
+  if sdldebug then begin
+   writeln('POSTCONFIGURE id=',ptruint(id),' rect=',rect1.x,',',rect1.y,' ',
+                                                      rect1.cx,'x',rect1.cy);
+   flush(output);
+  end;
   if (rect1.cx > 0) and (rect1.cy > 0) then begin
    gui_postevent(twindowrectevent.create(ek_configure,id,rect1,nullpoint));
   end;
@@ -1820,9 +1825,11 @@ var
  buttons: integer;
  mx, my: integer;
  btn: mousebuttonty;
+ hadevents: boolean;
 begin
  result:= nil;
- if gui_hasevent then begin
+ hadevents:= gui_hasevent;      //callers like getevents only call when events
+ if hadevents then begin        //are pending and must not block
   SDL_PumpEvents;
  end;
  while true do begin
@@ -2059,6 +2066,9 @@ begin
    end;
   end
   else begin
+   if hadevents then begin
+    break;                //pending events were all internal, return nil
+   end;
    sdlwaitforevents;      //nothing pending: sleep instead of spinning
   end;
  end;
@@ -2356,6 +2366,14 @@ begin
     gui_setwindowicon(applicationwindow,icon,iconmask);
    end;
   end;
+{$ifdef usesdl2}
+  if (id <> 0) and (result = gue_ok) then begin
+   //SDL2 sends no size event for a window created hidden (Wayland: not
+   //until it is mapped). MSEgui waits for the first configure event in
+   //checkwindow, so post it here.
+   postconfigureevent(id);
+  end;
+{$endif}
  end;
 end;
 
