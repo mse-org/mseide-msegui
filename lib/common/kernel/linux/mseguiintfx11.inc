@@ -2602,17 +2602,18 @@ begin
          inc(rectnum);
         end;
         if po2^.mm_width > 0 then begin
-         ppmmwidth:= po3^.width / po2^.mm_width;
+         ppmmwidth:= po3^.width / po2^.mm_width / x11scale; //logical
         end
         else begin
          ppmmwidth:= 0;
         end;
         if po2^.mm_height > 0 then begin
-         ppmmheight:= po3^.height / po2^.mm_height;
+         ppmmheight:= po3^.height / po2^.mm_height / x11scale;
         end
         else begin
          ppmmheight:= 0;
         end;
+        rect:= x11logrect(rect);
        end;
       end;
      end;
@@ -2698,8 +2699,8 @@ begin
  end;
  result.pos:= nullpoint;
 {$ifdef FPC} {$checkpointer off} {$endif}
- result.cx:= defscreen^.width;
- result.cy:= defscreen^ .height;
+ result.cx:= x11log(defscreen^.width);
+ result.cy:= x11log(defscreen^ .height);
 {$ifdef FPC} {$checkpointer default} {$endif}
 endlab:
  gdi_unlock();
@@ -2716,6 +2717,9 @@ begin
  if netsupported then begin
   bo1:= readcardinalproperty(gui_getrootwindow(id),
                                          netatoms[net_workarea],4,result);
+  if bo1 then begin
+   result:= x11logrect(result);
+  end;
  end;
  if not bo1 then begin
   result:= gui_getscreenrect(id);
@@ -2745,14 +2749,14 @@ begin
  if appmmwidth = 0 then begin
   with defscreen^ do begin
    if mwidth > 0 then begin
-    appmmwidth:= width / mwidth;
+    appmmwidth:= width / mwidth / x11scale;
    end;
   end;
  end;
  if appmmheight = 0 then begin
   with defscreen^ do begin
    if mheight > 0 then begin
-    appmmheight:= height / mheight;
+    appmmheight:= height / mheight / x11scale;
    end;
   end;
  end;
@@ -2778,10 +2782,10 @@ begin
  end;
  if bo1 then begin
   with result do begin
-   left:= ar1[0];
-   top:= ar1[2];
-   right:= ar1[1];
-   bottom:= ar1[3];
+   left:= x11logup(ar1[0]);
+   top:= x11logup(ar1[2]);
+   right:= x11logup(ar1[1]);
+   bottom:= x11logup(ar1[3]);
   end;
  end
  else begin
@@ -2808,13 +2812,15 @@ var
 begin
  gdi_lock;
  xquerypointer(appdisp,rootid,@ca1,@ca1,@result.x,@result.y,@ca1,@ca1,@ca1);
+ result.x:= x11log(result.x);
+ result.y:= x11log(result.y);
  gdi_unlock;
 end;
 
 function gui_setpointerpos(const pos: pointty): guierrorty;
 begin
  gdi_lock;
- xwarppointer(appdisp,none,rootid,0,0,0,0,pos.x,pos.y);
+ xwarppointer(appdisp,none,rootid,0,0,0,0,x11dev(pos.x),x11dev(pos.y));
  result:= gue_ok;
  gdi_unlock;
 end;
@@ -2822,7 +2828,7 @@ end;
 function gui_movepointer(const dist: pointty): guierrorty;
 begin
  gdi_lock;
- xwarppointer(appdisp,rootid,none,0,0,0,0,dist.x,dist.y);
+ xwarppointer(appdisp,rootid,none,0,0,0,0,x11dev(dist.x),x11dev(dist.y));
  result:= gue_ok;
  gdi_unlock;
 end;
@@ -3996,7 +4002,8 @@ begin
   end;
  end;
 {$warnings off}
- aoffset:= offset;
+ aoffset.x:= x11log(offset.x);
+ aoffset.y:= x11log(offset.y);
  result:= true;
 end;
 {$warnings on}
@@ -4048,7 +4055,7 @@ begin
  repeat
   result:= id;
   if longint(xtranslatecoordinates(appdisp,rootid,result,
-         pos.x,pos.y,@int1,@int1,@id)) = 0 then begin
+         x11dev(pos.x),x11dev(pos.y),@int1,@int1,@id)) = 0 then begin
    result:= 0;
    gdi_unlock;
    exit;
@@ -4069,7 +4076,7 @@ begin
  while true do begin
   id1:= id;
   if (longint(xtranslatecoordinates(appdisp,rootid,id1,
-         pos.x,pos.y,@int1,@int1,@id)) = 0) or (id = 0) then begin
+         x11dev(pos.x),x11dev(pos.y),@int1,@int1,@id)) = 0) or (id = 0) then begin
    break;
   end;
   additem(integerarty(result),id,int2);
@@ -4154,6 +4161,8 @@ var
   else begin
    height:= rect.cy;
   end;
+  width:= x11dev(width);
+  height:= x11dev(height);
   if options.parent <> 0 then begin
    id1:= options.parent;
   end
@@ -4186,7 +4195,7 @@ var
    attributes.bit_gravity:= northwestgravity;
    valuemask:= valuemask or cwwingravity or cwbitgravity;
 
-    id:= xcreatewindow(appdisp,id1,rect.x,rect.y,
+    id:= xcreatewindow(appdisp,id1,x11dev(rect.x),x11dev(rect.y),
    width,height,0,
     depth,  copyfromparent,visual,
       valuemask,@attributes);
@@ -4511,6 +4520,10 @@ begin
   if getrootoffset(id,origin) and
      (xgetgeometry(appdisp,id,@int1,@rect.x,@rect.y,@rect.cx,@rect.cy,@int1,@int1) <> 0) then begin
    result:= gue_ok;
+   rect.x:= x11log(rect.x);
+   rect.y:= x11log(rect.y);
+   rect.cx:= x11log(rect.cx);
+   rect.cy:= x11log(rect.cy);
   end;
 
 end;
@@ -4537,6 +4550,8 @@ begin
  with pos do begin
   if xgetgeometry(appdisp,id,@int1,@x,@y,@int1,@int1,@int1,@int1) <> 0 then begin
    result:= gue_ok;
+   x:= x11log(x);
+   y:= x11log(y);
   end;
  end;
  gdi_unlock;
@@ -4569,15 +4584,15 @@ begin
    debugwindow('*reposw.framekorr'+' '+inttostr(frame1.left)+' '+
                                        inttostr(frame1.top)+' ',id);
  {$endif}
-   x:= rect.x-frame1.left;
-   y:= rect.y-frame1.top;
+   x:= x11dev(rect.x-frame1.left);
+   y:= x11dev(rect.y-frame1.top);
   end
   else begin
-   x:= rect.x;
-   y:= rect.y;
+   x:= x11dev(rect.x);
+   y:= x11dev(rect.y);
   end;
-  width:= rect.cx;
-  height:= rect.cy;
+  width:= x11dev(rect.cx);
+  height:= x11dev(rect.cy);
   if width <= 0 then begin
    width:= 1;
   end;
@@ -4679,10 +4694,10 @@ begin
  gdi_lock;
  fillchar(changes,sizeof(changes),0);
  with changes do begin
-  x:= rect.x;
-  y:= rect.y;
-  width:= rect.cx;
-  height:= rect.cy;
+  x:= x11dev(rect.x);
+  y:= x11dev(rect.y);
+  width:= x11dev(rect.cx);
+  height:= x11dev(rect.cy);
   if width <= 0 then begin
    width:= 1;
   end;
@@ -4718,19 +4733,19 @@ begin
   else begin
    flags:= flags and not pmaxsize;
   end;
-  min_width:= min.cx;
-  min_height:= min.cy;
+  min_width:= x11dev(min.cx);
+  min_height:= x11dev(min.cy);
   if max.cx = 0 then begin
    max_width:= 30000;
   end
   else begin
-   max_width:= max.cx;
+   max_width:= x11dev(max.cx);
   end;
   if max.cy = 0 then begin
    max_height:= 30000;
   end
   else begin
-   max_height:= max.cy;
+   max_height:= x11dev(max.cy);
   end;
  end;
  {$ifdef FPC} {$checkpointer default} {$endif}
@@ -5080,8 +5095,9 @@ begin
  gdi_lock;
  gc:= xcreategc(appdisp,id,0,nil);
  if gc <> nil then begin
-  xcopyarea(appdisp,id,id,gc,rect.x,rect.y,rect.cx,rect.cy,rect.x+dist.x,
-                                                                rect.y+dist.y);
+  xcopyarea(appdisp,id,id,gc,x11dev(rect.x),x11dev(rect.y),
+              x11dev(rect.cx),x11dev(rect.cy),x11dev(rect.x+dist.x),
+                                                         x11dev(rect.y+dist.y));
   xfreegc(appdisp,gc);
   result:= gue_ok;
  end
@@ -6505,7 +6521,7 @@ eventrestart:
   enternotify: begin
    with xev.xcrossing do begin
     result:= tmouseenterevent.create(xwindow,
-                makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),
+                makepoint(x11log(x),x11log(y)),xtoshiftstate(state,key_none,mb_none,false),
                  time*1000);
    end;
   end;
@@ -6520,7 +6536,8 @@ eventrestart:
    with xev.xmotion do begin
     lasteventtime:= time;
     result:= tmouseevent.create(xwindow,false,mb_none,mw_none,
-                makepoint(x,y),xtoshiftstate(state,key_none,mb_none,false),time*1000);
+                makepoint(x11log(x),x11log(y)),
+                      xtoshiftstate(state,key_none,mb_none,false),time*1000);
    end;
   end;
   keypress: begin
@@ -6625,19 +6642,19 @@ eventrestart:
     if button = 4 then begin
      if xev.xtype = buttonpress then begin
       result:= tmouseevent.create(xwindow,false,mb_none,mw_up,
-                makepoint(x,y),shiftstate1,time*1000);
+                makepoint(x11log(x),x11log(y)),shiftstate1,time*1000);
      end;
     end
     else begin
      if button = 5 then begin
       if xev.xtype = buttonpress then begin
        result:= tmouseevent.create(xwindow,false,mb_none,mw_down,
-                makepoint(x,y),shiftstate1,time*1000);
+                makepoint(x11log(x),x11log(y)),shiftstate1,time*1000);
       end;
      end
      else begin
       result:= tmouseevent.create(xwindow,xtype = buttonrelease,button1,mw_none,
-                makepoint(x,y),shiftstate1,time*1000);
+                makepoint(x11log(x),x11log(y)),shiftstate1,time*1000);
      end;
     end;
    end;
@@ -6683,13 +6700,13 @@ eventrestart:
   expose: begin
    with xev.xexpose do begin
     result:= twindowrectevent.create(ek_expose,xwindow,
-                          makerect(x,y,width,height),nullpoint);
+                  x11logrect(makerect(x,y,width,height)),nullpoint);
    end;
   end;
   graphicsexpose: begin
    with xev.xgraphicsexpose do begin
     result:= twindowrectevent.create(ek_expose,drawable,
-                          makerect(x,y,width,height),nullpoint);
+                  x11logrect(makerect(x,y,width,height)),nullpoint);
    end;
   end;
   configurenotify: begin
@@ -6699,14 +6716,14 @@ eventrestart:
     end
     else begin
      if not application.deinitializing then begin
-      rect1.x:= x;
-      rect1.y:= y;
+      rect1.x:= x11log(x);
+      rect1.y:= x11log(y);
       pt1:= nullpoint;
       if send_event = 0 then begin //from window manager?
        getrootoffset(xwindow,pt1); //no, map to screen origin
       end;
-      rect1.cx:= width;
-      rect1.cy:= height;
+      rect1.cx:= x11log(width);
+      rect1.cy:= x11log(height);
     {$ifdef mse_debugconfigure}
       debugwindow('*conf winrect:'+
                       inttostr(pt1.x)+' '+inttostr(pt1.y)+'|'+
@@ -6957,6 +6974,51 @@ begin
  end;
 end;
 
+function xgetdefaultmse(dpy: pointer; prog,opt: pchar): pchar; cdecl;
+                                       external libX11 name 'XGetDefault';
+
+const
+ x11autoscale = false;  //HiDPI is only enabled with MSEX11SCALE until the
+                        //drawing code is finished
+
+procedure initx11scale;
+          //MSEX11SCALE: 1 = off, 2..4 = forced, otherwise Xft.dpi/96 rounded up
+var
+ str1: string;
+ po1: pchar;
+ i1: integer;
+ dpi: flo64;
+begin
+ x11scale:= 1;
+ str1:= getenvironmentvariable('MSEX11SCALE');
+ if str1 <> '' then begin
+  i1:= strtointdef(str1,1);
+  if i1 < 1 then begin
+   i1:= 1;
+  end;
+  if i1 > 4 then begin
+   i1:= 4;
+  end;
+  x11scale:= i1;
+ end
+ else begin
+  if x11autoscale then begin
+   po1:= xgetdefaultmse(appdisp,'Xft','dpi');
+   if po1 <> nil then begin
+    dpi:= strtofloatdef(string(po1),96);
+    i1:= trunc(dpi / 96 + 0.95);   //rounded up
+    if i1 < 1 then begin
+     i1:= 1;
+    end;
+    if i1 > 4 then begin
+     i1:= 4;
+    end;
+    x11scale:= i1;
+   end;
+  end;
+ end;
+end;
+
 function gui_init: guierrorty;
 label
  error;
@@ -7062,6 +7124,7 @@ begin
   rootid:= xrootwindowofscreen(defscreen);
   defvisual:= msepvisual(xdefaultvisualofscreen(defscreen));
   defdepth:= xdefaultdepthofscreen(defscreen);
+  initx11scale;
   msex11gdi.init(appdisp,defvisual,defdepth);
   attrib.event_mask:= propertychangemask;
   appid:= xcreatewindow(appdisp,rootid,0,0,200,200,0,

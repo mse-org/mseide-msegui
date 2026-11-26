@@ -34,6 +34,18 @@ function x11getgdifuncs: pgdifunctionaty;
 function x11regiontorects(const aregion: regionty): rectarty;
 function x11getdefaultfontnames: defaultfontnamesty;
 
+var
+ x11scale: integer = 1;  //device pixels per logical unit, 1 = HiDPI off
+ x11ppmmscale: integer = 1; //pixels per mm are divided by this, = x11scale
+                            //unless MSEX11PPMM=dev
+function x11dev(const avalue: integer): integer;     //logical -> device
+function x11log(const avalue: integer): integer;     //device -> logical,
+                                                     //rounded down
+function x11logup(const avalue: integer): integer;   //device -> logical,
+                                                     //rounded up
+function x11devrect(const arect: rectty): rectty;
+function x11logrect(const arect: rectty): rectty;    //covers the device rect
+
 type
  createcolorpicfuncty = function(const acolor: txrendercolor): tpicture;
 var
@@ -98,6 +110,7 @@ type
   xftascent,xftdescent: integer;
   rowlength: word;
   xftdirection: graphicdirectionty;
+  xftfontscaled: pxftfont;  //size * x11scale, used for windows, nil if scale = 1
  end;
  px11fontdatadty = ^x11fontdatadty;
  x11fontdataty = record
@@ -202,6 +215,46 @@ implementation
 uses
  msesys,msesonames,sysutils,msefcfontselect,msedynload,
  msepolytria,mselinetria,mseellipsetria;
+
+function x11dev(const avalue: integer): integer;
+begin
+ result:= avalue * x11scale;
+end;
+
+function x11log(const avalue: integer): integer;
+begin
+ if avalue >= 0 then begin
+  result:= avalue div x11scale;
+ end
+ else begin
+  result:= -((-avalue + x11scale - 1) div x11scale);
+ end;
+end;
+
+function x11logup(const avalue: integer): integer;
+begin
+ result:= -x11log(-avalue);
+end;
+
+function x11devrect(const arect: rectty): rectty;
+begin
+ result.x:= arect.x * x11scale;
+ result.y:= arect.y * x11scale;
+ result.cx:= arect.cx * x11scale;
+ result.cy:= arect.cy * x11scale;
+end;
+
+function x11logrect(const arect: rectty): rectty;
+var
+ x2,y2: integer;
+begin
+ result.x:= x11log(arect.x);
+ result.y:= x11log(arect.y);
+ x2:= x11logup(arect.x+arect.cx);
+ y2:= x11logup(arect.y+arect.cy);
+ result.cx:= x2 - result.x;
+ result.cy:= y2 - result.y;
+end;
 
 //
 //todo: optimise tesselation
@@ -343,6 +396,7 @@ type
  xftstatesty = set of xftstatety;
  x11gcdty = record
   triainfo: triainfoty; //first!
+  devscale: integer;      //device pixels per logical unit, 1 for pixmaps
   gcdrawingflags: drawingflagsty;
   gcrasterop: rasteropty;
   gcclipregion: regionty;
@@ -371,6 +425,15 @@ type
    0: (d: x11gcdty;);
    1: (_bufferspace: gcpty;);
  end;
+
+function gcscale(const agc: gcty): integer;
+          //scale of the paint device, windows only, pixmaps are logical
+begin
+ result:= x11gcty(agc.platformdata).d.devscale;
+ if result < 1 then begin
+  result:= 1;
+ end;
+end;
 
 var
 // xftcolorcache: array[0..xftcolorcachemask] of xftcolorcacheinfoty;
@@ -610,8 +673,13 @@ begin
   else begin
 //   xsetgraphicsexposures(appdisp,tgc(gcpo^.handle),
 //                             {$ifdef xboolean}false{$else}0{$endif});
-   with x11gcty(gcpo^.platformdata) do begin
-    //nothing to do, gc is nulled
+   with x11gcty(gcpo^.platformdata).d do begin
+    if kind = gck_screen then begin
+     devscale:= x11scale;     //windows are drawn in device pixels
+    end
+    else begin
+     devscale:= 1;            //pixmaps stay logical
+    end;
    end;
    error:= gde_ok;
   end;
@@ -808,10 +876,14 @@ var
  po1,rectspo: pxrectangle;
  boxpo: pbox;
  int1: integer;
+ sc,ox,oy: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif}
+ sc:= gcscale(gc);           //regions are logical, the device is scaled
+ ox:= gc.cliporigin.x * sc;
+ oy:= gc.cliporigin.y * sc;
  {$ifdef FPC} {$checkpointer off} {$endif}
  with pxregion(aregion)^ do begin
   if numrects > 0 then begin
@@ -819,37 +891,36 @@ begin
    getmem(rectspo,numrects*sizeof(xrectangle));
    po1:= rectspo;
    for int1:= numrects - 1 downto 0 do begin
-    rectspo^.x:= boxpo^.x1;
-    rectspo^.y:= boxpo^.y1;
-    rectspo^.width:= boxpo^.x2-boxpo^.x1;
-    rectspo^.height:= boxpo^.y2-boxpo^.y1;
+    rectspo^.x:= boxpo^.x1 * sc;
+    rectspo^.y:= boxpo^.y1 * sc;
+    rectspo^.width:= (boxpo^.x2-boxpo^.x1) * sc;
+    rectspo^.height:= (boxpo^.y2-boxpo^.y1) * sc;
     inc(boxpo);
     inc(rectspo);
    end;
    if pic <> 0 then begin
-    xrendersetpicturecliprectangles(appdisp,pic,gc.cliporigin.x,
-                            gc.cliporigin.y,po1,numrects);
+    xrendersetpicturecliprectangles(appdisp,pic,ox,oy,po1,numrects);
    end
    else begin
     if draw <> nil then begin
-     xftdrawsetcliprectangles(draw,gc.cliporigin.x,gc.cliporigin.y,po1,numrects);
+     xftdrawsetcliprectangles(draw,ox,oy,po1,numrects);
     end
     else begin
-     xsetcliprectangles(appdisp,tgc(gc.handle),gc.cliporigin.x,gc.cliporigin.y,po1,numrects,yxbanded);
+     xsetcliprectangles(appdisp,tgc(gc.handle),ox,oy,po1,numrects,yxbanded);
     end;
    end;
    freemem(po1);
   end
   else begin
    if pic <> 0 then begin
-    xrendersetpicturecliprectangles(appdisp,pic,gc.cliporigin.x,gc.cliporigin.y,nil,0);
+    xrendersetpicturecliprectangles(appdisp,pic,ox,oy,nil,0);
    end
    else begin
     if draw <> nil then begin
-     xftdrawsetcliprectangles(draw,gc.cliporigin.x,gc.cliporigin.y,nil,0);
+     xftdrawsetcliprectangles(draw,ox,oy,nil,0);
     end
     else begin
-     xsetcliprectangles(appdisp,tgc(gc.handle),gc.cliporigin.x,gc.cliporigin.y,nil,0,yxbanded);
+     xsetcliprectangles(appdisp,tgc(gc.handle),ox,oy,nil,0,yxbanded);
     end;
    end;
   end;
@@ -1190,6 +1261,8 @@ var
  agc: tgc;
  int1: integer;
  needslinecheck: boolean;
+ dashes1: string;
+ i1: integer;
 
 begin
 {$ifdef mse_debuggdisync}
@@ -1256,6 +1329,14 @@ begin
    xmask:= xmask or gclinewidth;
    xvalues.line_width:=
                    (lineinfo.width + linewidthroundvalue) shr linewidthshift;
+   if gcscale(drawinfo.gc) > 1 then begin
+    if xvalues.line_width = 0 then begin
+     xvalues.line_width:= gcscale(drawinfo.gc);   //thin line = 1 logical pixel
+    end
+    else begin
+     xvalues.line_width:= xvalues.line_width * gcscale(drawinfo.gc);
+    end;
+   end;
    triainfo.linewidth:= xvalues.line_width;
    if triainfo.linewidth = 0 then begin
     triainfo.linewidth1:= 1;
@@ -1277,6 +1358,21 @@ begin
     end;
     triainfo.xftdashes:= dashes;
     int1:= length(dashes);
+    if (int1 <> 0) and (gcscale(drawinfo.gc) > 1) then begin
+     dashes1:= dashes;
+     for i1:= 1 to int1 do begin
+      if byte(dashes1[i1]) * gcscale(drawinfo.gc) > 255 then begin
+       dashes1[i1]:= #255;
+      end
+      else begin
+       dashes1[i1]:= char(byte(dashes1[i1]) * gcscale(drawinfo.gc));
+      end;
+     end;
+     triainfo.xftdashes:= dashes1;
+    end
+    else begin
+     dashes1:= dashes;
+    end;
     if int1 <> 0 then begin
      if df_opaque in drawingflags then begin
       xvalues.line_style:= linedoubledash;
@@ -1284,7 +1380,7 @@ begin
      else begin
       xvalues.line_style:= lineonoffdash;
      end;
-     xsetdashes(appdisp,agc,0,@lineinfo.dashes[1],int1);
+     xsetdashes(appdisp,agc,0,@dashes1[1],int1);
     end
     else begin
      xvalues.line_style:= linesolid;
@@ -1313,6 +1409,9 @@ begin
    if fhasxft then begin
     xftfont:= pxftfont(font);
     xftfontdata:= @x11fontdataty(fontdata^.platformdata).d;
+    if (gcscale(drawinfo.gc) > 1) and (xftfontdata^.xftfontscaled <> nil) then begin
+     xftfont:= xftfontdata^.xftfontscaled;     //drawing size, device pixels
+    end;
    end
    else begin
     xmask:= xmask or gcfont;
@@ -1341,10 +1440,10 @@ begin
   end;
   if gvm_brushorigin in mask then begin
    xmask:= xmask or gctilestipxorigin or gctilestipyorigin;
-   xvalues.ts_x_origin:= brushorigin.x;
-   xvalues.ts_y_origin:= brushorigin.y;
-   xftbrushorigin.x:= -brushorigin.x;//-drawinfo.origin.x;
-   xftbrushorigin.y:= -brushorigin.y;//-drawinfo.origin.y;
+   xvalues.ts_x_origin:= brushorigin.x * gcscale(drawinfo.gc);
+   xvalues.ts_y_origin:= brushorigin.y * gcscale(drawinfo.gc);
+   xftbrushorigin.x:= -brushorigin.x * gcscale(drawinfo.gc);
+   xftbrushorigin.y:= -brushorigin.y * gcscale(drawinfo.gc);
   end;
 
   if gvm_brush in mask then begin
@@ -1869,10 +1968,12 @@ var
  fontinfo: fontinfoty;
  int1: integer;
  po3,po4: pfcpattern;
+ po5,po6: pfcpattern;
+ fontinfo1: fontinfoty;
  res1: tfcresult;
  rea1: real;
  {$ifdef mse_debugxft}
- po5: pchar;
+ po7: pchar;
  {$endif}
 begin
  gdi_lock;
@@ -1888,16 +1989,35 @@ begin
      realheight:= int1;
     end;
    {$ifdef mse_debugxft}
-    if fcpatterngetstring(po4,fc_file,0,@po5) = fcresultmatch then begin
+    if fcpatterngetstring(po4,fc_file,0,@po7) = fcresultmatch then begin
      writeln('Font found. Name: "'+h.name+'" Height: '+
        inttostr(h.d.height)+' Realheight: '+inttostr(int1)+' File:');
-     writeln('"'+string(po5)+'"');
+     writeln('"'+string(po7)+'"');
     end;
    {$endif}
     po2:= xftfontopenpattern(appdisp,po4); //font owns the pattern
     if po2 <> nil then begin
      drawinfo.getfont.ok:= true;
      getxftfontdata(po2,drawinfo);
+     x11fontdataty(platformdata).d.xftfontscaled:= nil;
+     if x11scale > 1 then begin     //the same font for the scaled windows
+      fontinfo1:= fontinfo;
+      if fontinfo1[fn_pixel_size] <> '*' then begin
+       fontinfo1[fn_pixel_size]:=
+                    inttostr(strtointdef(fontinfo1[fn_pixel_size],0)*x11scale);
+      end;
+      if fontinfo1[fn_average_width] <> '*' then begin
+       fontinfo1[fn_average_width]:=
+                  inttostr(strtointdef(fontinfo1[fn_average_width],0)*x11scale);
+      end;
+      po5:= buildxftpat(drawinfo.getfont.fontdata^,fontinfo1,false);
+      po6:= xftfontmatch(appdisp,xdefaultscreen(appdisp),po5,@res1);
+      if po6 <> nil then begin
+       x11fontdataty(platformdata).d.xftfontscaled:=
+                                             xftfontopenpattern(appdisp,po6);
+      end;
+      fcpatterndestroy(po5);
+     end;
      if h.d.rotation <> 0 then begin //ascent and descent are 0 for rotated fonts
       fcpatterndestroy(po3);
       rea1:= h.d.rotation;
@@ -1974,6 +2094,10 @@ begin
  with drawinfo.getfont.fontdata^ do begin
   if fhasxft then begin
    xftfontclose(appdisp,pxftfont(font));
+   if x11fontdataty(platformdata).d.xftfontscaled <> nil then begin
+    xftfontclose(appdisp,x11fontdataty(platformdata).d.xftfontscaled);
+    x11fontdataty(platformdata).d.xftfontscaled:= nil;
+   end;
    if fonthighres <> 0 then begin
     xftfontclose(appdisp,pxftfont(fonthighres));
    end;
@@ -2233,6 +2357,7 @@ begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
 {$endif}
+ fillchar(maskgc,sizeof(maskgc),0);  //devscale must not be garbage
  xvalues.graphics_exposures:= {$ifdef xboolean}false{$else}0{$endif};
  with drawinfo,copyarea,sourcerect^,gc,x11gcty(platformdata).d do begin
   dkind:= kind;
@@ -2835,6 +2960,7 @@ var
  po1: pxchar2b;
  xvalues: xgcvalues;
  glyphinfo: txglyphinfo;
+ fascent,fdescent: integer;
 begin
 {$ifdef mse_debuggdisync}
  checkgdilock;
@@ -2853,26 +2979,32 @@ begin
       xvalues.foreground:= xftcolorbackground.pixel;
       xchangegc(appdisp,tgc(gc.handle),gcforeground,@xvalues);
       with x11gcty(gc.platformdata).d.xftfontdata^ do begin
+       fascent:= xftascent;
+       fdescent:= xftdescent;
+       if (gcscale(gc) > 1) and (xftfontscaled <> nil) then begin
+        fascent:= xftfontscaled^.ascent;
+        fdescent:= xftfontscaled^.descent;
+       end;
        case xftdirection of
         gd_right: begin
          xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
-                                           x{-glyphinfo.x},y-xftascent,
-                glyphinfo.xoff,xftascent+xftdescent);
+                                           x{-glyphinfo.x},y-fascent,
+                glyphinfo.xoff,fascent+fdescent);
         end;
         gd_up: begin
          xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
-                      x-xftascent,y+glyphinfo.yoff,
-                xftascent+xftdescent,-glyphinfo.yoff);
+                      x-fascent,y+glyphinfo.yoff,
+                fascent+fdescent,-glyphinfo.yoff);
         end;
         gd_left: begin
          xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
-                      x+glyphinfo.xoff{-glyphinfo.x},y-xftdescent,
-                -glyphinfo.xoff,xftascent+xftdescent);
+                      x+glyphinfo.xoff{-glyphinfo.x},y-fdescent,
+                -glyphinfo.xoff,fascent+fdescent);
         end;
         gd_down: begin
          xfillrectangle(appdisp,paintdevice,tgc(gc.handle),
-                                           x-xftdescent,y,
-                xftascent+xftdescent,glyphinfo.yoff);
+                                           x-fdescent,y,
+                fascent+fdescent,glyphinfo.yoff);
         end;
         else; // Added to make compiler happy
        end;
@@ -2906,7 +3038,8 @@ begin
  checkgdilock;
 {$endif}
  with drawinfo,gc do begin
-  xsetcliporigin(appdisp,tgc(handle),cliporigin.x,cliporigin.y);
+  xsetcliporigin(appdisp,tgc(handle),cliporigin.x * gcscale(drawinfo.gc),
+                                      cliporigin.y * gcscale(drawinfo.gc));
  end;
 end;
 
@@ -3279,6 +3412,238 @@ begin
  end;
 end;
 
+var
+ scalepoints: array of pointty;
+
+procedure scaledrawinfopoints(var drawinfo: drawinfoty; const sc,shift: integer);
+var
+ i1: integer;
+ po1,po2: ppointty;
+begin
+ with drawinfo,points do begin
+  if length(scalepoints) < count then begin
+   setlength(scalepoints,count);
+  end;
+  po1:= points;
+  po2:= @scalepoints[0];
+  for i1:= 0 to count - 1 do begin
+   po2^.x:= po1^.x * sc;
+   po2^.y:= po1^.y * sc;
+   inc(po1);
+   inc(po2);
+  end;
+  points:= @scalepoints[0];
+  origin.x:= origin.x * sc + shift;
+  origin.y:= origin.y * sc + shift;
+ end;
+end;
+
+procedure sgdi_drawlines(var drawinfo: drawinfoty);
+var
+ sc: integer;
+ pointsbefore: ppointty;
+ originbefore: pointty;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_drawlines(drawinfo);
+ end
+ else begin
+  pointsbefore:= drawinfo.points.points;
+  originbefore:= drawinfo.origin;
+  if xfts_smooth in x11gcty(drawinfo.gc.platformdata).d.xftstate then begin
+   scaledrawinfopoints(drawinfo,sc,0);
+  end
+  else begin
+   scaledrawinfopoints(drawinfo,sc,sc div 2); //center of the logical pixel
+  end;
+  gdi_drawlines(drawinfo);
+  drawinfo.points.points:= pointsbefore;
+  drawinfo.origin:= originbefore;
+ end;
+end;
+
+procedure sgdi_drawlinesegments(var drawinfo: drawinfoty);
+var
+ sc: integer;
+ pointsbefore: ppointty;
+ originbefore: pointty;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_drawlinesegments(drawinfo);
+ end
+ else begin
+  pointsbefore:= drawinfo.points.points;
+  originbefore:= drawinfo.origin;
+  if xfts_smooth in x11gcty(drawinfo.gc.platformdata).d.xftstate then begin
+   scaledrawinfopoints(drawinfo,sc,0);
+  end
+  else begin
+   scaledrawinfopoints(drawinfo,sc,sc div 2);
+  end;
+  gdi_drawlinesegments(drawinfo);
+  drawinfo.points.points:= pointsbefore;
+  drawinfo.origin:= originbefore;
+ end;
+end;
+
+procedure sgdi_fillpolygon(var drawinfo: drawinfoty);
+var
+ sc: integer;
+ pointsbefore: ppointty;
+ originbefore: pointty;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_fillpolygon(drawinfo);
+ end
+ else begin
+  pointsbefore:= drawinfo.points.points;
+  originbefore:= drawinfo.origin;
+  scaledrawinfopoints(drawinfo,sc,0);
+  gdi_fillpolygon(drawinfo);
+  drawinfo.points.points:= pointsbefore;
+  drawinfo.origin:= originbefore;
+ end;
+end;
+
+procedure scalerectcall(var drawinfo: drawinfoty; const sc,shift: integer;
+                                    const func: gdifunctionty);
+          //rect and arc have the same layout
+var
+ rectbefore: prectty;
+ originbefore: pointty;
+ rect1: rectty;
+begin
+ rectbefore:= drawinfo.rect.rect;
+ originbefore:= drawinfo.origin;
+ rect1:= x11devrect(rectbefore^);
+ drawinfo.rect.rect:= @rect1;
+ drawinfo.origin.x:= originbefore.x * sc + shift;
+ drawinfo.origin.y:= originbefore.y * sc + shift;
+ func(drawinfo);
+ drawinfo.rect.rect:= rectbefore;
+ drawinfo.origin:= originbefore;
+end;
+
+procedure sgdi_fillrect(var drawinfo: drawinfoty);
+var
+ sc: integer;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_fillrect(drawinfo);
+ end
+ else begin
+  scalerectcall(drawinfo,sc,0,@gdi_fillrect);
+ end;
+end;
+
+procedure sgdi_fillellipse(var drawinfo: drawinfoty);
+var
+ sc: integer;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_fillellipse(drawinfo);
+ end
+ else begin
+  scalerectcall(drawinfo,sc,0,@gdi_fillellipse);
+ end;
+end;
+
+procedure sgdi_fillarc(var drawinfo: drawinfoty);
+var
+ sc: integer;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_fillarc(drawinfo);
+ end
+ else begin
+  scalerectcall(drawinfo,sc,0,@gdi_fillarc);
+ end;
+end;
+
+procedure sgdi_drawarc(var drawinfo: drawinfoty);
+var
+ sc: integer;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_drawarc(drawinfo);
+ end
+ else begin
+  scalerectcall(drawinfo,sc,0,@gdi_drawarc);
+ end;
+end;
+
+procedure sgdi_drawellipse(var drawinfo: drawinfoty);
+var
+ sc: integer;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_drawellipse(drawinfo);
+ end
+ else begin
+  scalerectcall(drawinfo,sc,0,@gdi_drawellipse);
+ end;
+end;
+
+procedure sgdi_drawstring16(var drawinfo: drawinfoty);
+var
+ sc: integer;
+ posbefore: ppointty;
+ originbefore: pointty;
+ pt1: pointty;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if sc = 1 then begin
+  gdi_drawstring16(drawinfo);
+ end
+ else begin
+  posbefore:= drawinfo.text16pos.pos;
+  originbefore:= drawinfo.origin;
+  pt1.x:= posbefore^.x * sc;
+  pt1.y:= posbefore^.y * sc;
+  drawinfo.text16pos.pos:= @pt1;
+  drawinfo.origin.x:= originbefore.x * sc;
+  drawinfo.origin.y:= originbefore.y * sc;
+  gdi_drawstring16(drawinfo);
+  drawinfo.text16pos.pos:= posbefore;
+  drawinfo.origin:= originbefore;
+ end;
+end;
+
+procedure sgdi_copyarea(var drawinfo: drawinfoty);
+          //logical pixmap -> scaled window: stretch
+var
+ sc: integer;
+ destbefore: prectty;
+ alignbefore: alignmentsty;
+ rect1: rectty;
+begin
+ sc:= gcscale(drawinfo.gc);
+ if (sc = 1) or
+    (gcscale(tcanvas1(drawinfo.copyarea.source).fdrawinfo.gc) <> 1) then begin
+  gdi_copyarea(drawinfo);   //todo: window to window
+ end
+ else begin
+  with drawinfo.copyarea do begin
+   destbefore:= destrect;
+   alignbefore:= alignment;
+   rect1:= x11devrect(destrect^);
+   destrect:= @rect1;
+   alignment:= alignment + [al_stretchx,al_stretchy];
+   gdi_copyarea(drawinfo);
+   destrect:= destbefore;
+   alignment:= alignbefore;
+  end;
+ end;
+end;
+
 const
  gdifunctions: gdifunctionaty = (
    {$ifdef FPC}@{$endif}gdi_creategc,
@@ -3291,15 +3656,15 @@ const
    {$ifdef FPC}@{$endif}gdi_endpaint,
    {$ifdef FPC}@{$endif}gdi_flush,
    {$ifdef FPC}@{$endif}gdi_movewindowrect,
-   {$ifdef FPC}@{$endif}gdi_drawlines,
-   {$ifdef FPC}@{$endif}gdi_drawlinesegments,
-   {$ifdef FPC}@{$endif}gdi_drawellipse,
-   {$ifdef FPC}@{$endif}gdi_drawarc,
-   {$ifdef FPC}@{$endif}gdi_fillrect,
-   {$ifdef FPC}@{$endif}gdi_fillellipse,
-   {$ifdef FPC}@{$endif}gdi_fillarc,
-   {$ifdef FPC}@{$endif}gdi_fillpolygon,
-   {$ifdef FPC}@{$endif}gdi_drawstring16,
+   {$ifdef FPC}@{$endif}sgdi_drawlines,
+   {$ifdef FPC}@{$endif}sgdi_drawlinesegments,
+   {$ifdef FPC}@{$endif}sgdi_drawellipse,
+   {$ifdef FPC}@{$endif}sgdi_drawarc,
+   {$ifdef FPC}@{$endif}sgdi_fillrect,
+   {$ifdef FPC}@{$endif}sgdi_fillellipse,
+   {$ifdef FPC}@{$endif}sgdi_fillarc,
+   {$ifdef FPC}@{$endif}sgdi_fillpolygon,
+   {$ifdef FPC}@{$endif}sgdi_drawstring16,
    {$ifdef FPC}@{$endif}gdi_setcliporigin,
    {$ifdef FPC}@{$endif}gdi_createemptyregion,
    {$ifdef FPC}@{$endif}gdi_createrectregion,
@@ -3315,7 +3680,7 @@ const
    {$ifdef FPC}@{$endif}gdi_regaddregion,
    {$ifdef FPC}@{$endif}gdi_regintersectrect,
    {$ifdef FPC}@{$endif}gdi_regintersectregion,
-   {$ifdef FPC}@{$endif}gdi_copyarea,
+   {$ifdef FPC}@{$endif}sgdi_copyarea,
    {$ifdef FPC}@{$endif}gdi_getimage,
    {$ifdef FPC}@{$endif}gdi_fonthasglyph,
    {$ifdef FPC}@{$endif}gdi_getfont,
