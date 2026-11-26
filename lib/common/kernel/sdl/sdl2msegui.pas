@@ -523,19 +523,21 @@ type
  function SDL_CheckErrorGDI(ref: string): gdierrorty;
 
 // thread
- function SDL_CreateMutex: mutexty; cdecl; external SDLLibName;
- procedure SDL_DestroyMutex(varmutex: mutexty); cdecl; external SDLLibName;
- function SDL_LockMutex(mutex: mutexty): integer; cdecl; external SDLLibName;
- function SDL_UnlockMutex(mutex: mutexty): integer; cdecl; external SDLLibName;
- function SDL_mutexP(mutex: mutexty): integer; cdecl; external SDLLibName;
- function SDL_mutexV(mutex: mutexty): integer; cdecl; external SDLLibName;
- function SDL_CreateSemaphore(initial_value: cardinal): semty; cdecl; external SDLLibName;
- function SDL_SemPost(sem: semty): integer; cdecl; external SDLLibName;
- procedure SDL_DestroySemaphore(sem: semty); cdecl; external SDLLibName;
- function SDL_SemWait(sem: semty): integer; cdecl; external SDLLibName;
- function SDL_SemWaitTimeout(sem: semty; ms:cardinal): integer; cdecl; external SDLLibName;
- function SDL_SemValue(sem: semty): cardinal; cdecl; external SDLLibName;
- function SDL_SemTryWait(sem: semty): integer; cdecl; external SDLLibName;
+ //SDL returns and takes pointers, mutexty and semty are arrays in MSEgui:
+ //the wrappers convert, a C function can not return or take such an array
+ function SDL_CreateMutex: mutexty;
+ procedure SDL_DestroyMutex(varmutex: mutexty);
+ function SDL_LockMutex(mutex: mutexty): integer;
+ function SDL_UnlockMutex(mutex: mutexty): integer;
+ function SDL_mutexP(mutex: mutexty): integer;
+ function SDL_mutexV(mutex: mutexty): integer;
+ function SDL_CreateSemaphore(initial_value: cardinal): semty;
+ function SDL_SemPost(sem: semty): integer;
+ procedure SDL_DestroySemaphore(sem: semty);
+ function SDL_SemWait(sem: semty): integer;
+ function SDL_SemWaitTimeout(sem: semty; ms:cardinal): integer;
+ function SDL_SemValue(sem: semty): cardinal;
+ function SDL_SemTryWait(sem: semty): integer;
  procedure SDL_WaitThread(thread: pointer; status:pinteger); cdecl; external SDLLibName;
 
 // mouse
@@ -809,6 +811,99 @@ type
  function SDL_GetShiftState(akeyevent: SDL_KeyboardEvent): shiftstatesty;
 
 implementation
+
+ function SDL_CreateMutexP: pointer; cdecl; external SDLLibName name 'SDL_CreateMutex';
+ procedure SDL_DestroyMutexP(mutex: pointer); cdecl; external SDLLibName name 'SDL_DestroyMutex';
+ function SDL_LockMutexP(mutex: pointer): integer; cdecl; external SDLLibName name 'SDL_LockMutex';
+ function SDL_UnlockMutexP(mutex: pointer): integer; cdecl; external SDLLibName name 'SDL_UnlockMutex';
+ function SDL_CreateSemaphoreP(initial_value: cardinal): pointer; cdecl; external SDLLibName name 'SDL_CreateSemaphore';
+ function SDL_SemPostP(sem: pointer): integer; cdecl; external SDLLibName name 'SDL_SemPost';
+ procedure SDL_DestroySemaphoreP(sem: pointer); cdecl; external SDLLibName name 'SDL_DestroySemaphore';
+ function SDL_SemWaitP(sem: pointer): integer; cdecl; external SDLLibName name 'SDL_SemWait';
+ function SDL_SemWaitTimeoutP(sem: pointer; ms: cardinal): integer; cdecl; external SDLLibName name 'SDL_SemWaitTimeout';
+ function SDL_SemValueP(sem: pointer): cardinal; cdecl; external SDLLibName name 'SDL_SemValue';
+ function SDL_SemTryWaitP(sem: pointer): integer; cdecl; external SDLLibName name 'SDL_SemTryWait';
+
+ function h2p(const h; size: integer): pointer;
+ begin
+  result:= nil;               //MSEgui wraps the SDL pointer in mutexty/semty
+  if size >= sizeof(pointer) then begin
+   move(h,result,sizeof(pointer));
+  end;
+ end;
+
+ function SDL_CreateMutex: mutexty;
+ var
+  p: pointer;
+ begin
+  fillchar(result,sizeof(result),0);
+  p:= SDL_CreateMutexP;
+  move(p,result,sizeof(pointer));
+ end;
+
+ procedure SDL_DestroyMutex(varmutex: mutexty);
+ begin
+  SDL_DestroyMutexP(h2p(varmutex,sizeof(varmutex)));
+ end;
+
+ function SDL_LockMutex(mutex: mutexty): integer;
+ begin
+  result:= SDL_LockMutexP(h2p(mutex,sizeof(mutex)));
+ end;
+
+ function SDL_UnlockMutex(mutex: mutexty): integer;
+ begin
+  result:= SDL_UnlockMutexP(h2p(mutex,sizeof(mutex)));
+ end;
+
+ function SDL_mutexP(mutex: mutexty): integer;
+ begin
+  result:= SDL_LockMutexP(h2p(mutex,sizeof(mutex)));
+ end;
+
+ function SDL_mutexV(mutex: mutexty): integer;
+ begin
+  result:= SDL_UnlockMutexP(h2p(mutex,sizeof(mutex)));
+ end;
+
+ function SDL_CreateSemaphore(initial_value: cardinal): semty;
+ var
+  p: pointer;
+ begin
+  fillchar(result,sizeof(result),0);
+  p:= SDL_CreateSemaphoreP(initial_value);
+  move(p,result,sizeof(pointer));
+ end;
+
+ function SDL_SemPost(sem: semty): integer;
+ begin
+  result:= SDL_SemPostP(h2p(sem,sizeof(sem)));
+ end;
+
+ procedure SDL_DestroySemaphore(sem: semty);
+ begin
+  SDL_DestroySemaphoreP(h2p(sem,sizeof(sem)));
+ end;
+
+ function SDL_SemWait(sem: semty): integer;
+ begin
+  result:= SDL_SemWaitP(h2p(sem,sizeof(sem)));
+ end;
+
+ function SDL_SemWaitTimeout(sem: semty; ms:cardinal): integer;
+ begin
+  result:= SDL_SemWaitTimeoutP(h2p(sem,sizeof(sem)),ms);
+ end;
+
+ function SDL_SemValue(sem: semty): cardinal;
+ begin
+  result:= SDL_SemValueP(h2p(sem,sizeof(sem)));
+ end;
+
+ function SDL_SemTryWait(sem: semty): integer;
+ begin
+  result:= SDL_SemTryWaitP(h2p(sem,sizeof(sem)));
+ end;
 
  function SDL_KeyCodeToKey(acode: SDL_KeyCode): keyty;
  begin
