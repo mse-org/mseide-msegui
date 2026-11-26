@@ -458,8 +458,9 @@ begin
  case size of
   wsi_normal: begin
    // only map/restore the window if it is not already visible and normal
-   if ((flags and SDL_WINDOW_SHOWN) = 0) or
-        ((flags and (SDL_WINDOW_MINIMIZED or SDL_WINDOW_MAXIMIZED)) <> 0) then begin
+   // windows are created hidden: show only the ones that must be visible
+   if visible and (((flags and SDL_WINDOW_SHOWN) = 0) or
+        ((flags and (SDL_WINDOW_MINIMIZED or SDL_WINDOW_MAXIMIZED)) <> 0)) then begin
     SDL_ShowWindow(id);
    end;
   end;
@@ -471,27 +472,90 @@ begin
  result:= SDL_CheckError('setwindowstate');
 end;
 
+type
+ winposinfoty = record
+  id: winidty;
+  parent: winidty;       //0 = no popup
+  x,y: integer;          //MSEgui screen coordinates
+ end;
+
+var
+ waylandmode: boolean;   //SDL driver is wayland
+ waylandsdl2: boolean;   //SDL2 on wayland: SDL knows no window positions
+ sdl2popupmode: integer;  //MSESDL2POPUP: 0 = off, 1 = menus, 2 = menus+hints
+ winposs: array of winposinfoty;
+
+function findwinpos(const id: winidty): integer;
+var
+ i: integer;
+begin
+ result:= -1;
+ for i:= 0 to high(winposs) do begin
+  if winposs[i].id = id then begin
+   result:= i;
+   break;
+  end;
+ end;
+end;
+
+procedure setwinpos(const id: winidty; const x,y: integer;
+                                              const aparent: winidty);
+var
+ i: integer;
+begin
+ i:= findwinpos(id);
+ if i < 0 then begin
+  i:= length(winposs);
+  setlength(winposs,i+1);
+  winposs[i].id:= id;
+  winposs[i].parent:= aparent;
+ end;
+ winposs[i].x:= x;
+ winposs[i].y:= y;
+end;
+
+function getwinpos(const id: winidty; out x,y: integer): boolean;
+var
+ i: integer;
+begin
+ x:= 0;
+ y:= 0;
+ i:= findwinpos(id);
+ result:= i >= 0;
+ if result then begin
+  x:= winposs[i].x;
+  y:= winposs[i].y;
+ end;
+end;
+
+procedure delwinpos(const id: winidty);
+var
+ i,j: integer;
+begin
+ for i:= high(winposs) downto 0 do begin
+  if (winposs[i].id = id) or (winposs[i].parent = id) then begin
+   j:= high(winposs);
+   winposs[i]:= winposs[j];
+   setlength(winposs,j);
+  end;
+ end;
+end;
+
 function gui_getpointerpos: pointty;
 var
  x,y: integer;
  rect1: rectty;
- iswl: boolean;
 begin
  x:= 0;
  y:= 0;
- iswl:= (string(SDL_GetCurrentVideoDriver) = 'wayland') and
-                                                      (mousewindow <> 0);
- if iswl then begin
-  //Wayland has no global coordinates: SDL gives the position inside the
-  //window which has the mouse focus, add the position of that window
+ if waylandmode then begin
+  // Wayland: SDL knows only the position in the window with the pointer
   SDL_GetMouseState(@x,@y);
-  gui_getwindowrect(mousewindow,rect1);
-  if sdldebug then begin
-   writeln('GETPOINTERPOS local=',x,',',y,' window=',rect1.x,',',rect1.y);
-   flush(output);
+  if mousewindow <> 0 then begin
+   gui_getwindowrect(mousewindow,rect1);
+   x:= x + rect1.x;
+   y:= y + rect1.y;
   end;
-  x:= x + rect1.x;
-  y:= y + rect1.y;
  end
  else begin
   SDL_GetGlobalMouseState(@x,@y);   // screen coordinates
@@ -956,6 +1020,7 @@ end;
 
 procedure windowdestroyed(id: winidty);
 begin
+ delwinpos(id);
  if mousewindow = id then begin
   mousewindow:= 0;
  end;
@@ -1282,7 +1347,15 @@ end;
 
 function gui_showwindow(id: winidty): guierrorty;
 begin
+ if sdldebug then begin
+  writeln('SHOWWINDOW before id=',ptruint(id));
+  flush(output);
+ end;
  SDL_ShowWindow(id);
+ if sdldebug then begin
+  writeln('SHOWWINDOW after id=',ptruint(id));
+  flush(output);
+ end;
  result:= SDL_CheckError('showwindow');
 end;
 
@@ -1507,6 +1580,9 @@ function getclientrect(winid: winidty; windowrect: prectty = nil): rectty;
 begin
  SDL_GetWindowSize(winid,result.cx,result.cy);
  SDL_GetWindowPosition(winid,result.x,result.y);
+ if waylandsdl2 then begin
+  getwinpos(winid,result.x,result.y);     //SDL2 returns 0,0
+ end;
  SDL_CheckError('getclientrect');
 end;
 
@@ -1520,6 +1596,9 @@ begin
  w:= 0;
  h:= 0;
  SDL_GetWindowPosition(id,x,y);
+ if waylandsdl2 then begin
+  getwinpos(id,x,y);
+ end;
  SDL_GetWindowSize(id,w,h);
  rect.x:= x;
  rect.y:= y;
@@ -1533,6 +1612,9 @@ var
  x,y : integer;
 begin
  SDL_GetWindowPosition(id,x,y);
+ if waylandsdl2 then begin
+  getwinpos(id,x,y);
+ end;
  pos.x:= x;
  pos.y:= y;
  result:= SDL_CheckError('getwindowpos');
@@ -1579,6 +1661,41 @@ begin
  end;
 end;
 
+procedure sdlsetwindowpos(id: winidty; x,y: integer);
+                 //SDL2 Wayland: remember the position, popups are positioned
+                 //relative to their parent
+var
+ i,px,py: integer;
+begin
+ if waylandsdl2 then begin
+  i:= findwinpos(id);
+  if (i >= 0) and (winposs[i].parent <> 0) then begin
+   px:= 0;
+   py:= 0;
+   getwinpos(winposs[i].parent,px,py);
+   winposs[i].x:= x;
+   winposs[i].y:= y;
+   if sdldebug then begin
+    writeln('POPUPSETPOS before id=',ptruint(id),' pos=',x,',',y,
+                                        ' rel=',x-px,',',y-py);
+    flush(output);
+   end;
+   SDL_SetWindowPosition(id,x-px,y-py);
+   if sdldebug then begin
+    writeln('POPUPSETPOS after id=',ptruint(id));
+    flush(output);
+   end;
+  end
+  else begin
+   setwinpos(id,x,y,0);
+   SDL_SetWindowPosition(id,x,y);
+  end;
+ end
+ else begin
+  SDL_SetWindowPosition(id,x,y);
+ end;
+end;
+
 function gui_reposwindow(id: winidty; const rect: rectty): guierrorty;
 var
  rect1: rectty;
@@ -1592,7 +1709,7 @@ begin
  rect1:= getclientrect(id);
  if not ((rect.x=rect1.x) and (rect.y=rect1.y) and
          (rect.cx=rect1.cx) and (rect.cy=rect1.cy)) then begin
-  SDL_SetWindowPosition(id,rect.x,rect.y);
+  sdlsetwindowpos(id,rect.x,rect.y);
   ww:= 0;
   wh:= 0;
   SDL_GetWindowSize(id,ww,wh);
@@ -1619,7 +1736,7 @@ begin
  gui_getwindowrect(id,clientrect);
  if (rect.cx > 0) and (rect.cy > 0) and
               (rect.x < 20000) and (rect.y < 20000) then begin
-  SDL_SetWindowPosition(id,rect.x,rect.y);
+  sdlsetwindowpos(id,rect.x,rect.y);
  end
  else begin
  end;
@@ -1630,7 +1747,7 @@ function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;
 begin
  result:= gue_resizewindow;
  if (rect.x < 20000) and (rect.y < 20000) then begin
-  SDL_SetWindowPosition(id,rect.x,rect.y);
+  sdlsetwindowpos(id,rect.x,rect.y);
  end;
  result:= SDL_CheckError('setembeddedwindowrect');
 end;
@@ -2035,14 +2152,17 @@ var
  drv: string;
  parentwin: winidty;
  realpopup: boolean;
+ px,py: integer;
 begin
+ px:= 0;
+ py:= 0;
  fillchar(awindow,sizeof(awindow),0);
  with awindow,options do begin
   ownerwindow:= applicationwindow;
 {$ifdef usesdl3}
   windowstyleex:= $00000008;     //hidden, the SDL3 shim shows it when ready
 {$else}
-  windowstyleex:= SDL_WINDOW_SHOWN;
+  windowstyleex:= SDL_WINDOW_HIDDEN;  //shown by gui_showwindow
 {$endif}
   if (options * noframewindowtypes <> []) or
     (wo_message in options) then begin
@@ -2057,6 +2177,12 @@ begin
   //HiDPI: SDL_WINDOW_HIGH_PIXEL_DENSITY, MSESDLSCALE=1 switches it off
   if getenvironmentvariable('MSESDLSCALE') <> '1' then begin
    windowstyleex:= windowstyleex or $00002000;
+  end;
+{$endif}
+{$ifdef usesdl2}
+  //HiDPI (only effective on native Wayland), MSESDLSCALE=1 switches it off
+  if getenvironmentvariable('MSESDLSCALE') <> '1' then begin
+   windowstyleex:= windowstyleex or $00002000;   //SDL_WINDOW_ALLOW_HIGHDPI
   end;
 {$endif}
   if pos = wp_minimized then begin
@@ -2117,6 +2243,49 @@ begin
   end;
 {$endif}
 
+{$ifdef usesdl2}
+  if (wo_popup in options) and waylandsdl2 and (sdl2popupmode > 0) and
+       ((sdl2popupmode >= 2) or not (wo_tooltip in options)) then begin
+   // native Wayland: menus and hints are real popup windows, the position
+   // is relative to the parent window (keyboard focus / mouse focus window)
+   if wo_tooltip in options then begin
+    parentwin:= SDL_GetMouseFocus;
+   end
+   else begin
+    parentwin:= SDL_GetKeyboardFocus;
+   end;
+   if parentwin = 0 then begin
+    parentwin:= SDL_GetKeyboardFocus;
+   end;
+   if parentwin <> 0 then begin
+    px:= 0;
+    py:= 0;
+    getwinpos(parentwin,px,py);
+    if wo_tooltip in options then begin
+     id:= SDL_CreateWindow(classname,rect1.x-px,rect1.y-py,rect1.cx,rect1.cy,
+                                              windowstyleex or $00040000);
+    end
+    else begin
+     id:= SDL_CreateWindow(classname,rect1.x-px,rect1.y-py,rect1.cx,rect1.cy,
+                                              windowstyleex or $00080000);
+    end;
+    realpopup:= id <> 0;
+    if realpopup then begin
+     setwinpos(id,rect1.x,rect1.y,parentwin);
+    end
+    else begin
+     SDL_ClearError;
+    end;
+   end;
+   if sdldebug then begin
+    writeln('POPUP2 parent=',ptruint(parentwin),' parentpos=',px,',',py,
+            ' id=',ptruint(id),' tooltip=',wo_tooltip in options,
+            ' pos=',rect1.x,',',rect1.y);
+    flush(output);
+   end;
+  end;
+{$endif}
+
   if id = 0 then begin
    // small hint windows must not take the focus (X11 only)
    if (wo_popup in options) and (drv = 'x11') and
@@ -2154,6 +2323,9 @@ begin
   end;
 
   result:= SDL_CheckError('createwindow');
+  if waylandsdl2 and (id <> 0) and not realpopup then begin
+   setwinpos(id,rect1.x,rect1.y,0);       //SDL2 can not tell the position
+  end;
 
   if (id <> 0) and (options * shapewindowoptions <> []) then begin
    addsdlshape(id,options,rect1.cx,rect1.cy);   //alpha mask, see gdi_endpaint
@@ -2168,7 +2340,8 @@ begin
    if transientfor <> 0 then begin
     ownerwindow:= transientfor;
    end;
-   if (transientfor = 0) and (parent = 0) and not realpopup then begin
+   if (transientfor = 0) and (parent = 0) and not realpopup and
+                                                   not waylandsdl2 then begin
     SDL_SetWindowPosition(id,0,0);
    end;
   end
@@ -2462,6 +2635,14 @@ begin
   //SDL_GetWindowSurface and recreates the window = visible flash
   SDL_SetHint('SDL_FRAMEBUFFER_ACCELERATION','0');
  end;
+ {$endif}
+ waylandmode:= string(SDL_GetCurrentVideoDriver) = 'wayland';
+ waylandsdl2:= false;
+ sdl2popupmode:= 0;
+ {$ifdef usesdl2}
+ waylandsdl2:= waylandmode;
+ //SDL2 Wayland popups can hang in SDL_ShowWindow, off unless asked for
+ sdl2popupmode:= strtointdef(getenvironmentvariable('MSESDL2POPUP'),0);
  {$endif}
  if sdldebug then begin
   writeln('GUI_INIT driver=',string(SDL_GetCurrentVideoDriver));

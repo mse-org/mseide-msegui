@@ -252,7 +252,7 @@ var
  bsurf: PSDL_Surface;
  disp: SDL_Rect;
  str1: string;
-{$ifdef usesdl3}
+{$if defined(usesdl3) or defined(usesdl2)}
  pxw,pxh: integer;
  dd: single;
 {$endif}
@@ -299,6 +299,22 @@ begin
       end;
      end;
 {$endif}
+{$ifdef usesdl2}
+     // HiDPI (native Wayland only, other SDL2 drivers report pixels = size)
+     pxw:= ww;
+     pxh:= wh;
+     SDL_GetWindowSizeInPixels(paintdevice,pxw,pxh);
+     dd:= 1;
+     if ww > 0 then begin
+      dd:= pxw / ww;
+     end;
+     if dd > 1.05 then begin
+      dens:= trunc(dd);
+      if dd - dens > 0.05 then begin
+       inc(dens);
+      end;
+     end;
+{$endif}
      str1:= getenvironmentvariable('MSESDLSCALE'); // 1 = off, 2..4 = force
      if str1 <> '' then begin
       dens:= strtointdef(str1,dens);
@@ -309,7 +325,7 @@ begin
      if dens > 4 then begin
       dens:= 4;
      end;
-{$ifdef usesdl3}
+{$if defined(usesdl3) or defined(usesdl2)}
      if sdldebug then begin
       writeln('CREATEGC density=',dd:0:3,' window=',ww,'x',wh,
                          ' pixels=',pxw,'x',pxh,' backscale=',dens);
@@ -530,6 +546,7 @@ var
  tex: SDL_Texture;
  dr: SDL_Rect;
  userenderer,done,scaledpresent: boolean;
+ outw,outh: integer;
 begin
  userenderer:= false;
 {$ifdef usesdl2}
@@ -551,6 +568,10 @@ begin
    pxw:= dw;                                 // size of the window in pixels
    pxh:= dh;
    scaledpresent:= false;
+{$ifdef usesdl2}
+   SDL_GetWindowSizeInPixels(window,pxw,pxh);
+   scaledpresent:= (pxw <> dw) or (pxh <> dh);
+{$endif}
 {$ifdef usesdl3}
    x3_getwindowsizeinpixels(pointer(ptruint(window)),pxw,pxh);
    scaledpresent:= (pxw <> dw) or (pxh <> dh);
@@ -602,6 +623,15 @@ begin
        dr.y:= 0;
        dr.w:= pxw;                  // the renderer works in window pixels
        dr.h:= pxh;
+{$ifdef usesdl2}
+       outw:= 0;
+       outh:= 0;
+       SDL_GetRendererOutputSize(pr,@outw,@outh);
+       if (outw > 0) and (outh > 0) then begin
+        dr.w:= outw;
+        dr.h:= outh;
+       end;
+{$endif}
        SDL_RenderCopy(pr,tex,nil,@dr);
        SDL_DestroyTexture(tex);
       end;
@@ -647,6 +677,17 @@ begin
      end;
      // plain copy, no alpha blending over the (zeroed) window surface
      SDL_SetSurfaceBlendMode(surf,SDL_BLENDMODE_NONE);
+{$ifdef usesdl2}
+     if scaledpresent then begin
+      // stretch to the window pixel size (fractional density)
+      dr.x:= 0;
+      dr.y:= 0;
+      dr.w:= wp^.w;
+      dr.h:= wp^.h;
+      SDL_UpperBlitScaled(surf,@r,wsurf,@dr);
+     end
+     else begin
+{$endif}
 {$ifdef usesdl3}
      if scaledpresent then begin
       // back surface and window have different pixel sizes (fractional
@@ -667,6 +708,9 @@ begin
        r.h:= wp^.h;
       end;
       SDL_UpperBlit(surf,@r,wsurf,@r);
+{$ifdef usesdl2}
+     end;
+{$endif}
 {$ifdef usesdl3}
      end;
      res:= SDL_UpdateWindowSurface(window);
