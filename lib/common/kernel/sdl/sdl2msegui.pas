@@ -498,6 +498,7 @@ type
  procedure SDL_GetWindowPosition(window: winidty; var x, y: integer); cdecl; external SDLLibName;
  procedure SDL_SetWindowPosition(window: winidty; x, y: integer); cdecl; external SDLLibName;
  procedure SDL_GetWindowSize(window: winidty; var w, h: integer); cdecl; external SDLLibName;
+ procedure SDL_GetWindowSizeInPixels(window: winidty; var w, h: integer); cdecl; external SDLLibName; //SDL 2.26+
  procedure SDL_SetWindowSize(window: winidty; w, h: integer); cdecl; external SDLLibName;
  function SDL_GetWindowFlags(window: winidty): SDL_WindowFlags; cdecl; external SDLLibName;
  procedure SDL_RestoreWindow(window: winidty); cdecl; external SDLLibName;
@@ -508,6 +509,8 @@ type
  procedure SDL_SetWindowIcon(window: winidty; icon: PSDL_Surface); cdecl; external SDLLibName;
  procedure SDL_UpdateWindowSurface(window: winidty); cdecl; external SDLLibName;
  function SDL_GetWindowFromID(id: cardinal): winidty; cdecl; external SDLLibName;
+ function SDL_GetKeyboardFocus: winidty; cdecl; external SDLLibName;
+ function SDL_GetMouseFocus: winidty; cdecl; external SDLLibName;
  function SDL_GetWindowSurface(window: winidty): PSDL_Surface; cdecl; external SDLLibName;
  function SDL_UpdateWindowSurface(window: winidty): integer; cdecl; external SDLLibName;
  function SDL_GetDisplayBounds(displayIndex: integer; rect: PSDL_Rect): integer; cdecl; external SDLLibName;
