@@ -238,6 +238,10 @@ function SDL_SetWindowSize(window: PSDL_Window; w: cint; h: cint): Boolean;
                                   cdecl; external SDL_LibName;
 function SDL_GetWindowFlags(window: PSDL_Window): TSDL_WindowFlags; cdecl;
                                                       external SDL_LibName;
+function SDL_GetWindowPixelDensity(window: PSDL_Window): cfloat; cdecl;
+                                                      external SDL_LibName;
+function SDL_GetWindowSizeInPixels(window: PSDL_Window; w: pcint; h: pcint):
+                                  Boolean; cdecl; external SDL_LibName;
 function SDL_SetWindowFullscreen(window: PSDL_Window; fullscreen: Boolean):
                                   Boolean; cdecl; external SDL_LibName;
 function SDL_SetWindowTitle(window: PSDL_Window; title: PAnsiChar): Boolean;
@@ -292,6 +296,10 @@ function SDL_SetSurfaceBlendMode(surface: PSDL_Surface;
 function SDL_BlitSurface(src: PSDL_Surface; srcrect: PSDL_Rect;
               dst: PSDL_Surface; dstrect: PSDL_Rect): Boolean; cdecl;
                                                       external SDL_LibName;
+{ scaleMode: 0 = nearest, 1 = linear }
+function SDL_BlitSurfaceScaled(src: PSDL_Surface; srcrect: PSDL_Rect;
+              dst: PSDL_Surface; dstrect: PSDL_Rect; scaleMode: cint): Boolean;
+                                  cdecl; external SDL_LibName;
 
 { renderer }
 function SDL_CreateSoftwareRenderer(surface: PSDL_Surface): PSDL_Renderer;
@@ -333,6 +341,8 @@ procedure SDL_DestroyTexture(texture: PSDL_Texture); cdecl;
                                                       external SDL_LibName;
 function SDL_SetTextureBlendMode(texture: PSDL_Texture;
               blendMode: TSDL_BlendMode): Boolean; cdecl; external SDL_LibName;
+function SDL_SetTextureScaleMode(texture: PSDL_Texture; scaleMode: cint):
+                                  Boolean; cdecl; external SDL_LibName;
 
 { events }
 function SDL_PollEvent(event: PSDL_Event): Boolean; cdecl;

@@ -474,10 +474,28 @@ end;
 function gui_getpointerpos: pointty;
 var
  x,y: integer;
+ rect1: rectty;
+ iswl: boolean;
 begin
  x:= 0;
  y:= 0;
- SDL_GetGlobalMouseState(@x,@y);   // screen coordinates
+ iswl:= (string(SDL_GetCurrentVideoDriver) = 'wayland') and
+                                                      (mousewindow <> 0);
+ if iswl then begin
+  //Wayland has no global coordinates: SDL gives the position inside the
+  //window which has the mouse focus, add the position of that window
+  SDL_GetMouseState(@x,@y);
+  gui_getwindowrect(mousewindow,rect1);
+  if sdldebug then begin
+   writeln('GETPOINTERPOS local=',x,',',y,' window=',rect1.x,',',rect1.y);
+   flush(output);
+  end;
+  x:= x + rect1.x;
+  y:= y + rect1.y;
+ end
+ else begin
+  SDL_GetGlobalMouseState(@x,@y);   // screen coordinates
+ end;
  SDL_CheckError('getpointerpos');
  result.x:= x;
  result.y:= y;
@@ -2035,6 +2053,10 @@ begin
 {$ifdef usesdl3}
   if options * shapewindowoptions <> [] then begin
    windowstyleex:= windowstyleex or $40000000;   //SDL_WINDOW_TRANSPARENT
+  end;
+  //HiDPI: SDL_WINDOW_HIGH_PIXEL_DENSITY, MSESDLSCALE=1 switches it off
+  if getenvironmentvariable('MSESDLSCALE') <> '1' then begin
+   windowstyleex:= windowstyleex or $00002000;
   end;
 {$endif}
   if pos = wp_minimized then begin

@@ -1,6 +1,6 @@
 { MSEgui Copyright (c) 1999-2011 by Martin Schreiber
 
-    See the file COPYING.MSE, included in this Second, where the error is raised from. At the places in that code that call error(gde_invalidsaveindex,...), add this line just before each call, so the call chain is printed:distribution,
+    See the file COPYING.MSE, included in this distribution,
     for details about the copyright.
 
     This program is distributed in the hope that it will be useful,
@@ -33,7 +33,7 @@ function sdlgetdefaultfontnames: defaultfontnamesty;
 
 implementation
 uses
- mseguiintf,msegraphutils,msesysintf1,sysutils,msegenericgdi;
+ mseguiintf,msegraphutils,msesysintf1,sysutils,msegenericgdi{$ifdef usesdl3},sdl3api{$endif};
 
 var
 fgrgb,bgrgb: rgbtriplety;
@@ -74,6 +74,7 @@ type
    procedure drawglyph(var drawinfo: drawinfoty; const pos: pointty;
                                       const bitmap: pbitmapdataty); override;
   public
+   function drawscale(const drawinfo: drawinfoty): integer; override;
    procedure drawstring16(var drawinfo: drawinfoty;
                                     const afont: fontty); override;
  end;
@@ -81,6 +82,44 @@ type
 var
  ffontcache: tsdlftfontcache;
  currentfont: fontty;      // set in gdi_changegc
+
+type
+ backbufty = record
+  renderer: ptruint;
+  window: winidty;
+  surf: PSDL_Surface;
+  pres: ptruint;       // Wayland: renderer used to present the back surface
+  scale: integer;      // HiDPI: back surface pixels per logical pixel
+ end;
+
+var
+ backbufs: array of backbufty;
+
+function findbackbuf(arenderer: ptruint): integer;
+var
+ i: integer;
+begin
+ result:= -1;
+ for i:= 0 to high(backbufs) do begin
+  if backbufs[i].renderer = arenderer then begin
+   result:= i;
+   break;
+  end;
+ end;
+end;
+
+function gcscale(arenderer: ptruint): integer;
+          //pixels per logical pixel of the surface behind the renderer,
+          //1 for pixmaps and the measuring gc
+var
+ i: integer;
+begin
+ result:= 1;
+ i:= findbackbuf(arenderer);
+ if (i >= 0) and (backbufs[i].scale > 1) then begin
+  result:= backbufs[i].scale;
+ end;
+end;
 
 function fontcache: tsdlftfontcache;
 begin
@@ -139,18 +178,25 @@ begin
  end;
 end;
 
+function tsdlftfontcache.drawscale(const drawinfo: drawinfoty): integer;
+begin
+ result:= gcscale(drawinfo.gc.handle);
+end;
+
 procedure tsdlftfontcache.drawstring16(var drawinfo: drawinfoty;
                                                   const afont: fontty);
 var
  rect1: rectty;
  rect2: SDL_Rect;
+ sc: integer;
 begin
  if df_opaque in drawinfo.gc.drawingflags then begin
   if textbackgroundrect(drawinfo,afont,rect1) then begin
-   rect2.x:= rect1.x + drawinfo.origin.x;   // check: see item 2 below
-   rect2.y:= rect1.y + drawinfo.origin.y;
-   rect2.w:= rect1.cx;
-   rect2.h:= rect1.cy;
+   sc:= gcscale(drawinfo.gc.handle);
+   rect2.x:= (rect1.x + drawinfo.origin.x) * sc;
+   rect2.y:= (rect1.y + drawinfo.origin.y) * sc;
+   rect2.w:= rect1.cx * sc;
+   rect2.h:= rect1.cy * sc;
    SDL_SetRenderDrawBlendMode(drawinfo.gc.handle,SDL_BLENDMODE_NONE);
    SDL_SetRenderDrawColor(drawinfo.gc.handle,bgrgb.red,bgrgb.green,
                                       bgrgb.blue,255 - bgrgb.res);
@@ -197,37 +243,19 @@ var
  windowrenderer: ptruint;
 
 
-type
- backbufty = record
-  renderer: ptruint;
-  window: winidty;
-  surf: PSDL_Surface;
-  pres: ptruint;       // Wayland: renderer used to present the back surface
- end;
-
-var
- backbufs: array of backbufty;
-
-function findbackbuf(arenderer: ptruint): integer;
-var
- i: integer;
-begin
- result:= -1;
- for i:= 0 to high(backbufs) do begin
-  if backbufs[i].renderer = arenderer then begin
-   result:= i;
-   break;
-  end;
- end;
-end;
 
 //
 procedure gdi_creategc(var drawinfo: drawinfoty);
 var
- int3,bw,bh,ww,wh: integer;
+ int3,bw,bh,ww,wh,dens: integer;
  arenderer: ptruint;
  bsurf: PSDL_Surface;
  disp: SDL_Rect;
+ str1: string;
+{$ifdef usesdl3}
+ pxw,pxh: integer;
+ dd: single;
+{$endif}
 begin
  with drawinfo.creategc do begin
   if sdldebug then begin
@@ -255,6 +283,39 @@ begin
      ww:= 0;
      wh:= 0;
      SDL_GetWindowSize(paintdevice,ww,wh);
+     dens:= 1;
+{$ifdef usesdl3}
+     // HiDPI: the window was created with the high pixel density flag, the
+     // back surface gets "dens" pixels per logical pixel. A fractional
+     // density is rounded up, gdi_endpaint scales the result down.
+     pxw:= ww;
+     pxh:= wh;
+     dd:= x3_getwindowpixeldensity(pointer(ptruint(paintdevice)));
+     x3_getwindowsizeinpixels(pointer(ptruint(paintdevice)),pxw,pxh);
+     if dd > 1.05 then begin
+      dens:= trunc(dd);
+      if dd - dens > 0.05 then begin
+       inc(dens);
+      end;
+     end;
+{$endif}
+     str1:= getenvironmentvariable('MSESDLSCALE'); // 1 = off, 2..4 = force
+     if str1 <> '' then begin
+      dens:= strtointdef(str1,dens);
+     end;
+     if dens < 1 then begin
+      dens:= 1;
+     end;
+     if dens > 4 then begin
+      dens:= 4;
+     end;
+{$ifdef usesdl3}
+     if sdldebug then begin
+      writeln('CREATEGC density=',dd:0:3,' window=',ww,'x',wh,
+                         ' pixels=',pxw,'x',pxh,' backscale=',dens);
+      flush(output);
+     end;
+{$endif}
      fillchar(disp,sizeof(disp),0);
      SDL_GetDisplayBounds(0,@disp);
      if disp.w <= 0 then begin
@@ -271,7 +332,7 @@ begin
      if wh > bh then begin
       bh:= wh;
      end;
-     bsurf:= SDL_CreateRGBSurface(0,bw,bh,32,
+     bsurf:= SDL_CreateRGBSurface(0,bw*dens,bh*dens,32,
                        $00FF0000,$0000FF00,$000000FF,$FF000000);
      arenderer:= 0;
      if bsurf <> 0 then begin
@@ -283,6 +344,8 @@ begin
         renderer:= arenderer;
         window:= paintdevice;
         surf:= bsurf;
+        pres:= 0;
+        scale:= dens;
        end;
       end
       else begin
@@ -300,7 +363,7 @@ begin
      end;
     end;
     gcpo^.handle:= arenderer;
-       if arenderer <> 0 then begin
+    if arenderer <> 0 then begin
      windowrenderer:= arenderer;
      error:= gde_ok;
     end;
@@ -352,7 +415,7 @@ end;
 procedure gdi_changegc(var drawinfo: drawinfoty);
 var
  ar1: rectarty;
- int1: integer;
+ int1,sc: integer;
  rect1: SDL_Rect;
  x1,y1,x2,y2: integer;
  rgbcolor: rgbtriplety;
@@ -387,6 +450,7 @@ begin
   if gvm_brushorigin in mask then begin
   end;
   if gvm_clipregion in mask then begin
+   sc:= gcscale(handle);
    if clipregion <> 0 then begin
     ar1:= gui_regiontorects(clipregion);
     if ar1 <> nil then begin
@@ -403,10 +467,10 @@ begin
       if ar1[int1].pos.y + ar1[int1].size.cy > y2 then
                                  y2:= ar1[int1].pos.y + ar1[int1].size.cy;
      end;
-     rect1.x:= x1 + cliporigin.x;
-     rect1.y:= y1 + cliporigin.y;
-     rect1.w:= x2 - x1;
-     rect1.h:= y2 - y1;
+     rect1.x:= (x1 + cliporigin.x) * sc;     // device pixels
+     rect1.y:= (y1 + cliporigin.y) * sc;
+     rect1.w:= (x2 - x1) * sc;
+     rect1.h:= (y2 - y1) * sc;
      SDL_RenderSetClipRect(handle,@rect1);
     end
     else begin
@@ -416,8 +480,6 @@ begin
    end
    else begin
     SDL_RenderSetClipRect(handle,nil);                     // no clipping
-     if rect1.w >= 200 then begin
-       end;
    end;
    SDL_CheckError('SDL_RenderSetClipRect');
   end;
@@ -455,9 +517,9 @@ var
 
 procedure gdi_endpaint(var drawinfo: drawinfoty); //gdifunc
 var
- i,ww,wh: integer;
+ i,ww,wh,sc,dw,dh,pxw,pxh: integer;
 {$ifdef usesdl3}
- winw,winh,res: integer;
+ res: integer;
 {$endif}
  wsurf: PSDL_Surface;
  sp,wp: CSDL_Surface;
@@ -467,7 +529,7 @@ var
  pr: SDL_Renderer;
  tex: SDL_Texture;
  dr: SDL_Rect;
- userenderer,done: boolean;
+ userenderer,done,scaledpresent: boolean;
 begin
  userenderer:= false;
 {$ifdef usesdl2}
@@ -482,10 +544,16 @@ begin
   with backbufs[i] do begin
    ww:= 0;
    wh:= 0;
-   SDL_GetWindowSize(window,ww,wh);
+   SDL_GetWindowSize(window,ww,wh);          // logical size
+   sc:= scale;
+   dw:= ww * sc;                             // size in back surface pixels
+   dh:= wh * sc;
+   pxw:= dw;                                 // size of the window in pixels
+   pxh:= dh;
+   scaledpresent:= false;
 {$ifdef usesdl3}
-   winw:= ww;
-   winh:= wh;
+   x3_getwindowsizeinpixels(pointer(ptruint(window)),pxw,pxh);
+   scaledpresent:= (pxw <> dw) or (pxh <> dh);
    //SDL3: only Wayland popups use the renderer, the software window
    //surface of a popup is not shown by the compositor until the pointer
    //enters it
@@ -496,22 +564,23 @@ begin
 
    if sdldebug and (endpaintcount < 80) then begin
     writeln('ENDPAINT gc=',ptruint(drawinfo.gc.handle),' backbuf=',i,
-            ' win=',ptruint(window),' surf=',ptruint(surf));
+            ' win=',ptruint(window),' surf=',ptruint(surf),
+            ' logical=',ww,'x',wh,' scale=',sc,' pixels=',pxw,'x',pxh);
     flush(output);
    end;
 
-   if ww > sp^.w then begin
-    ww:= sp^.w;
+   if dw > sp^.w then begin
+    dw:= sp^.w;
    end;
-   if wh > sp^.h then begin
-    wh:= sp^.h;
+   if dh > sp^.h then begin
+    dh:= sp^.h;
    end;
    r.x:= 0;
    r.y:= 0;
-   r.w:= ww;
-   r.h:= wh;
+   r.w:= dw;
+   r.h:= dh;
    done:= false;
-   if userenderer and (ww > 0) and (wh > 0) then begin
+   if userenderer and (dw > 0) and (dh > 0) then begin
     // show the back surface through a renderer on the window
     pr:= pres;
     if pr = 0 then begin
@@ -520,7 +589,7 @@ begin
      pres:= pr;
     end;
     if pr <> 0 then begin
-     tsurf:= SDL_CreateRGBSurface(0,ww,wh,32,
+     tsurf:= SDL_CreateRGBSurface(0,dw,dh,32,
                     $00FF0000,$0000FF00,$000000FF,$FF000000);
      if tsurf <> 0 then begin
       SDL_SetSurfaceBlendMode(tsurf,SDL_BLENDMODE_NONE);
@@ -531,8 +600,8 @@ begin
        SDL_RenderClear(pr);
        dr.x:= 0;
        dr.y:= 0;
-       dr.w:= ww;
-       dr.h:= wh;
+       dr.w:= pxw;                  // the renderer works in window pixels
+       dr.h:= pxh;
        SDL_RenderCopy(pr,tex,nil,@dr);
        SDL_DestroyTexture(tex);
       end;
@@ -560,8 +629,9 @@ begin
 {$ifdef usesdl3}
     if wsurf <> 0 then begin
      wp:= CSDL_Surface(ptruint(wsurf));
-     if (wp^.w <> winw) or (wp^.h <> winh) then begin
-      // SDL3 keeps the old window surface after a programmatic resize
+     if (wp^.w <> pxw) or (wp^.h <> pxh) then begin
+      // SDL3 keeps the old window surface after a programmatic resize,
+      // the window surface has the size in pixels
       SDL_DestroyWindowSurface(window);
       wsurf:= SDL_GetWindowSurface(window);
      end;
@@ -575,16 +645,30 @@ begin
               ' pitch=',wp^.pitch,' back=',sp^.w,'x',sp^.h);
       flush(output);
      end;
-     if ww > wp^.w then begin
-      r.w:= wp^.w;
-     end;
-     if wh > wp^.h then begin
-      r.h:= wp^.h;
-     end;
      // plain copy, no alpha blending over the (zeroed) window surface
      SDL_SetSurfaceBlendMode(surf,SDL_BLENDMODE_NONE);
-     SDL_UpperBlit(surf,@r,wsurf,@r);
 {$ifdef usesdl3}
+     if scaledpresent then begin
+      // back surface and window have different pixel sizes (fractional
+      // density or a window without the high density flag): stretch
+      dr.x:= 0;
+      dr.y:= 0;
+      dr.w:= wp^.w;
+      dr.h:= wp^.h;
+      x3_blitscaled(pointer(ptruint(surf)),px3rect(@r),
+                       pointer(ptruint(wsurf)),px3rect(@dr),true);
+     end
+     else begin
+{$endif}
+      if r.w > wp^.w then begin
+       r.w:= wp^.w;
+      end;
+      if r.h > wp^.h then begin
+       r.h:= wp^.h;
+      end;
+      SDL_UpperBlit(surf,@r,wsurf,@r);
+{$ifdef usesdl3}
+     end;
      res:= SDL_UpdateWindowSurface(window);
      if sdldebug and (endpaintcount < 80) then begin
       writeln('ENDPAINT update res=',res,' err=',string(SDL_GetError));
@@ -621,13 +705,12 @@ begin
  end;
 end;
 
-procedure drawsingleline(renderer: SDL_Renderer; const origin: pointty;
-                 x1,y1,x2,y2,awidth: integer; acolor: rgbtriplety);
+procedure drawlinedev(renderer: SDL_Renderer; x1,y1,x2,y2,awidth: integer;
+                                                      acolor: rgbtriplety);
+          //device pixel coordinates, origin already added
 var
  i,half,dx,dy: integer;
 begin
- inc(x1,origin.x); inc(y1,origin.y);
- inc(x2,origin.x); inc(y2,origin.y);
  SDL_SetRenderDrawColor(renderer,acolor.red,acolor.green,acolor.blue,
                                                          255-acolor.res);
  if awidth <= 1 then begin
@@ -646,7 +729,22 @@ begin
    end;
   end;
  end;
- SDL_CheckError('drawsingleline');
+ SDL_CheckError('drawlinedev');
+end;
+
+procedure drawsingleline(renderer: SDL_Renderer; const origin: pointty;
+                 x1,y1,x2,y2,awidth: integer; acolor: rgbtriplety);
+          //logical coordinates
+var
+ sc,h: integer;
+begin
+ sc:= gcscale(renderer);
+ h:= sc div 2;                  //center of the logical pixel
+ if awidth < 1 then begin
+  awidth:= 1;
+ end;
+ drawlinedev(renderer,(x1+origin.x)*sc+h,(y1+origin.y)*sc+h,
+                      (x2+origin.x)*sc+h,(y2+origin.y)*sc+h,awidth*sc,acolor);
 end;
 
 procedure gdi_flush(var drawinfo: drawinfoty); //gdifunc
@@ -654,12 +752,29 @@ begin
  // nothing to do, the back buffer is presented in gdi_endpaint
 end;
 
+procedure drawdotdev(renderer: SDL_Renderer; x,y,sc: integer);
+var
+ rect1: SDL_Rect;
+begin
+ if sc <= 1 then begin
+  SDL_RenderDrawPoint(renderer,x,y);
+ end
+ else begin
+  rect1.x:= x * sc;                    // one logical pixel
+  rect1.y:= y * sc;
+  rect1.w:= sc;
+  rect1.h:= sc;
+  SDL_RenderFillRect(renderer,@rect1);
+ end;
+end;
+
 procedure drawdottedline(renderer: SDL_Renderer; const origin: pointty;
                  x1,y1,x2,y2: integer; acolor: rgbtriplety);
 var
- i,n,dx,dy: integer;
+ i,n,dx,dy,sc: integer;
  xx,yy: real;
 begin
+ sc:= gcscale(renderer);
  inc(x1,origin.x); inc(y1,origin.y);
  inc(x2,origin.x); inc(y2,origin.y);
  SDL_SetRenderDrawColor(renderer,acolor.red,acolor.green,acolor.blue,
@@ -673,14 +788,14 @@ begin
   n:= abs(dy);
  end;
  if n = 0 then begin
-  SDL_RenderDrawPoint(renderer,x1,y1);
+  drawdotdev(renderer,x1,y1,sc);
  end
  else begin
   for i:= 0 to n do begin
    if (i and 1) = 0 then begin
     xx:= x1 + dx*i/n;
     yy:= y1 + dy*i/n;
-    SDL_RenderDrawPoint(renderer,round(xx),round(yy));
+    drawdotdev(renderer,round(xx),round(yy),sc);
    end;
   end;
  end;
@@ -765,7 +880,8 @@ end;
 
 procedure gdi_drawellipse(var drawinfo: drawinfoty);
 var
- i,n,rx,ry,rr,lwidth: integer;
+ i,n,rx,ry,rr,lwidth,sc,h: integer;
+ cxd,cyd,rxd,ryd: integer;
  ang,step: real;
  rgb: rgbtriplety;
  xa,ya,xb,yb: integer;
@@ -777,26 +893,36 @@ begin
   if (rx <= 0) or (ry <= 0) then begin
    exit;
   end;
-  if rx > ry then begin
-   rr:= rx;
+  sc:= gcscale(gc.handle);
+  h:= sc div 2;
+  cxd:= (origin.x + x) * sc + h;          // device pixels
+  cyd:= (origin.y + y) * sc + h;
+  rxd:= rx * sc;
+  ryd:= ry * sc;
+  if rxd > ryd then begin
+   rr:= rxd;
   end
   else begin
-   rr:= ry;
+   rr:= ryd;
   end;
   rgb:= colortorgb(acolorforeground);
   lwidth:= (gcvalues^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
+  if lwidth < 1 then begin
+   lwidth:= 1;
+  end;
+  lwidth:= lwidth * sc;
   n:= round(pi*rr) + 8;
   if n > 720 then begin
    n:= 720;
   end;
   step:= 2*pi/n;
-  xa:= x + rx;
-  ya:= y;
+  xa:= cxd + rxd;
+  ya:= cyd;
   for i:= 1 to n do begin
    ang:= i*step;
-   xb:= x + round(cos(ang)*rx);
-   yb:= y - round(sin(ang)*ry);
-   drawsingleline(gc.handle,origin,xa,ya,xb,yb,lwidth,rgb);
+   xb:= cxd + round(cos(ang)*rxd);
+   yb:= cyd - round(sin(ang)*ryd);
+   drawlinedev(gc.handle,xa,ya,xb,yb,lwidth,rgb);
    xa:= xb;
    ya:= yb;
   end;
@@ -806,7 +932,7 @@ end;
 
 procedure gdi_fillelipse(var drawinfo: drawinfoty);
 var
- yy,rx,ry,hw: integer;
+ yy,rx,ry,hw,sc,h: integer;
  cx0,cy0: integer;
  d: real;
  rect1: SDL_Rect;
@@ -818,8 +944,12 @@ begin
   if (rx <= 0) or (ry <= 0) then begin
    exit;
   end;
-  cx0:= origin.x + x;
-  cy0:= origin.y + y;
+  sc:= gcscale(gc.handle);
+  h:= sc div 2;
+  rx:= rx * sc;                           // device pixels from here
+  ry:= ry * sc;
+  cx0:= (origin.x + x) * sc + h;
+  cy0:= (origin.y + y) * sc + h;
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,
                                                            255-fgrgb.res);
   for yy:= -ry to ry do begin
@@ -856,26 +986,26 @@ end;
 
 procedure gdi_fillrect(var drawinfo: drawinfoty);
 var
- rect1: SDL_Rect;
+ rect1,rect2: SDL_Rect;
  buf: array of longword;
- xx,yy,x0,y0,x1,y1,w,h,outw,outh: integer;
+ xx,yy,x0,y0,x1,y1,w,h,outw,outh,sc: integer;
  p: longword;
 begin
  with drawinfo do begin
-  rect1.x:= rect.rect^.x + origin.x;
-  rect1.y:= rect.rect^.y + origin.y;
-  rect1.w:= rect.rect^.cx;
-  rect1.h:= rect.rect^.cy;
+  sc:= gcscale(gc.handle);
 
   if (currentrop = rop_xor) and (df_brush in gc.drawingflags) then begin
-   // dotted xor frame (focus rectangle): invert every second pixel
+   // dotted xor frame (focus rectangle): invert every second logical pixel
+   // x0.. are logical pixels, the buffer holds device pixels
    outw:= 0;
    outh:= 0;
    SDL_GetRendererOutputSize(gc.handle,@outw,@outh);
-   x0:= rect1.x;
-   y0:= rect1.y;
-   x1:= rect1.x + rect1.w;
-   y1:= rect1.y + rect1.h;
+   outw:= outw div sc;
+   outh:= outh div sc;
+   x0:= rect.rect^.x + origin.x;
+   y0:= rect.rect^.y + origin.y;
+   x1:= x0 + rect.rect^.cx;
+   y1:= y0 + rect.rect^.cy;
    if x0 < 0 then begin
     x0:= 0;
    end;
@@ -891,19 +1021,28 @@ begin
    w:= x1 - x0;
    h:= y1 - y0;
    if (w > 0) and (h > 0) then begin
-    rect1.x:= x0;
-    rect1.y:= y0;
-    rect1.w:= w;
-    rect1.h:= h;
-    setlength(buf,w*h);
-    SDL_RenderReadPixels(gc.handle,@rect1,$16362004,@buf[0],w*4);
+    rect1.x:= x0 * sc;
+    rect1.y:= y0 * sc;
+    rect1.w:= w * sc;
+    rect1.h:= h * sc;
+    setlength(buf,rect1.w*rect1.h);
+    SDL_RenderReadPixels(gc.handle,@rect1,$16362004,@buf[0],rect1.w*4);
     for yy:= 0 to h-1 do begin
      for xx:= 0 to w-1 do begin
       if ((x0+xx+y0+yy) and 1) = 0 then begin
-       p:= buf[yy*w+xx] xor $00FFFFFF;
+       p:= buf[yy*sc*rect1.w+xx*sc] xor $00FFFFFF;
        SDL_SetRenderDrawColor(gc.handle,(p shr 16) and $FF,(p shr 8) and $FF,
                                                            p and $FF,255);
-       SDL_RenderDrawPoint(gc.handle,x0+xx,y0+yy);
+       if sc = 1 then begin
+        SDL_RenderDrawPoint(gc.handle,x0+xx,y0+yy);
+       end
+       else begin
+        rect2.x:= (x0+xx) * sc;
+        rect2.y:= (y0+yy) * sc;
+        rect2.w:= sc;
+        rect2.h:= sc;
+        SDL_RenderFillRect(gc.handle,@rect2);
+       end;
       end;
      end;
     end;
@@ -912,6 +1051,10 @@ begin
    exit;
   end;
 
+  rect1.x:= (rect.rect^.x + origin.x) * sc;
+  rect1.y:= (rect.rect^.y + origin.y) * sc;
+  rect1.w:= rect.rect^.cx * sc;
+  rect1.h:= rect.rect^.cy * sc;
   SDL_SetRenderDrawColor(gc.handle,fgrgb.red,fgrgb.green,fgrgb.blue,255-fgrgb.res);
   SDL_RenderFillRect(gc.handle,@rect1);
   SDL_CheckError('SDL_RenderFillRect');
@@ -1034,7 +1177,8 @@ end;
 
 procedure gdi_drawarc(var drawinfo: drawinfoty);
 var
- i,n,rx,ry,rr,lwidth: integer;
+ i,n,rx,ry,rr,lwidth,sc,h: integer;
+ cxd,cyd,rxd,ryd: integer;
  ang,step: real;
  rgb: rgbtriplety;
  xa,ya,xb,yb: integer;
@@ -1045,26 +1189,36 @@ begin
   if (rx <= 0) or (ry <= 0) then begin
    exit;
   end;
-  if rx > ry then begin
-   rr:= rx;
+  sc:= gcscale(gc.handle);
+  h:= sc div 2;
+  cxd:= (origin.x + x) * sc + h;          // device pixels
+  cyd:= (origin.y + y) * sc + h;
+  rxd:= rx * sc;
+  ryd:= ry * sc;
+  if rxd > ryd then begin
+   rr:= rxd;
   end
   else begin
-   rr:= ry;
+   rr:= ryd;
   end;
   rgb:= colortorgb(acolorforeground);
   lwidth:= (gcvalues^.lineinfo.width + linewidthroundvalue) shr linewidthshift;
+  if lwidth < 1 then begin
+   lwidth:= 1;
+  end;
+  lwidth:= lwidth * sc;
   n:= round(abs(extentang)*rr/2) + 4;     // about 2 pixels per segment
   if n > 720 then begin
    n:= 720;
   end;
   step:= extentang/n;
-  xa:= x + round(cos(startang)*rx);
-  ya:= y - round(sin(startang)*ry);
+  xa:= cxd + round(cos(startang)*rxd);
+  ya:= cyd - round(sin(startang)*ryd);
   for i:= 1 to n do begin
    ang:= startang + i*step;
-   xb:= x + round(cos(ang)*rx);
-   yb:= y - round(sin(ang)*ry);
-   drawsingleline(gc.handle,origin,xa,ya,xb,yb,lwidth,rgb);
+   xb:= cxd + round(cos(ang)*rxd);
+   yb:= cyd - round(sin(ang)*ryd);
+   drawlinedev(gc.handle,xa,ya,xb,yb,lwidth,rgb);
    xa:= xb;
    ya:= yb;
   end;
@@ -1072,8 +1226,9 @@ begin
  end;
 end;
 
-procedure fillpointsarray(renderer: SDL_Renderer; const origin: pointty;
+procedure fillpointsdev(renderer: SDL_Renderer;
                           const pts: array of pointty; n: integer);
+          //device pixel coordinates, origin already added
 var
  i,j,yy,miny,maxy,cnt,tmp,k: integer;
  y1,y2,x1,x2: integer;
@@ -1120,8 +1275,8 @@ begin
   end;
   i:= 0;
   while i+1 < cnt do begin
-   rect1.x:= xs[i] + origin.x;
-   rect1.y:= yy + origin.y;
+   rect1.x:= xs[i];
+   rect1.y:= yy;
    rect1.w:= xs[i+1] - xs[i] + 1;
    rect1.h:= 1;
    SDL_RenderFillRect(renderer,@rect1);
@@ -1135,7 +1290,8 @@ end;
 
 procedure gdi_fillarc(var drawinfo: drawinfoty);
 var
- i,n,rx,ry,rr,first,total: integer;
+ i,n,rx,ry,rr,first,total,sc,h: integer;
+ cxd,cyd,rxd,ryd: integer;
  ang,step: real;
  pts: array of pointty;
 begin
@@ -1145,11 +1301,17 @@ begin
   if (rx <= 0) or (ry <= 0) then begin
    exit;
   end;
-  if rx > ry then begin
-   rr:= rx;
+  sc:= gcscale(gc.handle);
+  h:= sc div 2;
+  cxd:= (origin.x + x) * sc + h;          // device pixels
+  cyd:= (origin.y + y) * sc + h;
+  rxd:= rx * sc;
+  ryd:= ry * sc;
+  if rxd > ryd then begin
+   rr:= rxd;
   end
   else begin
-   rr:= ry;
+   rr:= ryd;
   end;
   n:= round(abs(extentang)*rr/2) + 4;     // about 2 pixels per segment
   if n > 720 then begin
@@ -1160,8 +1322,8 @@ begin
    first:= 1;                             // pts[0] is the center
    total:= n+2;
    setlength(pts,total);
-   pts[0].x:= x;
-   pts[0].y:= y;
+   pts[0].x:= cxd;
+   pts[0].y:= cyd;
   end
   else begin
    first:= 0;                             // chord: arc points only
@@ -1170,10 +1332,10 @@ begin
   end;
   for i:= 0 to n do begin
    ang:= startang + i*step;
-   pts[first+i].x:= x + round(cos(ang)*rx);
-   pts[first+i].y:= y - round(sin(ang)*ry);
+   pts[first+i].x:= cxd + round(cos(ang)*rxd);
+   pts[first+i].y:= cyd - round(sin(ang)*ryd);
   end;
-  fillpointsarray(gc.handle,origin,pts,total);
+  fillpointsdev(gc.handle,pts,total);
   SDL_CheckError('fillarc');
  end;
 end;
@@ -1181,19 +1343,22 @@ end;
 procedure gdi_fillpolygon(var drawinfo: drawinfoty);
 var
  pts: array of pointty;
- i: integer;
+ i,sc,h: integer;
  pp: ppointaty;
 begin
  with drawinfo do begin
   if points.count < 3 then begin
    exit;
   end;
+  sc:= gcscale(gc.handle);
+  h:= sc div 2;
   pp:= ppointaty(points.points);
   setlength(pts,points.count);
   for i:= 0 to points.count-1 do begin
-   pts[i]:= pp^[i];
+   pts[i].x:= (pp^[i].x + origin.x) * sc + h;      // device pixels
+   pts[i].y:= (pp^[i].y + origin.y) * sc + h;
   end;
-  fillpointsarray(gc.handle,origin,pts,points.count);
+  fillpointsdev(gc.handle,pts,points.count);
  end;
 end;
 
@@ -1212,7 +1377,10 @@ var
  mono,destmono,usekey: boolean;
  fgpix,bgpix,keycolor,alpha: longword;
  rgbcolor1,rgbcolor2: rgbtriplety;
+ sc: integer;
+ samesize: boolean;
 begin
+ sc:= gcscale(drawinfo.gc.handle);
  with drawinfo,copyarea,gcvalues^ do begin
   rect1.x:= sourcerect^.x;
   rect1.y:= sourcerect^.y;
@@ -1243,7 +1411,8 @@ begin
   end;
 
   if not (df_canvasispixmap in tcanvas1(source).fdrawinfo.gc.drawingflags) then begin
-   if df_canvasispixmap in drawinfo.gc.drawingflags then begin
+   if (df_canvasispixmap in drawinfo.gc.drawingflags) and
+         (gcscale(tcanvas1(source).fdrawinfo.gc.handle) = 1) then begin
     dsp:= CSDL_Surface(ptruint(drawinfo.paintdevice));
     SDL_RenderReadPixels(tcanvas1(source).fdrawinfo.gc.handle,@rect1,$16362004,
          pointer(ptruint(dsp^.pixels) + ptruint(rect2.y*dsp^.pitch + rect2.x*4)),
@@ -1359,7 +1528,7 @@ begin
    end;
   end;
 
-  if (drawinfo.copyarea.copymode = rop_xor) and
+  if (sc = 1) and (drawinfo.copyarea.copymode = rop_xor) and
               (rect1.w = rect2.w) and (rect1.h = rect2.h) then begin
    dsurface:= SDL_CreateRGBSurface(0,rect2.w,rect2.h,32,
                         $00FF0000,$0000FF00,$000000FF,$FF000000);
@@ -1377,9 +1546,21 @@ begin
    SDL_FreeSurface(dsurface);
   end;
 
+  samesize:= (rect1.w = rect2.w) and (rect1.h = rect2.h);
+  if sc > 1 then begin                  //destination in device pixels
+   rect2.x:= rect2.x * sc;
+   rect2.y:= rect2.y * sc;
+   rect2.w:= rect2.w * sc;
+   rect2.h:= rect2.h * sc;
+  end;
   atexture:= SDL_CreateTextureFromSurface(drawinfo.gc.handle,asurface);
   if atexture<>0 then begin
    SDL_SetTextureBlendMode(atexture,SDL_BLENDMODE_BLEND);
+{$ifdef usesdl3}
+   if (sc > 1) and samesize then begin   //crisp pixel doubling
+    x3_settexturenearest(pointer(ptruint(atexture)));
+   end;
+{$endif}
    SDL_RenderCopy(drawinfo.gc.handle, atexture, nil, @rect2);
    if (rect2.w <= 2) and
         not (df_canvasispixmap in drawinfo.gc.drawingflags) then begin

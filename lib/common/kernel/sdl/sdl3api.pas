@@ -72,6 +72,8 @@ procedure x3_setwindowposition(win: pointer; x,y: longint);
 procedure x3_getwindowsize(win: pointer; var w,h: longint);
 procedure x3_setwindowsize(win: pointer; w,h: longint);
 function x3_getwindowflags(win: pointer): qword;
+function x3_getwindowpixeldensity(win: pointer): single;
+procedure x3_getwindowsizeinpixels(win: pointer; var w,h: longint);
 function x3_setwindowfullscreen(win: pointer; fullscreen: boolean): boolean;
 procedure x3_setwindowtitle(win: pointer; title: pchar);
 procedure x3_setwindowicon(win: pointer; icon: pointer);
@@ -102,6 +104,9 @@ function x3_setsurfaceblend(surface: pointer; mode: cardinal): boolean;
 function x3_blit(src: pointer; srcrect: px3rect; dst: pointer;
                                                   dstrect: px3rect): boolean;
 
+function x3_blitscaled(src: pointer; srcrect: px3rect; dst: pointer;
+                          dstrect: px3rect; linear: boolean): boolean;
+
 function x3_createsoftwarerenderer(surface: pointer): pointer;
 function x3_createrenderer(win: pointer): pointer;
 function x3_getrenderer(win: pointer): pointer;
@@ -121,6 +126,7 @@ procedure x3_renderpresent(r: pointer);
 function x3_createtexture(r,surface: pointer): pointer;
 procedure x3_destroytexture(tex: pointer);
 function x3_settextureblend(tex: pointer; mode: cardinal): boolean;
+function x3_settexturenearest(tex: pointer): boolean;
 
 function x3_pollevent(var ev: x3event): boolean;
 function x3_pushuser(win: cardinal; acode: longint; d1,d2: pointer): boolean;
@@ -267,6 +273,16 @@ begin
  result:= qword(SDL_GetWindowFlags(PSDL_Window(win)));
 end;
 
+function x3_getwindowpixeldensity(win: pointer): single;
+begin
+ result:= SDL_GetWindowPixelDensity(PSDL_Window(win));
+end;
+
+procedure x3_getwindowsizeinpixels(win: pointer; var w,h: longint);
+begin
+ SDL_GetWindowSizeInPixels(PSDL_Window(win),@w,@h);   // w,h kept on failure
+end;
+
 function x3_setwindowfullscreen(win: pointer; fullscreen: boolean): boolean;
 begin
  result:= SDL_SetWindowFullscreen(PSDL_Window(win),fullscreen);
@@ -405,6 +421,21 @@ function x3_blit(src: pointer; srcrect: px3rect; dst: pointer;
 begin
  result:= SDL_BlitSurface(PSDL_Surface(src),PSDL_Rect(srcrect),
                                      PSDL_Surface(dst),PSDL_Rect(dstrect));
+end;
+
+function x3_blitscaled(src: pointer; srcrect: px3rect; dst: pointer;
+                          dstrect: px3rect; linear: boolean): boolean;
+var
+ mode: cint;
+begin
+ if linear then begin
+  mode:= 1;
+ end
+ else begin
+  mode:= 0;
+ end;
+ result:= SDL_BlitSurfaceScaled(PSDL_Surface(src),PSDL_Rect(srcrect),
+                         PSDL_Surface(dst),PSDL_Rect(dstrect),mode);
 end;
 
 function x3_createsoftwarerenderer(surface: pointer): pointer;
@@ -560,6 +591,11 @@ end;
 function x3_settextureblend(tex: pointer; mode: cardinal): boolean;
 begin
  result:= SDL_SetTextureBlendMode(PSDL_Texture(tex),TSDL_BlendMode(mode));
+end;
+
+function x3_settexturenearest(tex: pointer): boolean;
+begin
+ result:= SDL_SetTextureScaleMode(PSDL_Texture(tex),0);
 end;
 
 function windowsub(t: cardinal): longint;
