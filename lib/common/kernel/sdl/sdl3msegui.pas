@@ -602,6 +602,9 @@ procedure removewin(id: winidty);
 var
  i: integer;
 begin
+ if id = 0 then begin
+  exit;                  //parent = 0 means "top level": never match it
+ end;
  i:= high(wins);
  while i >= 0 do begin
   if (wins[i].id = id) or (wins[i].parent = id) then begin
@@ -697,6 +700,7 @@ end;
 procedure showpopup(const i: integer);
 var
  px,py: integer;
+ rx,ry: longint;
 begin
  if wins[i].hidden then begin
   wins[i].hidden:= false;
@@ -705,11 +709,17 @@ begin
   x3_showwindow(w3(wins[i].id));
   schedulepopupexpose(x3_getwindowid(w3(wins[i].id)));
   if sdldebug then begin
-   writeln('SHOWPOPUP id=',ptruint(wins[i].id),' at ',wins[i].x,',',wins[i].y);
+   rx:= 0;
+   ry:= 0;
+   x3_getwindowposition(w3(wins[i].id),rx,ry);
+   writeln('SHOWPOPUP id=',ptruint(wins[i].id),' wants ',wins[i].x,',',
+           wins[i].y,' parentpos=',px,',',py,' offset=',wins[i].x-px,',',
+           wins[i].y-py,' sdlpos=',rx,',',ry);
    flush(output);
   end;
  end;
 end;
+
 
 function SDL_CreatePopupWindow(parent: winidty; x, y, w, h: integer;
                                       flags: SDL_WindowFlags): winidty;
@@ -726,6 +736,12 @@ begin
   writeln('CREATEPOPUP parent=',ptruint(parent),' parentpos=',px,',',py,
           ' at ',x,',',y,' offset=',x-px,',',y-py,' size=',w,'x',h,
           ' win=',ptruint(win),' err=',string(SDL_GetError));
+  n:= findwin(parent);
+  writeln('CREATEPOPUP waylanddriver=',waylanddriver,' parentindex=',n);
+  if n >= 0 then begin
+   writeln('CREATEPOPUP stored=',wins[n].x,',',wins[n].y,
+           ' ispopup=',wins[n].ispopup);
+  end;
   flush(output);
  end;
  result:= winidty(ptruint(win));
@@ -738,6 +754,8 @@ begin
   end;
  end;
 end;
+
+
 procedure SDL_DestroyWindow(window: winidty);
 begin
  removewin(window);
@@ -746,28 +764,50 @@ end;
 
 procedure SDL_GetWindowPosition(window: winidty; var x, y: integer);
 var
- ax,ay: integer;
+ ax,ay,i: integer;
 begin
  windowscreenpos(window,ax,ay);
  x:= ax;
  y:= ay;
+ if sdldebug then begin
+  i:= findwin(window);
+  if (i >= 0) and wins[i].ispopup then begin
+   writeln('GETPOS popup id=',ptruint(window),' -> ',ax,',',ay);
+   flush(output);
+  end;
+ end;
 end;
+
 
 procedure SDL_SetWindowPosition(window: winidty; x, y: integer);
 var
  i,px,py: integer;
 begin
- if dbgok then begin
-  writeln('SETPOS ',x,',',y);
+ if sdldebug then begin
+  writeln('SETPOS id=',ptruint(window),' ',x,',',y);
   flush(output);
  end;
  i:= findwin(window);
+ if (i < 0) and (window <> 0) then begin
+  addwin(window,0,false,x,y);     //a window must always be tracked
+  i:= findwin(window);
+  if sdldebug then begin
+   writeln('SETPOS window was not tracked, added id=',ptruint(window));
+   flush(output);
+  end;
+ end;
  if i >= 0 then begin
   wins[i].x:= x;
   wins[i].y:= y;
   if wins[i].ispopup then begin
    windowscreenpos(wins[i].parent,px,py);
    x3_setwindowposition(w3(window),x-px,y-py);
+   if sdldebug then begin
+    writeln('POPUPSETPOS id=',ptruint(window),' wants ',x,',',y,
+            ' parentpos=',px,',',py,' offset=',x-px,',',y-py,
+            ' hidden=',wins[i].hidden);
+    flush(output);
+   end;
    exit;
   end;
  end;
