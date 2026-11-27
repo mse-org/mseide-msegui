@@ -724,11 +724,15 @@ end;
 function gui_getpointerpos: pointty;
 begin
  windows.getcursorpos(tpoint(result));
+ result:= winlogpoint(result);
 end;
 
 function gui_setpointerpos(const pos: pointty): guierrorty;
+var
+ pt1: pointty;
 begin
- if windows.SetCursorPos(pos.x,pos.y) then begin
+ pt1:= windevpoint(pos);
+ if windows.SetCursorPos(pt1.x,pt1.y) then begin
   result:= gue_ok;
  end
  else begin
@@ -742,7 +746,7 @@ var
 begin
  result:= gue_mousepos;
  if windows.getcursorpos(po1) then begin
-  if windows.setcursorpos(po1.x+dist.x,po1.y+dist.y) then begin
+  if windows.setcursorpos(po1.x+windev(dist.x),po1.y+windev(dist.y)) then begin
    result:= gue_ok;
   end;
  end;
@@ -1094,7 +1098,7 @@ var
 begin
  result:= gue_error;
  dc:= getdc(id);
- pixel:= windows.getpixel(dc,pos.x,pos.y);
+ pixel:= windows.getpixel(dc,windev(pos.x),windev(pos.y));
  releasedc(id,dc);
  if pixel <> clr_invalid then begin
   result:= gue_ok;
@@ -1842,15 +1846,29 @@ begin
  end;
 end;
 
-function winmousepostopoint(pos: longword): pointty;
+function winmousepostodevpoint(pos: longword): pointty;
+                  //device pixels
 begin
  result.x:= smallint(loword(pos));
  result.y:= smallint(hiword(pos));
 end;
 
-function pointtowinmousepos(pos: pointty): longword;
+function devpointtowinmousepos(pos: pointty): longword;
+                  //device pixels
 begin
  result:= word(pos.x) + (word(pos.y) shl 16);
+end;
+
+function winmousepostopoint(pos: longword): pointty;
+                  //device -> logical pixels
+begin
+ result:= winlogpoint(winmousepostodevpoint(pos));
+end;
+
+function pointtowinmousepos(pos: pointty): longword;
+                  //logical -> device pixels
+begin
+ result:= devpointtowinmousepos(windevpoint(pos));
 end;
 
 function winkeytokey(key: longword; lparam: longword;
@@ -2041,7 +2059,7 @@ begin
    end
    else begin
     if windows.screentoclient(mousewindow,po1) then begin
-     checkmousewindow(mousewindow,pointty(po1));
+     checkmousewindow(mousewindow,winlogpoint(pointty(po1)));
     end;
    end;
   end;
@@ -2068,8 +2086,8 @@ begin
  killmouseidletimer(true);
  if (window <> 0) then begin
   windows.getclientrect(window,rect1);
-  if (pos.x < 0) or (pos.x >= rect1.Right) or (pos.y < 0) or
-            (pos.y > rect1.Bottom) then begin
+  if (pos.x < 0) or (pos.x >= winlog(rect1.Right)) or (pos.y < 0) or
+            (pos.y > winlog(rect1.Bottom)) then begin
    window:= 0;
   end
  end;
@@ -2094,7 +2112,7 @@ function gui_movewindowrect(id: winidty; const dist: pointty;
 var
  rect1,rect2: rectty;
 begin
- rect1:= rect;
+ rect1:= windevrectedge(rect);
  recttowinrect(rect1);
  if iswin95 then begin
   rect2.x:= -32000;      //trect
@@ -2109,9 +2127,11 @@ begin
   rect2.cy:= 100000;
  end;
  {$ifdef FPC}
- winscrollwindowex(id,dist.x,dist.y,@rect1,@rect2,0,nil,sw_invalidate);
+ winscrollwindowex(id,windev(dist.x),windev(dist.y),@rect1,@rect2,0,nil,
+                                                              sw_invalidate);
  {$else}
- scrollwindowex(id,dist.x,dist.y,@rect1,@rect2,0,nil,sw_invalidate);
+ scrollwindowex(id,windev(dist.x),windev(dist.y),@rect1,@rect2,0,nil,
+                                                              sw_invalidate);
  {$endif}
  result:= gue_ok;
 end;
@@ -2131,8 +2151,8 @@ begin
  end;
 end;
 
-function getclientrect(hwnd: hwnd; windowrect: prectty = nil): rectty;
-                     //screen origin
+function getclientrectdev(hwnd: hwnd; windowrect: prectty = nil): rectty;
+                     //screen origin, device pixels
 var
  rect1,rect2: trect;
  frame: framety;
@@ -2161,6 +2181,12 @@ begin
  else begin
   result:= nullrect;
  end;
+end;
+
+function getclientrect(hwnd: hwnd): rectty;
+                     //screen origin, logical pixels
+begin
+ result:= winlogrect(getclientrectdev(hwnd));
 end;
 
 procedure getwindowrectpa(id: winidty; out rect: rectty; out origin: pointty);
@@ -2193,8 +2219,8 @@ var
 begin
  result:= gue_error;
  if windows.GetWindowRect(id,rect1) then begin
-  pos.x:= rect1.left;
-  pos.y:= rect1.top;
+  pos.x:= winlog(rect1.left);
+  pos.y:= winlog(rect1.top);
   result:= gue_ok;
  end;
 end;
@@ -2233,7 +2259,7 @@ begin
  if windows.getwindowrect(id,rect1) then begin
   if windows.GetclientRect(id,rect2) then begin
    getframe(rect1,rect2,frame);
-   arect:= inflaterect(rect,frame);
+   arect:= inflaterect(windevrect(rect),frame);
  {$ifdef mse_debugconfigure}
    debugwindow('*reposwindow rect x:'+inttostr(rect.x)+' y:'+inttostr(rect.y)+
                      ' cx:'+inttostr(rect.cx)+' cy:'+inttostr(rect.cy)+' ',id);
@@ -2264,6 +2290,7 @@ function gui_getdecoratedwindowrect(id: winidty; out arect: rectty): guierrorty;
 begin
  if windows.getwindowrect(id,trect(arect)) then begin
   winrecttorect(arect);
+  arect:= winlogrect(arect);
   result:= gue_ok;
  end
  else begin
@@ -2273,12 +2300,13 @@ end;
 
 function gui_setdecoratedwindowrect(id: winidty; const rect: rectty;
                                     out clientrect: rectty): guierrorty;
-//var
-// rect1: rectty;
+var
+ rect1: rectty;
 begin
  result:= gue_resizewindow;
  clientrect:= rect;
- if windows.SetWindowPos(id,0,rect.x,rect.y,rect.cx,rect.cy,
+ rect1:= windevrect(rect);
+ if windows.SetWindowPos(id,0,rect1.x,rect1.y,rect1.cx,rect1.cy,
                swp_nozorder or swp_noactivate) then begin
   clientrect:= getclientrect(id);
   result:= gue_ok;
@@ -2286,9 +2314,12 @@ begin
 end;
 
 function gui_setembeddedwindowrect(id: winidty; const rect: rectty): guierrorty;
+var
+ rect1: rectty;
 begin
  result:= gue_resizewindow;
- if windows.SetWindowPos(id,0,rect.x,rect.y,rect.cx,rect.cy,
+ rect1:= windevrect(rect);
+ if windows.SetWindowPos(id,0,rect1.x,rect1.y,rect1.cx,rect1.cy,
                swp_nozorder or swp_noactivate) then begin
   result:= gue_ok;
  end
@@ -2385,6 +2416,7 @@ function WindowProc(ahWnd: HWND; Msg: UINT; wParam: WPARAM; lParam: LPARAM): LRE
   end;
 
   windows.getcursorpos(tpoint(pt1));
+  pt1:= winlogpoint(pt1);
   gui_getwindowrect(ahwnd,rect1);
  {$ifdef mse_debugconfigure}
   debugwindow('*inittraycallback ',ahwnd);
@@ -2544,6 +2576,7 @@ begin
   wm_paint: begin
    if getupdaterect(ahwnd,trect(rect1),false) then begin
     winrecttorect(rect1);
+    rect1:= winlogrectout(rect1); //device -> logical
     eventlist.add(twindowrectevent.create(ek_expose,ahwnd,rect1,nullpoint));
 //    exit;
    end;
@@ -2557,10 +2590,10 @@ begin
   wm_sizing: begin
    rect1:= rectty(prect(lparam)^);
    winrecttorect(rect1);
-   rect2:= getclientrect(ahwnd,@rect1);
+   rect2:= winlogrect(getclientrectdev(ahwnd,@rect1));
    rect3:= rect2;
    application.checkwindowrect(ahwnd,rect2);
-   size1:= subsize(rect3.size,rect2.size);
+   size1:= windevsize(subsize(rect3.size,rect2.size));
    if (wparam = wmsz_topleft) or (wparam = wmsz_left) or
                            (wparam = wmsz_bottomleft) then begin
     inc(rect1.x,size1.cx);
@@ -2675,8 +2708,8 @@ begin
     fillchar(imminfo,sizeof(imminfo),0);
     with imminfo,application do begin
      dwstyle:= cfs_point;
-     ptcurrentpos.x:= caret.pos.x + caret.origin.x;
-     ptcurrentpos.y:= caret.pos.y + caret.origin.y{ + caret.size.cy};
+     ptcurrentpos.x:= windev(caret.pos.x + caret.origin.x);
+     ptcurrentpos.y:= windev(caret.pos.y + caret.origin.y{ + caret.size.cy});
 //     ptcurrentpos.x:= caret.pos.x + activewidget.rootpos.x;
 //     ptcurrentpos.y:= activewidget.rootpos.y + activewidget.bounds_cy;
      immsetcompositionwindow(imc,@imminfo);
@@ -2721,11 +2754,11 @@ begin
   wm_lbuttonup,wm_mbuttonup,wm_rbuttonup,
   wm_mousewheel: begin
    getwindowrect(ahwnd,rect1);
-   rect2:= getclientrect(parent);
+   rect2:= getclientrectdev(parent);       //device pixels
    pt1.x:= rect1.left - rect2.x;
    pt1.y:= rect1.top - rect2.y;
-   pt1:= addpoint(winmousepostopoint(lparam),pt1);
-   result:= windowproc(parent,msg,wparam,pointtowinmousepos(pt1));
+   pt1:= addpoint(winmousepostodevpoint(lparam),pt1);
+   result:= windowproc(parent,msg,wparam,devpointtowinmousepos(pt1));
    exit;
   end;
  end;
@@ -2924,7 +2957,7 @@ end;
 
 function gui_windowatpos(const pos: pointty): winidty;
 begin
- result:= windowfrompoint(tpoint(pos));
+ result:= windowfrompoint(tpoint(windevpoint(pos)));
 end;
 
 function gui_setsizeconstraints(id: winidty; const min,max: sizety): guierrorty;
@@ -3002,7 +3035,7 @@ begin
    rect1.cy:= integer(cw_usedefault);
   end
   else begin
-   rect1:= rect;
+   rect1:= windevrect(rect); //device pixels
   end;
   windowstyle:= windowstyle or ws_clipchildren;
   if (transientfor <> 0) or (options * [wo_popup,wo_message,wo_notaskbar] <> []) then begin
@@ -3230,7 +3263,8 @@ begin
    end;
   end
   else begin
-   if setwindowpos(child,0,pos.x,pos.y,0,0,swp_nosize or swp_nozorder or
+   if setwindowpos(child,0,windev(pos.x),windev(pos.y),0,0,
+                               swp_nosize or swp_nozorder or
                                swp_noownerzorder or swp_noactivate) then begin
     result:= gue_ok;
    end;
@@ -3298,6 +3332,7 @@ begin
   result:= rectty(info.rcmonitor);
   winrecttorect(result);
  end;
+ result:= winlogrect(result);
 end;
 
 function gui_getworkarea(id: winidty): rectty;
@@ -3310,6 +3345,7 @@ begin
                                                        @info) then begin
   result:= rectty(info.rcwork);
   winrecttorect(result);
+  result:= winlogrect(result);
  end
  else begin
   result:= nullrect;
@@ -3325,8 +3361,9 @@ begin
  appmmheight:= 0;
  dc:= getdc(id);
  if dc <> 0 then begin
-  appmmwidth:= getdevicecaps(dc,logpixelsx) / 25.4;
-  appmmheight:= getdevicecaps(dc,logpixelsy) / 25.4;
+  appmmwidth:= (getdevicecaps(dc,logpixelsx)*96/winscale) / 25.4;
+  appmmheight:= (getdevicecaps(dc,logpixelsy)*96/winscale) / 25.4;
+                  //logical pixels
   releasedc(id,dc);
  end;
 end;
@@ -3541,6 +3578,83 @@ begin
  result:= gue_ok; //dummy
 end;
 
+procedure initwindpi;
+          //MSEgui works in logical pixels (1/96 inch), the windows api in
+          //device pixels. The process is made system dpi aware and the
+          //system dpi is the scale. Environment variable MSEWINSCALE:
+          //1 = off (windows scales the windows, blurry), 2..8 = scale factor,
+          //>= 100 = percent (150 = 144 dpi).
+type
+ setprocessdpiawarenesscontextty = function(value: ptrint): longbool; stdcall;
+ setprocessdpiawarenessty = function(value: integer): hresult; stdcall;
+ setprocessdpiawarety = function: longbool; stdcall;
+ getdpiforsystemty = function: uint; stdcall;
+var
+ mod1,mod2: hmodule;
+ po1: pointer;
+ int1,dpi1: integer;
+ bo1: boolean;
+ dc1: hdc;
+begin
+ initwinscale(96);
+ int1:= strtointdef(sysutils.getenvironmentvariable('MSEWINSCALE'),0);
+ if int1 = 1 then begin
+  exit;
+ end;
+ mod1:= windows.getmodulehandlea('user32.dll');
+ bo1:= false;
+ po1:= windows.getprocaddress(mod1,'SetProcessDpiAwarenessContext');
+ if po1 <> nil then begin
+  if setprocessdpiawarenesscontextty(po1)(-2) then begin //system aware
+   bo1:= true;
+  end;
+ end;
+ if not bo1 then begin
+  mod2:= windows.loadlibrarya('shcore.dll');
+  if mod2 <> 0 then begin
+   po1:= windows.getprocaddress(mod2,'SetProcessDpiAwareness');
+   if po1 <> nil then begin
+    if setprocessdpiawarenessty(po1)(1) = 0 then begin //system aware
+     bo1:= true;
+    end;
+   end;
+  end;
+ end;
+ if not bo1 then begin
+  po1:= windows.getprocaddress(mod1,'SetProcessDPIAware');
+  if po1 <> nil then begin
+   if setprocessdpiawarety(po1)() then begin
+    bo1:= true;
+   end;
+  end;
+ end;
+         //if the awareness is already set by a manifest the calls fail,
+         //the actual dpi is used in any case
+ dpi1:= 0;
+ po1:= windows.getprocaddress(mod1,'GetDpiForSystem');
+ if po1 <> nil then begin
+  dpi1:= getdpiforsystemty(po1)();
+ end;
+ if dpi1 = 0 then begin
+  dc1:= getdc(0);
+  dpi1:= getdevicecaps(dc1,logpixelsx);
+  releasedc(0,dc1);
+ end;
+ if int1 >= 2 then begin
+  if int1 <= 8 then begin
+   dpi1:= int1 * 96;
+  end
+  else begin
+   dpi1:= (int1 * 96) div 100;
+  end;
+ end;
+ initwinscale(dpi1);
+ if sdldebug then begin
+  debugwriteln('WINSCALE dpi:'+inttostr(winscale)+' aware:'+
+                                                        inttostr(ord(bo1)));
+ end;
+end;
+
 function gui_init: guierrorty;
 const
 // classstyle = cs_owndc; //not possible with layered windows
@@ -3562,6 +3676,7 @@ begin
  eventlist:= tobjectqueue.create(true);
  desktopwindow:= getdesktopwindow;
 
+ initwindpi;
  msegdi32gdi.init;
 
  fillchar(classinfoa,sizeof(classinfoa),0);

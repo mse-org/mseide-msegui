@@ -277,6 +277,8 @@ var
           intention: GpFlushIntention): Gpstatus; stdcall;
  GdipTranslateWorldTransform: function(graphics: pGpGraphics;
               dx: REAL; dy: REAL; order: GpMatrixOrder): GpStatus; stdcall;
+ GdipScaleWorldTransform: function(graphics: pGpGraphics;
+              sx: REAL; sy: REAL; order: GpMatrixOrder): GpStatus; stdcall;
 
  GdipSetSmoothingMode: function(graphics: pGpGraphics;
                         smoothingMode_: SmoothingMode): GpStatus; stdcall;
@@ -405,7 +407,7 @@ end;
 function initializegdiplus(const sonames: array of filenamety;
                                 const noexception: boolean = false): boolean;
 const
- funcs: array[0..54] of funcinfoty = (
+ funcs: array[0..55] of funcinfoty = (
   (n: 'GdiplusStartup'; d: @GdiplusStartup),              //0
   (n: 'GdiplusShutdown'; d: @GdiplusShutdown),            //1
   (n: 'GdipCreateFromHDC'; d: @GdipCreateFromHDC),        //2
@@ -460,7 +462,8 @@ const
   (n: 'GdipTranslateTextureTransform'; d: @GdipTranslateTextureTransform),//51
   (n: 'GdipSetPenBrushFill'; d: @GdipSetPenBrushFill),//52
   (n: 'GdipFree'; d: @GdipFree),//53
-  (n: 'GdipSetImagePalette'; d: @GdipSetImagePalette)//54
+  (n: 'GdipSetImagePalette'; d: @GdipSetImagePalette),//54
+  (n: 'GdipScaleWorldTransform'; d: @GdipScaleWorldTransform)//55
  );
 //  (n: ''; d: @),//
 const

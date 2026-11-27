@@ -12,10 +12,35 @@ unit msegdi32gdi;
 {$goto on}
 interface
 uses
- msegraphics,msetypes,windows,msestrings,mseguiglob;
+ msegraphics,msetypes,windows,msestrings,mseguiglob,msegraphutils;
 
 procedure init;
 procedure deinit;
+
+var
+ sdldebug: boolean = false; //debug output switch
+ winscale: integer = 96;
+          //dpi of the system, 96 = logical pixels are device pixels
+          //MSEgui works in logical pixels (1/96 inch), the windows api
+          //works in device pixels.
+procedure initwinscale(const adpi: integer);
+function windev(const avalue: integer): integer;   //logical -> device, rounded
+function winlog(const avalue: integer): integer;   //device -> logical, rounded
+function winlogfloor(const avalue: integer): integer; //device -> logical
+function winlogceil(const avalue: integer): integer;  //device -> logical
+function windevpoint(const apoint: pointty): pointty;
+function winlogpoint(const apoint: pointty): pointty;
+function windevsize(const asize: sizety): sizety;
+function winlogsize(const asize: sizety): sizety;
+function windevrect(const arect: rectty): rectty;
+                //position and size rounded independently, for windows
+function winlogrect(const arect: rectty): rectty;
+function windevrectedge(const arect: rectty): rectty;
+                //edges rounded, adjacent rects have no gaps, for drawing
+function winlogrectout(const arect: rectty): rectty;
+                //rounded outwards, for areas to be repainted
+function gcscaled(const agc: gcty): boolean;
+                //true if gc maps logical to device pixels
 
 function gdi32getgdifuncs: pgdifunctionaty;
 //function gdi32getgdinum: integer;
@@ -214,7 +239,7 @@ P S D nor,notxor,not,ornot,notcopy,notor,nand,set
 
 implementation
 uses
- mseguiintf,msegraphutils,msesysintf1,sysutils,msegdiplus;
+ mseguiintf,msesysintf1,sysutils,msegdiplus,msesysutils;
 
 type
  shapety = (fs_copyarea,fs_rect,fs_ellipse,fs_arc,fs_polygon);
@@ -375,6 +400,165 @@ begin
  result:= defaultfontnames;
 end;
 
+//
+// HiDPI scaling. MSEgui works in logical pixels (1/96 inch), windows
+// and the device contexts of windows work in device pixels.
+// winscale is the system dpi, 96 = no scaling.
+//
+procedure initwinscale(const adpi: integer);
+begin
+ if (adpi >= 96) and (adpi <= 96*8) then begin
+  winscale:= adpi;
+ end
+ else begin
+  winscale:= 96;
+ end;
+end;
+
+function windev(const avalue: integer): integer;
+begin
+ if winscale = 96 then begin
+  result:= avalue;
+ end
+ else begin
+  if avalue >= 0 then begin
+   result:= (int64(avalue)*winscale + 48) div 96;
+  end
+  else begin
+   result:= -((int64(-avalue)*winscale + 48) div 96);
+  end;
+ end;
+end;
+
+function winlog(const avalue: integer): integer;
+begin
+ if winscale = 96 then begin
+  result:= avalue;
+ end
+ else begin
+  if avalue >= 0 then begin
+   result:= (int64(avalue)*96 + winscale div 2) div winscale;
+  end
+  else begin
+   result:= -((int64(-avalue)*96 + winscale div 2) div winscale);
+  end;
+ end;
+end;
+
+function winlogfloor(const avalue: integer): integer;
+begin
+ if winscale = 96 then begin
+  result:= avalue;
+ end
+ else begin
+  if avalue >= 0 then begin
+   result:= (int64(avalue)*96) div winscale;
+  end
+  else begin
+   result:= -((int64(-avalue)*96 + winscale - 1) div winscale);
+  end;
+ end;
+end;
+
+function winlogceil(const avalue: integer): integer;
+begin
+ if winscale = 96 then begin
+  result:= avalue;
+ end
+ else begin
+  if avalue >= 0 then begin
+   result:= (int64(avalue)*96 + winscale - 1) div winscale;
+  end
+  else begin
+   result:= -((int64(-avalue)*96) div winscale);
+  end;
+ end;
+end;
+
+function windevpoint(const apoint: pointty): pointty;
+begin
+ result.x:= windev(apoint.x);
+ result.y:= windev(apoint.y);
+end;
+
+function winlogpoint(const apoint: pointty): pointty;
+begin
+ result.x:= winlog(apoint.x);
+ result.y:= winlog(apoint.y);
+end;
+
+function windevsize(const asize: sizety): sizety;
+begin
+ result.cx:= windev(asize.cx);
+ result.cy:= windev(asize.cy);
+end;
+
+function winlogsize(const asize: sizety): sizety;
+begin
+ result.cx:= winlog(asize.cx);
+ result.cy:= winlog(asize.cy);
+end;
+
+function windevrect(const arect: rectty): rectty;
+begin
+ result.x:= windev(arect.x);
+ result.y:= windev(arect.y);
+ result.cx:= windev(arect.cx);
+ result.cy:= windev(arect.cy);
+end;
+
+function winlogrect(const arect: rectty): rectty;
+begin
+ result.x:= winlog(arect.x);
+ result.y:= winlog(arect.y);
+ result.cx:= winlog(arect.cx);
+ result.cy:= winlog(arect.cy);
+end;
+
+function windevrectedge(const arect: rectty): rectty;
+begin
+ result.x:= windev(arect.x);
+ result.y:= windev(arect.y);
+ result.cx:= windev(arect.x+arect.cx) - result.x;
+ result.cy:= windev(arect.y+arect.cy) - result.y;
+end;
+
+function winlogrectout(const arect: rectty): rectty;
+begin
+ result.x:= winlogfloor(arect.x);
+ result.y:= winlogfloor(arect.y);
+ result.cx:= winlogceil(arect.x+arect.cx) - result.x;
+ result.cy:= winlogceil(arect.y+arect.cy) - result.y;
+end;
+
+function gcscaled(const agc: gcty): boolean;
+begin
+ result:= (winscale <> 96) and
+                      (win32gcty(agc.platformdata).d.kind = gck_screen);
+end;
+
+procedure setscalemapping(const adc: hdc);
+begin
+ if winscale <> 96 then begin
+  setmapmode(adc,mm_anisotropic);
+  setwindowextex(adc,96,96,nil);
+  setviewportextex(adc,winscale,winscale,nil);
+ end
+ else begin
+  setmapmode(adc,mm_text);
+ end;
+end;
+
+function getscaleddc: hdc;
+                 //measuring dc, same mapping as the window gcs, must be
+                 //released by releasedc(0,..)
+begin
+ result:= getdc(0);
+ if result <> 0 then begin
+  setscalemapping(result);
+ end;
+end;
+
 procedure gdi_createpixmap(var drawinfo: drawinfoty); //gdifunc
 begin
  with drawinfo.createpixmap do begin
@@ -470,7 +654,12 @@ begin
  {$endif}
    settextalign(gcpo^.handle,ta_left or ta_baseline or ta_noupdatecp);
    setbkmode(gcpo^.handle,transparent);
-   setmapmode(gcpo^.handle,mm_text);
+   if kind = gck_screen then begin
+    setscalemapping(gcpo^.handle); //logical -> device pixels
+   end
+   else begin
+    setmapmode(gcpo^.handle,mm_text);
+   end;
    error:= gde_ok;
   end;
  end;
@@ -713,8 +902,9 @@ begin
      end;
     end
     else begin
-     if (df_brush in drawingflags) or (width > 0) then begin
-      astyle:= ps_geometric;
+     if (df_brush in drawingflags) or (width > 0) or
+                   ((kind = gck_screen) and (winscale <> 96)) then begin
+      astyle:= ps_geometric; //cosmetic pens are not scaled
      end
      else begin
       astyle:= ps_cosmetic;
@@ -922,9 +1112,14 @@ var
  dash1: array[0..high(dashesstringty)] of gpreal;
  int1: integer;
  dasca: real;
+ pensc: real;
  reg: hrgn;
 begin
  with gc,win32gcty(platformdata).d do begin
+  pensc:= 1;
+  if (kind = gck_screen) and (winscale <> 96) then begin
+   pensc:= winscale/96; //pen width in unitpixel is not transformed
+  end;
   if not (gcf_gpregionvalid in gpflags) then begin
    if gpregion <> nil then begin
     gdipdeleteregion(gpregion);
@@ -936,7 +1131,15 @@ begin
    end
    else begin
     GdipCreateRegionHrgn(reg,@gpregion);
-    gdipsetclipregion(gpgraphic,gpregion,combinemodereplace);
+    if (kind = gck_screen) and (winscale <> 96) then begin
+     gdipresetworldtransform(gpgraphic); //region is in device pixels
+     gdipsetclipregion(gpgraphic,gpregion,combinemodereplace);
+     gdipscaleworldtransform(gpgraphic,winscale/96,winscale/96,
+                                                         matrixorderprepend);
+    end
+    else begin
+     gdipsetclipregion(gpgraphic,gpregion,combinemodereplace);
+    end;
    end;
    include(gpflags,gcf_gpregionvalid);
    deleteobject(reg);
@@ -960,14 +1163,14 @@ begin
     end;
     exclude(gpflags,gcf_gpshiftpen);
     if peninfo.width = 0 then begin
-     gdipsetpenwidth(gppen,1);
+     gdipsetpenwidth(gppen,pensc);
      dasca:= 1;
     end
     else begin
      if not odd(peninfo.width) then begin
       include(gpflags,gcf_gpshiftpen);
      end;
-     gdipsetpenwidth(gppen,peninfo.width);
+     gdipsetpenwidth(gppen,peninfo.width*pensc);
      dasca:= 1/peninfo.width;
     end;
     cap1:= gpcaps[peninfo.capstyle];
@@ -1043,7 +1246,7 @@ begin
   result:= createrectrgnindirect(trect(rect1));
  end
  else begin
-  recttowinrect(rect);
+  recttowinrect(rect); //regions are in logical pixels
   result:= createrectrgnindirect(trect(rect));
   winrecttorect(rect);
  end;
@@ -1066,7 +1269,12 @@ begin
   if (delta.x <> 0) or (delta.y <> 0) then begin
    reg1:= createregion;
    if getcliprgn(handle,reg1) > 0 then begin
-    offsetrgn(reg1,delta.x,delta.y);
+    if kind = gck_screen then begin
+     offsetrgn(reg1,windev(delta.x),windev(delta.y)); //device pixels
+    end
+    else begin
+     offsetrgn(reg1,delta.x,delta.y);
+    end;
     selectcliprgn(handle,reg1);
    end;
    deleteobject(reg1);
@@ -1107,7 +1315,7 @@ begin
     end;
    end
    else begin
-    recttowinrect(@rectspo^[0],rectscount);
+    recttowinrect(@rectspo^[0],rectscount); //regions are in logical pixels
     for int1:= 0 to rectscount - 1 do begin
      reg1:= createrectrgnindirect(trect(rectspo^[int1]));
      combinergn(dest,dest,reg1,rgn_or);
@@ -1316,6 +1524,36 @@ begin
  result:= fhasgdiplus;
 end;
 
+function scaleregion(const source: hrgn): hrgn;
+                      //logical -> device pixels, edges rounded
+var
+ size1: dword;
+ po1: prgndata;
+ pr: ^trect;
+ reg1: hrgn;
+ int1: integer;
+begin
+ result:= createrectrgn(0,0,0,0);
+ size1:= getregiondata(source,0,nil);
+ if size1 > 0 then begin
+  getmem(po1,size1);
+  try
+   if getregiondata(source,size1,po1) <> 0 then begin
+    pr:= @po1^.buffer;
+    for int1:= 0 to po1^.rdh.ncount - 1 do begin
+     reg1:= createrectrgn(windev(pr^.left),windev(pr^.top),
+                                      windev(pr^.right),windev(pr^.bottom));
+     combinergn(result,result,reg1,rgn_or);
+     deleteobject(reg1);
+     inc(pr);
+    end;
+   end;
+  finally
+   freemem(po1);
+  end;
+ end;
+end;
+
 procedure checkgdiplusgraphic(var drawinfo: drawinfoty);
 var
  reg: hrgn;
@@ -1338,6 +1576,11 @@ begin
    end;
    deleteobject(reg);
    if gpgraphic <> nil then begin
+    if (kind = gck_screen) and (winscale <> 96) then begin
+     gdipscaleworldtransform(gpgraphic,winscale/96,winscale/96,
+                                                         matrixorderprepend);
+                       //gdi+ ignores the gdi mapping mode
+    end;
     gdipsetsmoothingmode(gpgraphic,smoothingmodeantialias);
     gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodehalf);
 //    gdipsetpixeloffsetmode(gpgraphic,pixeloffsetmodenone);
@@ -1351,6 +1594,9 @@ begin
 end;
 
 procedure gdi_changegc(var drawinfo: drawinfoty);
+var
+ int1,int2: integer;
+ reg1: hrgn;
 begin
  with drawinfo.gcvalues^,drawinfo.gc,win32gcty(platformdata).d do begin
   if gvm_colorbackground in mask then begin
@@ -1382,17 +1628,35 @@ begin
   if gvm_brushorigin in mask then begin
    exclude(gpflags,gcf_gpbrushoriginvalid);
    brushorg:= brushorigin;
-   setbrushorgex(handle,brushorigin.x,brushorigin.y,nil);
+   if kind = gck_screen then begin
+    setbrushorgex(handle,windev(brushorigin.x),windev(brushorigin.y),nil);
+   end
+   else begin
+    setbrushorgex(handle,brushorigin.x,brushorigin.y,nil);
+   end;
   end;
   if gvm_clipregion in mask then begin
    gccliporigin:= cliporigin;
-   if ((cliporigin.x <> 0) or (cliporigin.y <> 0)) and (clipregion <> 0) then begin
-    offsetrgn(clipregion,cliporigin.x,cliporigin.y);
-    selectcliprgn(handle,clipregion);
-    offsetrgn(clipregion,-cliporigin.x,-cliporigin.y);
+   int1:= cliporigin.x;
+   int2:= cliporigin.y;
+   if clipregion <> 0 then begin
+    if (int1 <> 0) or (int2 <> 0) then begin
+     offsetrgn(clipregion,int1,int2);
+    end;
+    if (kind = gck_screen) and (winscale <> 96) then begin
+     reg1:= scaleregion(clipregion); //regions are logical, dc clip is device
+     selectcliprgn(handle,reg1);
+     deleteobject(reg1);
+    end
+    else begin
+     selectcliprgn(handle,clipregion);
+    end;
+    if (int1 <> 0) or (int2 <> 0) then begin
+     offsetrgn(clipregion,-int1,-int2);
+    end;
    end
    else begin
-    selectcliprgn(handle,clipregion);
+    selectcliprgn(handle,0);
    end;
    exclude(gpflags,gcf_gpregionvalid);
   end
@@ -2084,7 +2348,7 @@ begin
  end;
 end;
 
-procedure gdi_copyarea(var drawinfo: drawinfoty);
+procedure gdi_copyarea1(var drawinfo: drawinfoty);
 
 var
  maskbmp,stretchedbmp: pixmapty;
@@ -2688,6 +2952,72 @@ begin
  end;
 end;
 
+procedure gdi_copyarea(var drawinfo: drawinfoty);
+        //the copy is done in device pixels, pixmaps are stretched to
+        //the scaled window gc
+var
+ dest1,src1: rectty;
+ destrectbefore,sourcerectbefore: prectty;
+ alignmentbefore: alignmentsty;
+ srcscaled: boolean;
+ srchandle: hdc;
+begin
+ with drawinfo,copyarea do begin
+                //df_colorconvert can be stale (observed with fractional
+                //scale: rgb->rgb copy ran the color->gray conversion)
+  if gc.kind <> tcanvas1(source).fdrawinfo.gc.kind then begin
+   include(gc.drawingflags,df_colorconvert);
+  end
+  else begin
+   exclude(gc.drawingflags,df_colorconvert);
+  end;
+ end;
+ if gcscaled(drawinfo.gc) then begin
+  with drawinfo,copyarea do begin
+   destrectbefore:= destrect;
+   sourcerectbefore:= sourcerect;
+   alignmentbefore:= alignment;
+   srchandle:= tcanvas1(source).fdrawinfo.gc.handle;
+   srcscaled:= gcscaled(tcanvas1(source).fdrawinfo.gc);
+   dest1:= windevrectedge(destrect^);
+   if srcscaled then begin
+    src1:= windevrectedge(sourcerect^);
+    if alignment * [al_stretchx,al_stretchy] = [] then begin
+     src1.size:= dest1.size; //same scale, no stretch
+    end;
+   end
+   else begin
+    src1:= sourcerect^; //pixmap, logical pixels
+    alignment:= alignment + [al_stretchx,al_stretchy];
+    if (mask = nil) and not (df_canvasismonochrome in gc.drawingflags) and
+                         (alignment * [al_or,al_and] = []) then begin
+     include(alignment,al_intpol);
+    end;
+   end;
+   destrect:= @dest1;
+   sourcerect:= @src1;
+   setmapmode(gc.handle,mm_text);
+   if srcscaled and (srchandle <> gc.handle) then begin
+    setmapmode(srchandle,mm_text);
+   end;
+   try
+    gdi_copyarea1(drawinfo);
+   finally
+    setscalemapping(gc.handle);
+    if srcscaled and (srchandle <> gc.handle) then begin
+     setscalemapping(srchandle);
+    end;
+    destrect:= destrectbefore;
+    sourcerect:= sourcerectbefore;
+    alignment:= alignmentbefore;
+   end;
+  end;
+ end
+ else begin
+  gdi_copyarea1(drawinfo);
+ end;
+end;
+
 procedure gdi_getimage(var drawinfo: drawinfoty); //gdifunc
 begin
  //dummy
@@ -2909,7 +3239,7 @@ begin
    end;
   end;
   if font1 <> 0 then begin
-   dc1:= getdc(0);
+   dc1:= getscaleddc; //same mapping as the window gcs
    fontbefore:= selectobject(dc1,font1);
    if not gettextmetricsa(dc1,{$ifdef FPC}@{$endif}textmetricsa) then begin
     goto endlab;
@@ -3045,7 +3375,7 @@ var
 begin
  with drawinfo.gettext16width do begin
   if drawinfo.gc.handle = invalidgchandle then begin
-   gc1:= getdc(0);  //use default dc
+   gc1:= getscaleddc;  //use default dc
   end
   else begin
    gc1:= drawinfo.gc.handle;
@@ -3131,7 +3461,7 @@ begin
   hires:= (df_highresfont in drawinfo.gc.drawingflags) and
                           (fontdata^.fonthighres <> 0);
   if (drawinfo.gc.handle = invalidgchandle) or hires then begin
-   gc1:= getdc(0);  //use default dc
+   gc1:= getscaleddc;  //use default dc
   end
   else begin
    gc1:= drawinfo.gc.handle;

@@ -114,7 +114,7 @@ function sysdndreadtext(var atext: msestring;
 
 implementation
 uses
- msethread,msesysutils,sysutils,mseevent,msesysdnd;
+ msethread,msesysutils,sysutils,mseevent,msesysdnd,msegdi32gdi;
 type
  sdndeventkindty = (sdndk_regwindow,sdndk_unregwindow,sdndk_reject,sdndk_accept,
                     sdndk_finished,sdndk_readdataortext,
@@ -927,7 +927,7 @@ var
  int1,int2: integer;
  buffer: array[0..max_path] of msechar;
 begin
- fdragwinid:= getwinid(pointty(pt));
+ fdragwinid:= getwinid(winlogpoint(pointty(pt)));
  effect1:= dropeffect_none;
  clearevents;
  if fdragwinid <> 0 then begin
@@ -958,7 +958,8 @@ begin
      end;
     end;
    end;
-   application.postevent(tsysdndevent.create(dek_check,fdragwinid,pointty(pt),
+   application.postevent(tsysdndevent.create(dek_check,fdragwinid,
+     winlogpoint(pointty(pt)),
       wintoshiftstate(grfkeystate),false,fformats,fformatistext,
       winactiontoaction(dweffect)));
    ev1:= waitevent(timeout);
@@ -980,7 +981,8 @@ var
 begin
  effect1:= dropeffect_none;
  if fdragwinid <> 0 then begin
-  application.postevent(tsysdndevent.create(dek_check,fdragwinid,pointty(pt),
+  application.postevent(tsysdndevent.create(dek_check,fdragwinid,
+     winlogpoint(pointty(pt)),
      wintoshiftstate(grfkeystate),false,fformats,fformatistext,
      winactiontoaction(dweffect)));
   ev1:= waitevent(timeout);
@@ -1009,7 +1011,8 @@ function tsysdndhandler.drop(const dataobj: idataobject; grfkeystate: dword;
                pt: tpoint; var dweffect: dword): hresult; stdcall;
 begin
  if fdragwinid <> 0 then begin
-  application.postevent(tsysdndevent.create(dek_drop,fdragwinid,pointty(pt),
+  application.postevent(tsysdndevent.create(dek_drop,fdragwinid,
+     winlogpoint(pointty(pt)),
      wintoshiftstate(grfkeystate),false,fformats,fformatistext,
                                             winactiontoaction(dweffect)));
  end;
